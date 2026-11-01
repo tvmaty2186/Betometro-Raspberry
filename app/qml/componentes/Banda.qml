@@ -5,9 +5,9 @@ import Betometro
 Rectangle {
     height: 18
     gradient: Gradient {
-        GradientStop { position: 0; color: Tema.blanco }
-        GradientStop { position: 0.34; color: Tema.blanco }
-        GradientStop { position: 0.3401; color: Tema.amarillo }
-        GradientStop { position: 1; color: Tema.amarillo }
+        GradientStop { position: 0; color: Tema.avispon ? Tema.blanco : Tema.acento }
+        GradientStop { position: 0.34; color: Tema.avispon ? Tema.blanco : Tema.acento }
+        GradientStop { position: 0.3401; color: Tema.avispon ? Tema.amarillo : Tema.acento }
+        GradientStop { position: 1; color: Tema.avispon ? Tema.amarillo : Tema.acento }
     }
 }

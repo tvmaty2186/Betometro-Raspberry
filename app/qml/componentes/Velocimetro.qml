@@ -24,9 +24,10 @@ Item {
                 c.fillStyle = "rgba(0,0,0,0.05)"; c.fill();
             }
             const disco = (rr, col) => { c.beginPath(); c.arc(cx, cy, rr, 0, Math.PI * 2); c.fillStyle = col; c.fill(); };
-            disco(R + 15, "#b9bfc5"); disco(R + 11, "#5d646b"); disco(R + 9, "#e8ebee");
+            if (Tema.avispon) { disco(R + 15, "#b9bfc5"); disco(R + 11, "#5d646b"); disco(R + 9, "#e8ebee"); }
+            else disco(R + 4, String(Tema.bordeCromo));
             const g = c.createRadialGradient(cx - R * 0.1, cy - R * 0.24, 0, cx - R * 0.1, cy - R * 0.24, R * 1.2);
-            g.addColorStop(0, "#fffbef"); g.addColorStop(0.55, "#efe6cf"); g.addColorStop(1, "#d6caa9");
+            g.addColorStop(0, String(Tema.cara1)); g.addColorStop(1, String(Tema.cara2));
             disco(R, g);
             const r = R - 14 * k;
             c.textAlign = "center";
@@ -34,22 +35,22 @@ Item {
             if (raiz.sugerida >= 0) {   // franja verde ±2 km/h y marca amarilla de la sugerida
                 c.beginPath();
                 c.arc(cx, cy, r - 5 * k, -ang(raiz.sugerida - 2), -ang(raiz.sugerida + 2), false);
-                c.strokeStyle = "#2f7a49"; c.lineWidth = 10 * k; c.lineCap = "butt"; c.stroke();
+                c.strokeStyle = String(Tema.zona); c.lineWidth = 10 * k; c.lineCap = "butt"; c.stroke();
                 const a = ang(raiz.sugerida);
                 c.beginPath();
                 c.moveTo(cx + Math.cos(a) * (r + 4 * k), cy - Math.sin(a) * (r + 4 * k));
                 c.lineTo(cx + Math.cos(a) * (r - 26 * k), cy - Math.sin(a) * (r - 26 * k));
-                c.strokeStyle = "#d9a20f"; c.lineWidth = 7 * k; c.stroke();
+                c.strokeStyle = String(Tema.sugerida); c.lineWidth = 7 * k; c.stroke();
             }
             for (let v = 0; v <= raiz.maximo; v += 10) {
                 const a = (225 - v / raiz.maximo * 270) * Math.PI / 180, L = (v % 20 ? 10 : 20) * k;
                 c.beginPath();
                 c.moveTo(cx + Math.cos(a) * r, cy - Math.sin(a) * r);
                 c.lineTo(cx + Math.cos(a) * (r - L), cy - Math.sin(a) * (r - L));
-                c.strokeStyle = "#1d2a20"; c.lineWidth = (v % 20 ? 2 : 5) * k; c.stroke();
+                c.strokeStyle = String(Tema.rayitas); c.lineWidth = (v % 20 ? 2 : 5) * k; c.stroke();
                 if (v % 20 === 0) {
                     c.font = "700 " + (26 * k) + "px '" + Tema.fuenteNum + "'";
-                    c.fillStyle = "#1d5233";
+                    c.fillStyle = String(Tema.numerosDial);
                     c.fillText(String(v), cx + Math.cos(a) * (r - 42 * k), cy - Math.sin(a) * (r - 42 * k) + 9 * k);
                 }
             }
@@ -58,17 +59,18 @@ Item {
                 const a = (225 - v / raiz.maximo * 270) * Math.PI / 180;
                 c.beginPath(); c.moveTo(cx, cy);
                 c.lineTo(cx + Math.cos(a) * (r - 30 * k), cy - Math.sin(a) * (r - 30 * k));
-                c.strokeStyle = "#111"; c.lineWidth = 7 * k; c.lineCap = "round"; c.stroke();
+                c.strokeStyle = String(Tema.aguja); c.lineWidth = 7 * k; c.lineCap = "round"; c.stroke();
             }
-            disco(14 * k, "#111");
+            disco(14 * k, String(Tema.aguja));
             c.font = "italic 800 " + (56 * k) + "px '" + Tema.fuenteNum + "'";
-            c.fillStyle = "#1d5233";
+            c.fillStyle = String(Tema.numerosDial);
             if (raiz.hayValor) c.fillText(String(Math.round(raiz.valor)), cx, cy + 80 * k);
             else { c.font = "italic 800 " + (30 * k) + "px '" + Tema.fuenteNum + "'"; c.fillText("SIN GPS", cx, cy + 74 * k); }
             c.font = (14 * k) + "px '" + Tema.fuente + "'";
-            c.fillStyle = "#333";
+            c.fillStyle = String(Tema.rayitas);
             c.fillText("K M / H", cx, cy + 104 * k);
         }
         Component.onCompleted: requestPaint()
+    Connections { target: Tema; function onNombreChanged() { lienzo.requestPaint(); } function onSolChanged() { lienzo.requestPaint(); } }
     }
 }

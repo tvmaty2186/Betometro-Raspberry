@@ -7,7 +7,7 @@ Rectangle {
     property bool prendida: false
     signal cambiada(bool valor)
     width: 58; height: 32; radius: 16
-    color: prendida ? Tema.amarillo : "#2a3a2f"
+    color: prendida ? Tema.acento : Qt.lighter(Tema.caja1, 1.2)
     border { width: 1; color: Qt.rgba(0, 0, 0, 0.3) }
     Rectangle {
         width: 26; height: 26; radius: 13; y: 3

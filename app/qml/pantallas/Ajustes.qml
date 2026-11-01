@@ -29,7 +29,7 @@ Item {
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     Sub { text: "Número y nombre (tocá para cambiar)" }
-                    Text { text: raiz.a.nombreAuto || "–"; color: Tema.blanco; font { family: Tema.fuente800; italic: true; pixelSize: 26 }
+                    Text { text: raiz.a.nombreAuto || "–"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 26 }
                         MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: raiz.editar("nombreAuto", "texto", "Nombre del auto", raiz.a.nombreAuto, 30) } }
                 }
             }
@@ -126,7 +126,7 @@ Item {
                 id: colS; width: parent.width
                 TituloTarjeta { texto: "Conexión y sistema" }
                 Fila { etiqueta: "Conectividad"; tocable: true; onTocada: Navegacion.ir("conectividad")
-                    Text { text: (Wifi.conectada || "Sin conexión") + "  ›"; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } } }
+                    Text { text: (Wifi.conectada || "Sin conexión") + "  ›"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
                 Fila { etiqueta: "Versión " + Contexto.version
                     BotonAmarillo { visible: !!Contexto.versionNueva; width: 210; height: 48; tamTexto: 18; texto: "Actualizar a " + Contexto.versionNueva
                         onTocado: Navegacion.ir("actualizar") }

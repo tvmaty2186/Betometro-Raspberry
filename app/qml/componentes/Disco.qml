@@ -23,9 +23,12 @@ Item {
                 c.fillStyle = "rgba(0,0,0,0.07)"; c.fill();
             }
             const aro = (rr, col) => { c.beginPath(); c.arc(cx, cy, rr, 0, Math.PI * 2); c.fillStyle = col; c.fill(); };
-            aro(r + 7, "#b9bfc5"); aro(r + 5, "#5d646b"); aro(r + 4, "#e9ecee");
+            if (Tema.avispon) { aro(r + 7, "#b9bfc5"); aro(r + 5, "#5d646b"); aro(r + 4, "#e9ecee"); }
+            else aro(r + 3, String(Tema.sol ? "#000000" : Tema.acento));
             const g = c.createRadialGradient(cx - r * 0.1, cy - r * 0.4, 0, cx - r * 0.1, cy - r * 0.4, r * 1.25);
-            g.addColorStop(0, "#3c8a57"); g.addColorStop(0.55, "#14432a"); g.addColorStop(1, "#0a2414");
+            if (Tema.avispon) { g.addColorStop(0, "#3c8a57"); g.addColorStop(0.55, "#14432a"); g.addColorStop(1, "#0a2414"); }
+            else if (Tema.sol) { g.addColorStop(0, "#333333"); g.addColorStop(1, "#000000"); }
+            else { g.addColorStop(0, String(Qt.lighter(Tema.caja1, 1.3))); g.addColorStop(1, String(Tema.caja2)); }
             aro(r, g);
             // brillo arriba y sombra adentro abajo
             const b = c.createLinearGradient(0, cy - r, 0, cy + r);
@@ -34,6 +37,8 @@ Item {
             aro(r, b);
         }
         Component.onCompleted: requestPaint()
+    Connections { target: Tema; function onNombreChanged() { lienzo.requestPaint(); } function onSolChanged() { lienzo.requestPaint(); } }
+
     }
     Image {
         anchors.centerIn: parent
@@ -43,8 +48,8 @@ Item {
     }
     Text {
         text: raiz.texto
-        color: Tema.blanco
-        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: 16 * raiz.d / 96 }
+        color: Tema.tinta
+        font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 16 * raiz.d / 96 }
         style: Text.Raised; styleColor: "#000"
         horizontalAlignment: raiz.etiquetaIzquierda ? Text.AlignRight : Text.AlignHCenter
         width: 200

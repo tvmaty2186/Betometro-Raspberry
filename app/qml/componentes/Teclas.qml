@@ -28,14 +28,14 @@ Column {
                     height: filaT.height
                     radius: 12
                     gradient: Gradient {
-                        GradientStop { position: 0; color: especial ? Tema.amarilloClaro : (zona.pressed ? "#4a6a55" : "#2c4434") }
-                        GradientStop { position: 1; color: especial ? Tema.amarillo2 : "#0d1d13" }
+                        GradientStop { position: 0; color: especial ? Tema.acentoClaro : (zona.pressed ? Qt.lighter(Tema.caja1, 1.6) : Qt.lighter(Tema.caja1, 1.25)) }
+                        GradientStop { position: 1; color: especial ? Tema.acentoOscuro : Tema.caja2 }
                     }
-                    border { width: 2; color: "#8c949b" }
+                    border { width: Tema.sol ? 3 : 2; color: Tema.bordeCromo }
                     Text {
                         anchors.centerIn: parent
                         text: modelData === "espacio" ? "espacio" : (raiz.mayuscula && modelData.length === 1 ? modelData.toUpperCase() : modelData)
-                        color: especial ? Tema.negro : Tema.blanco
+                        color: especial ? Tema.acentoTinta : Tema.tinta
                         font { family: Tema.fuente600; pixelSize: raiz.grande ? 34 : 24 }
                     }
                     MouseArea { id: zona; anchors.fill: parent; onClicked: raiz.tecla(modelData) }

@@ -10,6 +10,7 @@ class Contexto : public QObject {
     Q_PROPERTY(bool horizontal READ horizontal WRITE setHorizontal NOTIFY horizontalChanged)
     Q_PROPERTY(bool fisica READ fisica CONSTANT)
     Q_PROPERTY(QString tema READ tema WRITE setTema NOTIFY temaChanged)
+    Q_PROPERTY(bool sol READ sol WRITE setSol NOTIFY solChanged)   // modo sol: fondo claro, tinta negra
     Q_PROPERTY(QString pantallaInicial READ pantallaInicial CONSTANT)
     Q_PROPERTY(QString idInicial READ idInicial CONSTANT)
     Q_PROPERTY(QString prueba READ prueba CONSTANT)   // solo para capturas: abre algo al empezar
@@ -27,6 +28,8 @@ public:
     void setFisica(bool f) { fisica_ = f; }
     QString tema() const { return tema_; }
     void setTema(const QString& t) { if (t != tema_) { tema_ = t; emit temaChanged(); } }
+    bool sol() const { return sol_; }
+    void setSol(bool s) { if (s != sol_) { sol_ = s; emit solChanged(); } }
     QString pantallaInicial() const { return pantallaInicial_; }
     void setPantallaInicial(const QString& p) { pantallaInicial_ = p; }
     QString prueba() const { return prueba_; }
@@ -43,6 +46,7 @@ public:
 signals:
     void horizontalChanged();
     void temaChanged();
+    void solChanged();
     void versionNuevaChanged();
     void numeroAutoChanged();
     void gpsChanged();
@@ -51,6 +55,7 @@ signals:
 private:
     bool horizontal_ = true;
     bool fisica_ = false;
+    bool sol_ = false;
     QString tema_ = QStringLiteral("avispon");
     QString pantallaInicial_ = QStringLiteral("inicio");
     QString idInicial_;

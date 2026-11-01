@@ -70,13 +70,13 @@ Rectangle {
             id: visor
             visible: raiz.modo !== "fecha"
             x: 20; y: 42; width: parent.width - 40 - (raiz.h ? 0 : 0); height: 64; radius: 14
-            color: Qt.rgba(0, 0, 0, 0.35); border { width: 2; color: Tema.amarillo }
+            color: Qt.rgba(0, 0, 0, 0.35); border { width: 2; color: Tema.acento }
             Text {
                 anchors { left: parent.left; leftMargin: 18; verticalCenter: parent.verticalCenter }
                 text: raiz.modo === "tiempo" ? Formato.tiempo(Formato.digitosAMs(raiz.valor)) : raiz.valor
-                color: Tema.blanco
+                color: Tema.tinta
                 font { family: raiz.modo === "texto" ? Tema.fuente : Tema.fuenteNum; weight: Font.DemiBold; pixelSize: 32 }
-                Rectangle { anchors { left: parent.right; leftMargin: 2; verticalCenter: parent.verticalCenter } width: 3; height: 34; color: Tema.amarillo }
+                Rectangle { anchors { left: parent.right; leftMargin: 2; verticalCenter: parent.verticalCenter } width: 3; height: 34; color: Tema.acento }
             }
         }
 

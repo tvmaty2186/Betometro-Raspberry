@@ -7,5 +7,5 @@ Row {
     leftPadding: 22; topPadding: 16; bottomPadding: 6
     spacing: 12
     Banda { width: 30; height: 14; anchors.verticalCenter: parent.verticalCenter }
-    Text { text: parent.texto; color: Tema.blanco; font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 24 } }
+    Text { text: parent.texto; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 24 } }
 }

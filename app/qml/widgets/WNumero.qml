@@ -8,7 +8,7 @@ Caja {
     property string numero: ""
     property string extra: ""
     property bool fila: width > height * 3   // muy ancho y bajito: etiqueta y número en una línea
-    property color colorNumero: Tema.crema
+    property color colorNumero: Tema.numero
     Column {
         visible: !raiz.fila
         anchors.centerIn: parent

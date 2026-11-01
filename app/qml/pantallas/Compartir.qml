@@ -27,7 +27,7 @@ Item {
         x: raiz.h ? 580 : 40; y: raiz.h ? 150 : 640
         width: raiz.h ? 640 : parent.width - 80
         spacing: 20
-        Text { text: "Escaneá con el celular"; color: Tema.blanco; font { family: Tema.fuente800; italic: true; pixelSize: 40 } }
+        Text { text: "Escaneá con el celular"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 40 } }
         Text {
             width: parent.width; wrapMode: Text.WordWrap; textFormat: Text.StyledText; lineHeight: 1.5
             color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 24 }

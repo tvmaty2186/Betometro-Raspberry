@@ -32,8 +32,8 @@ Item {
         property bool bien: true
         property string texto: ""
         spacing: 8
-        Rectangle { width: 12; height: 12; radius: 6; color: parent.bien ? "#7fd36b" : "#ff8a7a"; anchors.verticalCenter: parent.verticalCenter }
-        Text { text: parent.texto; color: parent.bien ? "#7fd36b" : "#ff8a7a"; font { family: Tema.fuente800; pixelSize: 20 } }
+        Rectangle { width: 12; height: 12; radius: 6; color: parent.bien ? Tema.bien : Tema.alerta; anchors.verticalCenter: parent.verticalCenter }
+        Text { text: parent.texto; color: parent.bien ? Tema.bien : Tema.alerta; font { family: Tema.fuente800; pixelSize: 20 } }
     }
 
     Component {
@@ -75,7 +75,7 @@ Item {
                     BotonCromo { width: 150; height: 48; tamTexto: 16; texto: "▶ Probar"; onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") } }
                 TituloTarjeta { texto: "Wifi" }
                 Fila { etiqueta: "Conectado a"
-                    Text { text: Wifi.conectada || "Sin conexión"; color: Tema.blanco; font { family: Tema.fuente800; pixelSize: 20 } } }
+                    Text { text: Wifi.conectada || "Sin conexión"; color: Tema.tinta; font { family: Tema.fuente800; pixelSize: 20 } } }
                 TituloTarjeta { texto: "Almacenamiento" }
                 Fila { etiqueta: "Lugar libre"; ultima: true; Campo { activo: false; opacity: 1; texto: Datos.lugarLibre() + (raiz.tic * 0 === 0 ? "" : "") } }
                 Item { width: 1; height: 8 }

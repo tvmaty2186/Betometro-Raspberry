@@ -11,7 +11,7 @@ Row {
             required property int index
             width: 6; height: 6 + index * 5; radius: 2
             anchors.bottom: parent.bottom
-            color: index < parent.nivel ? Tema.blanco : Qt.rgba(1, 1, 1, 0.25)
+            color: index < parent.nivel ? Tema.tinta : Qt.rgba(1, 1, 1, 0.25)
         }
     }
 }

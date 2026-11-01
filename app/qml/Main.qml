@@ -11,7 +11,7 @@ Window {
     width: Contexto.fisica ? 720 : (h ? 1280 : 720)
     height: Contexto.fisica ? 1280 : (h ? 720 : 1280)
     visible: true
-    color: "#070908"
+    color: Tema.fondo3
     title: "Betómetro"
 
     Item {

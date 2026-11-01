@@ -99,6 +99,11 @@ int main(int argc, char* argv[]) {
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
     if (op.isSet(oTema)) contexto.setTema(op.value(oTema));
+    contexto.setSol(datos.cfg(QStringLiteral("modoSol")).toString() == QStringLiteral("si") || op.value(oPrueba) == QStringLiteral("sol"));
+    QObject::connect(&datos, &Datos::cfgChanged, &contexto, [&] {
+        contexto.setSol(datos.cfg(QStringLiteral("modoSol")).toString() == QStringLiteral("si"));
+        contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
+    });
 
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);

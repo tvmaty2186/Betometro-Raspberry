@@ -8,7 +8,7 @@ Item {
     property bool ultima: false
     property bool resaltada: false   // fondo amarillito (la red conectada o elegida)
     property bool tocable: false     // toda la fila responde al toque
-    property color colorEtiqueta: Tema.blanco
+    property color colorEtiqueta: Tema.tinta
     property real altoMinimo: 74
     default property alias derecha: lado.data
     property alias izquierda: ladoIzq.data

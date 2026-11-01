@@ -11,7 +11,7 @@ Item {
     implicitWidth: fila.implicitWidth
     implicitHeight: 40
     opacity: activo ? 1 : 0.5
-    Rectangle { id: fondo; anchors.fill: parent; radius: 14; color: "#0c1f13"; clip: true
+    Rectangle { id: fondo; anchors.fill: parent; radius: 14; color: Tema.caja2; clip: true
         Row {
             id: fila
             Repeater {
@@ -22,12 +22,12 @@ Item {
                     width: txt.implicitWidth + 36; height: raiz.height
                     radius: on ? 14 : 0
                     gradient: Gradient {
-                        GradientStop { position: 0; color: on ? Tema.amarilloClaro : "#1c3325" }
-                        GradientStop { position: 0.45; color: on ? Tema.amarillo : "#132a1c" }
-                        GradientStop { position: 1; color: on ? Tema.amarillo2 : "#0c1f13" }
+                        GradientStop { position: 0; color: on ? Tema.acentoClaro : Qt.lighter(Tema.caja1, 1.1) }
+                        GradientStop { position: 0.45; color: on ? Tema.acento : Tema.caja1 }
+                        GradientStop { position: 1; color: on ? Tema.acentoOscuro : Tema.caja2 }
                     }
-                    Text { id: txt; anchors.centerIn: parent; text: modelData.texto; color: on ? Tema.negro : Tema.blanco
-                           font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: 18 } }
+                    Text { id: txt; anchors.centerIn: parent; text: modelData.texto; color: on ? Tema.acentoTinta : Tema.tinta
+                           font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 18 } }
                     MouseArea { anchors.fill: parent; enabled: raiz.activo; onClicked: raiz.elegido(modelData.valor) }
                 }
             }

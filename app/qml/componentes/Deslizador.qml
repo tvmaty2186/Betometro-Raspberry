@@ -15,10 +15,10 @@ Item {
         id: carril
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width; height: 10; radius: 5
-        color: "#0c1f13"; border { width: 1.5; color: Tema.bordeCromo }
+        color: Tema.caja2; border { width: 1.5; color: Tema.bordeCromo }
         Rectangle {
             width: Math.max(height, parent.width * raiz.frac); height: parent.height; radius: 5
-            gradient: Gradient { orientation: Gradient.Horizontal; GradientStop { position: 0; color: Tema.amarillo2 } GradientStop { position: 1; color: Tema.amarillo } }
+            gradient: Gradient { orientation: Gradient.Horizontal; GradientStop { position: 0; color: Tema.acentoOscuro } GradientStop { position: 1; color: Tema.acento } }
         }
     }
     Rectangle {

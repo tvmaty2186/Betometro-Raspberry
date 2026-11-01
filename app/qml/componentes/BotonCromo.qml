@@ -6,7 +6,7 @@ Item {
     id: raiz
     property string texto: ""
     property real tamTexto: 16
-    property real radio: 14
+    property real radio: Math.max(3, Tema.radio - 4)
     property bool activo: true
     signal tocado()
     opacity: activo ? 1 : 0.45
@@ -15,15 +15,15 @@ Item {
     Rectangle {
         anchors.fill: parent; radius: raiz.radio
         gradient: Gradient {
-            GradientStop { position: 0; color: zona.pressed ? "#3a5a45" : "#2f4a39" }
-            GradientStop { position: 1; color: "#0c1f13" }
+            GradientStop { position: 0; color: zona.pressed ? Qt.lighter(Tema.caja1, 1.4) : Qt.lighter(Tema.caja1, 1.15) }
+            GradientStop { position: 1; color: Tema.caja2 }
         }
     }
     Text {
         anchors.centerIn: parent
         text: raiz.texto
-        color: Tema.blanco
-        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: raiz.tamTexto }
+        color: Tema.tinta
+        font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.tamTexto }
     }
     MouseArea { id: zona; anchors.fill: parent; enabled: raiz.activo; onClicked: raiz.tocado() }
 }

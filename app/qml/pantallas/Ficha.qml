@@ -61,7 +61,7 @@ Item {
                     Sub { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.t }
                     Digito {
                         anchors.horizontalCenter: parent.horizontalCenter; tam: raiz.h ? 56 : 52; text: modelData.v
-                        color: index === 0 ? (c.nivel === "ok" ? "#7fd36b" : c.nivel === "medio" ? Tema.amarillo : c.nivel === "mal" ? "#ff8a7a" : Tema.crema) : Tema.crema
+                        color: index === 0 ? (c.nivel === "ok" ? Tema.bien : c.nivel === "medio" ? Tema.acento : c.nivel === "mal" ? Tema.alerta : Tema.numero) : Tema.numero
                     }
                 }
             }
@@ -148,7 +148,7 @@ Item {
                 visible: raiz.fijos && !raiz.h
                 x: 22; width: parent.width - 44; wrapMode: Text.WordWrap; bottomPadding: 8
                 text: "Esta carrera ya tiene vueltas corridas: el tiempo, la distancia y las vueltas medidas no se pueden cambiar."
-                color: Tema.tintaSuave; font { family: Tema.fuente; italic: true; pixelSize: 15 }
+                color: Tema.tintaSuave; font { family: Tema.fuente; italic: Tema.cursiva; pixelSize: 15 }
             }
         }
     }
@@ -187,8 +187,8 @@ Item {
     Text {
         visible: raiz.error !== ""
         anchors { horizontalCenter: largar.horizontalCenter; bottom: largar.top; bottomMargin: 6 }
-        text: raiz.error; color: "#ff8a7a"
-        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: 17 }
+        text: raiz.error; color: Tema.alerta
+        font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 17 }
     }
 
     Row {
@@ -213,7 +213,7 @@ Item {
         visible: raiz.fijos && raiz.h
         x: largar.x + 4; y: 608; width: largar.width - 8; wrapMode: Text.WordWrap
         text: "Esta carrera ya tiene vueltas corridas: el tiempo, la distancia y las vueltas medidas no se pueden cambiar."
-        color: Tema.tintaSuave; font { family: Tema.fuente; italic: true; pixelSize: 16 }
+        color: Tema.tintaSuave; font { family: Tema.fuente; italic: Tema.cursiva; pixelSize: 16 }
     }
 
     Teclado {

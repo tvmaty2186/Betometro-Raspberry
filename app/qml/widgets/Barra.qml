@@ -13,10 +13,10 @@ Item {
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0; color: "#d23b2c" }
-            GradientStop { position: 0.25; color: Tema.amarillo }
+            GradientStop { position: 0.25; color: "#f4c531" }
             GradientStop { position: 0.45; color: "#7fd36b" }
             GradientStop { position: 0.55; color: "#7fd36b" }
-            GradientStop { position: 0.75; color: Tema.amarillo }
+            GradientStop { position: 0.75; color: "#f4c531" }
             GradientStop { position: 1; color: "#d23b2c" }
         }
     }

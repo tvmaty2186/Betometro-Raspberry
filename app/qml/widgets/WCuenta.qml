@@ -19,14 +19,14 @@ Caja {
             width: parent.width
             height: raiz.height * (raiz.barra ? 0.52 : 0.62)
             maximo: raiz.height * (raiz.barra ? 0.6 : 0.7)
-            color: raiz.pasado ? "#ff8a7a" : Tema.crema
+            color: raiz.pasado ? Tema.alerta : Tema.numero
             text: raiz.pasado ? "+" + Formato.reloj(-raiz.restante, false) : Formato.reloj(raiz.restante, !!raiz.est.enCurso)
         }
         Text {
             visible: raiz.extra
             width: parent.width; horizontalAlignment: Text.AlignHCenter
             text: "faltan " + (raiz.est.distanciaM > 0 && !raiz.est.sinGps ? Formato.miles(Math.max(0, raiz.est.restanteM)) : "–") + " m"
-            color: Tema.blanco
+            color: Tema.tinta
             font { family: Tema.fuente600; pixelSize: Math.max(14, Math.min(24, raiz.height * 0.075)) }
         }
         Item { width: 1; height: raiz.height * 0.02; visible: raiz.barra }

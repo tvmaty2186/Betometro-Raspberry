@@ -12,7 +12,7 @@ Caja {
         Etiq { alto: raiz.height; width: parent.width; text: "Adelantado / atrasado" }
         Numero {
             width: parent.width; height: raiz.height * 0.55; maximo: raiz.height * 0.4
-            color: raiz.d !== null && raiz.d <= -0.05 ? "#ff8a7a" : Tema.crema
+            color: raiz.d !== null && raiz.d <= -0.05 ? Tema.alerta : Tema.numero
             text: raiz.d === null ? (raiz.est.enCurso ? "SIN DATOS" : "EN TIEMPO")
                 : Math.abs(raiz.d) < 0.05 ? "EN TIEMPO"
                 : (raiz.d > 0 ? "ADELANTADO " : "ATRASADO ") + Math.abs(raiz.d).toFixed(1).replace(".", ",") + " s"

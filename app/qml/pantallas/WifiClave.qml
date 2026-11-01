@@ -45,9 +45,9 @@ Item {
                     onTocada: { raiz.red = modelData.nombre; raiz.clave = ""; }
                     izquierda: Row { spacing: 14
                         Senal { nivel: modelData.senal; anchors.verticalCenter: parent.verticalCenter }
-                        Text { text: modelData.nombre; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } } }
+                        Text { text: modelData.nombre; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
                     Text { visible: modelData.nombre === raiz.red || !modelData.clave; text: modelData.nombre === raiz.red ? "elegida" : "abierta"
-                           color: Tema.amarillo; font { family: Tema.fuente800; pixelSize: 18 } }
+                           color: Tema.acento; font { family: Tema.fuente800; pixelSize: 18 } }
                     Candado { visible: modelData.nombre !== raiz.red && modelData.clave }
                 }
             }
@@ -65,11 +65,11 @@ Item {
             Text {
                 anchors { left: parent.left; leftMargin: 18; verticalCenter: parent.verticalCenter }
                 text: raiz.ver ? raiz.clave : "•".repeat(raiz.clave.length)
-                color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 30 }
-                Rectangle { anchors { left: parent.right; leftMargin: 2; verticalCenter: parent.verticalCenter } width: 3; height: 34; color: Tema.amarillo }
+                color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 30 }
+                Rectangle { anchors { left: parent.right; leftMargin: 2; verticalCenter: parent.verticalCenter } width: 3; height: 34; color: Tema.acento }
             }
         }
-        Text { x: 24; y: 122; visible: Wifi.error !== ""; text: Wifi.error; color: "#ff8a7a"; font { family: Tema.fuente600; italic: true; pixelSize: 16 } }
+        Text { x: 24; y: 122; visible: Wifi.error !== ""; text: Wifi.error; color: Tema.alerta; font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 16 } }
         Row {
             x: 24; y: 154; spacing: 14
             BotonCromo { width: (claveT.width - 48 - 14) / 2; height: 58; tamTexto: 18; texto: raiz.ver ? "Ocultar clave" : "Mostrar clave"; onTocado: raiz.ver = !raiz.ver }

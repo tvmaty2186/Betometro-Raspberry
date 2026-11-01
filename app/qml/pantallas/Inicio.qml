@@ -27,31 +27,31 @@ Item {
     // Cabecera verde con filete amarillo
     Rectangle {
         x: 0; y: 0; width: parent.width; height: raiz.h ? 96 : 112
-        gradient: Gradient { GradientStop { position: 0; color: "#123d24" } GradientStop { position: 1; color: "#081a0f" } }
-        Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 4; color: Tema.amarillo }
+        gradient: Gradient { GradientStop { position: 0; color: Tema.avispon ? "#123d24" : Tema.caja1 } GradientStop { position: 1; color: Tema.avispon ? "#081a0f" : Tema.caja2 } }
+        Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 4; color: Tema.acento }
     }
-    Rayas { x: raiz.h ? parent.width - 200 - 80 : parent.width - 30 - 70; y: -30; width: raiz.h ? 80 : 70; height: raiz.h ? 130 : 150 }
+    Rayas { visible: Tema.avispon; x: raiz.h ? parent.width - 200 - 80 : parent.width - 30 - 70; y: -30; width: raiz.h ? 80 : 70; height: raiz.h ? 130 : 150 }
     Cabecera { x: raiz.h ? 28 : 22; y: raiz.h ? 17 : 15; alto: raiz.h ? 62 : 56; tamTitulo: raiz.h ? 44 : 40 }
 
     Text {
         id: version
         textFormat: Text.StyledText
-        text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.amarillo + "'>· Actualizar</font>" : "")
-        color: Tema.blanco
-        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
+        text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.acento + "'>· Actualizar</font>" : "")
+        color: Tema.tinta
+        font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
         x: raiz.h ? parent.width - 28 - width : 24
         y: raiz.h ? 30 : 84
         MouseArea { anchors.fill: parent; anchors.margins: -10; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
     }
 
-    Banda { x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
-    Numero101 { x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
+    Banda { visible: Tema.avispon; x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
+    Numero101 { visible: Tema.avispon; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
     Text {
         x: raiz.h ? 190 : 28; y: raiz.h ? 600 : 556
         text: Datos.ajustes.nombreAuto || ""
-        color: Tema.blanco
+        color: Tema.tinta
         style: Text.Raised; styleColor: "#000"
-        font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
+        font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
     }
     Flow {
         x: raiz.h ? 190 : parent.width - 16 - width
@@ -87,6 +87,7 @@ Item {
     }
 
     Swoosh {
+        visible: Tema.avispon
         x: -80; width: parent.width + 80 - (raiz.h ? 500 : 200)
         height: 120; y: parent.height + (raiz.h ? 70 : 80) - height
     }

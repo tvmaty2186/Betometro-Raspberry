@@ -85,7 +85,7 @@ Item {
                 visible: raiz.editando && raiz.elegido === celda.i
                 anchors.fill: parent; anchors.margins: -6
                 radius: celda.def.forma === "redondo" ? width / 2 : 26
-                color: "transparent"; border { width: 3; color: Tema.amarillo }
+                color: "transparent"; border { width: 3; color: Tema.acento }
             }
             MouseArea {
                 id: zona
@@ -123,7 +123,7 @@ Item {
                 width: 36; height: 36; radius: 18
                 x: celda.def.forma === "redondo" ? parent.width / 2 + parent.width / 2 * 0.707 - 18 : parent.width - 18
                 y: celda.def.forma === "redondo" ? parent.height / 2 + parent.height / 2 * 0.707 - 18 : parent.height - 18
-                color: Tema.amarillo; border { width: 2; color: "#000" }
+                color: Tema.acento; border { width: 2; color: "#000" }
                 Text { anchors.centerIn: parent; text: "⇲"; color: "#000"; font { pixelSize: 20; bold: true } }
                 MouseArea {
                     anchors.fill: parent; anchors.margins: -12

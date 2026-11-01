@@ -8,12 +8,14 @@ Row {
     property real tamTitulo: 44
     spacing: 18
     Image {
+        visible: Tema.avispon
         source: "qrc:/recursos/img/leon.png"
         height: raiz.alto; fillMode: Image.PreserveAspectFit
         anchors.verticalCenter: parent.verticalCenter
         smooth: true; mipmap: true
     }
     Canvas {
+        visible: Tema.avispon
         width: 18; height: raiz.alto * 0.9
         anchors.verticalCenter: parent.verticalCenter
         onPaint: {

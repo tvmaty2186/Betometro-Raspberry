@@ -21,16 +21,16 @@ Item {
                 Row {
                     x: 22; spacing: 12; topPadding: 6; bottomPadding: 4
                     Rectangle { width: 14; height: 14; radius: 7; anchors.verticalCenter: parent.verticalCenter
-                                color: Wifi.conectada ? "#7fd36b" : (Wifi.conectando ? Tema.amarillo : "#ff8a7a") }
-                    Text { color: Tema.blanco; font { family: Tema.fuente800; italic: true; pixelSize: 30 }
+                                color: Wifi.conectada ? Tema.bien : (Wifi.conectando ? Tema.acento : Tema.alerta) }
+                    Text { color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 }
                            text: Wifi.conectando ? "Conectando…" : Wifi.conectada ? "Conectado a «" + Wifi.conectada + "»" : "Sin conexión" }
                 }
                 Fila { altoMinimo: 58; etiqueta: "Señal"; colorEtiqueta: Tema.tintaSuave
                     Row { spacing: 12
                         Senal { nivel: Wifi.senal; anchors.verticalCenter: parent.verticalCenter }
-                        Text { text: ["Sin señal", "Débil", "Regular", "Buena", "Excelente"][Wifi.senal]; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } } } }
+                        Text { text: ["Sin señal", "Débil", "Regular", "Buena", "Excelente"][Wifi.senal]; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } } }
                 Fila { altoMinimo: 58; etiqueta: "Hora"; colorEtiqueta: Tema.tintaSuave; ultima: true
-                    Text { text: Wifi.horaInternet ? "Puesta por internet ✓" : "Del GPS"; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } } }
+                    Text { text: Wifi.horaInternet ? "Puesta por internet ✓" : "Del GPS"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
             }
         }
     }
@@ -52,7 +52,7 @@ Item {
                         width: colR.width - 132 - 64
                         Text { width: parent.width; wrapMode: Text.WordWrap; text: "Desde el celu o la compu, en la misma wifi:"
                                color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 18 } }
-                        Text { text: Wifi.direccion; color: Tema.amarillo; font { family: Tema.fuente800; italic: true; pixelSize: 34 } }
+                        Text { text: Wifi.direccion; color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 34 } }
                         Text { visible: raiz.h; width: parent.width; wrapMode: Text.WordWrap; text: "Ahí están todas las carreras y sus informes."
                                color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 16 } }
                     }
@@ -82,12 +82,12 @@ Item {
                         izquierda: Row {
                             spacing: 14
                             Senal { nivel: modelData.senal; anchors.verticalCenter: parent.verticalCenter }
-                            Text { text: modelData.nombre; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } }
+                            Text { text: modelData.nombre; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } }
                         }
                         Row { spacing: 14
                             Text { anchors.verticalCenter: parent.verticalCenter
                                    text: modelData.conectada ? "conectada" : modelData.cerca ? "cerca" : "no está cerca"
-                                   color: modelData.conectada ? Tema.amarillo : Tema.tintaSuave
+                                   color: modelData.conectada ? Tema.acento : Tema.tintaSuave
                                    font { family: modelData.conectada ? Tema.fuente800 : Tema.fuente600; pixelSize: 18 } }
                             BotonCromo { width: 110; height: 40; tamTexto: 15; texto: "Olvidar"; onTocado: Wifi.olvidar(modelData.nombre) } }
                     }
@@ -112,7 +112,7 @@ Item {
                         izquierda: Row {
                             spacing: 14
                             Senal { nivel: modelData.senal; anchors.verticalCenter: parent.verticalCenter }
-                            Text { text: modelData.nombre; color: Tema.blanco; font { family: Tema.fuente600; pixelSize: 20 } }
+                            Text { text: modelData.nombre; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } }
                         }
                         Candado { visible: modelData.clave }
                         Text { visible: !modelData.clave; text: "abierta"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 18 } }

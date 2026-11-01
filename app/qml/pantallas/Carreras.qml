@@ -35,7 +35,7 @@ Item {
                 visible: Datos.proximas.length === 0 && Datos.corridas.length === 0
                 width: parent.width; wrapMode: Text.WordWrap
                 text: "Todavía no hay carreras. Tocá + Nueva para cargar la primera."
-                color: Tema.tintaSuave; font { family: Tema.fuente; italic: true; pixelSize: 22 }
+                color: Tema.tintaSuave; font { family: Tema.fuente; italic: Tema.cursiva; pixelSize: 22 }
                 topPadding: 40
             }
 
@@ -54,8 +54,8 @@ Item {
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
                             width: tp.width - 62 - 60 - (raiz.h ? 210 : 0)
-                            Text { width: parent.width; elide: Text.ElideRight; text: tp.modelData.nombre; color: Tema.blanco
-                                   font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 28 } }
+                            Text { width: parent.width; elide: Text.ElideRight; text: tp.modelData.nombre; color: Tema.tinta
+                                   font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 28 } }
                             Sub { width: parent.width; elide: Text.ElideRight; text: tp.modelData.linea }
                         }
                     }
@@ -90,8 +90,8 @@ Item {
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
                             width: tc.width - 62 - 60 - (raiz.h ? 210 : 170)
-                            Text { width: parent.width; elide: Text.ElideRight; text: tc.modelData.nombre; color: Tema.blanco
-                                   font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 28 } }
+                            Text { width: parent.width; elide: Text.ElideRight; text: tc.modelData.nombre; color: Tema.tinta
+                                   font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 28 } }
                             Sub { width: parent.width; elide: Text.ElideRight; text: tc.modelData.linea }
                         }
                     }
@@ -130,7 +130,7 @@ Item {
             Text {
                 x: 28; y: 28; width: parent.width - 56; wrapMode: Text.WordWrap
                 text: raiz.borrando ? "¿Borrar «" + raiz.borrando.nombre + "»?" : ""
-                color: Tema.blanco; font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 28 }
+                color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 28 }
             }
             Sub { x: 28; y: 110; text: "Se borran también todas sus vueltas"; tam: 13 }
             Row {

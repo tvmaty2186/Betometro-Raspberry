@@ -8,7 +8,7 @@ Item {
     property real derechaRayas: Contexto.horizontal ? 90 : 150
     signal volver()
     anchors.fill: parent
-    Rayas { x: parent.width - raiz.derechaRayas - width; y: -30 }
+    Rayas { visible: Tema.avispon; x: parent.width - raiz.derechaRayas - width; y: -30 }
     Row {
         x: Contexto.horizontal ? 28 : 24; y: 24
         spacing: 14

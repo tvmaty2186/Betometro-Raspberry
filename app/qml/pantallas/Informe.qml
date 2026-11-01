@@ -20,13 +20,13 @@ Item {
     function nombreV(v) { return "V" + v.n + (inf.largadas > 1 ? " L" + v.largada : ""); }
     function colorPunto(p) {
         if (!p[7]) return "#555555";
-        if (modo === "acel") { const a = p[3]; return a > 0.8 ? "#7fd36b" : a > 0.25 ? "#8fe3b0" : a < -0.8 ? "#d23b2c" : a < -0.25 ? "#f08a96" : "#9aa3ad"; }
-        if (modo === "ade") { const s = Math.abs(p[4]); return s < 1 ? "#7fd36b" : s < 3 ? Tema.amarillo : "#d23b2c"; }
-        if (!(sug > 0)) return "#7fd36b";
+        if (modo === "acel") { const a = p[3]; return a > 0.8 ? Tema.bien : a > 0.25 ? "#8fe3b0" : a < -0.8 ? "#d23b2c" : a < -0.25 ? "#f08a96" : "#9aa3ad"; }
+        if (modo === "ade") { const s = Math.abs(p[4]); return s < 1 ? Tema.bien : s < 3 ? Tema.acento : "#d23b2c"; }
+        if (!(sug > 0)) return Tema.bien;
         const d = p[2] - sug;
-        return d > 6 ? "#d23b2c" : d > 2 ? Tema.amarillo : d >= -2 ? "#7fd36b" : d >= -6 ? "#7fd3ff" : "#3a8de0";
+        return d > 6 ? "#d23b2c" : d > 2 ? Tema.acento : d >= -2 ? Tema.bien : d >= -6 ? "#7fd3ff" : "#3a8de0";
     }
-    function colorDif(ms) { const s = Math.abs(ms / 1000); return s <= 0.2 ? "#7fd36b" : s <= 0.5 ? Tema.amarillo : "#ff8a7a"; }
+    function colorDif(ms) { const s = Math.abs(ms / 1000); return s <= 0.2 ? Tema.bien : s <= 0.5 ? Tema.acento : Tema.alerta; }
     onLapChanged: { mapa.requestPaint(); grafico.requestPaint(); }
     onModoChanged: mapa.requestPaint()
 
@@ -66,10 +66,10 @@ Item {
                 Rectangle {
                     required property var modelData
                     width: tm.implicitWidth + 18; height: 26; radius: 13
-                    color: raiz.modo === modelData.m ? Tema.amarillo : Qt.rgba(0, 0, 0, 0.4)
+                    color: raiz.modo === modelData.m ? Tema.acento : Qt.rgba(0, 0, 0, 0.4)
                     border { width: 1; color: Tema.bordeCromo }
-                    Text { id: tm; anchors.centerIn: parent; text: modelData.t; color: raiz.modo === modelData.m ? Tema.negro : Tema.blanco
-                           font { family: Tema.fuente600; italic: true; pixelSize: 13 } }
+                    Text { id: tm; anchors.centerIn: parent; text: modelData.t; color: raiz.modo === modelData.m ? Tema.acentoTinta : Tema.tinta
+                           font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 13 } }
                     MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: raiz.modo = modelData.m }
                 }
             }
@@ -104,7 +104,7 @@ Item {
                 }
                 g.beginPath(); g.arc(X(P[0]), Y(P[0]), 9 * k, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
                 const izq = X(P[0]) > width * 0.7;   // cerca del borde derecho: el texto va a la izquierda
-                g.fillStyle = Tema.blanco; g.font = "italic " + Math.round(11 * k) + "px '" + Tema.fuente800 + "'"; g.textAlign = izq ? "right" : "left";
+                g.fillStyle = Tema.tinta; g.font = "italic " + Math.round(11 * k) + "px '" + Tema.fuente800 + "'"; g.textAlign = izq ? "right" : "left";
                 g.fillText("LARGADA", X(P[0]) + (izq ? -14 : 14) * k, Y(P[0]) + 4 * k);
             }
         }
@@ -135,10 +135,10 @@ Item {
                 g.fillStyle = Tema.tintaSuave; g.font = "11px '" + Tema.fuente + "'"; g.textAlign = "right";
                 for (let i = 0; i <= 4; i++) { const v = esc * i / 4; g.beginPath(); g.moveTo(30, Y(v)); g.lineTo(width - 4, Y(v)); g.stroke(); g.fillText(String(Math.round(v)), 24, Y(v) + 4); }
                 if (raiz.sug > 0) {
-                    g.strokeStyle = Tema.amarillo; g.lineWidth = 2; g.setLineDash([8, 6]);
+                    g.strokeStyle = Tema.acento; g.lineWidth = 2; g.setLineDash([8, 6]);
                     g.beginPath(); g.moveTo(30, Y(raiz.sug)); g.lineTo(width - 4, Y(raiz.sug)); g.stroke(); g.setLineDash([]);
                 }
-                g.strokeStyle = Tema.crema; g.lineWidth = 3.5; g.lineJoin = "round";
+                g.strokeStyle = Tema.numero; g.lineWidth = 3.5; g.lineJoin = "round";
                 let abierto = false;
                 g.beginPath();
                 for (const p of M) {
@@ -172,18 +172,18 @@ Item {
                         Row {
                             anchors.verticalCenter: parent.verticalCenter; x: 6
                             readonly property real u: (colT.width - 12) / 10
-                            Text { width: parent.u * 1.6; text: raiz.nombreV(modelData); color: Tema.crema; font { family: Tema.fuenteNum; italic: true; weight: Font.Bold; pixelSize: 24 } }
+                            Text { width: parent.u * 1.6; text: raiz.nombreV(modelData); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
                             Row { width: parent.u * 3; spacing: 8
                                 Rectangle { width: 10; height: 10; radius: 5; anchors.verticalCenter: parent.verticalCenter
-                                            color: modelData.interrumpida ? "#8a929b" : modelData.medida ? "#d23b2c" : "#7fd36b" }
+                                            color: modelData.interrumpida ? "#8a929b" : modelData.medida ? "#d23b2c" : Tema.bien }
                                 Sub { anchors.verticalCenter: parent.verticalCenter; tam: 12; text: modelData.interrumpida ? "interrumpida" : modelData.medida ? "medida" : "práctica" } }
-                            Text { width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.crema; font { family: Tema.fuenteNum; italic: true; weight: Font.Bold; pixelSize: 24 } }
+                            Text { width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
                             Text { width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
                                    color: modelData.difMs === undefined ? Tema.tintaSuave : raiz.colorDif(modelData.difMs)
-                                   font { family: Tema.fuenteNum; italic: true; weight: Font.Bold; pixelSize: 24 } }
+                                   font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
                             Text { width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
                                    text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
-                                   color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: true; weight: Font.Bold; pixelSize: 20 } }
+                                   color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                         }
                         MouseArea { anchors.fill: parent; enabled: !!modelData.m; onClicked: raiz.lap = index }
                     }
@@ -195,7 +195,7 @@ Item {
                     Rectangle { width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.2) }
                     Sub { x: 6; anchors.verticalCenter: parent.verticalCenter; tam: 13; text: "Error total · " + parent.med.length + (parent.med.length === 1 ? " medida" : " medidas") }
                     Text { anchors { right: parent.right; rightMargin: 6; verticalCenter: parent.verticalCenter }
-                           text: raiz.c.errorTotal || ""; color: Tema.amarillo; font { family: Tema.fuenteNum; italic: true; weight: Font.Bold; pixelSize: 26 } }
+                           text: raiz.c.errorTotal || ""; color: Tema.acento; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 } }
                 }
             }
         }

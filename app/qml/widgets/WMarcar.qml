@@ -9,20 +9,20 @@ Item {
     readonly property bool enCurso: !!est.enCurso
     function efecto() { golpe.restart(); }
     BotonAmarillo { id: boton; anchors.fill: parent; radio: 22; texto: "" }
-    Rectangle { id: brillo; anchors.fill: parent; radius: 22; color: "#fff1b0"; opacity: 0 }
+    Rectangle { id: brillo; anchors.fill: parent; radius: 22; color: Tema.acentoClaro; opacity: 0 }
     Column {
         anchors.centerIn: parent
         width: parent.width - 30
         Text {
             width: parent.width; horizontalAlignment: Text.AlignHCenter
             fontSizeMode: Text.Fit; height: raiz.height * 0.5; verticalAlignment: Text.AlignVCenter
-            text: raiz.enCurso ? "MARCAR" : "LARGAR"; color: Tema.negro
-            font { family: Tema.fuente800; italic: true; pixelSize: Math.min(raiz.height * 0.47, raiz.width * 0.19) }
+            text: raiz.enCurso ? "MARCAR" : "LARGAR"; color: Tema.acentoTinta
+            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.min(raiz.height * 0.47, raiz.width * 0.19) }
         }
         Text {
             width: parent.width; horizontalAlignment: Text.AlignHCenter
-            text: raiz.enCurso ? "FIN DE VUELTA " + raiz.est.n : "TOCÁ EN LA LARGADA"; color: Tema.negro
-            font { family: Tema.fuente800; italic: true; pixelSize: Math.max(14, Math.min(24, raiz.height * 0.095)); letterSpacing: 3 }
+            text: raiz.enCurso ? "FIN DE VUELTA " + raiz.est.n : "TOCÁ EN LA LARGADA"; color: Tema.acentoTinta
+            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.max(14, Math.min(24, raiz.height * 0.095)); letterSpacing: 3 }
         }
     }
     transform: Scale { id: escala; origin.x: raiz.width / 2; origin.y: raiz.height / 2 }

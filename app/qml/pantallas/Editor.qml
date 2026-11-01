@@ -54,8 +54,8 @@ Item {
             x: 20; y: raiz.h ? 9 : 12; spacing: 16
             Volver { width: 40; height: 40; anchors.verticalCenter: parent.verticalCenter
                      onTocado: { if (raiz.cambiado) Navegacion.avisar("Se salió sin guardar"); raiz.salir(); } }
-            Text { text: "Pantalla de carrera"; color: Tema.blanco; anchors.verticalCenter: parent.verticalCenter
-                   font { family: Tema.fuente800; italic: true; pixelSize: 22 } }
+            Text { text: "Pantalla de carrera"; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter
+                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 22 } }
             Segmentado { anchors.verticalCenter: parent.verticalCenter; visible: raiz.h
                          opciones: [{ texto: "Vertical", valor: false }, { texto: "Horizontal", valor: true }]
                          valor: raiz.h; onElegido: v => raiz.orientacion(v) }
@@ -80,7 +80,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         y: raiz.h ? 300 : 134
         width: ayuda.implicitWidth + 32; height: 40; radius: 12; color: Qt.rgba(0, 0, 0, 0.78)
-        Text { id: ayuda; anchors.centerIn: parent; color: Tema.blanco; font { family: Tema.fuente600; italic: true; pixelSize: 17 }
+        Text { id: ayuda; anchors.centerIn: parent; color: Tema.tinta; font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 17 }
                text: "Mantené apretado para mover · tocá para cambiar tamaño · ✎ opciones" }
     }
 
@@ -90,7 +90,7 @@ Item {
         z: 6
         width: 58; height: 58; radius: 29
         x: parent.width - width - 18; y: raiz.h ? 70 : 140
-        color: Tema.amarillo; border { width: 2; color: "#000" }
+        color: Tema.acento; border { width: 2; color: "#000" }
         Text { anchors.centerIn: parent; text: "✎"; color: "#000"; font { pixelSize: 28; bold: true } }
         MouseArea { anchors.fill: parent; onClicked: raiz.panel = !raiz.panel }
     }

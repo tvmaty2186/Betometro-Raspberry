@@ -69,7 +69,7 @@ Item {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: 10; spacing: 10; z: 5
         Chip {
-            punto: Crono.gps.ok && !est.sinGps ? "#7fd36b" : "#ff8a7a"
+            punto: Crono.gps.ok && !est.sinGps ? Tema.bien : Tema.alerta
             texto: Crono.gps.ok ? "GPS " + Crono.gps.hz + " Hz" + (raiz.h ? " · " + Math.round(Crono.gps.precision) + " m" : "") : "Sin GPS"
         }
         Rectangle {
@@ -77,11 +77,11 @@ Item {
             property bool armado: false
             height: 32; radius: 16
             width: tt.implicitWidth + 28
-            color: armado ? Tema.amarillo : Qt.rgba(0, 0, 0, 0.55)
+            color: armado ? Tema.acento : Qt.rgba(0, 0, 0, 0.55)
             border { width: 1.5; color: "#c9ced3" }
-            Text { id: tt; anchors.centerIn: parent; color: terminar.armado ? Tema.negro : Tema.blanco
+            Text { id: tt; anchors.centerIn: parent; color: terminar.armado ? Tema.acentoTinta : Tema.tinta
                    text: Crono.enCurso ? (terminar.armado ? "Tocá otra vez" : "Terminar") : "Salir"
-                   font { family: Tema.fuente600; italic: true; pixelSize: 13 } }
+                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 13 } }
             MouseArea {
                 anchors.fill: parent; anchors.margins: -10
                 onClicked: {

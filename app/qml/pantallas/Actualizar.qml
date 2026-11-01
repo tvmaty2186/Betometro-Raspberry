@@ -28,9 +28,9 @@ Item {
                 flow: raiz.h ? Flow.LeftToRight : Flow.TopToBottom
                 Column { Sub { anchors.horizontalCenter: parent.horizontalCenter; text: "Tenés"; tam: 15 }
                          Digito { anchors.horizontalCenter: parent.horizontalCenter; text: Contexto.version; tam: 100 } }
-                Text { visible: raiz.h; text: "→"; color: Tema.amarillo; font { family: Tema.fuente800; pixelSize: 60 } topPadding: 30 }
+                Text { visible: raiz.h; text: "→"; color: Tema.acento; font { family: Tema.fuente800; pixelSize: 60 } topPadding: 30 }
                 Column { Sub { anchors.horizontalCenter: parent.horizontalCenter; text: "Nueva"; tam: 15 }
-                         Digito { anchors.horizontalCenter: parent.horizontalCenter; text: Contexto.versionNueva || Contexto.version; tam: 100; color: Tema.amarillo } }
+                         Digito { anchors.horizontalCenter: parent.horizontalCenter; text: Contexto.versionNueva || Contexto.version; tam: 100; color: Tema.acento } }
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
                    text: "Qué trae: arreglos y mejoras de la pantalla de carrera"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 22 } }
@@ -38,12 +38,12 @@ Item {
                 width: parent.width; height: 22; radius: 11; color: "#0a2414"; border { width: 2; color: Tema.bordeCromo }
                 Rectangle {
                     x: 2; y: 2; height: parent.height - 4; radius: 9; width: Math.max(height, (parent.width - 4) * raiz.progreso / 100)
-                    gradient: Gradient { GradientStop { position: 0; color: Tema.amarilloClaro } GradientStop { position: 1; color: Tema.amarillo } }
+                    gradient: Gradient { GradientStop { position: 0; color: Tema.acentoClaro } GradientStop { position: 1; color: Tema.acento } }
                 }
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter
                    text: raiz.estado === "carrera" ? "Terminá la carrera antes de actualizar" : raiz.estado === "lista" ? "Lista: se usa al reiniciar el equipo" : "Descargando… " + Math.floor(raiz.progreso) + " %"
-                   color: Tema.blanco; font { family: Tema.fuente800; italic: true; pixelSize: 28 } }
+                   color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.3
                    text: "Podés seguir usando Betómetro. Se instala en la copia de reserva.\nSi algo falla, vuelve solo a la versión anterior."
                    color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 19 } }
