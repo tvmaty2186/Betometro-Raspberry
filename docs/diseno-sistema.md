@@ -103,7 +103,7 @@ Cambian lo que hace la app en estos puntos:
 - **Respaldo:** no se exporta respaldo de la base.
 - **Informes:** se exporta el informe **de cada carrera** (HTML, por QR).
 - **Terminar a mano:** la vuelta en curso **no se pierde**: se guarda como **vuelta interrumpida** (se ve en la ficha y en el informe, marcada así, y no cuenta como vuelta completa).
-- **Volumen:** control en Ajustes → «Voz y sonido» → «Volumen auriculares», con botón ▶ Probar. Se usa fuera de carrera (menús, prueba, chequeo). **Al largar, el volumen sube siempre al máximo**, igual que en la app: con el ruido de los autos, si no, no se escucha. Al terminar la carrera vuelve al volumen de Ajustes.
+- **Volumen:** un solo ajuste, en Ajustes → «Voz y sonido» → «Volumen auriculares», con botón ▶ Probar. **De fábrica viene al máximo (100 %).** Es el volumen con que se escucha la voz al largar y durante la carrera. Si el usuario lo cambia, se guarda y se usa siempre el último que eligió. (No se fuerza el máximo al largar.)
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
