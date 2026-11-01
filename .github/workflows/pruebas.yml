@@ -53,7 +53,7 @@ jobs:
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j
       - name: Pruebas del programa
-        run: ctest --test-dir build --output-on-failure -R datos
+        run: ctest --test-dir build --output-on-failure -R "datos|crono"
       - name: Capturas
         run: herramientas/capturas.sh build/betometro capturas
       - uses: actions/upload-artifact@v4

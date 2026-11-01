@@ -19,7 +19,7 @@ Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). Plan apro
 
 - **E1 hecha** (01/11/2026): motor y modelo de datos en C++, idénticos a la app. Informe: [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md).
 - **Propuesta aprobada entera** (01/11/2026): conectividad, GPS y mejoras → [docs/propuesta-mejoras.md](docs/propuesta-mejoras.md). Muestra de Conectividad aprobada.
-- **E2 en curso:** base del programa, Inicio, Carreras, Ficha y Práctica libre hechas. Siguen las otras 12 pantallas, los widgets de carrera, los otros 3 temas, la voz y el informe.
+- **E2 en curso:** base del programa, Inicio, Carreras, Ficha, Práctica libre y pantalla de carrera hechas. Preguntar a Matías: ¿fondo rojo/verde en carrera (como la app) o fondo verde normal (como la muestra)? Siguen las otras 12 pantallas, los widgets de carrera, los otros 3 temas, la voz y el informe.
 
 - Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.
 - Pantallas en Qt/QML, con los 4 temas de la app. Mostrarle a Matías capturas de cada tema (Rally clásico, Deportivo moderno, Cabina de avión) antes de cerrar.

@@ -46,6 +46,17 @@ qt_add_qml_module(betometro_qml
     pantallas/Ficha.qml
     pantallas/Inicio.qml
     pantallas/Practica.qml
+    widgets/Barra.qml
+    widgets/Caja.qml
+    widgets/Etiq.qml
+    widgets/Numero.qml
+    widgets/WCuenta.qml
+    widgets/WMarcar.qml
+    widgets/WNumero.qml
+    widgets/WTipo.qml
+    widgets/WVelocidad.qml
+    widgets/WVelocimetro.qml
+    pantallas/Carrera.qml
   RESOURCES
     iconos/ajustes.svg
     iconos/carreras.svg

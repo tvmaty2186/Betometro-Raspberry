@@ -209,6 +209,37 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
     return r;
 }
 
+const Carrera* Datos::buscar(const QString& id) const {
+    for (const auto& c : base_.carreras) if (q(c.id) == id) return &c;
+    return nullptr;
+}
+
+QString Datos::crearPractica() {
+    Carrera c;
+    const QDateTime ahora = QDateTime::currentDateTime();
+    c.id = nuevaId(ahora.toMSecsSinceEpoch(), QRandomGenerator::global()->generate());
+    c.nombre = s("Práctica " + ahora.toString("dd/MM/yy HH:mm"));
+    c.fecha = s(ahora.date().toString(Qt::ISODate));
+    c.practica = true;
+    c.creada = s(ahora.toUTC().toString(Qt::ISODateWithMs));
+    c.tiempoIdealMs = cfg_["tiempoIdealMs"].aEntero(240000);
+    c.distanciaM = cfg_["distanciaM"].aEntero(3200);
+    c.patron = cfg_["patron"].aTexto("alt1");
+    base_.carreras.push_back(c);
+    guardar();
+    emit carrerasChanged();
+    return q(c.id);
+}
+
+bool Datos::agregarVuelta(const QString& id, const Vuelta& v) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c) return false;
+    c->vueltas.push_back(v);
+    guardar();   // al instante: un corte de luz no pierde la vuelta
+    emit carrerasChanged();
+    return true;
+}
+
 bool Datos::borrarCarrera(const QString& id) {
     auto& v = base_.carreras;
     auto it = std::find_if(v.begin(), v.end(), [&](const Carrera& c) { return q(c.id) == id; });

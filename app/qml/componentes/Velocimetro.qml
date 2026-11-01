@@ -7,8 +7,11 @@ Item {
     property real maximo: 160
     property real valor: 0
     property bool hayValor: true
+    property real sugerida: -1      // km/h; −1 = sin marca
     width: 320; height: 320
     onValorChanged: lienzo.requestPaint()
+    onSugeridaChanged: lienzo.requestPaint()
+    onHayValorChanged: lienzo.requestPaint()
 
     Canvas {
         id: lienzo
@@ -27,6 +30,17 @@ Item {
             disco(R, g);
             const r = R - 14 * k;
             c.textAlign = "center";
+            const ang = v => (225 - Math.max(0, Math.min(raiz.maximo, v)) / raiz.maximo * 270) * Math.PI / 180;
+            if (raiz.sugerida >= 0) {   // franja verde ±2 km/h y marca amarilla de la sugerida
+                c.beginPath();
+                c.arc(cx, cy, r - 5 * k, -ang(raiz.sugerida - 2), -ang(raiz.sugerida + 2), false);
+                c.strokeStyle = "#2f7a49"; c.lineWidth = 10 * k; c.lineCap = "butt"; c.stroke();
+                const a = ang(raiz.sugerida);
+                c.beginPath();
+                c.moveTo(cx + Math.cos(a) * (r + 4 * k), cy - Math.sin(a) * (r + 4 * k));
+                c.lineTo(cx + Math.cos(a) * (r - 26 * k), cy - Math.sin(a) * (r - 26 * k));
+                c.strokeStyle = "#d9a20f"; c.lineWidth = 7 * k; c.stroke();
+            }
             for (let v = 0; v <= raiz.maximo; v += 10) {
                 const a = (225 - v / raiz.maximo * 270) * Math.PI / 180, L = (v % 20 ? 10 : 20) * k;
                 c.beginPath();
@@ -49,7 +63,8 @@ Item {
             disco(14 * k, "#111");
             c.font = "italic 800 " + (56 * k) + "px '" + Tema.fuenteNum + "'";
             c.fillStyle = "#1d5233";
-            c.fillText(raiz.hayValor ? String(Math.round(raiz.valor)) : "–", cx, cy + 80 * k);
+            if (raiz.hayValor) c.fillText(String(Math.round(raiz.valor)), cx, cy + 80 * k);
+            else { c.font = "italic 800 " + (30 * k) + "px '" + Tema.fuenteNum + "'"; c.fillText("SIN GPS", cx, cy + 74 * k); }
             c.font = (14 * k) + "px '" + Tema.fuente + "'";
             c.fillStyle = "#333";
             c.fillText("K M / H", cx, cy + 104 * k);

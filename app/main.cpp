@@ -19,7 +19,9 @@
 #include <QTimer>
 
 #include "contexto.h"
+#include "crono.h"
 #include "datos.h"
+#include "gps.h"
 
 #include <QStandardPaths>
 
@@ -46,8 +48,9 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oDatos(QStringLiteral("datos"), QStringLiteral("Carpeta de la base"), QStringLiteral("carpeta"));
     QCommandLineOption oMuestra(QStringLiteral("muestra"), QStringLiteral("Carreras de ejemplo"));
     QCommandLineOption oPrueba(QStringLiteral("prueba"), QStringLiteral("Abrir algo al empezar (capturas)"), QStringLiteral("que"));
+    QCommandLineOption oSinGps(QStringLiteral("sin-gps"), QStringLiteral("Sin GPS (solo cronómetro)"));
     QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
-    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba});
+    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps});
     op.process(app);
 
     cargarFuentes();
@@ -69,9 +72,15 @@ int main(int argc, char* argv[]) {
             if (QString::fromStdString(c.nombre) == op.value(oCarrera)) contexto.setIdInicial(QString::fromStdString(c.id));
     }
 
+    // GPS: en la PC, el simulado (el real por UART llega en E4)
+    FuenteGps sinGps;
+    GpsSimulado* simulado = op.isSet(oSinGps) ? nullptr : new GpsSimulado(&app);
+    Crono crono(&datos, simulado ? static_cast<FuenteGps*>(simulado) : &sinGps);
+
     QQmlApplicationEngine motor;
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
     motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);
+    motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");

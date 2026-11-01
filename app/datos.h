@@ -29,6 +29,12 @@ public:
     Q_INVOKABLE QVariantMap guardarCarrera(const QVariantMap& c);
     Q_INVOKABLE bool borrarCarrera(const QString& id);
 
+    // Para el crono
+    QString crearPractica();                                   // práctica nueva con los valores de cfg; devuelve el id
+    bool agregarVuelta(const QString& id, const beto::Vuelta& v);
+    const beto::Carrera* buscar(const QString& id) const;
+    const beto::Json& config() const { return cfg_; }
+
     // Configuración (cfg = fábrica + lo guardado)
     Q_INVOKABLE QVariant cfg(const QString& clave) const;
     Q_INVOKABLE void ponerCfg(const QString& clave, const QVariant& valor);

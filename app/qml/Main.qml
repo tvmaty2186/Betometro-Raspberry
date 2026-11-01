@@ -30,6 +30,7 @@ Window {
                 case "carreras": return "pantallas/Carreras.qml";
                 case "ficha": return "pantallas/Ficha.qml";
                 case "practica": return "pantallas/Practica.qml";
+                case "carrera": return "pantallas/Carrera.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
             }

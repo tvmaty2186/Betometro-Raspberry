@@ -3,6 +3,17 @@ import QtQuick
 
 // Formatos de números y tiempos como la app.
 QtObject {
+    // Reloj de los widgets: m:ss.d con punto (fmt de la app). `arriba`: redondea hacia arriba (la cuenta en carrera)
+    function reloj(ms, arriba) {
+        const dec = arriba ? Math.ceil(ms / 100) : Math.floor(ms / 100), d = dec % 10, s = Math.floor(dec / 10);
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + d;
+    }
+    // Diferencia con signo: +1,2 s (tarde) / −1,2 s (temprano) / ±0,0 s
+    function dif(ms) {
+        const a = Math.abs(ms), signo = ms > 0 ? "+" : ms < 0 ? "−" : "±";
+        if (a < 59950) return signo + (Math.round(a / 100) / 10).toFixed(1).replace(".", ",") + " s";
+        return signo + tiempo(a);
+    }
     // m:ss,d
     function tiempo(ms) {
         const dec = Math.floor(ms / 100), d = dec % 10, s = Math.floor(dec / 10);
