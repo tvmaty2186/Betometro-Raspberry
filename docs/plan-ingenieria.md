@@ -136,7 +136,11 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - Capturas automáticas de cada pantalla, en las 2 orientaciones y los 4 temas, comparadas a ojo con las muestras.
 - Carrera completa simulada de punta a punta: largar, vueltas, marcas, terminar, informe, exportar.
 
-**Avance (01/11/2026):** base del programa (Qt 6.8, QML), tema Avispón, navegación, giro para la pantalla real y la pantalla de **Inicio** en las dos orientaciones (95 % de los píxeles iguales a la muestra). Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+**Avance (01/11/2026):** base del programa (Qt 6.8, QML), tema Avispón, navegación, giro para la pantalla real y la pantalla de **Inicio** en las dos orientaciones (95 % de los píxeles iguales a la muestra).
+- **Carreras, Ficha y Práctica libre** (01/11/2026) con datos reales (núcleo + almacén), teclado en pantalla (letras con ñ, números, tiempo m:ss,d y fecha), borrar con doble toque o manteniendo apretado. Prueba `prueba_datos` (30 chequeos).
+  - La ficha une el editor y el detalle de la app, como la muestra. En una carrera corrida el recuadro muestra Error total, Promedio y Mejor.
+  - LARGAR solo el día de la carrera; **sin hora del GPS se deja largar** (decisión de la Raspberry). Si no se puede, el botón dice por qué.
+  - La práctica **sí se guarda** en Corridas al largar (como la app); se cambió el texto de la muestra que decía lo contrario. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

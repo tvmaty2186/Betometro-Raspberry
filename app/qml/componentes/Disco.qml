@@ -44,7 +44,7 @@ Item {
     Text {
         text: raiz.texto
         color: Tema.blanco
-        font { family: Tema.fuente; italic: true; weight: Font.Bold; pixelSize: 16 * raiz.d / 96 }
+        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: 16 * raiz.d / 96 }
         style: Text.Raised; styleColor: "#000"
         horizontalAlignment: raiz.etiquetaIzquierda ? Text.AlignRight : Text.AlignHCenter
         width: 200

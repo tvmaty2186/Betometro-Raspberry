@@ -32,7 +32,7 @@ Row {
         Text {
             text: "REGULARIDAD PARA EL NAVEGANTE"
             color: Tema.tintaSuave
-            font { family: Tema.fuente; italic: true; weight: Font.DemiBold; pixelSize: 11; letterSpacing: 11 * 0.14 }
+            font { family: Tema.fuente600; italic: true; weight: Font.DemiBold; pixelSize: 11; letterSpacing: 11 * 0.14 }
             topPadding: -4
         }
     }

@@ -1,0 +1,99 @@
+// Pruebas de las reglas de Carreras (Datos): orden, cuándo se larga, validaciones, borrar y guardado.
+#include <QCoreApplication>
+#include <QDate>
+#include <QTemporaryDir>
+#include <iostream>
+
+#include "datos.h"
+
+static int fallas = 0, chequeos = 0;
+#define CHEQUEAR(c) do { ++chequeos; if (!(c)) { ++fallas; std::cerr << __FILE__ << ":" << __LINE__ << ": falló " #c "\n"; } } while (0)
+
+static QVariantMap carreraNueva(const QString& nombre, QDate f, int vueltas = 5) {
+    return {{"nombre", nombre}, {"fecha", f.toString(Qt::ISODate)}, {"vueltasTotal", vueltas},
+            {"distanciaM", 3000}, {"tiempoIdealMs", 180000}, {"patron", "alt1"}};
+}
+
+int main(int argc, char** argv) {
+    QCoreApplication app(argc, argv);
+    QTemporaryDir dir;
+    const QDate hoy = QDate::currentDate();
+    {
+        Datos d(dir.path());
+        CHEQUEAR(d.proximas().isEmpty() && d.corridas().isEmpty());
+
+        // Validaciones (mensajes de la app)
+        auto m = carreraNueva("", hoy);
+        CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Poné un nombre a la carrera.");
+        m = carreraNueva("X", hoy); m["fecha"] = "";
+        CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Elegí la fecha de la carrera.");
+        m = carreraNueva("X", hoy, 0);
+        CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Poné la cantidad de vueltas de la carrera.");
+        m = carreraNueva("X", hoy); m["tiempoIdealMs"] = 4900;
+        CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "El tiempo ideal tiene que ser de al menos 5 segundos.");
+
+        // Próximas por fecha ascendente; hoy se larga, otro día no
+        const QString idLejos = d.guardarCarrera(carreraNueva("Lejos", hoy.addDays(20)))["id"].toString();
+        const QString idHoy = d.guardarCarrera(carreraNueva("Hoy", hoy))["id"].toString();
+        const QString idPasada = d.guardarCarrera(carreraNueva("Pasada", hoy.addDays(-3)))["id"].toString();
+        CHEQUEAR(!idLejos.isEmpty() && !idHoy.isEmpty() && !idPasada.isEmpty());
+        auto prox = d.proximas();
+        CHEQUEAR(prox.size() == 2);
+        CHEQUEAR(prox[0].toMap()["nombre"] == "Hoy" && prox[1].toMap()["nombre"] == "Lejos");
+        CHEQUEAR(prox[0].toMap()["puedeLargar"].toBool());
+        CHEQUEAR(prox[0].toMap()["estado"] == "HOY");
+        CHEQUEAR(!prox[1].toMap()["puedeLargar"].toBool());
+        CHEQUEAR(prox[1].toMap()["motivoNoLargar"].toString().startsWith("Se larga el"));
+        CHEQUEAR(prox[1].toMap()["estado"] == "EN 20 DÍAS");
+        auto corr = d.corridas();
+        CHEQUEAR(corr.size() == 1 && corr[0].toMap()["estado"] == "SIN CORRER");
+        CHEQUEAR(corr[0].toMap()["motivoNoLargar"] == "La fecha de la carrera ya pasó");
+
+        // Sin hora del GPS se puede largar igual (decisión de la Raspberry)
+        d.setHoraValida(false);
+        CHEQUEAR(d.carrera(idLejos)["puedeLargar"].toBool());
+        d.setHoraValida(true);
+
+        // Nueva: toma los valores de la última práctica
+        d.ponerCfg("tiempoIdealMs", 150000);
+        CHEQUEAR(d.carrera("")["tiempoIdealMs"].toLongLong() == 150000);
+        CHEQUEAR(d.carrera("")["nueva"].toBool());
+
+        // Cambiar
+        auto c = d.carrera(idHoy);
+        c["nombre"] = "Hoy cambiada";
+        c["tiempoIdealMs"] = 90000;
+        CHEQUEAR(d.guardarCarrera(c)["ok"].toBool());
+        CHEQUEAR(d.carrera(idHoy)["ideal"] == "1:30,0");
+        CHEQUEAR(d.carrera(idHoy)["velocidad"] == "120,0");
+
+        CHEQUEAR(d.borrarCarrera(idPasada));
+        CHEQUEAR(d.corridas().isEmpty());
+    }
+    {
+        // Se guardó en disco: al abrir de nuevo está todo
+        Datos d(dir.path());
+        CHEQUEAR(d.proximas().size() == 2);
+        CHEQUEAR(d.cfg("tiempoIdealMs").toDouble() == 150000);
+    }
+    {
+        // Muestra: Santa Clara corrida, con error total 9,6 s y finalizada
+        QTemporaryDir otro;
+        Datos d(otro.path());
+        d.cargarMuestra();
+        bool hay = false;
+        for (const auto& v : d.corridas()) {
+            auto m = v.toMap();
+            if (m["nombre"] == "Santa Clara") {
+                hay = true;
+                CHEQUEAR(m["errorTotal"] == "9,6 s");
+                CHEQUEAR(m["finalizada"].toBool());
+                CHEQUEAR(!m["puedeLargar"].toBool());
+                CHEQUEAR(m["nivel"] == "mal");
+            }
+        }
+        CHEQUEAR(hay);
+    }
+    std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
+    return fallas ? 1 : 0;
+}

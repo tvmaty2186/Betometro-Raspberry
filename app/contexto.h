@@ -11,6 +11,8 @@ class Contexto : public QObject {
     Q_PROPERTY(bool fisica READ fisica CONSTANT)
     Q_PROPERTY(QString tema READ tema WRITE setTema NOTIFY temaChanged)
     Q_PROPERTY(QString pantallaInicial READ pantallaInicial CONSTANT)
+    Q_PROPERTY(QString idInicial READ idInicial CONSTANT)
+    Q_PROPERTY(QString prueba READ prueba CONSTANT)   // solo para capturas: abre algo al empezar
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString versionNueva READ versionNueva NOTIFY versionNuevaChanged)
     Q_PROPERTY(QString numeroAuto READ numeroAuto NOTIFY numeroAutoChanged)
@@ -27,6 +29,10 @@ public:
     void setTema(const QString& t) { if (t != tema_) { tema_ = t; emit temaChanged(); } }
     QString pantallaInicial() const { return pantallaInicial_; }
     void setPantallaInicial(const QString& p) { pantallaInicial_ = p; }
+    QString prueba() const { return prueba_; }
+    void setPrueba(const QString& p) { prueba_ = p; }
+    QString idInicial() const { return idInicial_; }
+    void setIdInicial(const QString& i) { idInicial_ = i; }
     QString version() const { return QStringLiteral(BETO_VERSION); }
     QString versionNueva() const { return versionNueva_; }
     QString numeroAuto() const { return numeroAuto_; }
@@ -47,6 +53,8 @@ private:
     bool fisica_ = false;
     QString tema_ = QStringLiteral("avispon");
     QString pantallaInicial_ = QStringLiteral("inicio");
+    QString idInicial_;
+    QString prueba_;
     QString versionNueva_ = QStringLiteral("1.1.0");   // muestra
     QString numeroAuto_ = QStringLiteral("101");
     QString nombreAuto_ = QStringLiteral("Avispón Verde");

@@ -9,11 +9,11 @@ Item {
     property real tam: 44
     property int peso: Font.ExtraBold
 
-    readonly property string css: "italic 800 " + tam + "px '" + Tema.fuente + "'"
+    readonly property string css: "italic 800 " + tam + "px '" + Tema.fuente800 + "'"
 
     TextMetrics {
         id: medida
-        font.family: Tema.fuente
+        font.family: Tema.fuente800
         font.italic: true
         font.weight: raiz.peso
         font.pixelSize: raiz.tam

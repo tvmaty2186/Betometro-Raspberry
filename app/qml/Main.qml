@@ -27,10 +27,15 @@ Window {
             source: {
                 switch (Navegacion.actual) {
                 case "inicio": return "pantallas/Inicio.qml";
+                case "carreras": return "pantallas/Carreras.qml";
+                case "ficha": return "pantallas/Ficha.qml";
+                case "practica": return "pantallas/Practica.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
             }
-            onLoaded: if (item && item.hasOwnProperty("nombre")) item.nombre = Navegacion.actual
+            onLoaded: if (item && item.hasOwnProperty("pantallaNombre")) item.pantallaNombre = Navegacion.actual
         }
+        Aviso { id: aviso }
+        Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
     }
 }

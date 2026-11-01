@@ -28,6 +28,9 @@ QtObject {
     readonly property var cromo: [[0, "#ffffff"], [0.30, "#c9ced3"], [0.52, "#6f777f"], [0.60, "#e8ebee"], [1, "#9aa1a8"]]
 
     // Fuentes
-    readonly property string fuente: "Barlow"
+    // Qt registra cada grosor de Barlow como una familia aparte («Barlow ExtraBold»…)
+    readonly property string fuente: "Barlow"                 // 400
+    readonly property string fuente600: "Barlow SemiBold"     // 600 (y 700)
+    readonly property string fuente800: "Barlow ExtraBold"    // 800 itálica (y 900)
     readonly property string fuenteNum: "Barlow Condensed"
 }

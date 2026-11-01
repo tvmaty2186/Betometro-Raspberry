@@ -16,6 +16,6 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 6
         Text { text: "●"; color: raiz.punto; font { pixelSize: 13 } anchors.verticalCenter: parent.verticalCenter }
-        Text { text: raiz.texto; color: Tema.blanco; font { family: Tema.fuente; italic: true; weight: Font.Bold; pixelSize: 13 } }
+        Text { text: raiz.texto; color: Tema.blanco; font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: 13 } }
     }
 }

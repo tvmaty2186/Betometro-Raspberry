@@ -50,10 +50,12 @@ jobs:
           cache: true
       - name: Compilar
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBETO_PRUEBAS=OFF
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build -j
+      - name: Pruebas del programa
+        run: ctest --test-dir build --output-on-failure -R datos
       - name: Capturas
-        run: herramientas/capturas.sh build/betometro capturas inicio
+        run: herramientas/capturas.sh build/betometro capturas
       - uses: actions/upload-artifact@v4
         with:
           name: capturas

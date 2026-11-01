@@ -38,7 +38,7 @@ Item {
         textFormat: Text.StyledText
         text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.amarillo + "'>· Actualizar</font>" : "")
         color: Tema.blanco
-        font { family: Tema.fuente; italic: true; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
+        font { family: Tema.fuente600; italic: true; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
         x: raiz.h ? parent.width - 28 - width : 24
         y: raiz.h ? 30 : 84
         MouseArea { anchors.fill: parent; anchors.margins: -10; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
@@ -51,7 +51,7 @@ Item {
         text: Contexto.nombreAuto
         color: Tema.blanco
         style: Text.Raised; styleColor: "#000"
-        font { family: Tema.fuente; italic: true; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
+        font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
     }
     Flow {
         x: raiz.h ? 190 : parent.width - 16 - width

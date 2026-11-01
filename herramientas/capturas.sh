@@ -1,16 +1,25 @@
 #!/bin/sh
-# Saca capturas del programa real, sin pantalla, para comparar con las muestras.
-# Uso: herramientas/capturas.sh <programa betometro> <carpeta de salida> [pantallas…]
+# Saca capturas del programa real, sin pantalla, con carreras de ejemplo, para comparar con las muestras.
+# Uso: herramientas/capturas.sh <programa betometro> <carpeta de salida>
 set -e
 BIN=${1:?falta el programa}
 OUT=${2:?falta la carpeta}
-shift 2
-PANTALLAS=${*:-inicio}
 mkdir -p "$OUT"
+DATOS=$(mktemp -d)
 export QT_QPA_PLATFORM=offscreen LANG=C.UTF-8
-for p in $PANTALLAS; do
+cap() {   # nombre pantalla [opciones…]
+  n=$1; p=$2; shift 2
   for o in h v; do
-    "$BIN" --pantalla "$p" --orientacion "$o" --captura "$OUT/$p-$o.png"
+    "$BIN" --datos "$DATOS" --muestra --pantalla "$p" --orientacion "$o" --captura "$OUT/$n-$o.png" "$@"
   done
-done
+}
+cap inicio inicio
+cap carreras carreras
+cap ficha ficha --carrera "Gualeguaychú"
+cap ficha-corrida ficha --carrera "Santa Clara"
+cap practica practica
+cap teclado-texto ficha --carrera "Gualeguaychú" --prueba teclado-texto
+cap teclado-tiempo ficha --carrera "Gualeguaychú" --prueba teclado-tiempo
+cap teclado-fecha ficha --carrera "Gualeguaychú" --prueba teclado-fecha
+rm -rf "$DATOS"
 ls -1 "$OUT"

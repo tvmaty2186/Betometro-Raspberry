@@ -6,6 +6,9 @@
 //   --tema NOMBRE            avispon, rally, sport, cabina
 //   --fisica                 simula la pantalla real (720×1280 de pie) y gira la interfaz
 //   --captura ARCHIVO.png    saca una captura y sale
+//   --datos CARPETA          dónde está la base (en la Raspberry: /datos)
+//   --muestra                carga carreras de ejemplo (no toca la base guardada hasta que se cambie algo)
+//   --carrera NOMBRE         abre la ficha de esa carrera
 #include <QCommandLineParser>
 #include <QDirIterator>
 #include <QFontDatabase>
@@ -16,6 +19,9 @@
 #include <QTimer>
 
 #include "contexto.h"
+#include "datos.h"
+
+#include <QStandardPaths>
 
 static void cargarFuentes() {
     QDirIterator it(QStringLiteral(":/recursos/fuentes"), {QStringLiteral("*.ttf"), QStringLiteral("*.woff2"), QStringLiteral("*.woff")});
@@ -37,7 +43,11 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oTema(QStringLiteral("tema"), QStringLiteral("Tema"), QStringLiteral("tema"));
     QCommandLineOption oFisica(QStringLiteral("fisica"), QStringLiteral("Pantalla real de pie, interfaz girada"));
     QCommandLineOption oCaptura(QStringLiteral("captura"), QStringLiteral("Guardar captura y salir"), QStringLiteral("archivo"));
-    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura});
+    QCommandLineOption oDatos(QStringLiteral("datos"), QStringLiteral("Carpeta de la base"), QStringLiteral("carpeta"));
+    QCommandLineOption oMuestra(QStringLiteral("muestra"), QStringLiteral("Carreras de ejemplo"));
+    QCommandLineOption oPrueba(QStringLiteral("prueba"), QStringLiteral("Abrir algo al empezar (capturas)"), QStringLiteral("que"));
+    QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
+    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba});
     op.process(app);
 
     cargarFuentes();
@@ -47,9 +57,21 @@ int main(int argc, char* argv[]) {
     if (op.isSet(oTema)) contexto.setTema(op.value(oTema));
     contexto.setFisica(op.isSet(oFisica));
     contexto.setPantallaInicial(op.value(oPantalla));
+    contexto.setPrueba(op.value(oPrueba));
+
+    QString carpeta = op.value(oDatos);
+    if (carpeta.isEmpty()) carpeta = qEnvironmentVariable("BETO_DATOS");
+    if (carpeta.isEmpty()) carpeta = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    Datos datos(carpeta);
+    if (op.isSet(oMuestra)) datos.cargarMuestra();
+    if (op.isSet(oCarrera)) {
+        for (const auto& c : datos.base().carreras)
+            if (QString::fromStdString(c.nombre) == op.value(oCarrera)) contexto.setIdInicial(QString::fromStdString(c.id));
+    }
 
     QQmlApplicationEngine motor;
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
+    motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");
