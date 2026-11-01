@@ -162,7 +162,10 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
   - `app/nucleo/neo.*`: lee UBX NAV-PVT y NMEA (GGA + GST + RMC), arma los mismos mensajes y la configuración del módulo (115200, 10 Hz, automotor, solo NAV-PVT, guardar).
   - `simulador/simular_neo`: crea un puerto virtual y manda lecturas a 10 Hz como si el auto diera vueltas (`--nmea`, `--mala`, `--corte`). Se usa con `betometro --gps /tmp/betometro-gps`.
   - `GpsNeo` (`app/gps.*`) es el mismo lector que usará el UART real: ya hace **G2** (hora de cada lectura según el GPS) y **G6** (solo posición 3D buena). G4 y G5 cambian el motor: van en E4 con su prueba y su opción en Ajustes.
-  - Probado de punta a punta: chequeo con satélites, 10 Hz y hora del GPS; carrera con UBX y con NMEA. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+  - Probado de punta a punta: chequeo con satélites, 10 Hz y hora del GPS; carrera con UBX y con NMEA.
+- **Editor de la pantalla de carrera** (01/11/2026): el tablero de widgets es uno solo (`widgets/Tablero.qml`) para la carrera y el editor. Tocar elige (borde amarillo y asa), mantener apretado 350 ms y arrastrar mueve con imán a 8 px y líneas fucsia, el asa cambia el tamaño (mínimos 60×44 y 70 de diámetro). ✎: redondo/cuadrado, dato extra, barra ±, quitar (MARCAR no se quita). + Widget, De fábrica (doble toque, solo la orientación elegida), Guardar. Los armados van en `widgetsH` y `widgets`, en fracciones como la app.
+  - Diferencia con la app: los cambios se guardan con **Guardar** (como la muestra), no al instante. Volver sin guardar los descarta.
+  - Nuevo widget «Adelantado / atrasado» (número). Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

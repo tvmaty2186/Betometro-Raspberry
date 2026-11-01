@@ -1,7 +1,7 @@
 if(QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
 endif()
-set_source_files_properties(Tema.qml Navegacion.qml Formato.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(Tema.qml Navegacion.qml Formato.qml Armado.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_library(betometro_qml STATIC)
 qt_add_qml_module(betometro_qml
@@ -12,6 +12,7 @@ qt_add_qml_module(betometro_qml
     Tema.qml
     Navegacion.qml
     Formato.qml
+    Armado.qml
     componentes/Aviso.qml
     componentes/Banda.qml
     componentes/BandaSeccion.qml
@@ -53,6 +54,7 @@ qt_add_qml_module(betometro_qml
     pantallas/Chequeo.qml
     pantallas/Compartir.qml
     pantallas/Conectividad.qml
+    pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml
     pantallas/Informe.qml
@@ -63,7 +65,9 @@ qt_add_qml_module(betometro_qml
     widgets/Caja.qml
     widgets/Etiq.qml
     widgets/Numero.qml
+    widgets/Tablero.qml
     widgets/WCuenta.qml
+    widgets/WDelta.qml
     widgets/WMarcar.qml
     widgets/WNumero.qml
     widgets/WTipo.qml

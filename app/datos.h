@@ -46,7 +46,7 @@ public:
     // Configuración (cfg = fábrica + lo guardado)
     Q_INVOKABLE QVariant cfg(const QString& clave) const;
     QVariantMap ajustes() const;
-    Q_INVOKABLE void ponerCfg(const QString& clave, const QVariant& valor);
+    Q_INVOKABLE void ponerCfg(const QString& clave, const QVariant& valor);   // también listas y objetos (armados de widgets)
 
     // Carga carreras de ejemplo (para capturas y pruebas)
     void cargarMuestra();

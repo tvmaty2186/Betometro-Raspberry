@@ -25,6 +25,8 @@ cap chequeo chequeo
 cap informe informe --carrera "Santa Clara"
 cap compartir compartir --carrera "Santa Clara"
 cap actualizar actualizar
+cap editor editor
+cap editor-elegido editor --prueba elegir
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
 cap carrera-sin-gps carrera --carrera "Gualeguaychú" --prueba largar --sin-gps

@@ -68,6 +68,14 @@ int main(int argc, char** argv) {
         CHEQUEAR(d.carrera(idHoy)["ideal"] == "1:30,0");
         CHEQUEAR(d.carrera(idHoy)["velocidad"] == "120,0");
 
+        // Armado de widgets: una lista de objetos se guarda y vuelve igual
+        QVariantList armado{QVariantMap{{"t", "marcar"}, {"x", 0.5}, {"y", 0.6}, {"w", 0.4}, {"h", 0.3}},
+                            QVariantMap{{"t", "velocimetro"}, {"forma", "redondo"}, {"x", 0.1}, {"y", 0.1}, {"w", 0.3}, {"h", 0.2}}};
+        d.ponerCfg("widgetsH", armado);
+        const QVariantList vuelta = d.ajustes()["widgetsH"].toList();
+        CHEQUEAR(vuelta.size() == 2);
+        CHEQUEAR(vuelta[1].toMap()["forma"] == "redondo" && vuelta[0].toMap()["x"].toDouble() == 0.5);
+
         CHEQUEAR(d.borrarCarrera(idPasada));
         CHEQUEAR(d.corridas().isEmpty());
     }
@@ -76,6 +84,7 @@ int main(int argc, char** argv) {
         Datos d(dir.path());
         CHEQUEAR(d.proximas().size() == 2);
         CHEQUEAR(d.cfg("tiempoIdealMs").toDouble() == 150000);
+        CHEQUEAR(d.ajustes()["widgetsH"].toList().size() == 2);
     }
     {
         // Muestra: Santa Clara corrida, con error total 9,6 s y finalizada

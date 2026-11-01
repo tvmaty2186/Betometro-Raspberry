@@ -38,6 +38,7 @@ Window {
                 case "informe": return "pantallas/Informe.qml";
                 case "compartir": return "pantallas/Compartir.qml";
                 case "actualizar": return "pantallas/Actualizar.qml";
+                case "editor": return "pantallas/Editor.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
             }

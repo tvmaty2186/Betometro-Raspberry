@@ -10,28 +10,11 @@ Item {
     readonly property var info: Crono.info
     focus: true
 
-    // Armados de fábrica, medidos en las muestras aprobadas (px de 1280×720 y 720×1280)
-    readonly property var fabricaH: [
-        { t: "cuenta", x: 24, y: 56, w: 1232, h: 320, extra: true, barra: true },
-        { t: "tipo", x: 50, y: 90, w: 210, h: 210 },
-        { t: "necesaria", x: 1010, y: 96, w: 220, h: 200 },
-        { t: "velocimetro", x: 24, y: 400, w: 330, h: 300, barra: true },
-        { t: "ultima", x: 378, y: 400, w: 270, h: 300 },
-        { t: "marcar", x: 672, y: 400, w: 584, h: 300 }
-    ]
-    readonly property var fabricaV: [
-        { t: "velocimetro", forma: "redondo", x: 150, y: 72, w: 420, h: 420 },
-        { t: "tipo", x: 20, y: 410, w: 190, h: 190 },
-        { t: "necesaria", x: 500, y: 430, w: 200, h: 160 },
-        { t: "cuenta", x: 20, y: 620, w: 680, h: 270, extra: true, barra: true },
-        { t: "ultima", x: 20, y: 910, w: 680, h: 96 },
-        { t: "marcar", x: 20, y: 1026, w: 680, h: 234 }
-    ]
-    readonly property var armado: h ? fabricaH : fabricaV
+    readonly property var armado: Armado.cargar(h, Datos.ajustes)
 
     function marcar(fuente) {
         const r = Crono.marcar(fuente);
-        if (r === "largada" || r === "marca") boton.efecto();
+        if (r === "largada" || r === "marca") tablero.efectoMarcar();
     }
     function volver() {
         if (Crono.enCurso) { Navegacion.avisar("Para salir, terminá la carrera"); return; }
@@ -111,56 +94,13 @@ Item {
         }
     }
 
-    // Tablero: los más grandes primero, así los chicos quedan adelante
-    Repeater {
-        model: raiz.armado.slice().sort((a, b) => b.w * b.h - a.w * a.h)
-        Loader {
-            required property var modelData
-            x: modelData.x; y: modelData.y; width: modelData.w; height: modelData.h
-            sourceComponent: {
-                switch (modelData.t) {
-                case "cuenta": return cCuenta;
-                case "tipo": return cTipo;
-                case "necesaria": return cNecesaria;
-                case "velocimetro": return modelData.forma === "redondo" ? cVelocimetro : cVelocidad;
-                case "ultima": return cUltima;
-                case "marcar": return cMarcar;
-                case "faltan": return cFaltan;
-                case "transcurrido": return cTranscurrido;
-                case "ideal": return cIdeal;
-                case "proxima": return cProxima;
-                }
-                return null;
-            }
-            property var def: modelData
-        }
+    // Tablero de widgets (el mismo que usa el editor)
+    Tablero {
+        id: tablero
+        anchors.fill: parent
+        armado: raiz.armado
+        est: raiz.est
+        velActiva: Datos.ajustes.velActiva !== false
+        onMarcar: Crono.marcar("pantalla")
     }
-
-    Component { id: cCuenta; WCuenta { est: raiz.est; extra: parent.def.extra !== false; barra: parent.def.barra !== false } }
-    Component { id: cTipo; WTipo { est: raiz.est } }
-    Component {
-        id: cNecesaria
-        WNumero {
-            etiqueta: "Sugerida"
-            numero: raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
-            extra: parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
-        }
-    }
-    Component { id: cVelocidad; WVelocidad { est: raiz.est; barra: parent.def.barra !== false; extra: !!parent.def.extra } }
-    Component { id: cVelocimetro; WVelocimetro { est: raiz.est } }
-    Component {
-        id: cUltima
-        WNumero {
-            etiqueta: fila ? "Última vuelta" + (Crono.ultima.n ? " · V" + Crono.ultima.n : "")
-                           : "Última vuelta" + (Crono.ultima.n ? "\nV" + Crono.ultima.n : "")
-            numero: Crono.ultima.realMs ? Formato.reloj(Crono.ultima.realMs, false) : "–"
-            extra: parent.def.extra && Crono.ultima.realMs ? Formato.dif(Crono.ultima.difMs) + " del ideal" : ""
-        }
-    }
-    Component { id: cMarcar; WMarcar { id: wm; est: raiz.est; onMarcar: Crono.marcar("pantalla"); Component.onCompleted: boton.w = wm } }
-    Component { id: cFaltan; WNumero { etiqueta: "Faltan"; numero: Formato.miles(Math.max(0, raiz.est.restanteM || 0)) + " m"; extra: "de " + Formato.miles(raiz.est.distanciaM || 0) + " m" } }
-    Component { id: cTranscurrido; WNumero { etiqueta: "Transcurrido"; numero: Formato.reloj(raiz.est.transMs || 0, false) } }
-    Component { id: cIdeal; WNumero { etiqueta: "Ideal"; numero: Formato.reloj(raiz.est.tiempoIdealMs || 0, false) } }
-    Component { id: cProxima; WNumero { etiqueta: "Próxima vuelta"; numero: raiz.est.proxMedida ? "MEDIDA" : "PRÁCTICA" } }
-    QtObject { id: boton; property var w: null; function efecto() { if (w) w.efecto(); } }
 }

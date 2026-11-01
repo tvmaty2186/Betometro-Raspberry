@@ -293,6 +293,8 @@ static QVariant aVariant(const Json& j) {
         case Json::Tipo::Bool: return j.aBool();
         case Json::Tipo::Numero: return j.aNumero();
         case Json::Tipo::Texto: return q(j.aTexto());
+        case Json::Tipo::Lista:
+        case Json::Tipo::Objeto: return QJsonDocument::fromJson(QByteArray::fromStdString(j.escribir())).toVariant();
         default: return {};
     }
 }
@@ -310,7 +312,15 @@ void Datos::ponerCfg(const QString& clave, const QVariant& valor) {
     switch (valor.typeId()) {
         case QMetaType::Bool: v = valor.toBool(); break;
         case QMetaType::Int: case QMetaType::LongLong: case QMetaType::Double: v = valor.toDouble(); break;
-        default: v = s(valor.toString());
+        case QMetaType::QVariantList: case QMetaType::QVariantMap: case QMetaType::QJsonArray: case QMetaType::QJsonValue:
+            v = Json::leer(QJsonDocument::fromVariant(valor).toJson(QJsonDocument::Compact).toStdString());
+            break;
+        default:
+            if (valor.canConvert<QVariantList>() && !valor.canConvert<QString>()) {
+                v = Json::leer(QJsonDocument::fromVariant(valor.toList()).toJson(QJsonDocument::Compact).toStdString());
+            } else {
+                v = s(valor.toString());
+            }
     }
     base_.config[s(clave)] = v;
     cfg_ = armarConfig(base_.config);
