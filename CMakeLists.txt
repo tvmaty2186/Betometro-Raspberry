@@ -20,6 +20,25 @@ target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
 # Mismos resultados que JavaScript: nada de cuentas «rápidas» ni fusionadas por el compilador
 target_compile_options(nucleo PUBLIC -fno-fast-math -ffp-contract=off)
 
+# Programa (Qt 6). Si no hay Qt, se compila solo el núcleo y sus pruebas.
+option(BETO_PROGRAMA "Compilar el programa con pantalla (necesita Qt 6)" ON)
+if(BETO_PROGRAMA)
+  find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg)
+  if(Qt6_FOUND)
+    qt_standard_project_setup(REQUIRES 6.5)
+    qt_add_executable(betometro app/main.cpp app/contexto.h)
+    target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
+    add_subdirectory(app/qml)
+    target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg betometro_qmlplugin)
+    file(GLOB BETO_FUENTES RELATIVE ${CMAKE_SOURCE_DIR} recursos/fuentes/*)
+    qt_add_resources(betometro recursos
+      PREFIX "/"
+      FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg)
+  else()
+    message(STATUS "Sin Qt 6: no se compila el programa, solo el núcleo")
+  endif()
+endif()
+
 option(BETO_PRUEBAS "Compilar las pruebas" ON)
 if(BETO_PRUEBAS)
   enable_testing()

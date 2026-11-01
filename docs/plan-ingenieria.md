@@ -136,6 +136,10 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - Capturas automáticas de cada pantalla, en las 2 orientaciones y los 4 temas, comparadas a ojo con las muestras.
 - Carrera completa simulada de punta a punta: largar, vueltas, marcas, terminar, informe, exportar.
 
+**Avance (01/11/2026):** base del programa (Qt 6.8, QML), tema Avispón, navegación, giro para la pantalla real y la pantalla de **Inicio** en las dos orientaciones (95 % de los píxeles iguales a la muestra). Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+- Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
+- El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
+
 **Aceptación:** Matías aprueba las capturas (incluidos los 3 temas que todavía no vio). La carrera simulada da los mismos tiempos que el motor de E1.
 
 **Entrega:** programa que corre en PC + capturas.

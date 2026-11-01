@@ -38,3 +38,23 @@ jobs:
           cmake --build build -j
       - name: Pruebas
         run: ctest --test-dir build --output-on-failure
+
+  programa:
+    name: Programa Qt y capturas
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.8.3
+          cache: true
+      - name: Compilar
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBETO_PRUEBAS=OFF
+          cmake --build build -j
+      - name: Capturas
+        run: herramientas/capturas.sh build/betometro capturas inicio
+      - uses: actions/upload-artifact@v4
+        with:
+          name: capturas
+          path: capturas
