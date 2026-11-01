@@ -16,7 +16,7 @@ Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respald
 ## Programar (después de aprobar las verticales)
 - Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.
 - Motor en C++, comparado con el `Motor` de la app.
-- Pantallas en Qt/QML.
+- Pantallas en Qt/QML, con los 4 temas de la app. Mostrarle a Matías capturas de cada tema (Rally clásico, Deportivo moderno, Cabina de avión) antes de cerrar.
 - GPS por UART, pulsador por GPIO, voz con Piper pregrabada por la salida de auriculares, volumen en Ajustes.
 
 ## Compras que faltan

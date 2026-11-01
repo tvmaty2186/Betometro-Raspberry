@@ -75,6 +75,8 @@ GitHub Actions arma la imagen completa (`.img`). La primera vez se graba en la t
 Imágenes: [muestras-horizontal-1.png](muestras-horizontal-1.png), [-2](muestras-horizontal-2.png), [-3](muestras-horizontal-3.png).
 Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizontal.html) (usa las fuentes y las imágenes de `recursos/`). Para regenerar, se abre con Playwright a 1280×720 y se saca captura de cada `#s1`…`#s12`.
 
+**Temas:** los 4 de la app, con sus mismos colores, fuentes y estilos: Avispón Verde (de fábrica), Rally clásico (menús tipo «carnet» de papel), Deportivo moderno y Cabina de avión. Las variables de cada tema están en [app/diseno.md](app/diseno.md) y en `referencia/app-2.1.1/index.html` (bloques `:root[data-tema="…"]`). Las muestras se hicieron solo en Avispón; los otros 3 se muestran con capturas del programa real en la etapa 2.
+
 **Regla de estética:** los temas, colores, tipografías y componentes son **iguales a la app** en todo lo posible (ver [app/diseno.md](app/diseno.md), copia de la guía de la app).
 
 | # | Pantalla | Qué tiene |
