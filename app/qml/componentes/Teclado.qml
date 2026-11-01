@@ -81,44 +81,13 @@ Rectangle {
         }
 
         // Letras o números
-        Column {
+        Teclas {
             visible: raiz.modo !== "fecha"
             anchors { left: parent.left; right: parent.right; top: visor.bottom; bottom: parent.bottom; margins: 20 }
-            spacing: 10
-            Repeater {
-                model: raiz.modo === "texto" ? raiz.filasTexto : raiz.filasNumero
-                Row {
-                    id: filaT
-                    required property string modelData
-                    readonly property var teclas: modelData.indexOf(" ") >= 0 ? modelData.split(" ") : Array.from(modelData)
-                    readonly property real unidad: (parent.width - (teclas.length - 1) * 10) / (teclas.length + (modelData.indexOf("espacio") >= 0 ? 4 : 0))
-                    width: parent.width
-                    height: (parent.height - 30) / 4
-                    spacing: 10
-                    Repeater {
-                        model: filaT.teclas
-                        Rectangle {
-                            required property string modelData
-                            readonly property bool especial: modelData === "✓"
-                            width: modelData === "espacio" ? filaT.unidad * 5 : filaT.unidad
-                            height: filaT.height
-                            radius: 12
-                            gradient: Gradient {
-                                GradientStop { position: 0; color: especial ? Tema.amarilloClaro : (zona.pressed ? "#4a6a55" : "#2c4434") }
-                                GradientStop { position: 1; color: especial ? Tema.amarillo2 : "#0d1d13" }
-                            }
-                            border { width: 2; color: "#8c949b" }
-                            Text {
-                                anchors.centerIn: parent
-                                text: modelData === "espacio" ? "espacio" : (raiz.mayuscula && modelData.length === 1 ? modelData.toUpperCase() : modelData)
-                                color: especial ? Tema.negro : Tema.blanco
-                                font { family: Tema.fuente600; weight: Font.DemiBold; pixelSize: raiz.modo === "texto" ? 24 : 34 }
-                            }
-                            MouseArea { id: zona; anchors.fill: parent; onClicked: raiz.tecla(modelData) }
-                        }
-                    }
-                }
-            }
+            filas: raiz.modo === "texto" ? raiz.filasTexto : raiz.filasNumero
+            mayuscula: raiz.mayuscula
+            grande: raiz.modo !== "texto"
+            onTecla: k => raiz.tecla(k)
         }
 
         // Fecha: día, mes, año

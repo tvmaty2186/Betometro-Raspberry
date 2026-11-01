@@ -18,6 +18,9 @@ cap carreras carreras
 cap ficha ficha --carrera "Gualeguaychú"
 cap ficha-corrida ficha --carrera "Santa Clara"
 cap practica practica
+cap ajustes ajustes
+cap conectividad conectividad
+cap wifi wifi --prueba red-vecino
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
 cap carrera-sin-gps carrera --carrera "Gualeguaychú" --prueba largar --sin-gps

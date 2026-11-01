@@ -144,7 +144,11 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Pantalla de carrera** (01/11/2026): motor de E1 conectado (`app/crono.*`), armados de fábrica de las muestras (horizontal y vertical), widgets cuenta, tipo, sugerida, velocidad digital y analógica, última vuelta, MARCAR (al apoyar el dedo, con efecto) y los demás tipos. Teclado USB (Enter, espacio, F9). Terminar con doble toque guarda la vuelta interrumpida. Carrera completa termina sola. Sin GPS anda como cronómetro. Prueba `prueba_crono` (29 chequeos).
   - GPS simulado interno a 10 Hz para la PC (`app/gps.*`). El simulador de los mensajes del NEO-M8N por terminal virtual va en la parte del GPS.
   - Indicador de vuelta como la app (fábrica «fondo»: toda la pantalla roja en medida y verde en práctica). Las muestras no lo mostraban; **Matías eligió «como la app»** (01/11/2026).
-  - Falta: editor de pantalla (mover y cambiar widgets), voz y modo sol. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+  - Falta: editor de pantalla (mover y cambiar widgets), voz y modo sol.
+- **Ajustes, Conectividad y clave del wifi** (01/11/2026): Ajustes con Mi auto (número y nombre), Tema y pantalla (tema, orientación, modo sol, brillo, tipo de vuelta), Voz y sonido, Velocidad y marcas, Conexión y sistema (conectividad, versión, apagar con doble toque). Todo se guarda al instante. Conectividad igual a la muestra, con **QR real** (qrcodegen, MIT, en `app/terceros/`). Clave con teclado siempre a la vista.
+  - En la PC el wifi es simulado (`app/wifi.*`); el real con `wpa_supplicant` va en E5.
+  - Brillo y volumen con barra amarilla (en la muestra eran la barra de colores de adelanto).
+  - Nuevos en la configuración: `nombreAuto`, `informesRed`, `wifiPropia`. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

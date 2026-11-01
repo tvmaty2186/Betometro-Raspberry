@@ -261,6 +261,12 @@ static QVariant aVariant(const Json& j) {
 
 QVariant Datos::cfg(const QString& clave) const { return aVariant(cfg_[s(clave)]); }
 
+QVariantMap Datos::ajustes() const {
+    QVariantMap m;
+    for (const auto& p : cfg_.pares()) m[q(p.first)] = aVariant(p.second);
+    return m;
+}
+
 void Datos::ponerCfg(const QString& clave, const QVariant& valor) {
     Json v;
     switch (valor.typeId()) {

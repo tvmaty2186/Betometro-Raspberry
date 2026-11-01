@@ -22,6 +22,9 @@
 #include "crono.h"
 #include "datos.h"
 #include "gps.h"
+#include "qr.h"
+#include "sistema.h"
+#include "wifi.h"
 
 #include <QStandardPaths>
 
@@ -77,7 +80,16 @@ int main(int argc, char* argv[]) {
     GpsSimulado* simulado = op.isSet(oSinGps) ? nullptr : new GpsSimulado(&app);
     Crono crono(&datos, simulado ? static_cast<FuenteGps*>(simulado) : &sinGps);
 
+    Wifi wifi;
+    Sistema sistema;
+    if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
+    contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
+    if (op.isSet(oTema)) contexto.setTema(op.value(oTema));
+
     QQmlApplicationEngine motor;
+    motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
+    motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
+    motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
     motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);

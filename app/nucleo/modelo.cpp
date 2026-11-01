@@ -211,6 +211,7 @@ Json configFabrica() {
     c["calibrar"] = true;
     c["tema"] = "avispon";
     c["numeroAuto"] = "101";
+    c["nombreAuto"] = "Avispón Verde";   // nuevo de la Raspberry: se ve en el inicio
     c["modoSol"] = "no";              // sin sensor de luz: «auto» no aplica
     c["indicador"] = "fondo";
     c["widgets"] = nullptr;           // armado vertical; null = de fábrica

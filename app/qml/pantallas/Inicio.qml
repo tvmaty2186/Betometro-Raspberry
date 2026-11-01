@@ -45,10 +45,10 @@ Item {
     }
 
     Banda { x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
-    Numero101 { x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Contexto.numeroAuto }
+    Numero101 { x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
     Text {
         x: raiz.h ? 190 : 28; y: raiz.h ? 600 : 556
-        text: Contexto.nombreAuto
+        text: Datos.ajustes.nombreAuto || ""
         color: Tema.blanco
         style: Text.Raised; styleColor: "#000"
         font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
@@ -60,7 +60,7 @@ Item {
         spacing: 8
         layoutDirection: raiz.h ? Qt.LeftToRight : Qt.RightToLeft
         Chip { texto: "GPS " + Contexto.satelites + " satélites" }
-        Chip { texto: Contexto.redWifi ? "Wifi: " + Contexto.redWifi : "Sin wifi" }
+        Chip { texto: Wifi.conectada ? "Wifi: " + Wifi.conectada : "Sin wifi" }
     }
 
     Velocimetro {

@@ -20,8 +20,10 @@ qt_add_qml_module(betometro_qml
     componentes/Cabecera.qml
     componentes/CabeceraPantalla.qml
     componentes/Campo.qml
+    componentes/Candado.qml
     componentes/Chip.qml
     componentes/ChipEstado.qml
+    componentes/Deslizador.qml
     componentes/Digito.qml
     componentes/Disco.qml
     componentes/DobleToque.qml
@@ -30,22 +32,29 @@ qt_add_qml_module(betometro_qml
     componentes/Fila.qml
     componentes/Fondo.qml
     componentes/FotoInicio.qml
+    componentes/Llave.qml
     componentes/Numero101.qml
     componentes/Rayas.qml
     componentes/Segmentado.qml
+    componentes/Senal.qml
     componentes/Sub.qml
     componentes/Swoosh.qml
     componentes/Tarjeta.qml
     componentes/Teclado.qml
+    componentes/Teclas.qml
     componentes/TextoCromo.qml
     componentes/TituloTarjeta.qml
     componentes/Velocimetro.qml
     componentes/Volver.qml
+    pantallas/Ajustes.qml
+    pantallas/Carrera.qml
     pantallas/Carreras.qml
+    pantallas/Conectividad.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml
     pantallas/Inicio.qml
     pantallas/Practica.qml
+    pantallas/WifiClave.qml
     widgets/Barra.qml
     widgets/Caja.qml
     widgets/Etiq.qml
@@ -56,7 +65,6 @@ qt_add_qml_module(betometro_qml
     widgets/WTipo.qml
     widgets/WVelocidad.qml
     widgets/WVelocimetro.qml
-    pantallas/Carrera.qml
   RESOURCES
     iconos/ajustes.svg
     iconos/carreras.svg

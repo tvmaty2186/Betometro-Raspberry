@@ -14,6 +14,7 @@ class Datos : public QObject {
     Q_PROPERTY(QVariantList proximas READ proximas NOTIFY carrerasChanged)
     Q_PROPERTY(QVariantList corridas READ corridas NOTIFY carrerasChanged)
     Q_PROPERTY(bool horaValida READ horaValida NOTIFY horaChanged)
+    Q_PROPERTY(QVariantMap ajustes READ ajustes NOTIFY cfgChanged)   // cfg completo, para enlazar en la pantalla
 
 public:
     explicit Datos(const QString& carpeta, QObject* padre = nullptr);
@@ -37,6 +38,7 @@ public:
 
     // Configuración (cfg = fábrica + lo guardado)
     Q_INVOKABLE QVariant cfg(const QString& clave) const;
+    QVariantMap ajustes() const;
     Q_INVOKABLE void ponerCfg(const QString& clave, const QVariant& valor);
 
     // Carga carreras de ejemplo (para capturas y pruebas)

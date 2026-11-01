@@ -31,6 +31,9 @@ Window {
                 case "ficha": return "pantallas/Ficha.qml";
                 case "practica": return "pantallas/Practica.qml";
                 case "carrera": return "pantallas/Carrera.qml";
+                case "ajustes": return "pantallas/Ajustes.qml";
+                case "conectividad": return "pantallas/Conectividad.qml";
+                case "wifi": return "pantallas/WifiClave.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
             }
