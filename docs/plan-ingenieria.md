@@ -148,7 +148,13 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Ajustes, Conectividad y clave del wifi** (01/11/2026): Ajustes con Mi auto (número y nombre), Tema y pantalla (tema, orientación, modo sol, brillo, tipo de vuelta), Voz y sonido, Velocidad y marcas, Conexión y sistema (conectividad, versión, apagar con doble toque). Todo se guarda al instante. Conectividad igual a la muestra, con **QR real** (qrcodegen, MIT, en `app/terceros/`). Clave con teclado siempre a la vista.
   - En la PC el wifi es simulado (`app/wifi.*`); el real con `wpa_supplicant` va en E5.
   - Brillo y volumen con barra amarilla (en la muestra eran la barra de colores de adelanto).
-  - Nuevos en la configuración: `nombreAuto`, `informesRed`, `wifiPropia`. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+  - Nuevos en la configuración: `nombreAuto`, `informesRed`, `wifiPropia`.
+- **Chequeo, Informe, Compartir y Actualizar** (01/11/2026):
+  - **Informe:** `armarRecorrido` y `datosInforme` pasados a C++ (`app/nucleo/informe.*`). Prueba `informe_igual_a_la_app`: 30 carreras con cortes de señal, saltos y mala precisión, 881.156 números, **diferencia cero**. Pantalla con mapa coloreado (velocidad, aceleración, adelanto), gráfico de velocidad con la sugerida y tabla de vueltas (tocar una la elige).
+  - **HTML del informe:** la plantilla de la app copiada a `recursos/informe-plantilla.html`, con la vuelta interrumpida (sin error, no suma). Se guarda en `datos/informes/` con el nombre de la app («🏁 nombre dd-mm-aaaa.html»).
+  - **Compartir:** QR a `http://betometro.local/informe/<id>` y los 3 pasos. La página que lo sirve va en E5.
+  - **Chequeo:** GPS (señal, precisión, lecturas por segundo, hora), prueba del pulsador (la próxima marca no larga), voz, wifi, lugar libre y TODO LISTO.
+  - **Actualizar:** pantalla de la muestra; en la PC la descarga es simulada (la real con RAUC va en E5). Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

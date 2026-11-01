@@ -46,12 +46,16 @@ qt_add_qml_module(betometro_qml
     componentes/TituloTarjeta.qml
     componentes/Velocimetro.qml
     componentes/Volver.qml
+    pantallas/Actualizar.qml
     pantallas/Ajustes.qml
     pantallas/Carrera.qml
     pantallas/Carreras.qml
+    pantallas/Chequeo.qml
+    pantallas/Compartir.qml
     pantallas/Conectividad.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml
+    pantallas/Informe.qml
     pantallas/Inicio.qml
     pantallas/Practica.qml
     pantallas/WifiClave.qml

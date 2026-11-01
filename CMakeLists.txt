@@ -14,6 +14,7 @@ add_library(nucleo STATIC
   app/nucleo/motor.cpp
   app/nucleo/modelo.cpp
   app/nucleo/almacen.cpp
+  app/nucleo/informe.cpp
 )
 target_include_directories(nucleo PUBLIC app/nucleo)
 target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
@@ -34,7 +35,7 @@ if(BETO_PROGRAMA)
     file(GLOB BETO_FUENTES RELATIVE ${CMAKE_SOURCE_DIR} recursos/fuentes/*)
     qt_add_resources(betometro recursos
       PREFIX "/"
-      FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg)
+      FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg recursos/informe-plantilla.html)
   else()
     message(STATUS "Sin Qt 6: no se compila el programa, solo el núcleo")
   endif()
@@ -47,16 +48,21 @@ if(BETO_PRUEBAS)
   add_executable(correr_motor pruebas/motor/correr_motor.cpp)
   target_link_libraries(correr_motor PRIVATE nucleo)
 
+  add_executable(correr_informe pruebas/informe/correr_informe.cpp)
+  target_link_libraries(correr_informe PRIVATE nucleo)
+
   add_executable(prueba_nucleo pruebas/nucleo/prueba_nucleo.cpp)
   target_link_libraries(prueba_nucleo PRIVATE nucleo)
   add_test(NAME nucleo COMMAND prueba_nucleo)
 
   if(TARGET betometro)
     add_executable(prueba_datos pruebas/programa/prueba_datos.cpp app/datos.cpp app/datos.h)
+    qt_add_resources(prueba_datos plantilla PREFIX "/" FILES recursos/informe-plantilla.html)
     target_include_directories(prueba_datos PRIVATE app)
     target_link_libraries(prueba_datos PRIVATE nucleo Qt6::Core)
     add_test(NAME datos COMMAND prueba_datos)
     add_executable(prueba_crono pruebas/programa/prueba_crono.cpp app/datos.cpp app/datos.h app/crono.cpp app/crono.h app/gps.cpp app/gps.h)
+    qt_add_resources(prueba_crono plantilla PREFIX "/" FILES recursos/informe-plantilla.html)
     target_include_directories(prueba_crono PRIVATE app)
     target_link_libraries(prueba_crono PRIVATE nucleo Qt6::Core)
     add_test(NAME crono COMMAND prueba_crono)
@@ -66,6 +72,8 @@ if(BETO_PRUEBAS)
   if(NODE)
     add_test(NAME motor_igual_a_la_app
              COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/pruebas/motor/comparar.js $<TARGET_FILE:correr_motor> ${CMAKE_BINARY_DIR})
+    add_test(NAME informe_igual_a_la_app
+             COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/pruebas/informe/comparar.js $<TARGET_FILE:correr_informe>)
   else()
     message(WARNING "Sin Node: no se compara el motor con el de la app")
   endif()

@@ -34,6 +34,10 @@ Window {
                 case "ajustes": return "pantallas/Ajustes.qml";
                 case "conectividad": return "pantallas/Conectividad.qml";
                 case "wifi": return "pantallas/WifiClave.qml";
+                case "chequeo": return "pantallas/Chequeo.qml";
+                case "informe": return "pantallas/Informe.qml";
+                case "compartir": return "pantallas/Compartir.qml";
+                case "actualizar": return "pantallas/Actualizar.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
             }

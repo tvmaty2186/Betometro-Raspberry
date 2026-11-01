@@ -1,6 +1,11 @@
 #include "datos.h"
 
 #include <QDateTime>
+#include <QFile>
+#include <QJsonDocument>
+#include <QStorageInfo>
+
+#include "informe.h"
 #include <QDir>
 #include <QLocale>
 #include <QRandomGenerator>
@@ -34,7 +39,7 @@ static QString tiempo(int64_t ms) {
 }
 static QString miles(int64_t n) { return QLocale(QLocale::Spanish, QLocale::Argentina).toString(static_cast<qlonglong>(n)); }
 
-Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), almacen_(s(carpeta)) {
+Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(carpeta), almacen_(s(carpeta)) {
     QDir().mkpath(carpeta);
     auto l = almacen_.cargar();
     base_ = std::move(l.base);
@@ -209,6 +214,39 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
     return r;
 }
 
+QVariantMap Datos::informe(const QString& id) const {
+    const Carrera* c = buscar(id);
+    if (!c) return {};
+    const std::string j = datosInforme(*c, cfg_["umbralPrecisionM"].aNumero(20)).escribir();
+    return QJsonDocument::fromJson(QByteArray::fromStdString(j)).toVariant().toMap();
+}
+
+QString Datos::nombreInforme(const QString& id) const {
+    const Carrera* c = buscar(id);
+    return c ? q(beto::nombreInforme(*c)) : QString();
+}
+
+QString Datos::guardarInformeHtml(const QString& id) const {
+    const Carrera* c = buscar(id);
+    if (!c) return {};
+    QFile p(QStringLiteral(":/recursos/informe-plantilla.html"));
+    if (!p.open(QIODevice::ReadOnly)) return {};
+    const std::string html = informeHtml(*c, cfg_["umbralPrecisionM"].aNumero(20), p.readAll().toStdString());
+    QDir().mkpath(carpeta_ + "/informes");
+    const QString ruta = carpeta_ + "/informes/" + q(beto::nombreInforme(*c));
+    QFile f(ruta);
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) return {};
+    f.write(QByteArray::fromStdString(html));
+    return ruta;
+}
+
+QString Datos::lugarLibre() const {
+    const QStorageInfo info(carpeta_);
+    const double gb = static_cast<double>(info.bytesAvailable()) / (1024.0 * 1024 * 1024);
+    if (gb >= 1) return QString::number(gb, 'f', 1).replace('.', ',') + " GB";
+    return QString::number(static_cast<int>(gb * 1024)) + " MB";
+}
+
 const Carrera* Datos::buscar(const QString& id) const {
     for (const auto& c : base_.carreras) if (q(c.id) == id) return &c;
     return nullptr;
@@ -299,6 +337,23 @@ void Datos::cargarMuestra() {
         for (int e : errores) {
             Vuelta v;
             v.n = n; v.medida = esMedida(c.patron, n); v.idealMs = T; v.realMs = T + e; v.difMs = e;
+            // recorrido de ejemplo: un circuito con curvas, a 1 lectura por segundo
+            const double L = static_cast<double>(D), seg = (T + e) / 1000.0;
+            double d = 0, vmax = 0;
+            for (int t = 0; t <= static_cast<int>(seg); ++t) {
+                const double fr = d / L, a = 2 * M_PI * fr;
+                const double kmh = L / seg * 3.6 * (1 + 0.28 * std::sin(a * 3 + n) - 0.1 * std::cos(a * 5));
+                const double R = L / (2 * M_PI), x = R * 1.5 * std::cos(a) + R * 0.25 * std::cos(3 * a), y = R * 0.8 * std::sin(a) + R * 0.15 * std::sin(2 * a);
+                FilaTraza p{static_cast<double>(t), redondearJs(d * 10) / 10, fijarDecimalesJs(kmh, 1),
+                            fijarDecimalesJs(-32.97 + y / 110540, 6), fijarDecimalesJs(-60.65 + x / (111320 * std::cos(32.97 * M_PI / 180)), 6),
+                            static_cast<double>(2 + (t * 7 + n) % 4)};
+                v.traza.push_back(p);
+                vmax = std::max(vmax, kmh);
+                d += kmh / 3.6;
+            }
+            v.distM = redondearJs(d);
+            v.velPromKmh = fijarDecimalesJs(d / seg * 3.6, 1);
+            v.velMaxKmh = fijarDecimalesJs(vmax, 1);
             c.vueltas.push_back(v);
             ++n;
         }

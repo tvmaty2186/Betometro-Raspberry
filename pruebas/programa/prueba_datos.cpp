@@ -1,6 +1,7 @@
 // Pruebas de las reglas de Carreras (Datos): orden, cuándo se larga, validaciones, borrar y guardado.
 #include <QCoreApplication>
 #include <QDate>
+#include <QFile>
 #include <QTemporaryDir>
 #include <iostream>
 
@@ -93,6 +94,23 @@ int main(int argc, char** argv) {
             }
         }
         CHEQUEAR(hay);
+        // Informe: datos con recorrido y HTML completo con la plantilla
+        for (const auto& v : d.corridas()) {
+            auto m = v.toMap();
+            if (m["nombre"] != "Santa Clara") continue;
+            const QString id = m["id"].toString();
+            const QVariantMap inf = d.informe(id);
+            CHEQUEAR(!inf["pista"].toList().isEmpty());
+            CHEQUEAR(inf["vueltas"].toList().size() == 6);
+            CHEQUEAR(d.nombreInforme(id).endsWith(".html") && d.nombreInforme(id).contains("Santa Clara"));
+            const QString ruta = d.guardarInformeHtml(id);
+            QFile f(ruta);
+            CHEQUEAR(f.open(QIODevice::ReadOnly));
+            const QByteArray html = f.readAll();
+            CHEQUEAR(html.contains("const C={\"nombre\":\"Santa Clara\""));
+            CHEQUEAR(!html.contains("__DATOS__") && !html.contains("__NOMBRE__"));
+            CHEQUEAR(html.contains("interrumpida"));   // la plantilla de la Raspberry
+        }
     }
     std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
     return fallas ? 1 : 0;

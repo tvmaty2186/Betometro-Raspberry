@@ -36,6 +36,13 @@ public:
     const beto::Carrera* buscar(const QString& id) const;
     const beto::Json& config() const { return cfg_; }
 
+    // Informe (sección 9 de la app): datos para dibujar, HTML para compartir y su nombre
+    Q_INVOKABLE QVariantMap informe(const QString& id) const;
+    Q_INVOKABLE QString nombreInforme(const QString& id) const;
+    Q_INVOKABLE QString guardarInformeHtml(const QString& id) const;   // devuelve la ruta del archivo
+    // Lugar libre en la partición de datos, en texto («11,2 GB»)
+    Q_INVOKABLE QString lugarLibre() const;
+
     // Configuración (cfg = fábrica + lo guardado)
     Q_INVOKABLE QVariant cfg(const QString& clave) const;
     QVariantMap ajustes() const;
@@ -58,6 +65,7 @@ private:
     QDate hoy() const { return QDate::currentDate(); }
     void guardar();
 
+    QString carpeta_;
     beto::Almacen almacen_;
     beto::Base base_;
     beto::Json cfg_;
