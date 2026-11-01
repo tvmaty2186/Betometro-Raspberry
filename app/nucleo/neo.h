@@ -37,6 +37,15 @@ struct VersionNeo {
     bool pareceOriginal() const { return esM8() && conFlash() && modelo().rfind("NEO-M8N", 0) == 0; }
 };
 
+// Familias de módulos u-blox que se consiguen (todas con UART a 9600 y NMEA de fábrica):
+// - M8  (NEO-M8N): GPS + GLONASS a 5 Hz, o un solo sistema a 10 Hz. NAV-PVT de 92 bytes.
+// - U7  (NEO-7M):  un solo sistema a la vez; GPS a 10 Hz. NAV-PVT de 84 bytes (los mismos campos que usamos).
+// - U6  (NEO-6M):  solo GPS, hasta 5 Hz. No tiene NAV-PVT: se usa NMEA (GGA + GST + RMC).
+enum class FamiliaNeo { Desconocida, M8, U7, U6 };
+FamiliaNeo familiaDe(const VersionNeo& v);          // por el hardware que informa MON-VER
+FamiliaNeo familiaDeTexto(const std::string& t);    // «m8», «7», «6»; cualquier otra cosa: Desconocida (= automático)
+const char* nombreFamilia(FamiliaNeo f);            // «NEO-M8N», «NEO-7M», «NEO-6M»
+
 class DecodificadorNeo {
 public:
     // Se le pasan los bytes como llegan del puerto; devuelve las lecturas completas
@@ -70,8 +79,8 @@ std::vector<uint8_t> armarMonVer(const VersionNeo& v);   // respuesta del simula
 // - Modelo «automotor», solo NAV-PVT en cada lectura, NMEA apagado y se guarda en el módulo.
 // El cambio de velocidad del puerto (9600 → 115200) va aparte: `cambioA115200()`.
 std::vector<uint8_t> cambioA115200();
-std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps = false);
-int hzDe(bool soloGps);
+std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps = false, FamiliaNeo familia = FamiliaNeo::M8);
+int hzDe(bool soloGps, FamiliaNeo familia = FamiliaNeo::M8);
 std::vector<uint8_t> pedirVersion();                       // UBX-MON-VER (pregunta)
 std::vector<std::vector<uint8_t>> volverANmea();           // si el módulo no manda NAV-PVT: GGA, GST y RMC
 

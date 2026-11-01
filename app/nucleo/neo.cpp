@@ -88,6 +88,29 @@ std::vector<LecturaGps> DecodificadorNeo::agregar(const uint8_t* datos, size_t n
     return out;
 }
 
+FamiliaNeo familiaDe(const VersionNeo& v) {
+    if (v.hardware == "00080000") return FamiliaNeo::M8;
+    if (v.hardware == "00070000") return FamiliaNeo::U7;
+    if (v.hardware.rfind("0004", 0) == 0) return FamiliaNeo::U6;
+    return FamiliaNeo::Desconocida;
+}
+
+FamiliaNeo familiaDeTexto(const std::string& t) {
+    if (t == "m8") return FamiliaNeo::M8;
+    if (t == "7") return FamiliaNeo::U7;
+    if (t == "6") return FamiliaNeo::U6;
+    return FamiliaNeo::Desconocida;
+}
+
+const char* nombreFamilia(FamiliaNeo f) {
+    switch (f) {
+        case FamiliaNeo::M8: return "NEO-M8N";
+        case FamiliaNeo::U7: return "NEO-7M";
+        case FamiliaNeo::U6: return "NEO-6M";
+        default: return "desconocido";
+    }
+}
+
 std::string VersionNeo::modelo() const {
     for (const auto& e : extensiones) if (e.rfind("MOD=", 0) == 0) return e.substr(4);
     return {};
@@ -117,7 +140,7 @@ void DecodificadorNeo::ubx(const std::vector<uint8_t>& m, std::vector<LecturaGps
         version_ = v;
         return;
     }
-    if (m[2] != 0x01 || m[3] != 0x07 || largo < 92) return;   // solo NAV-PVT
+    if (m[2] != 0x01 || m[3] != 0x07 || largo < 84) return;   // solo NAV-PVT (84 bytes en u-blox 7, 92 en M8)
     ++navPvt_;
     const uint8_t* p = &m[6];
     LecturaGps l;
@@ -231,7 +254,13 @@ std::vector<uint8_t> armarMonVer(const VersionNeo& v) {
 
 std::vector<uint8_t> pedirVersion() { return marco(0x0A, 0x04, {}); }
 
-int hzDe(bool soloGps) { return soloGps ? 10 : 5; }
+int hzDe(bool soloGps, FamiliaNeo familia) {
+    switch (familia) {
+        case FamiliaNeo::U7: return 10;   // un solo sistema (GPS): 10 Hz
+        case FamiliaNeo::U6: return 5;    // máximo del NEO-6M
+        default: return soloGps ? 10 : 5;
+    }
+}
 
 std::vector<uint8_t> cambioA115200() {
     // CFG-PRT: UART1 a 115200, 8N1, entra UBX+NMEA, sale solo UBX.
@@ -241,12 +270,14 @@ std::vector<uint8_t> cambioA115200() {
     pon4(prt, 4, 0x000008D0);
     pon4(prt, 8, 115200);
     pon2(prt, 12, 0x0003);
-    pon2(prt, 14, 0x0001);
+    pon2(prt, 14, 0x0003);   // sale UBX y NMEA (el NEO-6M usa NMEA); las frases que sobran se apagan con CFG-MSG
     return marco(0x06, 0x00, prt);
 }
 
-std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps) {
+std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps, FamiliaNeo familia) {
     std::vector<std::vector<uint8_t>> r;
+    if (familia == FamiliaNeo::U7) soloGps = true;   // u-blox 7: un sistema a la vez
+    const bool u6 = familia == FamiliaNeo::U6;
     // CFG-GNSS: GPS (+QZSS, siempre juntos, y SBAS) y GLONASS salvo «solo GPS». Galileo y BeiDou apagados.
     // Bloques: gnssId, canales reservados, máximo, reservado, flags (bit 0 = prender; bits 16-23 = señal L1)
     auto bloque = [](std::vector<uint8_t>& v, uint8_t id, uint8_t res, uint8_t max, bool prender) {
@@ -254,7 +285,7 @@ std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps) {
         const uint32_t f = (prender ? 0x01u : 0x00u) | (0x01u << 16);
         for (int k = 0; k < 4; ++k) v.push_back(static_cast<uint8_t>(f >> (8 * k)));
     };
-    std::vector<uint8_t> gnss = {0x00, 0x00, 0xFF, 0x00};
+    std::vector<uint8_t> gnss = {0x00, 0x00, 0xFF, 0x00};   // (el NEO-6M no tiene CFG-GNSS: no se manda)
     bloque(gnss, 0, 8, 16, true);          // GPS
     bloque(gnss, 1, 1, 3, true);           // SBAS
     bloque(gnss, 2, 4, 8, false);          // Galileo
@@ -262,10 +293,10 @@ std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps) {
     bloque(gnss, 5, 0, 3, true);           // QZSS
     bloque(gnss, 6, 8, 14, !soloGps);      // GLONASS
     gnss[3] = 6;
-    r.push_back(marco(0x06, 0x3E, gnss));
+    if (!u6) r.push_back(marco(0x06, 0x3E, gnss));
     // CFG-RATE: 200 ms (5 Hz) con dos sistemas; 100 ms (10 Hz) con GPS solo. Hora GPS.
     std::vector<uint8_t> rate(6, 0);
-    pon2(rate, 0, static_cast<uint16_t>(1000 / hzDe(soloGps))); pon2(rate, 2, 1); pon2(rate, 4, 1);
+    pon2(rate, 0, static_cast<uint16_t>(1000 / hzDe(soloGps, familia))); pon2(rate, 2, 1); pon2(rate, 4, 1);
     r.push_back(marco(0x06, 0x08, rate));
     // CFG-NAV5: modelo dinámico «automotor» (4)
     std::vector<uint8_t> nav5(36, 0);
@@ -273,8 +304,13 @@ std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps) {
     nav5[2] = 4;
     r.push_back(marco(0x06, 0x24, nav5));
     // CFG-MSG: NAV-PVT en cada lectura; las frases NMEA de fábrica, apagadas (GGA GLL GSA GSV RMC VTG)
-    r.push_back(marco(0x06, 0x01, {0x01, 0x07, 0x01}));
-    for (uint8_t id = 0x00; id <= 0x05; ++id) r.push_back(marco(0x06, 0x01, {0xF0, id, 0x00}));
+    if (u6) {   // NEO-6M: sin NAV-PVT. Quedan GGA, RMC y GST; el resto de NMEA, apagado
+        for (uint8_t id : {0x01, 0x02, 0x03, 0x05}) r.push_back(marco(0x06, 0x01, {0xF0, id, 0x00}));
+        for (uint8_t id : {0x00, 0x04, 0x07}) r.push_back(marco(0x06, 0x01, {0xF0, id, 0x01}));
+    } else {
+        r.push_back(marco(0x06, 0x01, {0x01, 0x07, 0x01}));
+        for (uint8_t id = 0x00; id <= 0x05; ++id) r.push_back(marco(0x06, 0x01, {0xF0, id, 0x00}));
+    }
     // CFG-CFG: guardar puerto, mensajes y navegación en la RAM con pila y en la flash del módulo
     std::vector<uint8_t> cfg(13, 0);
     pon4(cfg, 4, 0x00001F1F);

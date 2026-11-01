@@ -477,6 +477,38 @@ static void gpsNeo() {
     DecodificadorNeo dcp;
     dcp.agregar(mc.data(), mc.size());
     CHEQUEAR(!dcp.version()->pareceOriginal());
+    // Otras familias que se consiguen
+    CHEQUEAR(familiaDe(orig) == FamiliaNeo::M8);
+    CHEQUEAR(familiaDe(VersionNeo{"1.00 (59842)", "00070000", {}}) == FamiliaNeo::U7);
+    CHEQUEAR(familiaDe(VersionNeo{"7.03 (45969)", "00040007", {}}) == FamiliaNeo::U6);
+    // NEO-7M: NAV-PVT de 84 bytes (mismos campos): se lee
+    {
+        auto m84 = armarNavPvt(l);
+        m84.erase(m84.begin() + 6 + 84, m84.end() - 2);
+        m84[4] = 84;
+        uint8_t a = 0, b = 0;
+        for (size_t k = 2; k < m84.size() - 2; ++k) { a = static_cast<uint8_t>(a + m84[k]); b = static_cast<uint8_t>(b + a); }
+        m84[m84.size() - 2] = a; m84[m84.size() - 1] = b;
+        DecodificadorNeo d7;
+        auto r7 = d7.agregar(m84.data(), m84.size());
+        IGUAL(r7.size(), size_t(1));
+        CHEQUEAR(std::fabs(r7[0].velMs - 13.333) < 1e-9);
+    }
+    // NEO-7M: GLONASS apagado (un sistema a la vez) y 10 Hz
+    {
+        const auto c7 = configuracionNeo(false, FamiliaNeo::U7);
+        IGUAL(int(c7[0][6 + 4 + 8 * 5 + 4] & 1), 0);
+        IGUAL(int(c7[1][6] | (c7[1][7] << 8)), 100);
+    }
+    // NEO-6M: sin CFG-GNSS (no lo tiene), 5 Hz y NMEA prendido (GGA, RMC, GST)
+    {
+        const auto c6 = configuracionNeo(false, FamiliaNeo::U6);
+        IGUAL(int(c6[0][3]), 0x08);   // el primero ya es CFG-RATE
+        IGUAL(int(c6[0][6] | (c6[0][7] << 8)), 200);
+        int prendidas = 0;
+        for (const auto& c : c6) if (c[3] == 0x01 && c[6] == 0xF0 && c[8] == 1) ++prendidas;
+        IGUAL(prendidas, 3);
+    }
 }
 
 int main() {

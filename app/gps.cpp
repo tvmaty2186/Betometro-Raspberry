@@ -44,8 +44,8 @@ void GpsSimulado::tic() {
     emit muestra(m);
 }
 
-GpsNeo::GpsNeo(const QString& dispositivo, bool soloGps, QObject* padre)
-    : FuenteGps(padre), dispositivo_(dispositivo), soloGps_(soloGps) {
+GpsNeo::GpsNeo(const QString& dispositivo, bool soloGps, const QString& familia, QObject* padre)
+    : FuenteGps(padre), soloGps_(soloGps), familiaElegida_(beto::familiaDeTexto(familia.toStdString())), dispositivo_(dispositivo) {
     fd_ = ::open(dispositivo.toLocal8Bit().constData(), O_RDWR | O_NOCTTY | O_NONBLOCK | O_CLOEXEC);
     if (fd_ < 0) {
         qWarning("No pude abrir el GPS en %s", qPrintable(dispositivo));
@@ -80,15 +80,26 @@ void GpsNeo::detectar(int baudios) {
 }
 
 void GpsNeo::configurar(bool desde9600) {
+    // Primero preguntar qué módulo es; con la respuesta se elige la configuración
     escribir(beto::pedirVersion());
-    int t = 100;
-    if (desde9600) {
-        QTimer::singleShot(t, this, [this] { escribir(beto::cambioA115200()); });
-        t += 150;
-        QTimer::singleShot(t, this, [this] { velocidad(115200); });   // el módulo ya cambió
-        t += 200;
-    }
-    const auto cfg = beto::configuracionNeo(soloGps_);
+    QTimer::singleShot(500, this, [this, desde9600] {
+        familia_ = familiaElegida_;
+        if (familia_ == beto::FamiliaNeo::Desconocida)
+            familia_ = dec_.version() ? beto::familiaDe(*dec_.version()) : beto::FamiliaNeo::Desconocida;
+        if (familia_ == beto::FamiliaNeo::Desconocida) familia_ = beto::FamiliaNeo::M8;   // si no contesta: como M8 (y si no anda, NMEA)
+        int t = 0;
+        if (desde9600) {
+            escribir(beto::cambioA115200());
+            t += 150;
+            QTimer::singleShot(t, this, [this] { velocidad(115200); });   // el módulo ya cambió
+            t += 200;
+        }
+        enviarConfiguracion(t);
+    });
+}
+
+void GpsNeo::enviarConfiguracion(int t) {
+    const auto cfg = beto::configuracionNeo(soloGps_, familia_);
     for (size_t i = 0; i < cfg.size(); ++i) {
         QTimer::singleShot(t, this, [this, m = cfg[i]] { escribir(m); });
         t += i == 0 ? 600 : 80;   // después de CFG-GNSS, medio segundo (recomendación de u-blox)
@@ -98,14 +109,16 @@ void GpsNeo::configurar(bool desde9600) {
 }
 
 void GpsNeo::revisar() {
-    if (dec_.navPvt() == 0) {   // no es un M8 o no aceptó la configuración: seguir con NMEA
+    if (dec_.navPvt() == 0 && familia_ != beto::FamiliaNeo::U6) {   // no aceptó la configuración: seguir con NMEA
         qWarning("El GPS no manda NAV-PVT: se usa NMEA");
         for (const auto& m : beto::volverANmea()) escribir(m);
     }
     configurado_ = true;
     const auto& v = dec_.version();
-    emit modulo(v ? QString::fromStdString(v->modelo().empty() ? v->hardware : v->modelo()) : QStringLiteral("desconocido"),
-                v ? QString::fromStdString(v->firmware()) : QString(), v && v->pareceOriginal(), beto::hzDe(soloGps_));
+    QString modelo = v && !v->modelo().empty() ? QString::fromStdString(v->modelo()) : QString::fromLatin1(beto::nombreFamilia(familia_));
+    // «original» solo se puede afirmar en el M8N (los NEO-6M y 7M no tienen flash ni dicen su modelo)
+    const bool original = familia_ != beto::FamiliaNeo::M8 || (v && v->pareceOriginal());
+    emit modulo(modelo, v ? QString::fromStdString(v->firmware()) : QString(), original, beto::hzDe(soloGps_, familia_));
 }
 
 GpsNeo::~GpsNeo() {

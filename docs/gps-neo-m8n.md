@@ -38,6 +38,23 @@ Lo que hace ahora el programa:
 - **Configura el módulo en cada arranque**, así anda aunque no guarde nada.
 - Si no llega ningún NAV-PVT, **vuelve a NMEA** (GGA, GST, RMC), que el lector también entiende.
 
+## Repuestos: NEO-7M y NEO-6M (01/11/2026)
+
+Son los que más se consiguen (placas GY-GPSV3-NEO y GY-NEO6MV2). **Sirven los dos**, con el mismo cableado de 4 cables (VCC, RX, TX, GND; no tienen PPS). El programa **reconoce solo qué módulo hay** (pregunta con MON-VER) y lo configura según lo que puede. Si no lo reconoce, en Ajustes → Velocidad y marcas → **Módulo GPS** se elige a mano (Auto, M8N, 7M, 6M).
+
+| | NEO-M8N (el principal) | NEO-7M | NEO-6M |
+|---|---|---|---|
+| Sistemas | GPS + GLONASS a la vez | Uno solo (GPS) | Solo GPS |
+| Lecturas por segundo | 5 (10 con GPS solo) | 10 | 5 |
+| Precisión de la velocidad | 0,05 m/s | 0,1 m/s | 0,1 m/s |
+| Mensaje que usa Betómetro | NAV-PVT (92 bytes) | NAV-PVT (84 bytes, mismos campos) | NMEA (GGA + GST + RMC) |
+| Guarda la configuración | Sí (flash) | Con la pila de la placa | Con la pila de la placa |
+
+- Los tres arrancan a 9600 con NMEA; el programa los pasa a 115200 y los configura en cada arranque.
+- Con el 6M y el 7M hay menos satélites (sin GLONASS): se corta más fácil la señal entre árboles. **Conviene el M8N; los otros, de repuesto.**
+- Las antenas de esas placas son cerámicas chicas con ficha U.FL. Para la antena del techo hace falta un cable U.FL a SMA.
+- Fuentes: hoja de datos NEO-7 (UBX-13003830): https://content.u-blox.com/sites/default/files/products/documents/NEO-7_DataSheet_(UBX-13003830).pdf · protocolo u-blox 7 (NAV-PVT de 84 bytes): https://www.olimex.com/Products/Modules/GPS/MOD-GPS/resources/u-blox7-V14_ReceiverDescriptionProtocolSpec_Public_-GPS.G7-SW-12001-.pdf · hoja de datos NEO-6 (5 Hz): https://www.nyang-tech.com/datasheet/1894238505/u-blox/NEO-6M-0-001.pdf
+
 ## Al recibir el módulo (prueba en E4)
 
 1. **Leer los pines** en la placa (TXD y RXD) y anotarlos acá.

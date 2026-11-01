@@ -219,7 +219,8 @@ Json configFabrica() {
     c["orientacion"] = "horizontal";
     c["brillo"] = 100;                // %
     c["volumen"] = 100;
-    c["gpsSoloGps"] = false;          // false: GPS + GLONASS a 5 Hz; true: GPS solo a 10 Hz (NEO-M8N)               // %; de fábrica al máximo, después el último elegido
+    c["gpsSoloGps"] = false;
+    c["gpsModulo"] = "auto";          // auto (se detecta), m8 (NEO-M8N), 7 (NEO-7M), 6 (NEO-6M)          // false: GPS + GLONASS a 5 Hz; true: GPS solo a 10 Hz (NEO-M8N)               // %; de fábrica al máximo, después el último elegido
     return c;
 }
 
@@ -271,6 +272,7 @@ Json armarConfig(const Json& guardado) {
     opcionEn(c, def, "modoSol", {"no", "si"});
     opcionEn(c, def, "indicador", {"marco", "fondo"});
     opcionEn(c, def, "orientacion", {"horizontal", "vertical"});
+    opcionEn(c, def, "gpsModulo", {"auto", "m8", "7", "6"});
     numeroEn(c, def, "brillo", 10, 100);     // nunca negro del todo
     numeroEn(c, def, "volumen", 0, 100);
     return c;

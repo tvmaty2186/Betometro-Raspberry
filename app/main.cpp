@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
     if (puertoGps.isEmpty()) puertoGps = qEnvironmentVariable("BETO_GPS");
     FuenteGps* gps = &sinGps;
     if (!op.isSet(oSinGps)) {
-        if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, datos.cfg(QStringLiteral("gpsSoloGps")).toBool(), &app);
+        if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, datos.cfg(QStringLiteral("gpsSoloGps")).toBool(), datos.cfg(QStringLiteral("gpsModulo")).toString(), &app);
         else gps = new GpsSimulado(&app);
     }
     Crono crono(&datos, gps);

@@ -3,7 +3,8 @@
 // Solo para desarrollo: el programa lee el puerto igual que el UART real de la Raspberry.
 //
 // Uso: simular_neo [--enlace /tmp/betometro-gps] [--hz 5] [--kmh 48] [--largo 3200] [--nmea]
-//                  [--mala 0.05] [--corte 20] [--segundos N]
+//                  [--mala 0.05] [--corte 20] [--segundos N] [--modulo m8|7|6]
+//   --modulo     se hace pasar por un NEO-7M (NAV-PVT de 84 bytes) o un NEO-6M (solo NMEA)
 //   --mala P     probabilidad de una lectura con mala precisión (30 a 60 m)
 //   --corte S    cada vuelta, S segundos sin señal (como entre árboles)
 // Después: betometro --gps /tmp/betometro-gps
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
     std::string enlace = "/tmp/betometro-gps";
     double hz = 5, kmh = 48, largo = 3200, mala = 0, corte = 0, segundos = 0;
     bool nmea = false;
+    std::string modulo = "m8";
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
         auto sig = [&] { return i + 1 < argc ? std::string(argv[++i]) : std::string(); };
@@ -38,6 +40,7 @@ int main(int argc, char** argv) {
         else if (a == "--corte") corte = std::atof(sig().c_str());
         else if (a == "--segundos") segundos = std::atof(sig().c_str());
         else if (a == "--nmea") nmea = true;
+        else if (a == "--modulo") modulo = sig();
         else { std::fprintf(stderr, "Opción desconocida: %s\n", a.c_str()); return 2; }
     }
     const int maestro = posix_openpt(O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -49,13 +52,15 @@ int main(int argc, char** argv) {
     tcsetattr(maestro, TCSANOW, &t);
     unlink(enlace.c_str());
     if (symlink(esclavo, enlace.c_str()) != 0) std::perror("symlink");
-    std::printf("GPS simulado en %s (%s): %s a %.0f Hz, %.0f km/h, vuelta de %.0f m\n", enlace.c_str(), esclavo,
+    std::printf("GPS simulado (%s) en %s (%s): %s a %.0f Hz, %.0f km/h, vuelta de %.0f m\n", modulo.c_str(), enlace.c_str(), esclavo,
                 nmea ? "NMEA" : "UBX NAV-PVT", hz, kmh, largo);
     std::fflush(stdout);
 
     // Como un NEO-M8N original: contesta la versión (MON-VER) y acepta la configuración (ACK-ACK)
     beto::VersionNeo version{"EXT CORE 3.01 (107888)", "00080000",
                              {"ROM BASE 2.01 (75331)", "FWVER=SPG 3.01", "PROTVER=18.00", "MOD=NEO-M8N-0", "GPS;GLO;GAL;BDS", "SBAS;IMES;QZSS"}};
+    if (modulo == "7") version = beto::VersionNeo{"1.00 (59842)", "00070000", {"PROTVER 14.00", "GPS;SBAS;GLO;QZSS"}};
+    if (modulo == "6") { version = beto::VersionNeo{"7.03 (45969)", "00040007", {}}; nmea = true; }
     std::vector<uint8_t> entrada;
     auto atender = [&] {
         uint8_t b[512];
@@ -112,7 +117,14 @@ int main(int argc, char** argv) {
                 const std::string txt = beto::armarNmea(l);
                 if (write(maestro, txt.data(), txt.size()) < 0) break;
             } else {
-                const auto m = beto::armarNavPvt(l);
+                auto m = beto::armarNavPvt(l);
+                if (modulo == "7") {   // u-blox 7: NAV-PVT de 84 bytes
+                    m.erase(m.begin() + 6 + 84, m.end() - 2);
+                    m[4] = 84;
+                    uint8_t a = 0, b = 0;
+                    for (size_t k = 2; k < m.size() - 2; ++k) { a = static_cast<uint8_t>(a + m[k]); b = static_cast<uint8_t>(b + a); }
+                    m[m.size() - 2] = a; m[m.size() - 1] = b;
+                }
                 if (write(maestro, m.data(), m.size()) < 0) break;
             }
         }

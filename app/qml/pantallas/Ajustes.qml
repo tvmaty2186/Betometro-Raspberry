@@ -106,6 +106,9 @@ Item {
                     Llave { prendida: !!raiz.a.velActiva; onCambiada: v => raiz.poner("velActiva", v) } }
                 Fila { etiqueta: "Descartar error mayor a (m)"
                     Campo { texto: raiz.a.umbralPrecisionM; onTocado: raiz.editar("umbralPrecisionM", "numero", "Descartar lecturas del GPS con error mayor a (metros, 1 a 200)", raiz.a.umbralPrecisionM, 3) } }
+                Fila { etiqueta: "Módulo GPS (al reiniciar)"
+                    Segmentado { opciones: [{ texto: "Auto", valor: "auto" }, { texto: "M8N", valor: "m8" }, { texto: "7M", valor: "7" }, { texto: "6M", valor: "6" }]
+                        valor: raiz.a.gpsModulo || "auto"; onElegido: v => raiz.poner("gpsModulo", v) } }
                 Fila { etiqueta: "Calibración automática"
                     Llave { prendida: !!raiz.a.calibrar; onCambiada: v => raiz.poner("calibrar", v) } }
                 Fila { etiqueta: "Ignorar 2.ª marca durante"; ultima: true

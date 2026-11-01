@@ -40,7 +40,9 @@ signals:
 class GpsNeo : public FuenteGps {
     Q_OBJECT
 public:
-    explicit GpsNeo(const QString& dispositivo, bool soloGps = false, QObject* padre = nullptr);
+    // `familia`: «auto» (se detecta con MON-VER), «m8», «7» o «6» (Ajustes → Módulo GPS)
+    explicit GpsNeo(const QString& dispositivo, bool soloGps = false, const QString& familia = QStringLiteral("auto"),
+                    QObject* padre = nullptr);
     ~GpsNeo() override;
     bool abierto() const { return fd_ >= 0; }
 
@@ -51,7 +53,10 @@ private:
     void detectar(int baudios);
     void configurar(bool desde9600);
     void revisar();
+    void enviarConfiguracion(int desde);
     bool soloGps_ = false;
+    beto::FamiliaNeo familiaElegida_ = beto::FamiliaNeo::Desconocida;
+    beto::FamiliaNeo familia_ = beto::FamiliaNeo::M8;
     int validosAntes_ = 0;
     bool configurado_ = false;
     QString dispositivo_;
