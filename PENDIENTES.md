@@ -4,7 +4,7 @@ Actualizado el 01/11/2026.
 
 ## Diseño
 - Hecho: sistema acordado, cableado del GPS, muestras horizontales de las 12 pantallas (aprobadas).
-- Muestras verticales hechas (01/11/2026). **Sigue:** que Matías las apruebe.
+- Muestras verticales aprobadas (01/11/2026). El diseño visual está cerrado.
 
 ## Dudas para charlar con Matías (salieron de leer la app)
 

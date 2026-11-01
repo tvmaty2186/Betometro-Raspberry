@@ -1,6 +1,6 @@
 # Betómetro para Raspberry Pi — diseño del sistema
 
-Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales aprobadas («están preciosas»). Todavía no se programó nada.**
+Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y verticales aprobadas («están preciosas», «perfectas»). Todavía no se programó nada.**
 
 **Regla:** la app Android vive en otro repo ([tvmaty2186/Betometro](https://github.com/tvmaty2186/Betometro)) y **no se toca**. Este repo es solo la Raspberry.
 
@@ -106,7 +106,7 @@ Cambian lo que hace la app en estos puntos:
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
-## Pantallas en vertical (720×1280)
+## Pantallas en vertical (720×1280, aprobadas)
 
 Imágenes: [muestras-vertical-1.png](muestras-vertical-1.png), [-2](muestras-vertical-2.png), [-3](muestras-vertical-3.png). Fuente: [muestras/pantallas-vertical.html](muestras/pantallas-vertical.html) (`#v1`…`#v12`).
 
