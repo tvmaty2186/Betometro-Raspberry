@@ -6,7 +6,10 @@ Leé esto al empezar cualquier sesión en este repositorio.
 |---|---|
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
-| [docs/diseno-app.md](docs/diseno-app.md) | Copia de la guía estética de la app (temas, Avispón Verde, colores, tipografías) |
+| [docs/app/lo-aprendido.md](docs/app/lo-aprendido.md) | **Todo lo que hace la app y por qué**: datos, motor, voz, ajustes, pantallas, widgets, informe. Es la especificación a copiar |
+| [docs/app/diseno.md](docs/app/diseno.md) | Guía estética de la app (temas, Avispón Verde, colores, tipografías) |
+| [docs/app/arquitectura.md](docs/app/arquitectura.md) | Cómo está hecha la app |
+| [docs/app/historial.md](docs/app/historial.md) | Versiones de la app y decisiones de Matías |
 | [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer |
 
 ## Qué es
@@ -34,10 +37,17 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 - Autor `Matías Russo <tvmaty2186@gmail.com>`, mensaje en español.
 - Versiones propias de este repo (empieza en 1.0.0), separadas de las de la app.
 
+## Lo que ya se decidió en la app vale acá
+
+**No hay que volver a analizar ni preguntar lo que ya se decidió en la app.** Está en `docs/app/`. La Raspberry copia el comportamiento de la app (valores de fábrica, voz, widgets, pantallas de fábrica, informe) salvo lo que dice «Qué cambia en la Raspberry» en `lo-aprendido.md` y lo que dice `diseno-sistema.md`.
+
+- `referencia/app-2.1.1/`: copia del código de la app (versión 2.1.1) para buscar con grep. No se edita.
+- `docs/app/muestras-1.png` y `muestras-2.png`: muestras aprobadas del tema Avispón en la app (vertical y horizontal).
+
 ## Recursos
 
 - `recursos/fuentes/`: tipografías (copiadas de la app).
-- `recursos/img/leon.png`: el león de Matías. `recursos/img/inicio.jpg`: la foto fija del inicio.
+- `recursos/img/leon.png`: el león de Matías. `recursos/img/inicio.jpg`: la foto fija del inicio. `recursos/img/betometro-icono-*.png`: ícono de la app.
 
 ## Muestras
 

@@ -75,7 +75,7 @@ GitHub Actions arma la imagen completa (`.img`). La primera vez se graba en la t
 Imágenes: [muestras-horizontal-1.png](muestras-horizontal-1.png), [-2](muestras-horizontal-2.png), [-3](muestras-horizontal-3.png).
 Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizontal.html) (usa las fuentes y las imágenes de `recursos/`). Para regenerar, se abre con Playwright a 1280×720 y se saca captura de cada `#s1`…`#s12`.
 
-**Regla de estética:** los temas, colores, tipografías y componentes son **iguales a la app** en todo lo posible (ver [diseno-app.md](diseno-app.md), copia de la guía de la app).
+**Regla de estética:** los temas, colores, tipografías y componentes son **iguales a la app** en todo lo posible (ver [app/diseno.md](app/diseno.md), copia de la guía de la app).
 
 | # | Pantalla | Qué tiene |
 |---|---|---|
