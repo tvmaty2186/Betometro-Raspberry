@@ -17,6 +17,7 @@
 #include "motor.h"
 #include "programador.h"
 #include "neo.h"
+#include "pulsador.h"
 
 using namespace beto;
 
@@ -511,7 +512,59 @@ static void gpsNeo() {
     }
 }
 
+// Recorre el filtro de a 1 ms, como lo haría el temporizador, y junta las marcas
+static std::vector<double> marcasDe(FiltroPulsador& f, const std::vector<std::pair<double, bool>>& flancos, double hasta) {
+    std::vector<double> r;
+    size_t k = 0;
+    for (double t = 0; t <= hasta; t += 0.5) {
+        while (k < flancos.size() && flancos[k].first <= t) { f.flanco(flancos[k].first, flancos[k].second); ++k; }
+        if (auto m = f.revisar(t)) r.push_back(*m);
+    }
+    return r;
+}
+
+static void pulsador() {
+    {   // Apretar y soltar limpio: una marca, con la hora de apretar (no de soltar)
+        FiltroPulsador f;
+        auto m = marcasDe(f, {{1000, true}, {1300, false}}, 2000);
+        IGUAL(m.size(), size_t(1));
+        IGUAL(m[0], 1000.0);
+    }
+    {   // Rebotes al apretar: una sola marca, con la hora del primer contacto
+        FiltroPulsador f;
+        auto m = marcasDe(f, {{1000, true}, {1001, false}, {1002, true}, {1003.5, false}, {1004, true}, {1250, false}}, 2000);
+        IGUAL(m.size(), size_t(1));
+        IGUAL(m[0], 1000.0);
+    }
+    {   // Pico de ruido (una chispa): no marca
+        FiltroPulsador f;
+        auto m = marcasDe(f, {{1000, true}, {1000.2, false}, {1500, true}, {1500.1, false}}, 2000);
+        IGUAL(m.size(), size_t(0));
+        IGUAL(f.descartados(), 2);
+    }
+    {   // Mantenerlo apretado 5 s: una sola marca
+        FiltroPulsador f;
+        auto m = marcasDe(f, {{1000, true}, {6000, false}}, 7000);
+        IGUAL(m.size(), size_t(1));
+    }
+    {   // Rebotes al soltar: no marcan de nuevo; la próxima apretada sí
+        FiltroPulsador f;
+        auto m = marcasDe(f, {{1000, true}, {1300, false}, {1301, true}, {1302, false}, {1303, true}, {1304, false}, {1500, true}, {1700, false}}, 2000);
+        IGUAL(m.size(), size_t(2));
+        IGUAL(m[1], 1500.0);
+    }
+    {   // La marca se confirma a los 10 ms de apoyar el dedo (no hay que esperar a soltar)
+        FiltroPulsador f;
+        f.flanco(1000, true);
+        CHEQUEAR(!f.revisar(1005).has_value());
+        auto m = f.revisar(1010);
+        CHEQUEAR(m.has_value() && *m == 1000.0);
+        CHEQUEAR(!f.proximoVencimiento().has_value());   // apretado: no hay nada pendiente
+    }
+}
+
 int main() {
+    pulsador();
     gpsNeo();
     voz();
     redondeos();

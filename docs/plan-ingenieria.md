@@ -217,7 +217,10 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Datos que se usan de `NAV-PVT`:** velocidad sobre el suelo (`gSpeed`, Doppler), posición, **precisión horizontal (`hAcc`) como «precisión»** contra el umbral de 20 m, hora UTC válida, cantidad de satélites. Así se resuelve la duda de la precisión.
 - **PPS** (opcional): para medir la demora del GPS.
 - **Hora:** cuando el GPS da hora válida, se pone en el reloj del sistema (hora de Argentina).
-- **Pulsador** en GPIO17 (pin 11) contra GND (pin 9), con la resistencia interna hacia arriba. Filtro eléctrico de 20 ms + el antirrebote de 3 s de la app.
+- **Pulsador** en GPIO17 (pin 11) contra GND (pin 9). **Marca al apretar, nunca al soltar.** Filtro ya programado y probado (`app/nucleo/pulsador.*`, 01/11/2026):
+  - La hora de la marca es la del **primer flanco de bajada**, tomada por el kernel en la interrupción (libgpiod, reloj monotónico). Se le pasa al crono como `edadMs`, así cuenta el instante del toque aunque el programa se entere después.
+  - **Antirruido:** tiene que quedar apretado 10 ms para valer (una chispa dura microsegundos). **Antirrebote:** los rebotes del contacto no cambian la hora ni dan marcas dobles. **Rearme:** suelto 30 ms antes de aceptar otra; mantenerlo apretado da una sola marca. Además, el antirrebote de 3 s de la app en el motor.
+  - **Cableado contra el ruido del auto:** resistencia de 10 kΩ de GPIO17 a 3,3 V (pin 1) además de la interna, capacitor de 100 nF entre GPIO17 y GND junto a la Raspberry, y cable trenzado (o mallado) hasta el pulsador.
 - **Audio** por la salida de 3,5 mm (`dtparam=audio=on`, `audio_pwm_mode=2` para menos ruido). Volumen de fábrica al máximo; se usa el último elegido.
 - **Brillo** de la pantalla desde Ajustes.
 

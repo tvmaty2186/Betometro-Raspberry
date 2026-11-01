@@ -17,6 +17,7 @@ add_library(nucleo STATIC
   app/nucleo/informe.cpp
   app/nucleo/programador.cpp
   app/nucleo/neo.cpp
+  app/nucleo/pulsador.cpp
 )
 target_include_directories(nucleo PUBLIC app/nucleo)
 target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)

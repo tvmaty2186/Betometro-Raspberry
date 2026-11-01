@@ -10,7 +10,8 @@
 ## Falta comprar (recomendado)
 - Fuente de 5 V 2,5 A micro-USB y cable USB-A a micro-USB
 - Auriculares con cable y ficha de 3,5 mm (van en la salida de audio de la Raspberry)
-- Cables dupont y un pulsador
+- Cables dupont y un pulsador (normal abierto)
+- Para el pulsador, contra el ruido del auto: una resistencia de 10 kΩ, un capacitor de 100 nF (cerámico) y cable trenzado o mallado de 2 hilos
 - Más adelante: convertidor de 12 V a 5 V 3 A, fichas GX12 y cable espiralado
 
 ## GPS
