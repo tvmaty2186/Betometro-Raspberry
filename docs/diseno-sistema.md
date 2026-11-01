@@ -94,6 +94,17 @@ Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizon
 
 Lo nuevo respecto de la app: orientación, brillo, wifi, apagar el equipo, chequeo con hora del GPS y lugar libre, compartir por QR y la pantalla de actualizar.
 
+## Decisiones propias de la Raspberry (01/11/2026)
+
+Cambian lo que hace la app en estos puntos:
+
+- **Largar sin hora:** se puede largar aunque el GPS todavía no haya dado la hora (no se exige que la carrera sea «de hoy»).
+- **Correr sin GPS (solo cronómetro):** si no hay GPS, la carrera sigue solo con el tiempo: cuenta regresiva, voz, MARCAR y tiempos de vuelta. Sin velocidad sugerida, sin metros y sin recorrido en el informe.
+- **Respaldo:** no se exporta respaldo de la base.
+- **Informes:** se exporta el informe **de cada carrera** (HTML, por QR).
+- **Terminar a mano:** la vuelta en curso **no se pierde**: se guarda como **vuelta interrumpida** (se ve en la ficha y en el informe, marcada así, y no cuenta como vuelta completa).
+- **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
+
 ## Pendiente de definir
 
 - Muestras de las mismas pantallas en **vertical** (720×1280).
