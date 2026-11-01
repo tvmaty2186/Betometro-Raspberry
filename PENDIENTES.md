@@ -15,10 +15,12 @@ Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respald
 
 ## Programar
 
-Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). **Falta el OK de Matías al plan.**
+Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). Plan aprobado por Matías el 01/11/2026.
+
+- **E1 hecha** (01/11/2026): motor y modelo de datos en C++, idénticos a la app. Informe: [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md).
+- **Sigue E2:** programa completo en PC (Qt 6).
 
 - Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.
-- Motor en C++, comparado con el `Motor` de la app.
 - Pantallas en Qt/QML, con los 4 temas de la app. Mostrarle a Matías capturas de cada tema (Rally clásico, Deportivo moderno, Cabina de avión) antes de cerrar.
 - GPS por UART, pulsador por GPIO, voz con Piper pregrabada por la salida de auriculares, volumen en Ajustes.
 

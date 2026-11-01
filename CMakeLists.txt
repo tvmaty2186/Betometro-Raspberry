@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.16)
+project(betometro VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+endif()
+
+# Núcleo: C++ puro, sin pantalla ni hardware. Se prueba en PC.
+add_library(nucleo STATIC
+  app/nucleo/json.cpp
+  app/nucleo/motor.cpp
+  app/nucleo/modelo.cpp
+  app/nucleo/almacen.cpp
+)
+target_include_directories(nucleo PUBLIC app/nucleo)
+target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
+# Mismos resultados que JavaScript: nada de cuentas «rápidas» ni fusionadas por el compilador
+target_compile_options(nucleo PUBLIC -fno-fast-math -ffp-contract=off)
+
+option(BETO_PRUEBAS "Compilar las pruebas" ON)
+if(BETO_PRUEBAS)
+  enable_testing()
+
+  add_executable(correr_motor pruebas/motor/correr_motor.cpp)
+  target_link_libraries(correr_motor PRIVATE nucleo)
+
+  add_executable(prueba_nucleo pruebas/nucleo/prueba_nucleo.cpp)
+  target_link_libraries(prueba_nucleo PRIVATE nucleo)
+  add_test(NAME nucleo COMMAND prueba_nucleo)
+
+  find_program(NODE node)
+  if(NODE)
+    add_test(NAME motor_igual_a_la_app
+             COMMAND ${NODE} ${CMAKE_SOURCE_DIR}/pruebas/motor/comparar.js $<TARGET_FILE:correr_motor> ${CMAKE_BINARY_DIR})
+  else()
+    message(WARNING "Sin Node: no se compara el motor con el de la app")
+  endif()
+endif()

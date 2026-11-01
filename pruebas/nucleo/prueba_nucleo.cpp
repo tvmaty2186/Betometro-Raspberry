@@ -1,0 +1,361 @@
+// Pruebas del núcleo: lo que no se compara con la app (lo propio de la Raspberry, el JSON,
+// el modelo y el almacén) y los redondeos iguales a JavaScript.
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <unistd.h>
+
+#include "almacen.h"
+#include "json.h"
+#include "modelo.h"
+#include "motor.h"
+
+using namespace beto;
+
+static int fallas = 0, chequeos = 0;
+#define CHEQUEAR(c)                                                                  \
+    do {                                                                             \
+        ++chequeos;                                                                  \
+        if (!(c)) { ++fallas; std::cerr << __FILE__ << ":" << __LINE__ << ": falló " #c "\n"; } \
+    } while (0)
+#define IGUAL(a, b)                                                                  \
+    do {                                                                             \
+        ++chequeos;                                                                  \
+        auto va_ = (a); auto vb_ = (b);                                              \
+        if (!(va_ == vb_)) {                                                         \
+            ++fallas;                                                                \
+            std::cerr << __FILE__ << ":" << __LINE__ << ": " #a " = " << va_ << ", se esperaba " << vb_ << "\n"; \
+        }                                                                            \
+    } while (0)
+
+static void redondeos() {
+    IGUAL(redondearJs(0.5), 1.0);
+    IGUAL(redondearJs(2.5), 3.0);
+    IGUAL(redondearJs(-2.5), -2.0);
+    IGUAL(redondearJs(-0.4), 0.0);
+    IGUAL(redondearJs(0.49999999999999994), 0.0);
+    IGUAL(redondearJs(1234.5), 1235.0);
+    // +x.toFixed(n) de JavaScript
+    IGUAL(fijarDecimalesJs(0.25, 1), 0.3);     // empate exacto: hacia arriba
+    IGUAL(fijarDecimalesJs(-0.25, 1), -0.3);
+    IGUAL(fijarDecimalesJs(0.35, 1), 0.3);     // 0.35 es en realidad 0.34999…
+    IGUAL(fijarDecimalesJs(1.45, 1), 1.4);
+    IGUAL(fijarDecimalesJs(1.005, 2), 1.0);
+    IGUAL(fijarDecimalesJs(2.5, 0), 3.0);
+    IGUAL(fijarDecimalesJs(0.03125, 4), 0.0313);
+    IGUAL(fijarDecimalesJs(57.64999, 1), 57.6);
+    IGUAL(fijarDecimalesJs(-34.6037221, 6), -34.603722);
+}
+
+static void json() {
+    IGUAL(numeroComoJs(100), std::string("100"));
+    IGUAL(numeroComoJs(-0.0), std::string("0"));
+    IGUAL(numeroComoJs(0.1), std::string("0.1"));
+    IGUAL(numeroComoJs(123.456), std::string("123.456"));
+    IGUAL(numeroComoJs(1e21), std::string("1e+21"));
+    IGUAL(numeroComoJs(1.5e-7), std::string("1.5e-7"));
+    IGUAL(numeroComoJs(0.000001), std::string("0.000001"));
+    IGUAL(numeroComoJs(1.0 / 3), std::string("0.3333333333333333"));
+    IGUAL(numeroComoJs(-34.603722), std::string("-34.603722"));
+
+    std::string texto = R"({"a":1,"b":[true,false,null],"c":"Ñandú \"101\"\n","d":{"e":-2.5e-3},"f":"á🏁"})";
+    Json j = Json::leer(texto);
+    IGUAL(j["a"].aEntero(), 1);
+    IGUAL(j["b"].tamano(), size_t(3));
+    IGUAL(j["c"].aTexto(), std::string("Ñandú \"101\"\n"));
+    IGUAL(j["d"]["e"].aNumero(), -0.0025);
+    IGUAL(j["f"].aTexto(), std::string("á🏁"));
+    Json k = Json::leer(j.escribir());
+    CHEQUEAR(j == k);
+    CHEQUEAR(Json::leer(j.escribir(1)) == j);
+    // el orden de las claves se conserva
+    IGUAL(j.escribir().substr(0, 10), std::string("{\"a\":1,\"b\""));
+    // copiar es copia de verdad
+    Json copia = j;
+    copia["a"] = 2;
+    IGUAL(j["a"].aEntero(), 1);
+
+    bool tiro = false;
+    try { Json::leer("{\"a\":1"); } catch (const ErrorJson&) { tiro = true; }
+    CHEQUEAR(tiro);
+    tiro = false;
+    try { Json::leer("{\"a\":1} x"); } catch (const ErrorJson&) { tiro = true; }
+    CHEQUEAR(tiro);
+}
+
+struct Registro {
+    std::vector<VueltaMotor> cerradas, interrumpidas;
+    int terminadas = 0;
+    Motor::Oyente oyente() {
+        return [this](Evento e, const DatosEvento& d) {
+            if (e == Evento::Cerrada) cerradas.push_back(*d.vuelta);
+            if (e == Evento::Interrumpida) interrumpidas.push_back(*d.vuelta);
+            if (e == Evento::Terminada) ++terminadas;
+        };
+    }
+};
+
+static DatosLargada largada(double T, double D, int total = 0) {
+    DatosLargada c;
+    c.tiempoIdealMs = T;
+    c.distanciaM = D;
+    c.patron = "alt1";
+    c.vueltasTotal = total;
+    return c;
+}
+
+static void vueltaInterrumpida() {
+    {   // Terminar a mano en medio de la vuelta: se guarda marcada, sin error y sin calibrar
+        Registro r;
+        Motor m(largada(60000, 1000), r.oyente(), [] { return int64_t(123); });
+        double t = 0;
+        auto gpsHasta = [&](double fin) { for (; t <= fin; t += 100) m.muestra({t, 1000.0 / 60, 3, {}, {}}); };
+        gpsHasta(1000);
+        m.marcar(1000, "pulsador");
+        gpsHasta(61000);
+        m.marcar(61000, "pulsador");
+        gpsHasta(91000);
+        m.terminar(91000, true);
+        IGUAL(r.cerradas.size(), size_t(1));
+        IGUAL(r.interrumpidas.size(), size_t(1));
+        IGUAL(r.terminadas, 1);
+        const VueltaMotor& v = r.interrumpidas[0];
+        CHEQUEAR(v.interrumpida);
+        IGUAL(v.n, 2);
+        CHEQUEAR(!v.medida);                     // alt1: la 2 es de práctica
+        IGUAL(v.realMs, 30000.0);
+        CHEQUEAR(!v.difMs.has_value());
+        CHEQUEAR(!v.factorVuelta.has_value());
+        CHEQUEAR(v.distM.has_value());
+        IGUAL(*v.distM, 500.0);
+        IGUAL(v.fuente, std::string("terminar"));
+        IGUAL(v.fin, int64_t(123));
+        IGUAL(m.vueltas().size(), size_t(2));
+        CHEQUEAR(!m.enCurso());
+    }
+    {   // Si terminás enseguida después de marcar (menos que el antirrebote), no queda una vuelta de nada
+        Registro r;
+        Motor m(largada(60000, 1000), r.oyente());
+        m.marcar(0, "pantalla");
+        m.marcar(60000, "pantalla");
+        m.terminar(61000, true);
+        IGUAL(r.interrumpidas.size(), size_t(0));
+        IGUAL(r.terminadas, 1);
+    }
+    {   // Carrera completa: la vuelta siguiente al total no se guarda, ni a mano ni sola
+        Registro r;
+        Motor m(largada(60000, 1000, 2), r.oyente());
+        m.marcar(0, "pantalla");
+        m.marcar(60000, "pantalla");
+        m.marcar(120000, "pantalla");
+        m.terminar(150000, true);
+        IGUAL(r.cerradas.size(), size_t(2));
+        IGUAL(r.interrumpidas.size(), size_t(0));
+    }
+    {   // Terminar solo (no a mano): no guarda interrumpida
+        Registro r;
+        Motor m(largada(60000, 1000), r.oyente());
+        m.marcar(0, "pantalla");
+        m.terminar(30000, false);
+        IGUAL(r.interrumpidas.size(), size_t(0));
+    }
+}
+
+static void soloCronometro() {
+    // Sin GPS la carrera anda igual: cuenta, marcas y tiempos; sin sugerida ni metros
+    Registro r;
+    Motor m(largada(60000, 1000), r.oyente());
+    Estado e0 = m.estado(0);
+    CHEQUEAR(e0.sinGps);
+    CHEQUEAR(!e0.vActKmh.has_value());
+    IGUAL(m.marcar(1000, "pulsador") == ResultadoMarca::Largada, true);
+    Estado e = m.estado(31000);
+    CHEQUEAR(e.enCurso);
+    CHEQUEAR(e.sinGps);
+    IGUAL(e.restanteMs, 30000.0);
+    CHEQUEAR(!e.vNecKmh.has_value());
+    CHEQUEAR(!e.deltaS.has_value());
+    IGUAL(m.marcar(62500, "pulsador") == ResultadoMarca::Marca, true);
+    IGUAL(r.cerradas.size(), size_t(1));
+    IGUAL(r.cerradas[0].realMs, 61500.0);
+    IGUAL(*r.cerradas[0].difMs, 1500.0);
+    CHEQUEAR(!r.cerradas[0].distM.has_value());
+    CHEQUEAR(!r.cerradas[0].velPromKmh.has_value());
+    // Antirrebote igual que con GPS
+    IGUAL(m.marcar(63000, "pantalla") == ResultadoMarca::Ignorada, true);
+}
+
+static void traza() {
+    Traza t;
+    t.empezar(1000);
+    Muestra sinPos{1100, 10, 3, {}, {}};
+    t.agregar(sinPos, 1000, 900);
+    IGUAL(t.filas().size(), size_t(0));
+    Muestra m{3456.7, 13.8889, 4.6, -34.60372219, -58.38159111};
+    t.agregar(m, 1000, 1000.04);                 // d negativo → 0
+    const FilaTraza& f = t.filas()[0];
+    IGUAL(f[0], 2.5);
+    IGUAL(f[1], 0.0);
+    IGUAL(f[2], 50.0);
+    IGUAL(f[3], -34.603722);
+    IGUAL(f[4], -58.381591);
+    IGUAL(f[5], 5.0);
+    for (int i = 0; i < 20005; ++i) t.agregar(m, 1000, 500);
+    IGUAL(t.filas().size(), Traza::kTope);
+}
+
+static void modelo() {
+    Json cfg = armarConfig(Json::objeto());
+    IGUAL(cfg["volumen"].aNumero(), 100.0);
+    IGUAL(cfg["tema"].aTexto(), std::string("avispon"));
+    IGUAL(cfg["anticipoMs"].aNumero(), 40.0);
+    IGUAL(cfg["cuentaN"].aNumero(), 20.0);
+
+    Json g = Json::objeto();
+    g["volumen"] = 35;
+    g["umbralPrecisionM"] = 500;
+    g["tiempoIdealMs"] = 3000;
+    g["modoSol"] = "auto";
+    g["tema"] = "inventado";
+    g["cuentaN"] = 0;
+    g["widgetsH"] = Json::lista();            // las claves que no conoce se conservan
+    Json c = armarConfig(g);
+    IGUAL(c["volumen"].aNumero(), 35.0);      // se usa el último que eligió
+    IGUAL(c["umbralPrecisionM"].aNumero(), 200.0);
+    IGUAL(c["tiempoIdealMs"].aNumero(), 240000.0);
+    IGUAL(c["modoSol"].aTexto(), std::string("no"));
+    IGUAL(c["tema"].aTexto(), std::string("avispon"));
+    CHEQUEAR(c["widgetsH"].esLista());
+
+    Carrera k;
+    k.id = nuevaId(1730419200000, 12345);
+    CHEQUEAR(k.id.size() > 5 && k.id[0] == 'c');
+    k.nombre = "Regularidad Ñandú";
+    k.fecha = "2026-11-01";
+    k.tiempoIdealMs = 180000;
+    k.distanciaM = 2500;
+    k.patron = "alt2";
+    k.vueltasTotal = 6;
+    k.extra["piloto"] = "viejo";
+    k.extra["algoNuevo"] = 7;
+    DatosLargada d = datosLargada(k, c);
+    IGUAL(d.congelarMs, 3000.0);              // max(cuentaN = 0, 3) s
+    IGUAL(d.factorGps, 1.0);
+    IGUAL(d.vueltasTotal, 6);
+    IGUAL(k.proximaLargada(), 1);
+    CHEQUEAR(!k.parametrosFijos());
+
+    VueltaMotor vm;
+    vm.n = 3; vm.medida = true; vm.idealMs = 180000; vm.realMs = 90000; vm.interrumpida = true;
+    vm.fuente = "terminar"; vm.fin = 99; vm.distM = 1200;
+    k.vueltas.push_back(Vuelta::desdeMotor(vm, 2));
+    CHEQUEAR(k.parametrosFijos());
+    IGUAL(k.proximaLargada(), 3);
+
+    Base b;
+    b.config = g;
+    b.carreras.push_back(k);
+    Json j = b.aJson();
+    IGUAL(j["schemaVersion"].aEntero(), int64_t(2));
+    const Json& vj = j["carreras"].elementos()[0]["vueltas"].elementos()[0];
+    CHEQUEAR(!vj.tiene("difMs"));
+    CHEQUEAR(vj["interrumpida"].aBool());
+    IGUAL(j["carreras"].elementos()[0]["piloto"].aTexto(), std::string("viejo"));
+    IGUAL(j["carreras"].elementos()[0]["algoNuevo"].aEntero(), int64_t(7));
+    Base b2 = Base::desdeJson(Json::leer(j.escribir()));
+    CHEQUEAR(b2.aJson() == j);
+
+    // Nombre largo: se recorta a 80 letras sin partir acentos
+    Carrera largo;
+    largo.nombre = std::string(79, 'a') + "ñññ";
+    std::string n = largo.aJson()["nombre"].aTexto();
+    IGUAL(n, std::string(79, 'a') + "ñ");
+}
+
+static std::string carpetaTemporal() {
+    char plantilla[] = "/tmp/beto-pruebaXXXXXX";
+    const char* r = mkdtemp(plantilla);
+    return r ? r : "/tmp";
+}
+
+static void almacen() {
+    std::string dir = carpetaTemporal();
+    Almacen a(dir);
+    {
+        auto l = a.cargar();
+        IGUAL(l.origen, std::string(""));
+        IGUAL(l.base.carreras.size(), size_t(0));
+    }
+    Base b;
+    Carrera c;
+    c.id = "c1";
+    c.nombre = "Primera";
+    b.carreras.push_back(c);
+    CHEQUEAR(a.guardar(b));
+    b.carreras[0].nombre = "Segunda";
+    CHEQUEAR(a.guardar(b));
+    {
+        auto l = a.cargar();
+        IGUAL(l.origen, a.archivo());
+        IGUAL(l.base.carreras[0].nombre, std::string("Segunda"));
+    }
+    // Copia anterior
+    {
+        std::ifstream f(a.archivo() + ".anterior");
+        CHEQUEAR(f.good());
+    }
+    // Archivo principal roto: se usa la copia anterior y el roto se guarda aparte
+    {
+        std::ofstream f(a.archivo(), std::ios::trunc);
+        f << "{\"schemaVersion\":2,\"carre";
+    }
+    {
+        auto l = a.cargar();
+        CHEQUEAR(l.habiaDanado);
+        IGUAL(l.origen, a.archivo() + ".anterior");
+        IGUAL(l.base.carreras[0].nombre, std::string("Primera"));
+        std::ifstream f(a.archivo() + ".danado");
+        CHEQUEAR(f.good());
+    }
+    // Corte de luz justo después de escribir «.nuevo»: se usa lo nuevo
+    {
+        b.carreras[0].nombre = "Tercera";
+        std::ofstream f(a.archivo() + ".nuevo", std::ios::trunc);
+        f << b.aJson().escribir();
+    }
+    {
+        auto l = a.cargar();
+        IGUAL(l.base.carreras[0].nombre, std::string("Tercera"));
+    }
+    // Corte de luz mientras se escribía «.nuevo»: está incompleto y se ignora
+    CHEQUEAR(a.guardar(b));
+    {
+        std::ofstream f(a.archivo() + ".nuevo", std::ios::trunc);
+        f << "{\"schemaVersion\":2,\"carreras\":[{\"id\":\"c1\",\"nom";
+    }
+    {
+        auto l = a.cargar();
+        IGUAL(l.origen, a.archivo());
+        IGUAL(l.base.carreras[0].nombre, std::string("Tercera"));
+    }
+    std::string limpiar = "rm -rf '" + dir + "'";
+    if (std::system(limpiar.c_str()) != 0) std::cerr << "no pude borrar " << dir << "\n";
+}
+
+int main() {
+    redondeos();
+    json();
+    vueltaInterrumpida();
+    soloCronometro();
+    traza();
+    modelo();
+    almacen();
+    std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
+    return fallas ? 1 : 0;
+}

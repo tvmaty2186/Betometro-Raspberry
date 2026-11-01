@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Plan de ingeniería
 
-Versión del plan: 1 (01/11/2026). Estado: **propuesto, falta el OK de Matías.**
+Versión del plan: 1 (01/11/2026). Estado: **aprobado por Matías (01/11/2026).** E1 hecha; sigue E2.
 
 Este documento ordena el proyecto en etapas. Para cada etapa dice qué se hace, cómo se hace, qué se entrega y cómo se prueba que está bien.
 
@@ -110,6 +110,12 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 **Aceptación:** diferencias menores a 1 ms en tiempos y a 1 cm en distancias en todos los casos. Pruebas corriendo solas en GitHub Actions en cada cambio.
 
 **Entrega:** `app/nucleo/` + `pruebas/motor/` + informe de la comparación.
+
+**Estado: hecha (01/11/2026).** Diferencia cero contra la app en 65 casos. Ver [pruebas/motor/INFORME.md](../pruebas/motor/INFORME.md).
+- El JSON es propio (`app/nucleo/json.*`): el núcleo no depende de nada, ni de Qt.
+- La vuelta interrumpida no se guarda si dura menos que el antirrebote. Su `fuente` es `"terminar"`.
+- Orientación de fábrica: horizontal. Brillo mínimo: 10 %. Las redes wifi las guarda `wpa_supplicant` (E5), no la base.
+- Falta para E2: el programador de voz (`programador`) y el informe (`armarRecorrido`) también van al núcleo.
 
 ### E2 — Programa completo en PC
 

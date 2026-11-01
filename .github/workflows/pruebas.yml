@@ -1,0 +1,40 @@
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pc:
+    name: Núcleo en PC (con controles de memoria)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compilar
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
+          cmake --build build -j
+      - name: Pruebas (motor igual a la app + núcleo)
+        run: ctest --test-dir build --output-on-failure
+      - name: Informe de la comparación
+        if: always()
+        run: cat build/comparacion-motor.md >> "$GITHUB_STEP_SUMMARY" || true
+
+  arm:
+    name: Núcleo en ARM 64 bits (como la Raspberry)
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Compilar
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build -j
+      - name: Pruebas
+        run: ctest --test-dir build --output-on-failure
