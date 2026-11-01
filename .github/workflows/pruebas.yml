@@ -17,7 +17,7 @@ jobs:
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-sanitize-recover=all"
-          cmake --build build -j
+          cmake --build build -j 4
       - name: Pruebas (motor igual a la app + núcleo)
         run: ctest --test-dir build --output-on-failure
       - name: Informe de la comparación
@@ -35,7 +35,7 @@ jobs:
       - name: Compilar
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build -j
+          cmake --build build -j 4
       - name: Pruebas
         run: ctest --test-dir build --output-on-failure
 
@@ -51,7 +51,7 @@ jobs:
       - name: Compilar
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build -j
+          cmake --build build -j 4
       - name: Pruebas del programa
         run: ctest --test-dir build --output-on-failure -R "datos|crono"
       - name: Capturas
