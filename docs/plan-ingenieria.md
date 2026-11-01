@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Plan de ingeniería
 
-Versión del plan: 1 (01/11/2026). Estado: **aprobado por Matías (01/11/2026).** E1 hecha; sigue E2.
+Versión del plan: 1 (01/11/2026). Estado: **aprobado por Matías (01/11/2026).** E1 y E2 hechas; sigue E3.
 
 Este documento ordena el proyecto en etapas. Para cada etapa dice qué se hace, cómo se hace, qué se entrega y cómo se prueba que está bien.
 
@@ -166,11 +166,11 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Editor de la pantalla de carrera** (01/11/2026): el tablero de widgets es uno solo (`widgets/Tablero.qml`) para la carrera y el editor. Tocar elige (borde amarillo y asa), mantener apretado 350 ms y arrastrar mueve con imán a 8 px y líneas fucsia, el asa cambia el tamaño (mínimos 60×44 y 70 de diámetro). ✎: redondo/cuadrado, dato extra, barra ±, quitar (MARCAR no se quita). + Widget, De fábrica (doble toque, solo la orientación elegida), Guardar. Los armados van en `widgetsH` y `widgets`, en fracciones como la app.
   - Diferencia con la app: los cambios se guardan con **Guardar** (como la muestra), no al instante. Volver sin guardar los descarta.
   - Nuevo widget «Adelantado / atrasado» (número).
-- **Los 4 temas y el modo sol** (01/11/2026): todos los colores y letras salen de `Tema.qml` (Avispón, Rally clásico, Deportivo moderno, Cabina de avión, tomados de la app) y el modo sol le gana a cualquiera (fondo claro, tinta negra, widgets blancos con borde negro, MARCAR negro). Imagen con los 5: [capturas-temas.png](capturas-temas.png). **Falta el OK de Matías.**
+- **Los 4 temas y el modo sol** (01/11/2026): todos los colores y letras salen de `Tema.qml` (Avispón, Rally clásico, Deportivo moderno, Cabina de avión, tomados de la app) y el modo sol le gana a cualquiera (fondo claro, tinta negra, widgets blancos con borde negro, MARCAR negro). Imagen con los 5: [capturas-temas.png](capturas-temas.png). **Aprobados por Matías** («Quedaron hermosos», 01/11/2026).
   - Lo del Avispón (león, rayas, banda, 101, curva de abajo, título cromado) solo aparece en el Avispón, como en la app.
   - Pendiente si Matías lo quiere: las tarjetas tipo «carnet» de papel del Rally clásico en Carreras y en la ficha.
 
-**Estado de E2: completa** (01/11/2026), salvo el OK de Matías a los temas. Pasan las pruebas: núcleo (174 chequeos), motor y informe iguales a la app, datos y crono. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+**Estado de E2: completa y aceptada** (01/11/2026). Pasan las pruebas: núcleo (174 chequeos), motor y informe iguales a la app, datos y crono. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 
