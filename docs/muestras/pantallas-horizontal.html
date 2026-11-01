@@ -1,0 +1,237 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><link rel="stylesheet" href="extra.css"><style>.ed{outline:3px dashed var(--ama);outline-offset:5px}.ed::after{content:'✎';position:absolute;right:-14px;top:-14px;width:34px;height:34px;border-radius:50%;background:var(--ama);color:#000;display:grid;place-items:center;font:700 20px Barlow}</style></head><body>
+
+<!-- 1 INICIO -->
+<div class="pi" id="s1">
+ <div class="abs" style="left:0;right:0;top:0;height:96px;background:linear-gradient(180deg,#123d24,#081a0f);border-bottom:4px solid var(--ama);z-index:2"></div>
+ <div class="titulo"><img src="../../recursos/img/leon.png" style="height:62px"><div style="width:3px;height:56px;background:var(--cromo);transform:skewX(-15deg)"></div>
+  <div><div class="cromo-txt">BETÓMETRO</div><div class="sub" style="margin-top:-2px">Regularidad para el navegante</div></div></div>
+ <div class="abs" style="right:28px;top:30px;z-index:3;font:italic 700 18px Barlow">v1.0.0 <span style="color:var(--ama)">· Actualizar</span></div>
+ <div class="rayasT" style="z-index:2;right:200px"></div>
+ <div class="abs" style="left:0;top:100px;width:860px;height:470px;background:url(../../recursos/img/inicio.jpg) center 18%/cover;-webkit-mask:linear-gradient(90deg,#000 75%,transparent),linear-gradient(180deg,#000 70%,transparent);-webkit-mask-composite:source-in"></div>
+ <div class="banda" style="left:0;width:820px;top:560px"></div>
+ <div class="num101 abs" style="left:40px;top:510px;width:112px;height:112px">101</div>
+ <div class="abs" style="left:190px;top:600px;font:italic 800 30px Barlow;text-shadow:0 2px 4px #000">Avispón Verde</div>
+ <div class="abs" style="left:190px;top:640px" ><span class="chip-c">● GPS 9 satélites</span> <span class="chip-c">● Wifi: Celu de Matías</span></div>
+ <div class="gauge" id="g1" style="left:930px;top:280px;width:320px;height:320px"></div>
+ <div id="disc1"></div>
+ <div class="swoosh" style="left:-80px;right:500px;bottom:-70px;height:120px"></div>
+</div>
+
+<!-- 2 CARRERAS -->
+<div class="pi" id="s2">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">CARRERAS</div></div>
+ <div class="rayasT"></div>
+ <div class="btn-ama abs" style="right:40px;top:110px;width:200px;height:64px;font-size:22px">+ Nueva</div>
+ <div class="abs" style="left:40px;right:280px;top:100px">
+  <div class="bandaSec">PRÓXIMAS</div>
+  <div class="card" style="display:flex;align-items:center;gap:20px;padding:14px 20px;margin-bottom:14px"><div class="fecha">15<small>NOV</small></div>
+   <div style="flex:1"><div style="font:italic 800 28px Barlow">Gualeguaychú</div><div class="sub">10 vueltas · 3.200 m · ideal 4:00,0 · impares medidas</div></div><div class="btn-ama" style="width:170px;height:56px">LARGAR</div></div>
+  <div class="card" style="display:flex;align-items:center;gap:20px;padding:14px 20px"><div class="fecha">29<small>NOV</small></div>
+   <div style="flex:1"><div style="font:italic 800 28px Barlow">Concepción del Uruguay</div><div class="sub">8 vueltas · 2.800 m · ideal 3:30,0 · todas medidas</div></div><div class="btn-ama" style="width:170px;height:56px">LARGAR</div></div>
+  <div class="bandaSec" style="margin-top:22px">CORRIDAS</div>
+  <div class="card" style="display:flex;align-items:center;gap:20px;padding:14px 20px"><div class="fecha">01<small>NOV</small></div>
+   <div style="flex:1"><div style="font:italic 800 28px Barlow">Santa Clara</div><div class="sub">6 vueltas · error total 9,6 s</div></div><div class="btn-cromo" style="width:170px;height:56px">Informe</div></div>
+ </div>
+</div>
+
+<!-- 3 FICHA / EDITOR -->
+<div class="pi" id="s3">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">GUALEGUAYCHÚ</div></div>
+ <div class="rayasT"></div>
+ <div class="card abs" style="left:40px;top:110px;width:600px;height:560px">
+  <div class="h3">Datos de la carrera</div>
+  <div class="fila">Nombre<span class="campo" style="min-width:260px">Gualeguaychú</span></div>
+  <div class="fila">Fecha<span class="campo">15/11</span></div>
+  <div class="fila">Vueltas<span class="campo">10</span></div>
+  <div class="fila">Distancia (m)<span class="campo">3.200</span></div>
+  <div class="fila">Tiempo ideal<span class="campo">4:00,0</span></div>
+  <div class="fila">Vueltas medidas<span class="seg"><b class="on">Impares</b><b>Pares</b><b>Todas</b></span></div>
+  <div class="fila" style="color:#d6e6d2">Velocidad promedio<span style="font:italic 800 30px 'Barlow Condensed';color:var(--crema)">48,0 km/h</span></div>
+ </div>
+ <div class="abs" style="left:680px;top:110px;width:560px">
+  <div class="card oscuro" style="padding:20px 24px;display:flex;gap:30px;justify-content:space-around;text-align:center">
+   <div><div class="sub">Vueltas</div><div class="dig" style="font-size:72px">10</div></div>
+   <div><div class="sub">Ideal</div><div class="dig" style="font-size:72px">4:00</div></div>
+   <div><div class="sub">Distancia</div><div class="dig" style="font-size:72px">3,2<span style="font-size:30px"> km</span></div></div></div>
+  <div style="margin:22px 4px 10px" class="sub">Vueltas: <span class="tag m">V1 MEDIDA</span> <span class="tag p">V2 PRÁCTICA</span> <span class="tag m">V3 MEDIDA</span> <span class="tag p">V4</span> …</div>
+  <div class="btn-ama" style="height:150px;font-size:60px;margin-top:30px">LARGAR</div>
+  <div style="display:flex;gap:16px;margin-top:22px"><div class="btn-cromo" style="flex:1;height:60px">Guardar</div><div class="btn-cromo" style="flex:1;height:60px">Borrar</div></div>
+ </div>
+</div>
+
+<!-- 4 CARRERA -->
+<div class="pi" id="s4">
+ <div class="abs" style="left:24px;top:14px;right:24px;display:flex;justify-content:space-between;align-items:center;z-index:2">
+  <span class="sub" style="font-size:15px">Gualeguaychú · ideal 4:00,0 · 3.200 m</span>
+  <span><span class="chip-c">● GPS 10 Hz · 2 m</span> <span class="chip-c">Terminar</span></span></div>
+ <div class="card oscuro abs" style="left:24px;top:56px;width:1232px;height:320px"></div>
+ <div class="abs num101" style="left:50px;top:90px;width:210px;height:210px;background:radial-gradient(circle at 40% 30%,#ffe9a0,var(--ama) 50%,var(--ama2));color:#1b5a33;flex-direction:column;font-size:90px;line-height:.85;align-content:center">V3<div style="font:italic 800 22px Barlow;color:#1d3a24;letter-spacing:.1em">MEDIDA</div></div>
+ <div class="abs" style="left:290px;width:700px;top:80px;text-align:center"><div class="sub" style="font-size:16px">Falta</div>
+  <div class="dig" style="font-size:190px">2:32.3</div><div style="font:600 22px Barlow;margin:6px 0 14px">faltan 2.310 m</div>
+  <div class="barra" style="width:560px;margin:auto;height:12px"><i style="left:58%;height:26px;top:-7px;width:7px"></i></div></div>
+ <div class="card oscuro abs" style="left:1010px;top:96px;width:220px;height:200px;text-align:center;padding-top:28px"><div class="sub" style="font-size:15px">Sugerida</div><div class="dig" style="font-size:110px">75</div></div>
+ <div class="card oscuro abs" style="left:24px;top:400px;width:330px;height:300px;text-align:center;padding-top:30px"><div class="sub" style="font-size:15px">Velocidad km/h</div><div class="dig" style="font-size:150px">78</div><div class="barra" style="width:240px;margin:16px auto 0"><i style="left:62%"></i></div></div>
+ <div class="card oscuro abs" style="left:378px;top:400px;width:270px;height:300px;text-align:center;padding-top:56px"><div class="sub" style="font-size:15px">Última vuelta<br>V2</div><div class="dig" style="font-size:80px;margin-top:22px">4:59.6</div></div>
+ <div class="btn-ama abs" style="left:672px;top:400px;width:584px;height:300px;align-content:center"><div style="font:italic 900 110px Barlow;line-height:1">MARCAR</div><div style="font:italic 800 22px Barlow;letter-spacing:.15em">FIN DE VUELTA 3</div></div>
+</div>
+
+<!-- 5 PRACTICA -->
+<div class="pi" id="s5">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">PRÁCTICA LIBRE</div></div>
+ <div class="rayasT"></div>
+ <div class="card abs" style="left:40px;top:110px;width:600px;height:400px">
+  <div class="h3">Vuelta de práctica</div>
+  <div class="fila">Tiempo ideal<span class="campo">4:00,0</span></div>
+  <div class="fila">Distancia (m)<span class="campo">3.200</span></div>
+  <div class="fila">Vueltas medidas<span class="seg"><b>Impares</b><b>Pares</b><b class="on">Todas</b></span></div>
+  <div class="fila" style="color:#d6e6d2">Velocidad promedio<span style="font:italic 800 30px 'Barlow Condensed';color:var(--crema)">48,0 km/h</span></div>
+ </div>
+ <div class="abs sub" style="left:44px;top:540px;width:590px;font-size:14px;line-height:1.6">No se guarda como carrera. Sirve para probar el GPS, la voz y el pulsador en la pista.</div>
+ <div class="btn-ama abs" style="left:680px;top:110px;width:560px;height:400px;font-size:90px">LARGAR</div>
+</div>
+
+<!-- 6 CHEQUEO -->
+<div class="pi" id="s6">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">CHEQUEO PREVIO</div></div>
+ <div class="rayasT"></div>
+ <div class="card abs" style="left:40px;top:110px;width:590px;height:580px">
+  <div class="h3">GPS</div>
+  <div class="fila">Señal<span style="color:#7fd36b;font-weight:700">● 9 satélites</span></div>
+  <div class="fila">Precisión<span class="campo">2,1 m</span></div>
+  <div class="fila">Lecturas por segundo<span class="campo">10</span></div>
+  <div class="fila">Hora tomada del GPS<span class="campo">14:32:07</span></div>
+  <div class="h3">Pulsador</div>
+  <div class="fila">Apretalo para probar<span style="color:#7fd36b;font-weight:700">● Funciona</span></div>
+ </div>
+ <div class="card abs" style="left:660px;top:110px;width:580px;height:580px">
+  <div class="h3">Voz y parlante</div>
+  <div class="fila">Volumen<span style="width:220px" class="barra"><i style="left:85%"></i></span></div>
+  <div class="fila">Probar la voz<span class="btn-cromo" style="width:150px;height:48px">▶ Probar</span></div>
+  <div class="h3">Wifi</div>
+  <div class="fila">Conectado a<span style="font-weight:700">Celu de Matías</span></div>
+  <div class="h3">Almacenamiento</div>
+  <div class="fila">Lugar libre<span class="campo">11,2 GB</span></div>
+  <div class="btn-ama" style="margin:18px 22px;height:64px">TODO LISTO</div>
+ </div>
+</div>
+
+<!-- 7 PANTALLA DE CARRERA (editor) -->
+<div class="pi" id="s7">
+ <div class="abs" style="left:0;right:0;top:0;height:58px;background:rgba(0,0,0,.55);display:flex;align-items:center;gap:16px;padding:0 20px;z-index:5">
+  <div class="volver" style="width:40px;height:40px">‹</div><span style="font:italic 800 22px Barlow">Pantalla de carrera</span>
+  <span class="seg" style="margin-left:30px"><b>Vertical</b><b class="on">Horizontal</b></span>
+  <span style="flex:1"></span><span class="btn-cromo" style="width:150px;height:42px">+ Widget</span><span class="btn-cromo" style="width:150px;height:42px">De fábrica</span><span class="btn-ama" style="width:140px;height:42px;font-size:18px">Guardar</span></div>
+ <div style="position:absolute;inset:0;transform:scale(.88);transform-origin:50% 100%;opacity:.95" id="s7in"></div>
+ <div class="abs" style="left:430px;top:300px;padding:10px 16px;border-radius:12px;background:rgba(0,0,0,.75);font:italic 700 17px Barlow;z-index:6">Mantené apretado para mover · tocá para cambiar tamaño · ✎ opciones</div>
+</div>
+
+<!-- 8 AJUSTES -->
+<div class="pi" id="s8">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">AJUSTES</div></div>
+ <div class="rayasT"></div>
+ <div class="abs" style="left:40px;top:104px;width:590px">
+  <div class="card" style="padding-bottom:12px"><div class="h3">Mi auto</div>
+   <div style="display:flex;align-items:center;gap:20px;padding:8px 22px"><div class="num101" style="width:84px;height:84px;font-size:38px">101</div><div><div class="sub">Número</div><div style="font:italic 800 26px Barlow">Avispón Verde</div></div></div></div>
+  <div class="card" style="margin-top:18px"><div class="h3">Tema y pantalla</div>
+   <div class="fila">Tema<span class="campo" style="font-size:22px">Avispón Verde</span></div>
+   <div class="fila">Orientación<span class="seg"><b>Vertical</b><b class="on">Horizontal</b></span></div>
+   <div class="fila">Modo sol<span class="seg"><b class="on">Auto</b><b>Sí</b><b>No</b></span></div>
+   <div class="fila">Brillo<span style="width:220px" class="barra"><i style="left:80%"></i></span></div></div>
+ </div>
+ <div class="abs" style="left:660px;top:104px;width:580px">
+  <div class="card"><div class="h3">Cuenta regresiva</div>
+   <div class="fila">Segundos que cuenta en voz<span class="campo">20</span></div>
+   <div class="fila">Pitido largo al llegar a cero<span class="toggle off"></span></div>
+   <div class="fila">Clic al marcar<span class="toggle"></span></div></div>
+  <div class="card" style="margin-top:18px"><div class="h3">Conexión y sistema</div>
+   <div class="fila">Wifi<span style="font-weight:700">Celu de Matías ›</span></div>
+   <div class="fila">Versión 1.0.0<span class="btn-ama" style="width:200px;height:48px;font-size:18px">Actualizar a 1.1.0</span></div>
+   <div class="fila">Apagar el equipo<span class="btn-cromo" style="width:150px;height:44px">Apagar</span></div></div>
+ </div>
+</div>
+
+<!-- 9 WIFI -->
+<div class="pi" id="s9">
+ <div class="cab" style="padding:20px 28px"><div class="volver">‹</div><div class="cromo-txt">WIFI</div></div>
+ <div class="rayasT"></div>
+ <div class="card abs" style="left:40px;top:96px;width:520px;height:250px">
+  <div class="fila" style="background:rgba(244,197,49,.18)">📶 Celu de Matías<span style="color:var(--ama);font-weight:700">elegida</span></div>
+  <div class="fila">📶 Autódromo-Invitados<span>🔒</span></div>
+  <div class="fila">📶 Boxes 3<span>🔒</span></div>
+  <div class="fila" style="color:#d6e6d2">↻ Buscar redes</div></div>
+ <div class="card abs" style="left:590px;top:96px;width:650px;height:250px;padding:20px 24px">
+  <div class="sub" style="font-size:14px">Clave de «Celu de Matías»</div>
+  <div class="campo" style="text-align:left;font:600 30px Barlow;margin:14px 0;padding:12px 18px">avispon101<span style="color:var(--ama)">|</span></div>
+  <div style="display:flex;gap:14px"><span class="btn-cromo" style="flex:1;height:56px">Mostrar clave</span><span class="btn-ama" style="flex:1;height:56px">CONECTAR</span></div></div>
+ <div class="abs" style="left:40px;right:40px;top:370px;display:grid;gap:10px" id="kb"></div>
+</div>
+
+<!-- 10 INFORME -->
+<div class="pi" id="s10">
+ <div class="abs" style="left:24px;top:18px;right:24px;display:flex;align-items:center;gap:18px">
+  <div class="volver">‹</div><img src="../../recursos/img/leon.png" style="height:46px"><div><div class="cromo-txt" style="font-size:38px">SANTA CLARA</div><div class="sub">01/11 · ideal 5:00,0 · 3.000 m · 6 vueltas</div></div>
+  <span style="flex:1"></span><div class="num101" style="width:66px;height:66px;font-size:30px">101</div><span class="btn-ama" style="width:190px;height:56px">Compartir</span></div>
+ <div class="card oscuro abs" style="left:24px;top:110px;width:600px;height:590px"><div class="sub" style="padding:14px 18px">Recorrido de la vuelta · color = velocidad</div>
+  <svg width="600" height="520" viewBox="0 0 600 520"><path d="M120 120 C 220 60, 420 70, 500 130 S 540 330, 470 400 S 200 450, 130 400 S 60 200, 120 120Z" fill="none" stroke="#000" stroke-width="20" opacity=".4"/>
+  <path d="M120 120 C 220 60, 420 70, 500 130" fill="none" stroke="#d23b2c" stroke-width="12" stroke-linecap="round"/><path d="M500 130 S 540 330, 470 400" fill="none" stroke="#7fd36b" stroke-width="12" stroke-linecap="round"/>
+  <path d="M470 400 S 200 450, 130 400" fill="none" stroke="#f4c531" stroke-width="12" stroke-linecap="round"/><path d="M130 400 S 60 200, 120 120" fill="none" stroke="#3a8de0" stroke-width="12" stroke-linecap="round"/><circle cx="120" cy="120" r="10" fill="#fff"/></svg></div>
+ <div class="card oscuro abs" style="left:648px;top:110px;width:608px;height:230px"><div class="sub" style="padding:14px 18px">Velocidad km/h · V3</div>
+  <svg width="608" height="170"><line x1="20" x2="590" y1="90" y2="90" stroke="#f4c531" stroke-dasharray="8 6"/><path d="M20 90 C 80 30, 140 30, 200 90 S 320 150, 380 90 S 500 30, 590 80" fill="none" stroke="#f3ecd8" stroke-width="4"/></svg></div>
+ <div class="card oscuro abs" style="left:648px;top:362px;width:608px;height:338px;padding:16px 22px"><div class="sub">Todas las vueltas</div>
+  <div style="font:italic 800 26px 'Barlow Condensed';line-height:1.75;margin-top:6px" id="tabla"></div></div>
+</div>
+
+<!-- 11 COMPARTIR QR -->
+<div class="pi" id="s11">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">COMPARTIR INFORME</div></div>
+ <div class="rayasT"></div>
+ <div class="abs" style="left:80px;top:130px;width:430px;height:430px;background:#fff;border-radius:24px;box-shadow:0 0 0 6px #cfd4d8,0 0 0 8px #4b5258;display:grid;place-items:center"><canvas id="qr" width="370" height="370"></canvas></div>
+ <div class="abs" style="left:580px;top:150px;width:640px">
+  <div style="font:italic 800 40px Barlow">Escaneá con el celular</div>
+  <div style="font:600 24px Barlow;line-height:1.6;margin-top:20px;color:#d6e6d2">1. El celular tiene que estar en la misma red wifi: <b style="color:#fff">Celu de Matías</b>.<br>2. Abrí la cámara y apuntá al código.<br>3. Se descarga <b style="color:#fff">«🏁 Santa Clara 01-11-2026.html»</b>.</div>
+  <div class="btn-cromo" style="width:240px;height:60px;margin-top:40px">Listo</div>
+ </div>
+ <div class="nota">Ejemplo: el código es de muestra</div>
+</div>
+
+<!-- 12 ACTUALIZAR -->
+<div class="pi" id="s12">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">ACTUALIZAR</div></div>
+ <div class="rayasT"></div>
+ <div class="card abs" style="left:200px;top:130px;width:880px;height:500px;padding:34px 50px;text-align:center">
+  <div style="display:flex;justify-content:center;align-items:center;gap:50px">
+   <div><div class="sub" style="font-size:15px">Tenés</div><div class="dig" style="font-size:100px">1.0.0</div></div>
+   <div style="font:900 60px Barlow;color:var(--ama)">→</div>
+   <div><div class="sub" style="font-size:15px">Nueva</div><div class="dig" style="font-size:100px;color:var(--ama)">1.1.0</div></div></div>
+  <div style="font:600 22px Barlow;color:#d6e6d2;margin:16px 0 26px">Qué trae: velocímetro más suave · voz más clara</div>
+  <div class="barra" style="height:22px;background:#0a2414;box-shadow:0 0 0 2px #cfd4d8"><div style="width:64%;height:100%;border-radius:9px;background:linear-gradient(180deg,#ffe07a,var(--ama))"></div></div>
+  <div style="font:italic 800 28px Barlow;margin-top:14px">Descargando… 64 %</div>
+  <div style="font:600 19px Barlow;color:#d6e6d2;margin-top:24px">Podés seguir usando Betómetro. Se instala en la copia de reserva.<br>Si algo falla, vuelve solo a la versión anterior.</div>
+ </div>
+</div>
+
+<script>
+// gauge
+function gauge(el,max){const W=el.clientWidth,c=W/2,r=W/2-14;let s=`<svg width="${W}" height="${W}">`;
+ for(let v=0;v<=max;v+=10){const a=(225-v/max*270)*Math.PI/180,L=v%20?10:20;
+  s+=`<line x1="${c+Math.cos(a)*r}" y1="${c-Math.sin(a)*r}" x2="${c+Math.cos(a)*(r-L)}" y2="${c-Math.sin(a)*(r-L)}" stroke="#1d2a20" stroke-width="${v%20?2:5}"/>`;
+  if(v%20==0)s+=`<text x="${c+Math.cos(a)*(r-42)}" y="${c-Math.sin(a)*(r-42)+9}" font-family="Barlow Condensed" font-weight="700" font-size="26" fill="#1d5233" text-anchor="middle">${v}</text>`;}
+ const a=(225-78/max*270)*Math.PI/180;s+=`<line x1="${c}" y1="${c}" x2="${c+Math.cos(a)*(r-30)}" y2="${c-Math.sin(a)*(r-30)}" stroke="#111" stroke-width="7" stroke-linecap="round"/><circle cx="${c}" cy="${c}" r="14" fill="#111"/>
+ <text x="${c}" y="${c+80}" font-family="Barlow Condensed" font-style="italic" font-weight="800" font-size="56" fill="#1d5233" text-anchor="middle">78</text><text x="${c}" y="${c+104}" font-family="Barlow" font-size="14" fill="#333" text-anchor="middle" letter-spacing="3">KM/H</text></svg>`;el.innerHTML=s}
+gauge(document.getElementById('g1'),160);
+// discos en arco
+const ic={Carreras:'<path d="M10 6v28M10 8h20l-4 6 4 6H10"/>',"Práctica libre":'<circle cx="20" cy="22" r="12"/><path d="M20 22V15M16 5h8"/>',"Chequeo previo":'<rect x="9" y="6" width="22" height="28" rx="3"/><path d="M14 18l3 3 6-6M14 27l3 3 6-6"/>',"Pantalla de carrera":'<rect x="6" y="7" width="12" height="12"/><circle cx="28" cy="13" r="6"/><rect x="6" y="24" width="28" height="10" rx="3"/>',Ajustes:'<circle cx="20" cy="20" r="6"/><path d="M20 4v6M20 30v6M4 20h6M30 20h6M9 9l4 4M27 27l4 4M9 31l4-4M27 13l4-4"/>'};
+let h='';const cx=1090,cy=440,R=270;Object.keys(ic).forEach((k,i)=>{const a=(225-i*25)*Math.PI/180;const x=cx+Math.cos(a)*R,y=cy-Math.sin(a)*R;
+ h+=`<div class="abs" style="left:${x-48}px;top:${y-48}px;width:96px;text-align:center;z-index:3"><div class="disco" style="width:96px;height:96px"><svg viewBox="0 0 40 40" style="width:44px;height:44px">${ic[k]}</svg></div><div class="lbl" style="position:absolute;right:108px;top:34px;width:200px;text-align:right">${k}</div></div>`});
+document.getElementById('disc1').innerHTML=h;
+// editor copia la carrera
+document.getElementById('s7in').innerHTML=document.getElementById('s4').innerHTML.replace(/class="card oscuro abs"/g,'class="card oscuro abs ed"').replace(/class="btn-ama abs"/g,'class="btn-ama abs ed"');
+// teclado
+const filas=['qwertyuiop','asdfghjklñ','⇧zxcvbnm⌫','123 espacio ✓'];document.getElementById('kb').innerHTML=filas.map(f=>{const t=f.includes(' ')?f.split(' '):[...f];return `<div style="display:grid;grid-template-columns:${t.map(x=>x=='espacio'?'5fr':'1fr').join(' ')};gap:10px">${t.map(x=>`<div class="tecla"${x=='✓'?' style="background:var(--ama);color:#000"':''}>${x}</div>`).join('')}</div>`}).join('');
+// tabla
+document.getElementById('tabla').innerHTML=[['V1','4:55,7','−4,3 s','#ff8a7a'],['V2','5:00,7','+0,7 s','#7fd36b'],['V3','5:04,6','+4,6 s','#ff8a7a'],['V4','4:59,1','−0,9 s','#7fd36b'],['V5','5:01,2','+1,2 s','#f4c531'],['V6','5:00,3','+0,3 s','#7fd36b']].map(([a,b,c,col])=>`<div style="display:flex"><span style="width:70px">${a}</span><span style="flex:1">${b}</span><span style="color:${col}">${c}</span></div>`).join('');
+// qr de muestra
+const q=document.getElementById('qr').getContext('2d'),n=29,u=370/n;let sd=7;const rnd=()=>(sd=(sd*9301+49297)%233280)/233280;
+for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(rnd()<.5){q.fillRect(x*u,y*u,u+.5,u+.5)}
+[[0,0],[n-7,0],[0,n-7]].forEach(([x,y])=>{q.fillStyle='#fff';q.fillRect((x-1)*u,(y-1)*u,9*u,9*u);q.fillStyle='#000';q.fillRect(x*u,y*u,7*u,7*u);q.fillStyle='#fff';q.fillRect((x+1)*u,(y+1)*u,5*u,5*u);q.fillStyle='#000';q.fillRect((x+2)*u,(y+2)*u,3*u,3*u)});
+</script></body></html>

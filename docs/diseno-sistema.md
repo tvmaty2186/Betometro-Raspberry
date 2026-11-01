@@ -1,0 +1,100 @@
+# Betómetro para Raspberry Pi — diseño del sistema
+
+Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales aprobadas («están preciosas»). Todavía no se programó nada.**
+
+**Regla:** la app Android vive en otro repo ([tvmaty2186/Betometro](https://github.com/tvmaty2186/Betometro)) y **no se toca**. Este repo es solo la Raspberry.
+
+## Qué es
+
+- Equipo **autónomo**: no necesita el celular para nada.
+- **Betómetro es el sistema operativo:** se prende y arranca directo en Betómetro. No hay escritorio, ni usuario, ni navegador.
+- Programa **nativo, hecho de cero**. No es un emulador de la app del celular.
+
+## Equipo
+
+- Raspberry Pi 3 B+
+- Pantalla Raspberry Pi Touch Display 2 de 7" (DSI)
+- GPS GY-NEO-M8N por UART (cableado en [cableado-gps.png](cableado-gps.png))
+- Amplificador MAX98357A (I2S) con parlante de 3 W 4 Ω, para la voz (falta comprar)
+- Pulsador en GPIO
+
+### Pines
+
+| Pin | Uso |
+|---|---|
+| 2 y 6 | Alimentación de la pantalla |
+| 4 (5 V), 14 (GND) | GPS |
+| 8 (TX) → RXD del GPS | GPS |
+| 10 (RX) ← TXD del GPS | GPS |
+| 7 (GPIO4) | PPS del GPS (opcional) |
+| 12, 35, 40 | Amplificador I2S |
+| 11 (GPIO17) y 9 (GND) | Pulsador (propuesto) |
+
+- El Bluetooth se apaga (`dtoverlay=disable-bt`) para usar el UART bueno con el GPS.
+- El GPS se configura al arrancar: solo GPS, **10 Hz**, 115200 baudios.
+- La hora del sistema se toma del GPS (la Raspberry no tiene reloj propio).
+
+## Sistema operativo
+
+**Buildroot**: un Linux armado a medida, solo con lo necesario.
+
+Por qué (para que no se tilde ni se trabe):
+- Pocos programas corriendo: arranca rápido (unos 10–15 s) y no hay nada que compita con Betómetro.
+- **Sistema de solo lectura:** cortar el contacto no lo rompe.
+- Las carreras van en una partición aparte, con escritura segura (archivo nuevo y después reemplazo).
+- **Vigilante (watchdog) del procesador:** si el programa se colgara, la Raspberry se reinicia sola y vuelve a Betómetro.
+- **Dos copias del sistema (A y B):** la actualización se escribe en la copia que no se está usando. Si la nueva no arranca bien, vuelve sola a la anterior.
+
+GitHub Actions arma la imagen completa (`.img`). La primera vez se graba en la tarjeta con Raspberry Pi Imager.
+
+## Programa
+
+- **Qt 6 con QML**, dibujando directo en la pantalla (EGLFS), con aceleración de la placa de video. Es lo que se usa en tableros de autos.
+- **Motor:** se reescribe en C++ con la misma lógica que `Motor` de la app. Se prueba con los mismos datos que el motor de la app: tienen que dar igual.
+- **Vertical u horizontal:** lo elige el usuario desde el inicio o desde Ajustes. Cada orientación tiene su armado de pantalla.
+- **Voz:** Piper (voz natural, español argentino). Los números y frases se graban al armar la imagen; la Raspberry solo los reproduce, sin demora.
+- **Diseño:** misma línea estética que la app (temas, Avispón Verde). Antes de programar, se muestran imágenes de muestra.
+
+## Wifi
+
+- Ajustes → Wifi: elegir red y escribir la clave con teclado en pantalla.
+- En la pista lo normal es conectarse a la **zona wifi del celular**.
+
+## Informes
+
+- Se ven **en la pantalla de la Raspberry** (mapa, velocidad, aceleración, tabla), dibujados por el programa.
+- **Compartir por wifi:** la Raspberry muestra un **código QR**. Con el celular en la misma red, se escanea y se descarga el informe en HTML, igual al de la app.
+
+## Actualizaciones
+
+- Solo cuando el usuario quiere: Ajustes → Actualizar, o tocando la versión con el texto amarillo «· Actualizar» en el inicio.
+- Busca la última *release* de GitHub, descarga el paquete del sistema y lo instala en la otra copia (A/B). Reinicia en la versión nueva.
+
+## Pantallas (muestras aprobadas, horizontal 1280×720)
+
+Imágenes: [muestras-horizontal-1.png](muestras-horizontal-1.png), [-2](muestras-horizontal-2.png), [-3](muestras-horizontal-3.png).
+Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizontal.html) (usa las fuentes y las imágenes de `recursos/`). Para regenerar, se abre con Playwright a 1280×720 y se saca captura de cada `#s1`…`#s12`.
+
+**Regla de estética:** los temas, colores, tipografías y componentes son **iguales a la app** en todo lo posible (ver [diseno-app.md](diseno-app.md), copia de la guía de la app).
+
+| # | Pantalla | Qué tiene |
+|---|---|---|
+| 1 | Inicio | Cabecera Avispón (león, título cromo, rayas, versión con «· Actualizar» amarillo). La foto de los pilotos ocupa casi toda la izquierda (a Matías le parece bien). 101 sobre la banda, nombre del auto y chips de GPS y wifi. Velocímetro crema a la derecha y los 5 botones en arco, con el nombre a la izquierda de cada disco (de abajo hacia arriba: Carreras, Práctica libre, Chequeo previo, Pantalla de carrera, Ajustes). |
+| 2 | Carreras | Bandas PRÓXIMAS y CORRIDAS, fecha en redondel cromado, LARGAR en cada próxima, Informe en cada corrida, «+ Nueva». |
+| 3 | Ficha de la carrera | A la izquierda los datos editables (nombre, fecha, vueltas, distancia, tiempo ideal, vueltas medidas, velocidad promedio). A la derecha el resumen, las vueltas medida/práctica y LARGAR grande. |
+| 4 | Carrera en curso | Arriba: tipo de vuelta (V3 MEDIDA), cuenta «Falta» enorme con metros y barra, Sugerida. Abajo: velocidad digital con barra, Última vuelta y MARCAR. Línea superior con la carrera, el estado del GPS y Terminar. |
+| 5 | Práctica libre | Tiempo ideal, distancia, vueltas medidas y LARGAR grande. |
+| 6 | Chequeo previo | GPS (satélites, precisión, lecturas por segundo, hora del GPS), pulsador, voz y volumen, wifi, lugar libre, TODO LISTO. |
+| 7 | Pantalla de carrera (editor) | Barra con Vertical/Horizontal, + Widget, De fábrica, Guardar. Widgets con borde punteado amarillo y ✎. |
+| 8 | Ajustes | Mi auto, Tema y pantalla (tema, **orientación**, modo sol, **brillo**), Cuenta regresiva, Conexión y sistema (**wifi**, **versión y Actualizar**, **Apagar el equipo**). |
+| 9 | Wifi | Lista de redes, clave y teclado en pantalla con ñ. |
+| 10 | Informe | Recorrido coloreado por velocidad, gráfico de velocidad, tabla de vueltas con error, Compartir. |
+| 11 | Compartir por QR | Código QR y los 3 pasos para bajarlo al celular en la misma red. |
+| 12 | Actualizar | Versión actual → nueva, qué trae, barra de descarga. Se instala en la copia de reserva; si falla vuelve sola a la anterior. |
+
+Lo nuevo respecto de la app: orientación, brillo, wifi, apagar el equipo, chequeo con hora del GPS y lugar libre, compartir por QR y la pantalla de actualizar.
+
+## Pendiente de definir
+
+- Muestras de las mismas pantallas en **vertical** (720×1280).
+- Después: empezar a programar (imagen Buildroot, motor en C++, pantallas en Qt).
