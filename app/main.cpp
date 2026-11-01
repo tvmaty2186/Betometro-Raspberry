@@ -21,6 +21,7 @@
 #include "contexto.h"
 #include "crono.h"
 #include "datos.h"
+#include "audio.h"
 #include "gps.h"
 #include "qr.h"
 #include "sistema.h"
@@ -80,6 +81,11 @@ int main(int argc, char* argv[]) {
     GpsSimulado* simulado = op.isSet(oSinGps) ? nullptr : new GpsSimulado(&app);
     Crono crono(&datos, simulado ? static_cast<FuenteGps*>(simulado) : &sinGps);
 
+    Audio audio;
+    audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());
+    QObject::connect(&datos, &Datos::cfgChanged, &audio, [&] { audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble()); });
+    QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
+    QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
     Sistema sistema;
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
@@ -89,6 +95,7 @@ int main(int argc, char* argv[]) {
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
+    motor.rootContext()->setContextProperty(QStringLiteral("Audio"), &audio);
     motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
     motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);

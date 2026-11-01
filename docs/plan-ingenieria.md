@@ -154,7 +154,10 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
   - **HTML del informe:** la plantilla de la app copiada a `recursos/informe-plantilla.html`, con la vuelta interrumpida (sin error, no suma). Se guarda en `datos/informes/` con el nombre de la app («🏁 nombre dd-mm-aaaa.html»).
   - **Compartir:** QR a `http://betometro.local/informe/<id>` y los 3 pasos. La página que lo sirve va en E5.
   - **Chequeo:** GPS (señal, precisión, lecturas por segundo, hora), prueba del pulsador (la próxima marca no larga), voz, wifi, lugar libre y TODO LISTO.
-  - **Actualizar:** pantalla de la muestra; en la PC la descarga es simulada (la real con RAUC va en E5). Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+  - **Actualizar:** pantalla de la muestra; en la PC la descarga es simulada (la real con RAUC va en E5).
+- **Voz** (01/11/2026): programador de voz en C++ (`app/nucleo/programador.*`) con la lógica de la app: cuenta hacia abajo con anticipo, «cero» o pitido largo, pitidos en vez de voz, tic cada X s, «Vuelta N, medida», «Última vuelta…», «Carrera completa», clic en cada marca aceptada.
+  - Audios grabados con **Piper**, voz «Daniela» (español de Argentina, CC BY-SA 4.0): `voz/grabar.py` arma 192 archivos (cero y 1 a 60, «Vuelta 1…60, medida/práctica», pitidos, clic), sin silencio al principio. Se arman con `cmake --build build --target voz`; en la Raspberry, al armar la imagen (E3).
+  - Se cargan todos en memoria al arrancar (Qt Multimedia). Volumen de Ajustes en vivo; ▶ Probar dice «Betómetro listo». Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

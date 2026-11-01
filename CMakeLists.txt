@@ -15,6 +15,7 @@ add_library(nucleo STATIC
   app/nucleo/modelo.cpp
   app/nucleo/almacen.cpp
   app/nucleo/informe.cpp
+  app/nucleo/programador.cpp
 )
 target_include_directories(nucleo PUBLIC app/nucleo)
 target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
@@ -24,14 +25,19 @@ target_compile_options(nucleo PUBLIC -fno-fast-math -ffp-contract=off)
 # Programa (Qt 6). Si no hay Qt, se compila solo el núcleo y sus pruebas.
 option(BETO_PROGRAMA "Compilar el programa con pantalla (necesita Qt 6)" ON)
 if(BETO_PROGRAMA)
-  find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg)
+  find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg Multimedia)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
-    qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/sistema.h
+    qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/sistema.h app/audio.h app/audio.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
     target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
     add_subdirectory(app/qml)
-    target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg betometro_qmlplugin)
+    target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg Qt6::Multimedia betometro_qmlplugin)
+    # Voz: se graba con Piper (voz/grabar.py) en build/voz. Se arma a mano: cmake --build build --target voz
+    find_package(Python3 COMPONENTS Interpreter)
+    if(Python3_FOUND)
+      add_custom_target(voz COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/voz/grabar.py ${CMAKE_BINARY_DIR}/voz)
+    endif()
     file(GLOB BETO_FUENTES RELATIVE ${CMAKE_SOURCE_DIR} recursos/fuentes/*)
     qt_add_resources(betometro recursos
       PREFIX "/"

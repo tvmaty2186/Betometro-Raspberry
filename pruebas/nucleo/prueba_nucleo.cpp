@@ -15,6 +15,7 @@
 #include "json.h"
 #include "modelo.h"
 #include "motor.h"
+#include "programador.h"
 
 using namespace beto;
 
@@ -348,7 +349,62 @@ static void almacen() {
     if (std::system(limpiar.c_str()) != 0) std::cerr << "no pude borrar " << dir << "\n";
 }
 
+static void voz() {
+    using T = Sonido::Tipo;
+    // Una vuelta de 60 s, cuenta de 20 s en voz, anticipo 40 ms: se recorre cada 15 ms
+    auto correr = [](const AjustesVoz& a, double T_ms, double hasta) {
+        ProgramadorVoz p;
+        p.reiniciarVuelta();
+        std::vector<std::pair<double, Sonido>> dichos;
+        for (double t = 0; t <= hasta; t += 15) {
+            Estado e;
+            e.enCurso = true;
+            e.transMs = t;
+            e.restanteMs = T_ms - t;
+            for (const auto& s : p.tic(e, a)) dichos.push_back({t, s});
+        }
+        return dichos;
+    };
+    AjustesVoz a;
+    auto d = correr(a, 60000, 62000);
+    IGUAL(d.size(), size_t(21));                         // 20, 19, …, 1 y «cero»
+    IGUAL(d.front().second.numero, 20);
+    CHEQUEAR(d.front().first >= 40000 - 40 - 15 && d.front().first <= 40000 - 40 + 15);   // adelantado 40 ms
+    IGUAL(d[19].second.numero, 1);
+    CHEQUEAR(d.back().second.tipo == T::Cero);
+    CHEQUEAR(d.back().first >= 60000 - 40 - 15 && d.back().first <= 60000);
+    // Nunca repite ni vuelve atrás
+    for (size_t i = 1; i < 20; ++i) IGUAL(d[i].second.numero, d[i - 1].second.numero - 1);
+    // Pitido largo en vez de «cero», sin anticipo
+    a.pitidoCero = true;
+    d = correr(a, 60000, 62000);
+    CHEQUEAR(d.back().second.tipo == T::PitidoLargo);
+    CHEQUEAR(d.back().first >= 60000 && d.back().first <= 60015);
+    // Pitidos en vez de voz: sin anticipo, 20 pitidos cortos + el del cero
+    a = AjustesVoz{};
+    a.enVoz = false;
+    d = correr(a, 60000, 62000);
+    IGUAL(d.size(), size_t(21));
+    CHEQUEAR(d.front().second.tipo == T::PitidoCorto && d.front().first >= 40000 && d.front().first <= 40000 + 15);
+    // Sin cuenta: nada (ni «cero»)
+    a = AjustesVoz{};
+    a.cuentaN = 0;
+    IGUAL(correr(a, 60000, 62000).size(), size_t(0));
+    // Tic cada 10 s: en 10, 20, 30 (a los 40 ya empieza la cuenta: se calla)
+    a = AjustesVoz{};
+    a.pitidoCadaS = 10;
+    d = correr(a, 60000, 39000);
+    IGUAL(d.size(), size_t(3));
+    CHEQUEAR(d[0].second.tipo == T::Tic);
+    // Anuncios
+    IGUAL(*anuncioVuelta(3, true, 10), std::string("Vuelta 3, medida"));
+    IGUAL(*anuncioVuelta(10, false, 10), std::string("Última vuelta, práctica"));
+    CHEQUEAR(!anuncioVuelta(11, true, 10).has_value());
+    IGUAL(*anuncioVuelta(25, true, 0), std::string("Vuelta 25, medida"));
+}
+
 int main() {
+    voz();
     redondeos();
     json();
     vueltaInterrumpida();

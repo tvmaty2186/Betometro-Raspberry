@@ -25,6 +25,10 @@ int main(int argc, char** argv) {
     // avanzar el tiempo con GPS a 10 Hz y velocidad constante
     auto andar = [&](double hasta, double v) { while (ahora < hasta) { ahora += 100; gps.dar(ahora, v); } };
 
+    QStringList sonidos, frases;
+    QObject::connect(&crono, &Crono::sonido, [&](const QString& s) { sonidos << s; });
+    QObject::connect(&crono, &Crono::frase, [&](const QString& f) { frases << f; });
+
     // 1) Práctica: no existe hasta largar
     datos.ponerCfg("tiempoIdealMs", 60000);
     datos.ponerCfg("distanciaM", 1000);
@@ -75,6 +79,11 @@ int main(int argc, char** argv) {
     CHEQUEAR(c && c->vueltas[0].medida && !c->vueltas[1].medida);   // alt1
     CHEQUEAR(c && c->vueltas[0].fuente == "pulsador");
     CHEQUEAR(datos.carrera(id)["finalizada"].toBool());
+    // Voz: anuncio de cada vuelta, «Última vuelta» y «Carrera completa»; clic en cada marca aceptada
+    CHEQUEAR(frases.contains("Vuelta 1, medida"));
+    CHEQUEAR(frases.contains("Última vuelta, práctica"));
+    CHEQUEAR(frases.last() == "Carrera completa");
+    CHEQUEAR(sonidos.count("clic") == 5);   // práctica: largada y 1 marca (la ignorada no suena); carrera: largada y 2 marcas
 
     // 3) Sin GPS: anda igual (solo cronómetro)
     QTemporaryDir dir2;

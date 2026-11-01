@@ -75,8 +75,8 @@ Item {
                     Row { spacing: 12
                         Deslizador { width: raiz.h ? 170 : 220; valor: vol.v; anchors.verticalCenter: parent.verticalCenter
                             property QtObject vol: QtObject { property real v: raiz.a.volumen }
-                            onMovido: x => vol.v = x; onSoltado: x => raiz.poner("volumen", x) }
-                        BotonCromo { width: 100; height: 42; texto: "▶ Probar"; tamTexto: 15; onTocado: Navegacion.avisar("La voz llega en la próxima parte") } } }
+                            onMovido: x => { vol.v = x; Audio.ponerVolumen(x); }; onSoltado: x => { raiz.poner("volumen", x); Audio.probar(); } }
+                        BotonCromo { width: 100; height: 42; texto: "▶ Probar"; tamTexto: 15; onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") } } }
                 Fila { etiqueta: "Segundos que cuenta en voz"
                     Campo { texto: raiz.a.cuentaN; onTocado: raiz.editar("cuentaN", "numero", "Segundos que cuenta en voz (0 a 60, 0 = sin cuenta)", raiz.a.cuentaN, 2) } }
                 Fila { etiqueta: "Cómo contar"

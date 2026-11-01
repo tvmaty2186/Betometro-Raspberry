@@ -13,6 +13,7 @@
 #include "gps.h"
 #include "modelo.h"
 #include "motor.h"
+#include "programador.h"
 
 class Crono : public QObject {
     Q_OBJECT
@@ -52,11 +53,14 @@ signals:
     void aviso(const QString& texto);
     void marcado(const QString& resultado);  // largada, marca, ignorada
     void terminada(const QString& motivo, int vueltas, const QString& id);
+    void sonido(const QString& nombre);      // «n05», «clic», «vuelta_03_m»… (lo reproduce Audio)
+    void frase(const QString& texto);        // «Vuelta 3, medida», «Carrera completa»
 
 private:
     void alEvento(beto::Evento e, const beto::DatosEvento& d);
     void alMuestra(const beto::Muestra& m);
     void refrescar();
+    void voz();
     void terminarCon(const QString& motivo, bool aMano);
 
     Datos* datos_;
@@ -72,6 +76,8 @@ private:
     double velMaxVuelta_ = 0;
     QString terminarPendiente_;
     QTimer reloj_;
+    QTimer relojVoz_;
+    beto::ProgramadorVoz programador_;
     std::function<double()> reloj_ms_ = ahoraMs;
     QVariantMap info_, estado_, ultima_, gpsInfo_;
     std::vector<double> tiemposGps_;

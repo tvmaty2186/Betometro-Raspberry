@@ -72,7 +72,7 @@ Item {
                 TituloTarjeta { texto: "Voz y auriculares" }
                 Fila { etiqueta: "Volumen"; Sub { text: Math.round(Datos.ajustes.volumen) + " %"; tam: 16 } }
                 Fila { etiqueta: "Probar la voz"
-                    BotonCromo { width: 150; height: 48; tamTexto: 16; texto: "▶ Probar"; onTocado: Navegacion.avisar("La voz llega en la próxima parte") } }
+                    BotonCromo { width: 150; height: 48; tamTexto: 16; texto: "▶ Probar"; onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") } }
                 TituloTarjeta { texto: "Wifi" }
                 Fila { etiqueta: "Conectado a"
                     Text { text: Wifi.conectada || "Sin conexión"; color: Tema.blanco; font { family: Tema.fuente800; pixelSize: 20 } } }

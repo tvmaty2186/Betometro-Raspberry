@@ -13,6 +13,10 @@ Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), dat
     reloj_.setInterval(50);   // pantalla: 20 veces por segundo (la voz va aparte, cada 15 ms)
     connect(&reloj_, &QTimer::timeout, this, &Crono::refrescar);
     reloj_.start();
+    relojVoz_.setTimerType(Qt::PreciseTimer);
+    relojVoz_.setInterval(15);   // como la app
+    connect(&relojVoz_, &QTimer::timeout, this, &Crono::voz);
+    relojVoz_.start();
 }
 
 void Crono::preparar(const QString& id) {
@@ -77,6 +81,7 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         vueltasGuardadas_ = 0;
         ultima_.clear();
         emit ultimaChanged();
+        if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
         motor_->marcar(t, fuente.toStdString());
         // la distancia arranca justo en la largada: la última lectura con la hora de la marca
         if (ultimaMuestra_) {
@@ -96,10 +101,12 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         return QStringLiteral("ignorada");
     }
     emit marcado(QStringLiteral("marca"));
+    if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
     if (!terminarPendiente_.isEmpty()) {
         const QString motivo = terminarPendiente_;
         terminarPendiente_.clear();
         terminarCon(motivo, false);
+        if (motivo == QStringLiteral("Carrera completa")) emit frase(motivo);
     }
     refrescar();
     return QStringLiteral("marca");
@@ -123,10 +130,15 @@ void Crono::terminarCon(const QString& motivo, bool aMano) {
 
 void Crono::alEvento(Evento e, const DatosEvento& d) {
     switch (e) {
-        case Evento::Vuelta:
+        case Evento::Vuelta: {
             velMaxVuelta_ = 0;
             traza_.empezar(d.inicio);
+            programador_.reiniciarVuelta();
+            const int total = datosLargada_ ? datosLargada_->vueltasTotal : 0;
+            if (datos_->config()["avisoInicio"].aBool(true))
+                if (auto f = anuncioVuelta(d.n, d.medida, total)) emit frase(QString::fromStdString(*f));
             break;
+        }
         case Evento::Cerrada:
         case Evento::Interrumpida: {
             const VueltaMotor& v = *d.vuelta;
@@ -182,4 +194,25 @@ void Crono::refrescar() {
                {"velMaxVuelta", velMaxVuelta_}, {"vueltasTotal", datosLargada_->vueltasTotal},
                {"tiempoIdealMs", datosLargada_->tiempoIdealMs}, {"distanciaM", datosLargada_->distanciaM}};
     emit estadoChanged();
+}
+
+void Crono::voz() {
+    if (!enCurso()) return;
+    const Json& cfg = datos_->config();
+    AjustesVoz a;
+    a.cuentaN = static_cast<int>(cfg["cuentaN"].aNumero(20));
+    a.enVoz = cfg["modoCuenta"].aTexto("voz") == "voz";
+    a.anticipoMs = cfg["anticipoMs"].aNumero(40);
+    a.pitidoCero = cfg["pitidoCero"].aBool(false);
+    a.pitidoCadaS = cfg["pitidoCadaS"].aNumero(0);
+    for (const Sonido& s : programador_.tic(motor_->estado(reloj_ms_()), a)) {
+        switch (s.tipo) {
+            case Sonido::Tipo::Numero: emit sonido(QStringLiteral("n%1").arg(s.numero, 2, 10, QLatin1Char('0'))); break;
+            case Sonido::Tipo::Cero: emit sonido(QStringLiteral("n00")); break;
+            case Sonido::Tipo::PitidoCorto: emit sonido(QStringLiteral("corto")); break;
+            case Sonido::Tipo::PitidoLargo: emit sonido(QStringLiteral("largo")); break;
+            case Sonido::Tipo::Tic: emit sonido(QStringLiteral("tic")); break;
+            case Sonido::Tipo::Frase: emit frase(QString::fromStdString(s.frase)); break;
+        }
+    }
 }
