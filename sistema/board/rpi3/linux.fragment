@@ -1,0 +1,9 @@
+# Sistema en squashfs, sin initramfs: tiene que estar adentro del kernel
+CONFIG_SQUASHFS=y
+CONFIG_SQUASHFS_ZSTD=y
+CONFIG_SQUASHFS_XATTR=y
+# Vigilante del procesador
+CONFIG_WATCHDOG=y
+CONFIG_BCM2835_WDT=y
+# Sin consola en el puerto serie (es del GPS)
+CONFIG_SERIAL_AMBA_PL011_CONSOLE=n

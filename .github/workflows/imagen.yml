@@ -1,0 +1,79 @@
+name: Imagen para la Raspberry
+
+# Arma la imagen completa (Buildroot): betometro-X.Y.Z.img.xz para grabar con Raspberry Pi Imager.
+# Tarda: la primera vez unas 3 horas; después, con la caché, bastante menos.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+    paths: ['sistema/**', '.github/workflows/imagen.yml']
+
+env:
+  BUILDROOT: 2026.02.3
+
+jobs:
+  imagen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hacer lugar en el disco (Buildroot con Qt necesita unos 25 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Herramientas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential rsync cpio unzip bc file wget python3 python3-pip libncurses-dev
+
+      - name: Caché de descargas y compilación
+        uses: actions/cache@v4
+        with:
+          path: |
+            sistema/cache
+            ~/.cache/betometro-voz
+          key: buildroot-${{ env.BUILDROOT }}-${{ hashFiles('sistema/configs/*', 'sistema/board/rpi3/linux.fragment') }}-${{ github.run_id }}
+          restore-keys: |
+            buildroot-${{ env.BUILDROOT }}-${{ hashFiles('sistema/configs/*', 'sistema/board/rpi3/linux.fragment') }}-
+            buildroot-${{ env.BUILDROOT }}-
+
+      - name: Voz (Piper)
+        run: |
+          pip install --break-system-packages piper-tts
+          python3 voz/grabar.py sistema/voz-grabada
+
+      - name: Buildroot
+        run: |
+          wget -q https://buildroot.org/downloads/buildroot-${BUILDROOT}.tar.xz
+          tar xf buildroot-${BUILDROOT}.tar.xz
+          make -C buildroot-${BUILDROOT} BR2_EXTERNAL=$PWD/sistema O=$PWD/salida betometro_rpi3_defconfig
+
+      - name: Compilar la imagen
+        run: make -C salida -j$(nproc) 2>&1 | tee compilacion.log | grep -E '^>>>|[Ee]rror' || true; test ${PIPESTATUS[0]} -eq 0
+
+      - name: Registro de la compilación (si falló)
+        if: failure()
+        run: tail -n 300 compilacion.log
+
+      - name: Nombre con la versión
+        id: v
+        run: |
+          V=$(grep -oP 'project\(betometro VERSION \K[0-9.]+' CMakeLists.txt)
+          cp salida/images/betometro.img.xz betometro-$V.img.xz
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          ls -la salida/images
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betometro-${{ steps.v.outputs.version }}
+          path: betometro-${{ steps.v.outputs.version }}.img.xz
+          retention-days: 30
+
+      - name: Publicar en la versión (solo con etiqueta v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: betometro-${{ steps.v.outputs.version }}.img.xz

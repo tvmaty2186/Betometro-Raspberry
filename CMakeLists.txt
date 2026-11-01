@@ -34,6 +34,7 @@ if(BETO_PROGRAMA)
       app/terceros/qrcodegen/qrcodegen.cpp)
     target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
     add_subdirectory(app/qml)
+    install(TARGETS betometro RUNTIME DESTINATION bin)
     target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg Qt6::Multimedia betometro_qmlplugin)
     # Voz: se graba con Piper (voz/grabar.py) en build/voz. Se arma a mano: cmake --build build --target voz
     find_package(Python3 COMPONENTS Interpreter)
