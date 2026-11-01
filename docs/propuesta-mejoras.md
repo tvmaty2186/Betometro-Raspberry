@@ -1,6 +1,6 @@
 # Propuesta: conectividad y mejoras por usar la Raspberry
 
-Estado: **aprobada entera por Matías (01/11/2026).** Falta que apruebe la muestra visual de Conectividad. Nada de esto está programado.
+Estado: **aprobada entera por Matías (01/11/2026).** Muestra visual de Conectividad aprobada («Hermoso», 01/11/2026). Nada de esto está programado.
 
 Muestras: [Conectividad horizontal](muestras-conectividad-horizontal.png), [vertical](muestras-conectividad-vertical.png) y [la página en el celular](muestras-red-celular.png). Fuente: [muestras/conectividad.html](muestras/conectividad.html) (`#c1`, `#c2`, `#c3`).
 

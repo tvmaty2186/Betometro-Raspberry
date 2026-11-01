@@ -18,7 +18,7 @@ Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respald
 Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). Plan aprobado por Matías el 01/11/2026.
 
 - **E1 hecha** (01/11/2026): motor y modelo de datos en C++, idénticos a la app. Informe: [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md).
-- **Propuesta aprobada entera** (01/11/2026): conectividad, GPS y mejoras → [docs/propuesta-mejoras.md](docs/propuesta-mejoras.md). **Falta el OK de Matías a la muestra de Conectividad.**
+- **Propuesta aprobada entera** (01/11/2026): conectividad, GPS y mejoras → [docs/propuesta-mejoras.md](docs/propuesta-mejoras.md). Muestra de Conectividad aprobada.
 - **Sigue E2:** programa completo en PC (Qt 6).
 
 - Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.

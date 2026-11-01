@@ -93,7 +93,7 @@ Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizon
 | 7 | Pantalla de carrera (editor) | Barra con Vertical/Horizontal, + Widget, De fábrica, Guardar. Widgets con borde punteado amarillo y ✎. |
 | 8 | Ajustes | Mi auto, Tema y pantalla (tema, **orientación**, modo sol, **brillo**), Voz y sonido (**volumen auriculares** con Probar, cuenta regresiva), Conexión y sistema (**wifi**, **versión y Actualizar**, **Apagar el equipo**). |
 | 9 | Wifi (clave) | Lista de redes, clave y teclado en pantalla con ñ. Se abre al tocar una red en Conectividad. |
-| 13 | Conectividad | Estado, Betómetro en la red (QR y `betometro.local`), redes guardadas con Olvidar, redes cerca y Buscar. Se entra desde Ajustes → Conexión y sistema → Conectividad. Muestra: [horizontal](muestras-conectividad-horizontal.png), [vertical](muestras-conectividad-vertical.png) (falta el OK). |
+| 13 | Conectividad | Estado, Betómetro en la red (QR y `betometro.local`), redes guardadas con Olvidar, redes cerca y Buscar. Se entra desde Ajustes → Conexión y sistema → Conectividad. Muestra: [horizontal](muestras-conectividad-horizontal.png), [vertical](muestras-conectividad-vertical.png) (aprobadas). |
 | 10 | Informe | Recorrido coloreado por velocidad, gráfico de velocidad, tabla de vueltas con error, Compartir. |
 | 11 | Compartir por QR | Código QR y los 3 pasos para bajarlo al celular en la misma red. |
 | 12 | Actualizar | Versión actual → nueva, qué trae, barra de descarga. Se instala en la copia de reserva; si falla vuelve sola a la anterior. |
