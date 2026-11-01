@@ -2,7 +2,7 @@
 // (UBX NAV-PVT, o NMEA con --nmea), como si el auto diera vueltas a un circuito.
 // Solo para desarrollo: el programa lee el puerto igual que el UART real de la Raspberry.
 //
-// Uso: simular_neo [--enlace /tmp/betometro-gps] [--hz 10] [--kmh 48] [--largo 3200] [--nmea]
+// Uso: simular_neo [--enlace /tmp/betometro-gps] [--hz 5] [--kmh 48] [--largo 3200] [--nmea]
 //                  [--mala 0.05] [--corte 20] [--segundos N]
 //   --mala P     probabilidad de una lectura con mala precisión (30 a 60 m)
 //   --corte S    cada vuelta, S segundos sin señal (como entre árboles)
@@ -25,7 +25,7 @@
 
 int main(int argc, char** argv) {
     std::string enlace = "/tmp/betometro-gps";
-    double hz = 10, kmh = 48, largo = 3200, mala = 0, corte = 0, segundos = 0;
+    double hz = 5, kmh = 48, largo = 3200, mala = 0, corte = 0, segundos = 0;
     bool nmea = false;
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         else if (a == "--nmea") nmea = true;
         else { std::fprintf(stderr, "Opción desconocida: %s\n", a.c_str()); return 2; }
     }
-    const int maestro = posix_openpt(O_RDWR | O_NOCTTY);
+    const int maestro = posix_openpt(O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (maestro < 0 || grantpt(maestro) || unlockpt(maestro)) { std::perror("posix_openpt"); return 1; }
     const char* esclavo = ptsname(maestro);
     termios t{};
@@ -53,6 +53,33 @@ int main(int argc, char** argv) {
                 nmea ? "NMEA" : "UBX NAV-PVT", hz, kmh, largo);
     std::fflush(stdout);
 
+    // Como un NEO-M8N original: contesta la versión (MON-VER) y acepta la configuración (ACK-ACK)
+    beto::VersionNeo version{"EXT CORE 3.01 (107888)", "00080000",
+                             {"ROM BASE 2.01 (75331)", "FWVER=SPG 3.01", "PROTVER=18.00", "MOD=NEO-M8N-0", "GPS;GLO;GAL;BDS", "SBAS;IMES;QZSS"}};
+    std::vector<uint8_t> entrada;
+    auto atender = [&] {
+        uint8_t b[512];
+        ssize_t n;
+        while ((n = read(maestro, b, sizeof b)) > 0) entrada.insert(entrada.end(), b, b + n);
+        size_t i = 0;
+        while (i + 8 <= entrada.size()) {
+            if (entrada[i] != 0xB5 || entrada[i + 1] != 0x62) { ++i; continue; }
+            const size_t largo = entrada[i + 4] | (entrada[i + 5] << 8);
+            if (i + 8 + largo > entrada.size()) break;
+            const uint8_t clase = entrada[i + 2], id = entrada[i + 3];
+            std::vector<uint8_t> r;
+            if (clase == 0x0A && id == 0x04) r = beto::armarMonVer(version);
+            else if (clase == 0x06) {
+                r = {0xB5, 0x62, 0x05, 0x01, 0x02, 0x00, clase, id};
+                uint8_t a = 0, c = 0;
+                for (size_t k = 2; k < r.size(); ++k) { a = static_cast<uint8_t>(a + r[k]); c = static_cast<uint8_t>(c + a); }
+                r.push_back(a); r.push_back(c);
+            }
+            if (!r.empty() && write(maestro, r.data(), r.size()) < 0) break;
+            i += 8 + largo;
+        }
+        entrada.erase(entrada.begin(), entrada.begin() + static_cast<long>(i));
+    };
     std::mt19937 azar(7);
     std::uniform_real_distribution<double> u(0, 1);
     const double paso = 1.0 / hz, base = kmh / 3.6, R = largo / (2 * M_PI);
@@ -89,6 +116,7 @@ int main(int argc, char** argv) {
                 if (write(maestro, m.data(), m.size()) < 0) break;
             }
         }
+        atender();
         iTOW += static_cast<uint32_t>(1000 / hz);
         s += paso;
         proximo += std::chrono::microseconds(static_cast<long>(1e6 / hz));

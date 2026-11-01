@@ -47,11 +47,11 @@ El GPS del celular da 1 lectura por segundo y una precisión que inventa Android
 
 | # | Mejora | Qué se gana |
 |---|---|---|
-| G1 | **10 lecturas por segundo con GPS + GLONASS** (más satélites), en vez de solo GPS. Se confirma en E4 que el módulo lo sostiene | Más satélites → menos error y menos cortes entre árboles o edificios |
+| G1 | **GPS + GLONASS** (más satélites). **Corregido el 01/11/2026:** el NEO-M8N llega a **5 Hz** con dos sistemas y a 10 Hz con GPS solo (hoja de datos de u-blox). De fábrica 5 Hz con GPS + GLONASS; en E4 se compara con GPS solo a 10 Hz. Ver [gps-neo-m8n.md](gps-neo-m8n.md) | Más satélites → menos error y menos cortes entre árboles o edificios |
 | G2 | **Hora de cada lectura según el reloj del GPS**, no la hora a la que llegó por el cable | Las lecturas quedan exactas cada 100 ms. La distancia sale más pareja |
 | G3 | **PPS** (el pulso por segundo del GPS, pin 7) para atar el reloj de la Raspberry al del GPS | Se sabe cuánto tarda en llegar cada lectura y se corrige |
 | G4 | Usar el **error de la velocidad** que da el GPS (`sAcc`), además del de la posición | La distancia sale de la velocidad: descartar las velocidades dudosas es lo que de verdad importa |
-| G5 | **«Sin GPS» a 1 s** en vez de 3 s (con 10 Hz, 1 s son 10 lecturas perdidas) | Avisa antes cuando se pierde la señal |
+| G5 | **«Sin GPS» a 1 s** en vez de 3 s (con 5 Hz, 1 s son 5 lecturas perdidas) | Avisa antes cuando se pierde la señal |
 | G6 | Solo lecturas con **posición 3D buena** (el GPS lo marca) | Se evitan lecturas sueltas malas al arrancar |
 | G7 | **Arranque en caliente:** con la pila del módulo, el GPS guarda los satélites | Tiene señal en segundos al prender |
 

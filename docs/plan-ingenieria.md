@@ -159,10 +159,10 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
   - Audios grabados con **Piper**, voz «Daniela» (español de Argentina, CC BY-SA 4.0): `voz/grabar.py` arma 192 archivos (cero y 1 a 60, «Vuelta 1…60, medida/práctica», pitidos, clic), sin silencio al principio. Se arman con `cmake --build build --target voz`; en la Raspberry, al armar la imagen (E3).
   - Se cargan todos en memoria al arrancar (Qt Multimedia). Volumen de Ajustes en vivo; ▶ Probar dice «Betómetro listo».
 - **Simulador del NEO-M8N y lector del GPS** (01/11/2026):
-  - `app/nucleo/neo.*`: lee UBX NAV-PVT y NMEA (GGA + GST + RMC), arma los mismos mensajes y la configuración del módulo (115200, 10 Hz, automotor, solo NAV-PVT, guardar).
-  - `simulador/simular_neo`: crea un puerto virtual y manda lecturas a 10 Hz como si el auto diera vueltas (`--nmea`, `--mala`, `--corte`). Se usa con `betometro --gps /tmp/betometro-gps`.
+  - `app/nucleo/neo.*`: lee UBX NAV-PVT y NMEA (GGA + GST + RMC), arma los mismos mensajes y la configuración del módulo (115200, GPS + GLONASS a 5 Hz, automotor, solo NAV-PVT, guardar), MON-VER y vuelta a NMEA.
+  - `simulador/simular_neo`: crea un puerto virtual y manda lecturas a 5 Hz (`--hz`) como si el auto diera vueltas, y contesta la versión y la configuración como un NEO-M8N original (`--nmea`, `--mala`, `--corte`). Se usa con `betometro --gps /tmp/betometro-gps`.
   - `GpsNeo` (`app/gps.*`) es el mismo lector que usará el UART real: ya hace **G2** (hora de cada lectura según el GPS) y **G6** (solo posición 3D buena). G4 y G5 cambian el motor: van en E4 con su prueba y su opción en Ajustes.
-  - Probado de punta a punta: chequeo con satélites, 10 Hz y hora del GPS; carrera con UBX y con NMEA.
+  - Probado de punta a punta: chequeo con satélites, módulo y firmware, lecturas por segundo y hora del GPS; carrera con UBX y con NMEA.
 - **Editor de la pantalla de carrera** (01/11/2026): el tablero de widgets es uno solo (`widgets/Tablero.qml`) para la carrera y el editor. Tocar elige (borde amarillo y asa), mantener apretado 350 ms y arrastrar mueve con imán a 8 px y líneas fucsia, el asa cambia el tamaño (mínimos 60×44 y 70 de diámetro). ✎: redondo/cuadrado, dato extra, barra ±, quitar (MARCAR no se quita). + Widget, De fábrica (doble toque, solo la orientación elegida), Guardar. Los armados van en `widgetsH` y `widgets`, en fracciones como la app.
   - Diferencia con la app: los cambios se guardan con **Guardar** (como la muestra), no al instante. Volver sin guardar los descarta.
   - Nuevo widget «Adelantado / atrasado» (número).
@@ -212,8 +212,8 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 
 **Especificación:**
 - **GPS por UART** (cableado en [cableado-gps.png](cableado-gps.png)): `enable_uart=1`, `dtoverlay=disable-bt`, puerto `/dev/ttyAMA0`.
-- **Configuración del NEO-M8N al arrancar** (mensajes UBX): 115200 baudios, **solo GPS a 10 Hz**, modelo dinámico «automotor», salida `NAV-PVT`. Se guarda en el módulo.
-- **Mejoras G1 a G7** de [propuesta-mejoras.md](propuesta-mejoras.md): GPS + GLONASS a 10 Hz, hora de cada lectura según el GPS (`iTOW`) atada al PPS, error de velocidad (`sAcc`), «sin GPS» a 1 s, solo posición 3D buena, arranque en caliente. G4 y G5 cambian el motor: van aparte, con su prueba, y en Ajustes se puede volver a lo de la app.
+- **Configuración del NEO-M8N al arrancar** (mensajes UBX): busca la velocidad (115200 o 9600 de fábrica), pasa a 115200, **GPS + GLONASS a 5 Hz** (máximo del NEO-M8N con dos sistemas; opción GPS solo a 10 Hz), modelo dinámico «automotor», salida `NAV-PVT`, se guarda en el módulo y se repite en cada arranque (por si es una copia sin flash). Pregunta la versión (MON-VER) y la muestra en el chequeo. Ver [gps-neo-m8n.md](gps-neo-m8n.md).
+- **Mejoras G1 a G7** de [propuesta-mejoras.md](propuesta-mejoras.md): GPS + GLONASS a 5 Hz (corregido: el NEO-M8N no da 10 Hz con dos sistemas), hora de cada lectura según el GPS (`iTOW`) atada al PPS, error de velocidad (`sAcc`), «sin GPS» a 1 s, solo posición 3D buena, arranque en caliente. G4 y G5 cambian el motor: van aparte, con su prueba, y en Ajustes se puede volver a lo de la app.
 - **Datos que se usan de `NAV-PVT`:** velocidad sobre el suelo (`gSpeed`, Doppler), posición, **precisión horizontal (`hAcc`) como «precisión»** contra el umbral de 20 m, hora UTC válida, cantidad de satélites. Así se resuelve la duda de la precisión.
 - **PPS** (opcional): para medir la demora del GPS.
 - **Hora:** cuando el GPS da hora válida, se pone en el reloj del sistema (hora de Argentina).
@@ -222,11 +222,11 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Brillo** de la pantalla desde Ajustes.
 
 **Pruebas:**
-- GPS: con antena en el techo, 10 lecturas por segundo estables, tiempo hasta tener señal.
+- GPS: con antena en el techo, 5 lecturas por segundo estables (10 con GPS solo), tiempo hasta tener señal.
 - Pulsador: 500 apretadas, ninguna perdida ni doble.
 - Voz: demora entre la hora prevista y el sonido, medida con grabación. Se ajusta el anticipo.
 
-**Aceptación:** demora de la voz menor a 50 ms; el pulsador nunca falla; el GPS da 10 Hz en el auto andando.
+**Aceptación:** demora de la voz menor a 50 ms; el pulsador nunca falla; el GPS da 5 Hz con GPS + GLONASS (o 10 Hz con GPS solo) en el auto andando; el chequeo muestra el NEO-M8N como original.
 
 ### E5 — Wifi, compartir y actualizar
 

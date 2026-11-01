@@ -45,6 +45,8 @@ Item {
                 Fila { etiqueta: "Señal"
                     Estado { bien: raiz.gpsOk; texto: !Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? "Sin señal todavía" : raiz.gpsOk ? (raiz.g.satelites ? raiz.g.satelites + " satélites" : "Funciona") : "Esperá al aire libre" } }
                 Fila { etiqueta: "Precisión"; Campo { activo: false; opacity: 1; texto: raiz.g.ok ? raiz.g.precision.toFixed(1).replace(".", ",") + " m" : "–" } }
+                Fila { etiqueta: "Módulo"; visible: !!raiz.g.modulo
+                    Estado { bien: !!raiz.g.original; texto: (raiz.g.modulo || "") + (raiz.g.firmware ? " · " + raiz.g.firmware : "") + (raiz.g.original ? "" : " · ¿copia?") } }
                 Fila { etiqueta: "Lecturas por segundo"; Campo { activo: false; opacity: 1; texto: raiz.g.ok ? raiz.g.hz : "–" } }
                 Fila { etiqueta: raiz.g.hora ? "Hora tomada del GPS" : "Hora del equipo"; ultima: true; Campo { activo: false; opacity: 1; texto: raiz.g.hora || raiz.hora } }
             }

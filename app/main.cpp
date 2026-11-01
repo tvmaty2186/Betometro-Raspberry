@@ -54,8 +54,9 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oPrueba(QStringLiteral("prueba"), QStringLiteral("Abrir algo al empezar (capturas)"), QStringLiteral("que"));
     QCommandLineOption oSinGps(QStringLiteral("sin-gps"), QStringLiteral("Sin GPS (solo cronómetro)"));
     QCommandLineOption oGps(QStringLiteral("gps"), QStringLiteral("Puerto del GPS (en la Raspberry /dev/ttyAMA0; con el simulador /tmp/betometro-gps)"), QStringLiteral("puerto"));
+    QCommandLineOption oEspera(QStringLiteral("espera"), QStringLiteral("ms antes de la captura"), QStringLiteral("ms"), QStringLiteral("1200"));
     QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
-    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps});
+    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps, oEspera});
     op.process(app);
 
     cargarFuentes();
@@ -84,7 +85,7 @@ int main(int argc, char* argv[]) {
     if (puertoGps.isEmpty()) puertoGps = qEnvironmentVariable("BETO_GPS");
     FuenteGps* gps = &sinGps;
     if (!op.isSet(oSinGps)) {
-        if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, &app);
+        if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, datos.cfg(QStringLiteral("gpsSoloGps")).toBool(), &app);
         else gps = new GpsSimulado(&app);
     }
     Crono crono(&datos, gps);
@@ -121,7 +122,7 @@ int main(int argc, char* argv[]) {
     if (op.isSet(oCaptura)) {
         auto* ventana = qobject_cast<QQuickWindow*>(motor.rootObjects().first());
         const QString archivo = op.value(oCaptura);
-        QTimer::singleShot(1200, &app, [ventana, archivo] {
+        QTimer::singleShot(op.value(oEspera).toInt(), &app, [ventana, archivo] {
             const bool ok = ventana && ventana->grabWindow().save(archivo);
             if (!ok) qWarning("No pude guardar la captura en %s", qPrintable(archivo));
             QCoreApplication::exit(ok ? 0 : 2);

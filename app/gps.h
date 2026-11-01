@@ -26,21 +26,34 @@ signals:
     void muestra(const beto::Muestra& m);
     // Datos de cada lectura que no usa el motor: satélites y hora UTC del GPS
     void datos(int satelites, const QDateTime& horaUtc);
+    // Qué módulo es (UBX-MON-VER) y cómo quedó configurado
+    void modulo(const QString& modelo, const QString& firmware, bool original, int hz);
 };
 
 // GPS real (UART de la Raspberry) o el simulador por puerto virtual: lee UBX NAV-PVT o NMEA.
 // - Solo pasan las lecturas con posición 3D buena (mejora G6).
 // - La hora de cada lectura sale del reloj del GPS (iTOW), atada al reloj del equipo (mejora G2):
 //   las lecturas quedan separadas exactamente 100 ms aunque lleguen con demoras distintas por el cable.
+// Al arrancar: busca la velocidad del puerto (115200 si ya estaba configurado, 9600 de fábrica), pregunta la
+// versión del módulo, lo pasa a 115200, lo configura (GPS + GLONASS a 5 Hz, o GPS solo a 10 Hz) y lo guarda.
+// Si después no llegan NAV-PVT (un módulo que no es M8), vuelve a NMEA, que el lector también entiende.
 class GpsNeo : public FuenteGps {
     Q_OBJECT
 public:
-    explicit GpsNeo(const QString& dispositivo, QObject* padre = nullptr);
+    explicit GpsNeo(const QString& dispositivo, bool soloGps = false, QObject* padre = nullptr);
     ~GpsNeo() override;
     bool abierto() const { return fd_ >= 0; }
 
 private:
     void leer();
+    void velocidad(int baudios);
+    void escribir(const std::vector<uint8_t>& m);
+    void detectar(int baudios);
+    void configurar(bool desde9600);
+    void revisar();
+    bool soloGps_ = false;
+    int validosAntes_ = 0;
+    bool configurado_ = false;
     QString dispositivo_;
     int fd_ = -1;
     QSocketNotifier* aviso_ = nullptr;

@@ -88,8 +88,37 @@ std::vector<LecturaGps> DecodificadorNeo::agregar(const uint8_t* datos, size_t n
     return out;
 }
 
+std::string VersionNeo::modelo() const {
+    for (const auto& e : extensiones) if (e.rfind("MOD=", 0) == 0) return e.substr(4);
+    return {};
+}
+
+std::string VersionNeo::firmware() const {
+    for (const auto& e : extensiones) if (e.rfind("FWVER=", 0) == 0) return e.substr(6);
+    return software;
+}
+
 void DecodificadorNeo::ubx(const std::vector<uint8_t>& m, std::vector<LecturaGps>& out) {
-    if (m[2] != 0x01 || m[3] != 0x07 || u2(&m[4]) < 92) return;   // solo NAV-PVT
+    const uint16_t largo = u2(&m[4]);
+    ++validos_;
+    if (m[2] == 0x05) {   // ACK-ACK (0x01) / ACK-NAK (0x00)
+        if (m[3] == 0x01) ++acks_; else if (m[3] == 0x00) ++naks_;
+        return;
+    }
+    if (m[2] == 0x0A && m[3] == 0x04 && largo >= 40) {   // MON-VER
+        auto texto = [&](size_t ini, size_t n) {
+            std::string s(reinterpret_cast<const char*>(&m[6 + ini]), n);
+            return s.substr(0, s.find('\0'));
+        };
+        VersionNeo v;
+        v.software = texto(0, 30);
+        v.hardware = texto(30, 10);
+        for (size_t i = 40; i + 30 <= largo; i += 30) v.extensiones.push_back(texto(i, 30));
+        version_ = v;
+        return;
+    }
+    if (m[2] != 0x01 || m[3] != 0x07 || largo < 92) return;   // solo NAV-PVT
+    ++navPvt_;
     const uint8_t* p = &m[6];
     LecturaGps l;
     l.iTOW = u4(p + 0);
@@ -110,6 +139,7 @@ void DecodificadorNeo::nmea(const std::string& linea, std::vector<LecturaGps>& o
     if (linea.size() < 7 || ast == std::string::npos || ast + 3 > linea.size()) return;
     const std::string cuerpo = linea.substr(1, ast - 1);
     if (sumaNmea(cuerpo) != std::strtol(linea.substr(ast + 1, 2).c_str(), nullptr, 16)) { ++errores_; return; }
+    ++validos_;
     const auto f = partes(cuerpo);
     if (f[0].size() < 5) return;
     const std::string tipo = f[0].substr(2);
@@ -190,34 +220,72 @@ std::string armarNmea(const LecturaGps& l) {
     return o.str();
 }
 
-std::vector<std::vector<uint8_t>> configuracionNeo() {
-    std::vector<std::vector<uint8_t>> r;
-    // CFG-PRT: UART1 a 115200, 8N1, entra UBX+NMEA, sale solo UBX
+std::vector<uint8_t> armarMonVer(const VersionNeo& v) {
+    std::vector<uint8_t> c(40 + 30 * v.extensiones.size(), 0);
+    std::memcpy(&c[0], v.software.data(), std::min<size_t>(29, v.software.size()));
+    std::memcpy(&c[30], v.hardware.data(), std::min<size_t>(9, v.hardware.size()));
+    for (size_t i = 0; i < v.extensiones.size(); ++i)
+        std::memcpy(&c[40 + 30 * i], v.extensiones[i].data(), std::min<size_t>(29, v.extensiones[i].size()));
+    return marco(0x0A, 0x04, c);
+}
+
+std::vector<uint8_t> pedirVersion() { return marco(0x0A, 0x04, {}); }
+
+int hzDe(bool soloGps) { return soloGps ? 10 : 5; }
+
+std::vector<uint8_t> cambioA115200() {
+    // CFG-PRT: UART1 a 115200, 8N1, entra UBX+NMEA, sale solo UBX.
+    // Ojo (protocolo, 33.10.23.2): el módulo cambia enseguida; la respuesta puede llegar ya a la velocidad nueva.
     std::vector<uint8_t> prt(20, 0);
     prt[0] = 1;
     pon4(prt, 4, 0x000008D0);
     pon4(prt, 8, 115200);
     pon2(prt, 12, 0x0003);
     pon2(prt, 14, 0x0001);
-    r.push_back(marco(0x06, 0x00, prt));
-    // CFG-RATE: una lectura cada 100 ms (10 Hz), hora GPS
+    return marco(0x06, 0x00, prt);
+}
+
+std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps) {
+    std::vector<std::vector<uint8_t>> r;
+    // CFG-GNSS: GPS (+QZSS, siempre juntos, y SBAS) y GLONASS salvo «solo GPS». Galileo y BeiDou apagados.
+    // Bloques: gnssId, canales reservados, máximo, reservado, flags (bit 0 = prender; bits 16-23 = señal L1)
+    auto bloque = [](std::vector<uint8_t>& v, uint8_t id, uint8_t res, uint8_t max, bool prender) {
+        v.insert(v.end(), {id, res, max, 0});
+        const uint32_t f = (prender ? 0x01u : 0x00u) | (0x01u << 16);
+        for (int k = 0; k < 4; ++k) v.push_back(static_cast<uint8_t>(f >> (8 * k)));
+    };
+    std::vector<uint8_t> gnss = {0x00, 0x00, 0xFF, 0x00};
+    bloque(gnss, 0, 8, 16, true);          // GPS
+    bloque(gnss, 1, 1, 3, true);           // SBAS
+    bloque(gnss, 2, 4, 8, false);          // Galileo
+    bloque(gnss, 3, 8, 16, false);         // BeiDou
+    bloque(gnss, 5, 0, 3, true);           // QZSS
+    bloque(gnss, 6, 8, 14, !soloGps);      // GLONASS
+    gnss[3] = 6;
+    r.push_back(marco(0x06, 0x3E, gnss));
+    // CFG-RATE: 200 ms (5 Hz) con dos sistemas; 100 ms (10 Hz) con GPS solo. Hora GPS.
     std::vector<uint8_t> rate(6, 0);
-    pon2(rate, 0, 100); pon2(rate, 2, 1); pon2(rate, 4, 1);
+    pon2(rate, 0, static_cast<uint16_t>(1000 / hzDe(soloGps))); pon2(rate, 2, 1); pon2(rate, 4, 1);
     r.push_back(marco(0x06, 0x08, rate));
     // CFG-NAV5: modelo dinámico «automotor» (4)
     std::vector<uint8_t> nav5(36, 0);
     pon2(nav5, 0, 0x0001);
     nav5[2] = 4;
     r.push_back(marco(0x06, 0x24, nav5));
-    // CFG-MSG: NAV-PVT en cada lectura; las frases NMEA de fábrica, apagadas
+    // CFG-MSG: NAV-PVT en cada lectura; las frases NMEA de fábrica, apagadas (GGA GLL GSA GSV RMC VTG)
     r.push_back(marco(0x06, 0x01, {0x01, 0x07, 0x01}));
     for (uint8_t id = 0x00; id <= 0x05; ++id) r.push_back(marco(0x06, 0x01, {0xF0, id, 0x00}));
-    // CFG-CFG: guardar en el módulo (con la pila, queda para el próximo arranque)
+    // CFG-CFG: guardar puerto, mensajes y navegación en la RAM con pila y en la flash del módulo
     std::vector<uint8_t> cfg(13, 0);
     pon4(cfg, 4, 0x00001F1F);
     cfg[12] = 0x17;
     r.push_back(marco(0x06, 0x09, cfg));
     return r;
+}
+
+std::vector<std::vector<uint8_t>> volverANmea() {
+    // GGA (0x00), RMC (0x04) y GST (0x07) en cada lectura: lo que entiende el lector en NMEA
+    return {marco(0x06, 0x01, {0xF0, 0x00, 0x01}), marco(0x06, 0x01, {0xF0, 0x04, 0x01}), marco(0x06, 0x01, {0xF0, 0x07, 0x01})};
 }
 
 }  // namespace beto

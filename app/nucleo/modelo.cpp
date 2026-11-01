@@ -218,7 +218,8 @@ Json configFabrica() {
     // Nuevos de la Raspberry
     c["orientacion"] = "horizontal";
     c["brillo"] = 100;                // %
-    c["volumen"] = 100;               // %; de fábrica al máximo, después el último elegido
+    c["volumen"] = 100;
+    c["gpsSoloGps"] = false;          // false: GPS + GLONASS a 5 Hz; true: GPS solo a 10 Hz (NEO-M8N)               // %; de fábrica al máximo, después el último elegido
     return c;
 }
 

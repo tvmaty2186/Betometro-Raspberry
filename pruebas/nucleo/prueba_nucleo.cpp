@@ -449,12 +449,34 @@ static void gpsNeo() {
     CHEQUEAR(std::fabs(rn[0].velMs - l.velMs) < 0.001);
     CHEQUEAR(std::fabs(rn[0].precisionM - 2.1) < 0.05);
     IGUAL(rn[0].dia, 1);
-    // Configuración del módulo: 11 mensajes UBX bien armados (los lee el mismo decodificador sin errores)
-    const auto cfg = configuracionNeo();
-    IGUAL(cfg.size(), size_t(11));
+    // Configuración del módulo: mensajes UBX bien armados (los lee el mismo decodificador sin errores)
+    const auto cfg = configuracionNeo(false);
+    IGUAL(cfg.size(), size_t(11));   // GNSS, RATE, NAV5, NAV-PVT, 6 NMEA apagados y CFG-CFG
     DecodificadorNeo dc;
     for (const auto& c : cfg) dc.agregar(c.data(), c.size());
+    const auto prt = cambioA115200();
+    dc.agregar(prt.data(), prt.size());
     IGUAL(dc.errores(), 0);
+    // CFG-RATE: 200 ms con GPS + GLONASS (5 Hz, el máximo del NEO-M8N con dos sistemas); 100 ms con GPS solo
+    IGUAL(int(cfg[1][6] | (cfg[1][7] << 8)), 200);
+    IGUAL(int(configuracionNeo(true)[1][6] | (configuracionNeo(true)[1][7] << 8)), 100);
+    // CFG-GNSS: GLONASS (gnssId 6, último bloque) prendido o apagado
+    IGUAL(int(cfg[0][6 + 4 + 8 * 5 + 4] & 1), 1);
+    IGUAL(int(configuracionNeo(true)[0][6 + 4 + 8 * 5 + 4] & 1), 0);
+    IGUAL(int(cfg[0][6 + 4 + 8 * 2 + 4] & 1), 0);   // Galileo apagado
+    // MON-VER: original y copia
+    VersionNeo orig{"EXT CORE 3.01 (107888)", "00080000", {"ROM BASE 2.01 (75331)", "FWVER=SPG 3.01", "PROTVER=18.00", "MOD=NEO-M8N-0"}};
+    const auto mv = armarMonVer(orig);
+    DecodificadorNeo dv;
+    dv.agregar(mv.data(), mv.size());
+    CHEQUEAR(dv.version().has_value() && dv.version()->pareceOriginal());
+    IGUAL(dv.version()->firmware(), std::string("SPG 3.01"));
+    IGUAL(dv.version()->modelo(), std::string("NEO-M8N-0"));
+    VersionNeo copia{"ROM CORE 3.01 (107888)", "00080000", {"FWVER=SPG 3.01", "PROTVER=18.00"}};
+    const auto mc = armarMonVer(copia);
+    DecodificadorNeo dcp;
+    dcp.agregar(mc.data(), mc.size());
+    CHEQUEAR(!dcp.version()->pareceOriginal());
 }
 
 int main() {

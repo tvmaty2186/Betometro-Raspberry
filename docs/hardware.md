@@ -14,6 +14,7 @@
 - Más adelante: convertidor de 12 V a 5 V 3 A, fichas GX12 y cable espiralado
 
 ## GPS
+- Investigación del módulo que se compra (NEO-M8N-0-10, firmware SPG 3.01) y lo que hay que probar al recibirlo: [gps-neo-m8n.md](gps-neo-m8n.md).
 - Va por **cables (UART), no por USB** (decisión de Matías). Cableado: [cableado-gps.png](cableado-gps.png) y la tabla de pines en [diseno-sistema.md](diseno-sistema.md).
 - Pines del módulo, vistos del lado de la antena cuadrada, de izquierda a derecha: PPS, TXD, RXD, GND, VCC.
 - Usar la **antena externa en el techo**; verificar que el módulo la esté usando y no la cerámica de la placa.

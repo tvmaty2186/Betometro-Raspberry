@@ -30,7 +30,7 @@ Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y ver
 | 11 (GPIO17) y 9 (GND) | Pulsador (propuesto) |
 
 - El Bluetooth se apaga (`dtoverlay=disable-bt`) para usar el UART bueno con el GPS.
-- El GPS se configura al arrancar: solo GPS, **10 Hz**, 115200 baudios.
+- El GPS se configura al arrancar: **GPS + GLONASS a 5 Hz** (el NEO-M8N no da más con dos sistemas; opción GPS solo a 10 Hz), 115200 baudios. Ver [gps-neo-m8n.md](gps-neo-m8n.md).
 - La hora del sistema se toma del GPS (la Raspberry no tiene reloj propio).
 
 ## Sistema operativo

@@ -9,6 +9,13 @@ static QVariant opt(const std::optional<double>& v) { return v ? QVariant(*v) : 
 
 Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), datos_(datos), fuenteGps_(gps) {
     connect(fuenteGps_, &FuenteGps::muestra, this, &Crono::alMuestra);
+    connect(fuenteGps_, &FuenteGps::modulo, this, [this](const QString& modelo, const QString& fw, bool original, int hz) {
+        gpsInfo_["modulo"] = modelo;
+        gpsInfo_["firmware"] = fw;
+        gpsInfo_["original"] = original;
+        gpsInfo_["hzConfig"] = hz;
+        emit gpsChanged();
+    });
     connect(fuenteGps_, &FuenteGps::datos, this, [this](int satelites, const QDateTime& utc) {
         gpsInfo_["satelites"] = satelites;
         gpsInfo_["hora"] = utc.isValid() ? utc.toLocalTime().toString(QStringLiteral("HH:mm:ss")) : QString();
