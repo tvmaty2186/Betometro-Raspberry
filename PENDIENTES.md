@@ -4,8 +4,7 @@ Actualizado el 01/11/2026.
 
 ## Diseño
 - Hecho: sistema acordado, cableado del GPS, muestras horizontales de las 12 pantallas (aprobadas).
-- **Sigue:** muestras de las mismas pantallas en vertical (720×1280).
-  - Ojo: el armado vertical de fábrica de la app no entra igual en 720×1280 (el velocímetro redondo se mete en la cuenta). Hay que reacomodarlo y mostrarlo (ver `docs/app/lo-aprendido.md`, sección 6).
+- Muestras verticales hechas (01/11/2026). **Sigue:** que Matías las apruebe.
 
 ## Dudas para charlar con Matías (salieron de leer la app)
 

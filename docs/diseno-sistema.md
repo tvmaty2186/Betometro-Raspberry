@@ -106,7 +106,15 @@ Cambian lo que hace la app en estos puntos:
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
+## Pantallas en vertical (720×1280)
+
+Imágenes: [muestras-vertical-1.png](muestras-vertical-1.png), [-2](muestras-vertical-2.png), [-3](muestras-vertical-3.png). Fuente: [muestras/pantallas-vertical.html](muestras/pantallas-vertical.html) (`#v1`…`#v12`).
+
+Las mismas 12 pantallas que en horizontal, apiladas en una columna. Diferencias:
+- **Inicio:** como la app: foto arriba, banda con el 101, velocímetro crema abajo a la derecha (sale un poco del borde) y los 5 botones en arco con la fórmula de `layoutInicio()` (k = min(W/390, H/844); centro en W − 60k y 0,717·H; diámetro 330k; radio 262k; ángulos 150° a 270°).
+- **Carrera:** armado de fábrica de la app reacomodado para que entre: velocímetro redondo de 420 px arriba; V3 a la izquierda y Sugerida a la derecha, montados sobre el borde del velocímetro; la cuenta abajo, sin tocarlo; Última vuelta en una franja; MARCAR abajo a todo el ancho.
+- **Informe:** la tabla muestra la **vuelta interrumpida** (sin error).
+
 ## Pendiente de definir
 
-- Muestras de las mismas pantallas en **vertical** (720×1280).
 - Después: empezar a programar (imagen Buildroot, motor en C++, pantallas en Qt).
