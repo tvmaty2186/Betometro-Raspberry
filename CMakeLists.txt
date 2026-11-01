@@ -16,6 +16,7 @@ add_library(nucleo STATIC
   app/nucleo/almacen.cpp
   app/nucleo/informe.cpp
   app/nucleo/programador.cpp
+  app/nucleo/neo.cpp
 )
 target_include_directories(nucleo PUBLIC app/nucleo)
 target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
@@ -46,6 +47,10 @@ if(BETO_PROGRAMA)
     message(STATUS "Sin Qt 6: no se compila el programa, solo el núcleo")
   endif()
 endif()
+
+# Simulador del NEO-M8N (solo desarrollo, nunca en el equipo)
+add_executable(simular_neo simulador/simular_neo.cpp)
+target_link_libraries(simular_neo PRIVATE nucleo)
 
 option(BETO_PRUEBAS "Compilar las pruebas" ON)
 if(BETO_PRUEBAS)

@@ -157,7 +157,12 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
   - **Actualizar:** pantalla de la muestra; en la PC la descarga es simulada (la real con RAUC va en E5).
 - **Voz** (01/11/2026): programador de voz en C++ (`app/nucleo/programador.*`) con la lógica de la app: cuenta hacia abajo con anticipo, «cero» o pitido largo, pitidos en vez de voz, tic cada X s, «Vuelta N, medida», «Última vuelta…», «Carrera completa», clic en cada marca aceptada.
   - Audios grabados con **Piper**, voz «Daniela» (español de Argentina, CC BY-SA 4.0): `voz/grabar.py` arma 192 archivos (cero y 1 a 60, «Vuelta 1…60, medida/práctica», pitidos, clic), sin silencio al principio. Se arman con `cmake --build build --target voz`; en la Raspberry, al armar la imagen (E3).
-  - Se cargan todos en memoria al arrancar (Qt Multimedia). Volumen de Ajustes en vivo; ▶ Probar dice «Betómetro listo». Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+  - Se cargan todos en memoria al arrancar (Qt Multimedia). Volumen de Ajustes en vivo; ▶ Probar dice «Betómetro listo».
+- **Simulador del NEO-M8N y lector del GPS** (01/11/2026):
+  - `app/nucleo/neo.*`: lee UBX NAV-PVT y NMEA (GGA + GST + RMC), arma los mismos mensajes y la configuración del módulo (115200, 10 Hz, automotor, solo NAV-PVT, guardar).
+  - `simulador/simular_neo`: crea un puerto virtual y manda lecturas a 10 Hz como si el auto diera vueltas (`--nmea`, `--mala`, `--corte`). Se usa con `betometro --gps /tmp/betometro-gps`.
+  - `GpsNeo` (`app/gps.*`) es el mismo lector que usará el UART real: ya hace **G2** (hora de cada lectura según el GPS) y **G6** (solo posición 3D buena). G4 y G5 cambian el motor: van en E4 con su prueba y su opción en Ajustes.
+  - Probado de punta a punta: chequeo con satélites, 10 Hz y hora del GPS; carrera con UBX y con NMEA. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
 - Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
 - El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 

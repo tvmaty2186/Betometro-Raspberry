@@ -9,6 +9,12 @@ static QVariant opt(const std::optional<double>& v) { return v ? QVariant(*v) : 
 
 Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), datos_(datos), fuenteGps_(gps) {
     connect(fuenteGps_, &FuenteGps::muestra, this, &Crono::alMuestra);
+    connect(fuenteGps_, &FuenteGps::datos, this, [this](int satelites, const QDateTime& utc) {
+        gpsInfo_["satelites"] = satelites;
+        gpsInfo_["hora"] = utc.isValid() ? utc.toLocalTime().toString(QStringLiteral("HH:mm:ss")) : QString();
+        gpsInfo_["ok"] = gpsInfo_.contains("hz");
+        emit gpsChanged();
+    });
     reloj_.setTimerType(Qt::PreciseTimer);
     reloj_.setInterval(50);   // pantalla: 20 veces por segundo (la voz va aparte, cada 15 ms)
     connect(&reloj_, &QTimer::timeout, this, &Crono::refrescar);
@@ -163,7 +169,9 @@ void Crono::alMuestra(const Muestra& m) {
     // lecturas por segundo (último segundo)
     tiemposGps_.push_back(m.t);
     while (!tiemposGps_.empty() && m.t - tiemposGps_.front() >= 1000) tiemposGps_.erase(tiemposGps_.begin());
-    gpsInfo_ = {{"hz", static_cast<int>(tiemposGps_.size())}, {"precision", m.precisionM}, {"ok", true}};
+    gpsInfo_["hz"] = static_cast<int>(tiemposGps_.size());
+    gpsInfo_["precision"] = m.precisionM;
+    gpsInfo_["ok"] = true;
     emit gpsChanged();
 
     ultimaMuestra_ = m;

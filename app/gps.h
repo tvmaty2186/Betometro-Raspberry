@@ -5,8 +5,13 @@
 #pragma once
 
 #include <QElapsedTimer>
+#include <QTimeZone>
 #include <QObject>
+#include <QDateTime>
+#include <QSocketNotifier>
 #include <QTimer>
+
+#include "neo.h"
 
 #include "motor.h"
 
@@ -19,6 +24,30 @@ public:
     using QObject::QObject;
 signals:
     void muestra(const beto::Muestra& m);
+    // Datos de cada lectura que no usa el motor: satélites y hora UTC del GPS
+    void datos(int satelites, const QDateTime& horaUtc);
+};
+
+// GPS real (UART de la Raspberry) o el simulador por puerto virtual: lee UBX NAV-PVT o NMEA.
+// - Solo pasan las lecturas con posición 3D buena (mejora G6).
+// - La hora de cada lectura sale del reloj del GPS (iTOW), atada al reloj del equipo (mejora G2):
+//   las lecturas quedan separadas exactamente 100 ms aunque lleguen con demoras distintas por el cable.
+class GpsNeo : public FuenteGps {
+    Q_OBJECT
+public:
+    explicit GpsNeo(const QString& dispositivo, QObject* padre = nullptr);
+    ~GpsNeo() override;
+    bool abierto() const { return fd_ >= 0; }
+
+private:
+    void leer();
+    QString dispositivo_;
+    int fd_ = -1;
+    QSocketNotifier* aviso_ = nullptr;
+    beto::DecodificadorNeo dec_;
+    double desfase_ = 0;          // ms: hora del equipo − iTOW (la menor vista: la de menos demora)
+    uint32_t ultimoITOW_ = 0;
+    bool hayDesfase_ = false;
 };
 
 class GpsSimulado : public FuenteGps {

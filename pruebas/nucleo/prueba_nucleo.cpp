@@ -16,6 +16,7 @@
 #include "modelo.h"
 #include "motor.h"
 #include "programador.h"
+#include "neo.h"
 
 using namespace beto;
 
@@ -403,7 +404,61 @@ static void voz() {
     IGUAL(*anuncioVuelta(25, true, 0), std::string("Vuelta 25, medida"));
 }
 
+static void gpsNeo() {
+    LecturaGps l;
+    l.iTOW = 345678900; l.anio = 2026; l.mes = 11; l.dia = 1; l.hora = 14; l.minuto = 32; l.segundo = 7; l.horaValida = true;
+    l.fix3d = true; l.satelites = 9; l.lat = -34.6037222; l.lon = -58.3815931; l.precisionM = 2.1; l.velMs = 13.333; l.precisionVelMs = 0.15;
+    // UBX: ida y vuelta, en pedacitos (como llega por el cable)
+    const auto m = armarNavPvt(l);
+    IGUAL(m.size(), size_t(100));
+    DecodificadorNeo d;
+    std::vector<LecturaGps> r;
+    for (size_t i = 0; i < m.size(); i += 7) {
+        auto x = d.agregar(m.data() + i, std::min<size_t>(7, m.size() - i));
+        r.insert(r.end(), x.begin(), x.end());
+    }
+    IGUAL(r.size(), size_t(1));
+    IGUAL(r[0].iTOW, l.iTOW);
+    CHEQUEAR(r[0].fix3d && r[0].horaValida);
+    IGUAL(r[0].satelites, 9);
+    CHEQUEAR(std::fabs(r[0].lat - l.lat) < 1e-7 && std::fabs(r[0].lon - l.lon) < 1e-7);
+    CHEQUEAR(std::fabs(r[0].precisionM - 2.1) < 1e-9 && std::fabs(r[0].velMs - 13.333) < 1e-9);
+    CHEQUEAR(std::fabs(r[0].precisionVelMs - 0.15) < 1e-9);
+    IGUAL(r[0].hora, 14);
+    // Basura antes y un mensaje con la suma mala: se descarta y sigue
+    auto malo = m;
+    malo[30] ^= 0xFF;
+    std::vector<uint8_t> todo = {'x', 0xB5, 0x00};
+    todo.insert(todo.end(), malo.begin(), malo.end());
+    todo.insert(todo.end(), m.begin(), m.end());
+    DecodificadorNeo d2;
+    IGUAL(d2.agregar(todo.data(), todo.size()).size(), size_t(1));
+    CHEQUEAR(d2.errores() >= 1);
+    // Sin posición 3D buena
+    l.fix3d = false;
+    const auto sinFix = armarNavPvt(l);
+    CHEQUEAR(!d.agregar(sinFix.data(), sinFix.size())[0].fix3d);
+    l.fix3d = true;
+    // NMEA (GGA + GST + RMC)
+    const std::string n = armarNmea(l);
+    DecodificadorNeo dn;
+    auto rn = dn.agregar(reinterpret_cast<const uint8_t*>(n.data()), n.size());
+    IGUAL(rn.size(), size_t(1));
+    CHEQUEAR(rn[0].deNmea && rn[0].fix3d && rn[0].horaValida);
+    CHEQUEAR(std::fabs(rn[0].lat - l.lat) < 1e-6 && std::fabs(rn[0].lon - l.lon) < 1e-6);
+    CHEQUEAR(std::fabs(rn[0].velMs - l.velMs) < 0.001);
+    CHEQUEAR(std::fabs(rn[0].precisionM - 2.1) < 0.05);
+    IGUAL(rn[0].dia, 1);
+    // Configuración del módulo: 11 mensajes UBX bien armados (los lee el mismo decodificador sin errores)
+    const auto cfg = configuracionNeo();
+    IGUAL(cfg.size(), size_t(11));
+    DecodificadorNeo dc;
+    for (const auto& c : cfg) dc.agregar(c.data(), c.size());
+    IGUAL(dc.errores(), 0);
+}
+
 int main() {
+    gpsNeo();
     voz();
     redondeos();
     json();

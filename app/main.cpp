@@ -53,8 +53,9 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oMuestra(QStringLiteral("muestra"), QStringLiteral("Carreras de ejemplo"));
     QCommandLineOption oPrueba(QStringLiteral("prueba"), QStringLiteral("Abrir algo al empezar (capturas)"), QStringLiteral("que"));
     QCommandLineOption oSinGps(QStringLiteral("sin-gps"), QStringLiteral("Sin GPS (solo cronómetro)"));
+    QCommandLineOption oGps(QStringLiteral("gps"), QStringLiteral("Puerto del GPS (en la Raspberry /dev/ttyAMA0; con el simulador /tmp/betometro-gps)"), QStringLiteral("puerto"));
     QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
-    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps});
+    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps});
     op.process(app);
 
     cargarFuentes();
@@ -77,9 +78,16 @@ int main(int argc, char* argv[]) {
     }
 
     // GPS: en la PC, el simulado (el real por UART llega en E4)
+    // GPS: el puerto que se diga (UART real o el simulador del NEO-M8N); si no, en la PC uno interno sencillo
     FuenteGps sinGps;
-    GpsSimulado* simulado = op.isSet(oSinGps) ? nullptr : new GpsSimulado(&app);
-    Crono crono(&datos, simulado ? static_cast<FuenteGps*>(simulado) : &sinGps);
+    QString puertoGps = op.value(oGps);
+    if (puertoGps.isEmpty()) puertoGps = qEnvironmentVariable("BETO_GPS");
+    FuenteGps* gps = &sinGps;
+    if (!op.isSet(oSinGps)) {
+        if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, &app);
+        else gps = new GpsSimulado(&app);
+    }
+    Crono crono(&datos, gps);
 
     Audio audio;
     audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());

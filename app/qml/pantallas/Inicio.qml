@@ -59,7 +59,7 @@ Item {
         width: raiz.h ? 600 : 260
         spacing: 8
         layoutDirection: raiz.h ? Qt.LeftToRight : Qt.RightToLeft
-        Chip { texto: "GPS " + Contexto.satelites + " satélites" }
+        Chip { texto: !Crono.gps.ok ? "Sin GPS" : Crono.gps.satelites ? "GPS " + Crono.gps.satelites + " satélites" : "GPS " + Crono.gps.hz + " Hz" }
         Chip { texto: Wifi.conectada ? "Wifi: " + Wifi.conectada : "Sin wifi" }
     }
 

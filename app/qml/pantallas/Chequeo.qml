@@ -43,10 +43,10 @@ Item {
             Column { id: cG; width: parent.width
                 TituloTarjeta { texto: "GPS" }
                 Fila { etiqueta: "Señal"
-                    Estado { bien: raiz.gpsOk; texto: !Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? "Sin señal todavía" : raiz.gpsOk ? "Funciona" : "Esperá al aire libre" } }
+                    Estado { bien: raiz.gpsOk; texto: !Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? "Sin señal todavía" : raiz.gpsOk ? (raiz.g.satelites ? raiz.g.satelites + " satélites" : "Funciona") : "Esperá al aire libre" } }
                 Fila { etiqueta: "Precisión"; Campo { activo: false; opacity: 1; texto: raiz.g.ok ? raiz.g.precision.toFixed(1).replace(".", ",") + " m" : "–" } }
                 Fila { etiqueta: "Lecturas por segundo"; Campo { activo: false; opacity: 1; texto: raiz.g.ok ? raiz.g.hz : "–" } }
-                Fila { etiqueta: "Hora del equipo"; ultima: true; Campo { activo: false; opacity: 1; texto: raiz.hora } }
+                Fila { etiqueta: raiz.g.hora ? "Hora tomada del GPS" : "Hora del equipo"; ultima: true; Campo { activo: false; opacity: 1; texto: raiz.g.hora || raiz.hora } }
             }
         }
     }
