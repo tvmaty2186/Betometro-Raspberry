@@ -103,6 +103,7 @@ Cambian lo que hace la app en estos puntos:
 - **Respaldo:** no se exporta respaldo de la base.
 - **Informes:** se exporta el informe **de cada carrera** (HTML, por QR).
 - **Terminar a mano:** la vuelta en curso **no se pierde**: se guarda como **vuelta interrumpida** (se ve en la ficha y en el informe, marcada así, y no cuenta como vuelta completa).
+- **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
 ## Pendiente de definir

@@ -9,9 +9,8 @@ Actualizado el 01/11/2026.
 
 ## Dudas para charlar con Matías (salieron de leer la app)
 
-Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respaldo no, vuelta interrumpida, simulador NMEA. Ver «Decisiones propias» en `docs/diseno-sistema.md`.
+Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respaldo no, vuelta interrumpida, simulador NMEA, MARCAR en pantalla siempre visible. Ver «Decisiones propias» en `docs/diseno-sistema.md`.
 
-- **Pulsador conectado:** en la app decide si MARCAR en pantalla es obligatorio. En la Raspberry el pulsador va fijo por GPIO: ¿MARCAR en pantalla siempre visible?
 - **Precisión del GPS:** técnica, la resuelve Claude (qué dato del NEO-M8N usar; umbral de fábrica 20 m).
 
 
