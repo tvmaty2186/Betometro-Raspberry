@@ -1,6 +1,8 @@
 # Propuesta: conectividad y mejoras por usar la Raspberry
 
-Estado: **propuesta (01/11/2026), falta que Matías elija.** Nada de esto está programado.
+Estado: **aprobada entera por Matías (01/11/2026).** Falta que apruebe la muestra visual de Conectividad. Nada de esto está programado.
+
+Muestras: [Conectividad horizontal](muestras-conectividad-horizontal.png), [vertical](muestras-conectividad-vertical.png) y [la página en el celular](muestras-red-celular.png). Fuente: [muestras/conectividad.html](muestras/conectividad.html) (`#c1`, `#c2`, `#c3`).
 
 Salió de lo que pidió Matías: un menú de conectividad para la wifi de casa, ver todos los informes por la red y revisar qué se puede hacer mejor que en el celular, sobre todo con el GPS.
 

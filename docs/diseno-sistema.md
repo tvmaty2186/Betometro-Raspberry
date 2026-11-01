@@ -55,7 +55,10 @@ GitHub Actions arma la imagen completa (`.img`). La primera vez se graba en la t
 - **Voz:** Piper (voz natural, español argentino). Los números y frases se graban al armar la imagen; la Raspberry solo los reproduce, sin demora.
 - **Diseño:** misma línea estética que la app (temas, Avispón Verde). Antes de programar, se muestran imágenes de muestra.
 
-## Wifi
+## Wifi y conectividad
+
+**Aprobado el 01/11/2026:** todo lo de [propuesta-mejoras.md](propuesta-mejoras.md): menú Conectividad, informes en `betometro.local`, wifi propia «Betometro-101» si no hay red, y las mejoras del GPS (G1 a G7).
+
 
 - Ajustes → Wifi: elegir red y escribir la clave con teclado en pantalla.
 - En la pista lo normal es conectarse a la **zona wifi del celular**.
@@ -89,7 +92,8 @@ Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizon
 | 6 | Chequeo previo | GPS (satélites, precisión, lecturas por segundo, hora del GPS), pulsador, voz y auriculares, wifi, lugar libre, TODO LISTO. |
 | 7 | Pantalla de carrera (editor) | Barra con Vertical/Horizontal, + Widget, De fábrica, Guardar. Widgets con borde punteado amarillo y ✎. |
 | 8 | Ajustes | Mi auto, Tema y pantalla (tema, **orientación**, modo sol, **brillo**), Voz y sonido (**volumen auriculares** con Probar, cuenta regresiva), Conexión y sistema (**wifi**, **versión y Actualizar**, **Apagar el equipo**). |
-| 9 | Wifi | Lista de redes, clave y teclado en pantalla con ñ. |
+| 9 | Wifi (clave) | Lista de redes, clave y teclado en pantalla con ñ. Se abre al tocar una red en Conectividad. |
+| 13 | Conectividad | Estado, Betómetro en la red (QR y `betometro.local`), redes guardadas con Olvidar, redes cerca y Buscar. Se entra desde Ajustes → Conexión y sistema → Conectividad. Muestra: [horizontal](muestras-conectividad-horizontal.png), [vertical](muestras-conectividad-vertical.png) (falta el OK). |
 | 10 | Informe | Recorrido coloreado por velocidad, gráfico de velocidad, tabla de vueltas con error, Compartir. |
 | 11 | Compartir por QR | Código QR y los 3 pasos para bajarlo al celular en la misma red. |
 | 12 | Actualizar | Versión actual → nueva, qué trae, barra de descarga. Se instala en la copia de reserva; si falla vuelve sola a la anterior. |

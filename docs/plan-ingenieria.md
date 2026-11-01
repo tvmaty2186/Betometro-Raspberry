@@ -130,6 +130,7 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Voz:** las frases de la app (números de la cuenta, «cero», «Vuelta N, medida/práctica», clic, pitido) se graban con Piper (voz en español de Argentina) al compilar. Se cargan en memoria al arrancar. Anticipo configurable (valor inicial 40 ms, se ajusta en E4).
 - **Informe:** pantalla propia (recorrido coloreado, velocidad, aceleración, tabla con la vuelta interrumpida) con el mismo cálculo que la app (`armarRecorrido`). Exportación a HTML con la plantilla de la app (`informe-plantilla.html`), mismo nombre de archivo.
 - **Teclado en pantalla** con ñ, para el wifi y los nombres.
+- **Conectividad** (pantalla 13) y la página **Betómetro en la red** con datos de prueba. Ver [propuesta-mejoras.md](propuesta-mejoras.md).
 
 **Pruebas:**
 - Capturas automáticas de cada pantalla, en las 2 orientaciones y los 4 temas, comparadas a ojo con las muestras.
@@ -174,6 +175,7 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 **Especificación:**
 - **GPS por UART** (cableado en [cableado-gps.png](cableado-gps.png)): `enable_uart=1`, `dtoverlay=disable-bt`, puerto `/dev/ttyAMA0`.
 - **Configuración del NEO-M8N al arrancar** (mensajes UBX): 115200 baudios, **solo GPS a 10 Hz**, modelo dinámico «automotor», salida `NAV-PVT`. Se guarda en el módulo.
+- **Mejoras G1 a G7** de [propuesta-mejoras.md](propuesta-mejoras.md): GPS + GLONASS a 10 Hz, hora de cada lectura según el GPS (`iTOW`) atada al PPS, error de velocidad (`sAcc`), «sin GPS» a 1 s, solo posición 3D buena, arranque en caliente. G4 y G5 cambian el motor: van aparte, con su prueba, y en Ajustes se puede volver a lo de la app.
 - **Datos que se usan de `NAV-PVT`:** velocidad sobre el suelo (`gSpeed`, Doppler), posición, **precisión horizontal (`hAcc`) como «precisión»** contra el umbral de 20 m, hora UTC válida, cantidad de satélites. Así se resuelve la duda de la precisión.
 - **PPS** (opcional): para medir la demora del GPS.
 - **Hora:** cuando el GPS da hora válida, se pone en el reloj del sistema (hora de Argentina).
@@ -191,7 +193,9 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 ### E5 — Wifi, compartir y actualizar
 
 **Especificación:**
-- **Wifi:** buscar redes, conectar con clave, recordar redes (`wpa_supplicant`). La clave se guarda en la partición de datos.
+- **Wifi:** buscar redes, conectar con clave, recordar y olvidar redes (`wpa_supplicant`). La clave se guarda en la partición de datos. Hora por internet (NTP) cuando hay conexión.
+- **Betómetro en la red:** página en `http://betometro.local` (mDNS) con todas las carreras, cada informe y «Descargar todos» (.zip). Solo lectura. Se apaga durante la carrera.
+- **Wifi propia:** si no encuentra red guardada, arma «Betometro-<número del auto>» para conectar el celular directo.
 - **Compartir informe por QR:** un servidor web chico dentro del programa, solo mientras está abierta la pantalla de compartir. El QR lleva a `http://<ip>:<puerto>/<código>` y descarga el HTML. Se cierra al salir de la pantalla.
 - **Actualizar:** consulta la última *release* de **este repo**. Si hay versión nueva aparece «· Actualizar» en amarillo. Al tocarlo, descarga el paquete RAUC, verifica la firma, lo instala en la copia que no está en uso y reinicia. Si la nueva no arranca bien 3 veces, vuelve sola a la anterior.
 - **Firma de las actualizaciones:** clave privada en los secretos de GitHub (la carga Matías; nunca se escribe en el repo). La pública va dentro del sistema.
