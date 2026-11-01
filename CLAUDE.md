@@ -4,6 +4,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 
 | Archivo | Qué tiene |
 |---|---|
+| [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
 | [docs/app/lo-aprendido.md](docs/app/lo-aprendido.md) | **Todo lo que hace la app y por qué**: datos, motor, voz, ajustes, pantallas, widgets, informe. Es la especificación a copiar |
