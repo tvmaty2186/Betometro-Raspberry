@@ -17,10 +17,10 @@ Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respald
 - Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.
 - Motor en C++, comparado con el `Motor` de la app.
 - Pantallas en Qt/QML.
-- GPS por UART, pulsador por GPIO, voz con Piper pregrabada.
+- GPS por UART, pulsador por GPIO, voz con Piper pregrabada por la salida de auriculares, volumen en Ajustes.
 
 ## Compras que faltan
 - Fuente de 5 V 2,5 A y cable micro-USB.
-- Amplificador MAX98357A con parlante de 3 W 4 Ω.
+- Auriculares con cable (ficha de 3,5 mm), si no tenés.
 - Cables dupont y pulsador.
 - Más adelante: convertidor de 12 V a 5 V 3 A, fichas GX12 y cable espiralado.

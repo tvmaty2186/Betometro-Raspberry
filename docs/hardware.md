@@ -9,7 +9,7 @@
 
 ## Falta comprar (recomendado)
 - Fuente de 5 V 2,5 A micro-USB y cable USB-A a micro-USB
-- Amplificador **MAX98357A** (I2S) con parlante de 3 W 4 Ω, para la voz
+- Auriculares con cable y ficha de 3,5 mm (van en la salida de audio de la Raspberry)
 - Cables dupont y un pulsador
 - Más adelante: convertidor de 12 V a 5 V 3 A, fichas GX12 y cable espiralado
 
@@ -19,6 +19,7 @@
 - Usar la **antena externa en el techo**; verificar que el módulo la esté usando y no la cerámica de la placa.
 
 ## Descartado
+- Amplificador MAX98357A con parlante (01/11/2026): se usan auriculares en la salida de 3,5 mm.
 - Caja con celular Galaxy A37 (cancelada el 01/11/2026).
 - Kiosco con la web de la app en Chromium: Matías quiere un sistema nativo hecho de cero.
 - Placas ESP32 Waveshare: peores para la voz.

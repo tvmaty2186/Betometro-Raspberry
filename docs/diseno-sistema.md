@@ -15,7 +15,7 @@ Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y ver
 - Raspberry Pi 3 B+
 - Pantalla Raspberry Pi Touch Display 2 de 7" (DSI)
 - GPS GY-NEO-M8N por UART (cableado en [cableado-gps.png](cableado-gps.png))
-- Amplificador MAX98357A (I2S) con parlante de 3 W 4 Ω, para la voz (falta comprar)
+- **Auriculares con cable** en la salida de audio de la Raspberry (ficha de 3,5 mm), para la voz
 - Pulsador en GPIO
 
 ### Pines
@@ -27,7 +27,6 @@ Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y ver
 | 8 (TX) → RXD del GPS | GPS |
 | 10 (RX) ← TXD del GPS | GPS |
 | 7 (GPIO4) | PPS del GPS (opcional) |
-| 12, 35, 40 | Amplificador I2S |
 | 11 (GPIO17) y 9 (GND) | Pulsador (propuesto) |
 
 - El Bluetooth se apaga (`dtoverlay=disable-bt`) para usar el UART bueno con el GPS.
@@ -52,6 +51,7 @@ GitHub Actions arma la imagen completa (`.img`). La primera vez se graba en la t
 - **Qt 6 con QML**, dibujando directo en la pantalla (EGLFS), con aceleración de la placa de video. Es lo que se usa en tableros de autos.
 - **Motor:** se reescribe en C++ con la misma lógica que `Motor` de la app. Se prueba con los mismos datos que el motor de la app: tienen que dar igual.
 - **Vertical u horizontal:** lo elige el usuario desde el inicio o desde Ajustes. Cada orientación tiene su armado de pantalla.
+- **Audio:** salida de auriculares de 3,5 mm de la Raspberry (`dtparam=audio=on`), con auriculares con cable. No hay parlante ni amplificador.
 - **Voz:** Piper (voz natural, español argentino). Los números y frases se graban al armar la imagen; la Raspberry solo los reproduce, sin demora.
 - **Diseño:** misma línea estética que la app (temas, Avispón Verde). Antes de programar, se muestran imágenes de muestra.
 
@@ -84,15 +84,15 @@ Fuente editable: [muestras/pantallas-horizontal.html](muestras/pantallas-horizon
 | 3 | Ficha de la carrera | A la izquierda los datos editables (nombre, fecha, vueltas, distancia, tiempo ideal, vueltas medidas, velocidad promedio). A la derecha el resumen, las vueltas medida/práctica y LARGAR grande. |
 | 4 | Carrera en curso | Arriba: tipo de vuelta (V3 MEDIDA), cuenta «Falta» enorme con metros y barra, Sugerida. Abajo: velocidad digital con barra, Última vuelta y MARCAR. Línea superior con la carrera, el estado del GPS y Terminar. |
 | 5 | Práctica libre | Tiempo ideal, distancia, vueltas medidas y LARGAR grande. |
-| 6 | Chequeo previo | GPS (satélites, precisión, lecturas por segundo, hora del GPS), pulsador, voz y volumen, wifi, lugar libre, TODO LISTO. |
+| 6 | Chequeo previo | GPS (satélites, precisión, lecturas por segundo, hora del GPS), pulsador, voz y auriculares, wifi, lugar libre, TODO LISTO. |
 | 7 | Pantalla de carrera (editor) | Barra con Vertical/Horizontal, + Widget, De fábrica, Guardar. Widgets con borde punteado amarillo y ✎. |
-| 8 | Ajustes | Mi auto, Tema y pantalla (tema, **orientación**, modo sol, **brillo**), Cuenta regresiva, Conexión y sistema (**wifi**, **versión y Actualizar**, **Apagar el equipo**). |
+| 8 | Ajustes | Mi auto, Tema y pantalla (tema, **orientación**, modo sol, **brillo**), Voz y sonido (**volumen auriculares** con Probar, cuenta regresiva), Conexión y sistema (**wifi**, **versión y Actualizar**, **Apagar el equipo**). |
 | 9 | Wifi | Lista de redes, clave y teclado en pantalla con ñ. |
 | 10 | Informe | Recorrido coloreado por velocidad, gráfico de velocidad, tabla de vueltas con error, Compartir. |
 | 11 | Compartir por QR | Código QR y los 3 pasos para bajarlo al celular en la misma red. |
 | 12 | Actualizar | Versión actual → nueva, qué trae, barra de descarga. Se instala en la copia de reserva; si falla vuelve sola a la anterior. |
 
-Lo nuevo respecto de la app: orientación, brillo, wifi, apagar el equipo, chequeo con hora del GPS y lugar libre, compartir por QR y la pantalla de actualizar.
+Lo nuevo respecto de la app: orientación, brillo, volumen de auriculares, wifi, apagar el equipo, chequeo con hora del GPS y lugar libre, compartir por QR y la pantalla de actualizar.
 
 ## Decisiones propias de la Raspberry (01/11/2026)
 
@@ -103,6 +103,7 @@ Cambian lo que hace la app en estos puntos:
 - **Respaldo:** no se exporta respaldo de la base.
 - **Informes:** se exporta el informe **de cada carrera** (HTML, por QR).
 - **Terminar a mano:** la vuelta en curso **no se pierde**: se guarda como **vuelta interrumpida** (se ve en la ficha y en el informe, marcada así, y no cuenta como vuelta completa).
+- **Volumen:** control en Ajustes → «Voz y sonido» → «Volumen auriculares», con botón ▶ Probar. Se guarda y se usa siempre, también en carrera. **No** se sube al máximo al largar (en la app sí, pero con auriculares lastimaría los oídos).
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
