@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <sstream>
 #include <functional>
 #include <iostream>
 #include <string>
@@ -602,8 +603,47 @@ static void unirVueltas() {
     CHEQUEAR(!c.unirConSiguiente(1));
 }
 
+// El informe real (pruebas/reales/practica-2026-10-31-beto.html, app del celular): se leen sus
+// vueltas y se une la V5 (4,1 s, marca de más) con la V6. Tiene que dar 1:50,5 (+0,5 s) y 8 vueltas.
+static void informeReal() {
+    std::ifstream f(std::string(BETO_REALES) + "/practica-2026-10-31-beto.html");
+    std::stringstream ss;
+    ss << f.rdbuf();
+    const std::string html = ss.str();
+    const size_t a = html.find("const C=");
+    CHEQUEAR(a != std::string::npos);
+    if (a == std::string::npos) return;
+    const size_t b = html.find('\n', a);
+    std::string datos = html.substr(a + 8, b - a - 8);
+    while (!datos.empty() && (datos.back() == ';' || datos.back() == ' ' || datos.back() == '\r')) datos.pop_back();
+    const Json C = Json::leer(datos);
+    Carrera c;
+    c.tiempoIdealMs = C["idealMs"].aEntero();
+    for (const Json& j : C["vueltas"].elementos()) {
+        Vuelta v;
+        v.n = static_cast<int>(j["n"].aEntero());
+        v.largada = static_cast<int>(j["largada"].aEntero(1));
+        v.medida = j["medida"].aBool(true);
+        v.idealMs = c.tiempoIdealMs;
+        v.realMs = j["realMs"].aEntero();
+        v.difMs = j["difMs"].aEntero();
+        v.distM = j["L"].aNumero();
+        v.velMaxKmh = j["velMaxKmh"].aNumero();
+        c.vueltas.push_back(v);
+    }
+    IGUAL(c.vueltas.size(), size_t(9));
+    IGUAL(c.vueltas[4].realMs, int64_t(4125));
+    CHEQUEAR(c.unirConSiguiente(4));
+    IGUAL(c.vueltas.size(), size_t(8));
+    IGUAL(c.vueltas[4].realMs, int64_t(110461));
+    IGUAL(*c.vueltas[4].difMs, int64_t(461));
+    IGUAL(*c.vueltas[4].distM, 2709.0);
+    IGUAL(c.vueltas[7].n, 8);
+}
+
 int main() {
     unirVueltas();
+    informeReal();
     pulsador();
     gpsNeo();
     voz();

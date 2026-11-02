@@ -66,6 +66,7 @@ if(BETO_PRUEBAS)
 
   add_executable(prueba_nucleo pruebas/nucleo/prueba_nucleo.cpp)
   target_link_libraries(prueba_nucleo PRIVATE nucleo)
+  target_compile_definitions(prueba_nucleo PRIVATE BETO_REALES="${CMAKE_SOURCE_DIR}/pruebas/reales")
   add_test(NAME nucleo COMMAND prueba_nucleo)
 
   if(TARGET betometro)
