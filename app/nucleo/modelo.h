@@ -63,7 +63,7 @@ struct Carrera {
     std::string patron = "alt1";
     bool practica = false;
     std::string creada;                     // ISO
-    int vueltasTotal = 0;                   // 0 = sin fin
+    int vueltasTotal = 0;                   // de versiones viejas; ya no se usa (sin límite de vueltas)
     std::vector<Vuelta> vueltas;
     Json extra = Json::objeto();            // campos que no conocemos: se conservan
 

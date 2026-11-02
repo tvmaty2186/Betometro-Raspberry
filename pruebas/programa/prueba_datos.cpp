@@ -10,8 +10,8 @@
 static int fallas = 0, chequeos = 0;
 #define CHEQUEAR(c) do { ++chequeos; if (!(c)) { ++fallas; std::cerr << __FILE__ << ":" << __LINE__ << ": falló " #c "\n"; } } while (0)
 
-static QVariantMap carreraNueva(const QString& nombre, QDate f, int vueltas = 5) {
-    return {{"nombre", nombre}, {"fecha", f.toString(Qt::ISODate)}, {"vueltasTotal", vueltas},
+static QVariantMap carreraNueva(const QString& nombre, QDate f) {
+    return {{"nombre", nombre}, {"fecha", f.toString(Qt::ISODate)},
             {"distanciaM", 3000}, {"tiempoIdealMs", 180000}, {"patron", "alt1"}};
 }
 
@@ -28,8 +28,6 @@ int main(int argc, char** argv) {
         CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Poné un nombre a la carrera.");
         m = carreraNueva("X", hoy); m["fecha"] = "";
         CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Elegí la fecha de la carrera.");
-        m = carreraNueva("X", hoy, 0);
-        CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "Poné la cantidad de vueltas de la carrera.");
         m = carreraNueva("X", hoy); m["tiempoIdealMs"] = 4900;
         CHEQUEAR(d.guardarCarrera(m)["error"].toString() == "El tiempo ideal tiene que ser de al menos 5 segundos.");
 
@@ -108,6 +106,14 @@ int main(int argc, char** argv) {
             auto m = v.toMap();
             if (m["nombre"] != "Santa Clara") continue;
             const QString id = m["id"].toString();
+            // Vuelta libre a mano: la V1 (+1,5 s) deja de sumar error; vuelve a medida y suma de nuevo
+            CHEQUEAR(d.cambiarMedida(id, 0));
+            CHEQUEAR(!d.buscar(id)->vueltas[0].medida);
+            CHEQUEAR(d.carrera(id)["errorTotal"] == "8,1 s");
+            CHEQUEAR(d.informe(id)["vueltas"].toList()[0].toMap()["medida"] == false);
+            CHEQUEAR(d.cambiarMedida(id, 0));
+            CHEQUEAR(d.carrera(id)["errorTotal"] == "9,6 s");
+            CHEQUEAR(!d.cambiarMedida(id, 99));
             const QVariantMap inf = d.informe(id);
             CHEQUEAR(!inf["pista"].toList().isEmpty());
             CHEQUEAR(inf["vueltas"].toList().size() == 6);

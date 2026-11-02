@@ -250,7 +250,7 @@ static void modelo() {
     DatosLargada d = datosLargada(k, c);
     IGUAL(d.congelarMs, 3000.0);              // max(cuentaN = 0, 3) s
     IGUAL(d.factorGps, 1.0);
-    IGUAL(d.vueltasTotal, 6);
+    IGUAL(d.vueltasTotal, 0);                 // sin límite de vueltas
     IGUAL(k.proximaLargada(), 1);
     CHEQUEAR(!k.parametrosFijos());
 

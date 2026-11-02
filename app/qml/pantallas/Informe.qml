@@ -7,8 +7,9 @@ Item {
     id: raiz
     readonly property bool h: Contexto.horizontal
     readonly property string id_: Navegacion.parametros.id || ""
-    readonly property var c: Datos.carrera(id_)
-    readonly property var inf: Datos.informe(id_)
+    property int rev: 0              // sube al cambiar una vuelta a medida/libre: se vuelve a leer
+    readonly property var c: { rev; return Datos.carrera(id_); }
+    readonly property var inf: { rev; return Datos.informe(id_); }
     readonly property var vueltas: inf.vueltas || []
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
@@ -25,6 +26,10 @@ Item {
         if (!(sug > 0)) return Tema.bien;
         const d = p[2] - sug;
         return d > 6 ? "#d23b2c" : d > 2 ? Tema.acento : d >= -2 ? Tema.bien : d >= -6 ? "#7fd3ff" : "#3a8de0";
+    }
+    function cambiarMedida(i) {
+        const l = lap;
+        if (Datos.cambiarMedida(id_, i)) { rev++; lap = l; }
     }
     function colorDif(ms) { const s = Math.abs(ms / 1000); return s <= 0.2 ? Tema.bien : s <= 0.5 ? Tema.acento : Tema.alerta; }
     onLapChanged: { mapa.requestPaint(); grafico.requestPaint(); }
@@ -155,7 +160,7 @@ Item {
         oscura: true
         x: cajaVel.x; y: raiz.h ? 362 : 900
         width: cajaVel.width; height: raiz.h ? 338 : 360
-        Sub { x: 22; y: 16; text: "Todas las vueltas · tocá una para verla"; tam: 12 }
+        Sub { x: 22; y: 16; text: "Todas las vueltas · tocá MEDIDA o LIBRE para cambiarla"; tam: 12 }
         Flickable {
             id: tabla
             anchors { fill: parent; topMargin: 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
@@ -169,14 +174,25 @@ Item {
                         required property int index
                         width: colT.width; height: 40
                         Rectangle { anchors.fill: parent; radius: 8; color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, 0.18); visible: index === raiz.lap }
+                        MouseArea { anchors.fill: parent; enabled: !!modelData.m; onClicked: raiz.lap = index }
                         Row {
                             anchors.verticalCenter: parent.verticalCenter; x: 6
                             readonly property real u: (colT.width - 12) / 10
                             Text { width: parent.u * 1.6; text: raiz.nombreV(modelData); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                            Row { width: parent.u * 3; spacing: 8
-                                Rectangle { width: 10; height: 10; radius: 5; anchors.verticalCenter: parent.verticalCenter
-                                            color: modelData.interrumpida ? "#8a929b" : modelData.medida ? "#d23b2c" : Tema.bien }
-                                Sub { anchors.verticalCenter: parent.verticalCenter; tam: 12; text: modelData.interrumpida ? "interrumpida" : modelData.medida ? "medida" : "práctica" } }
+                            // Etiqueta MEDIDA / LIBRE: se toca y cambia (la libre no suma error)
+                            Item { width: parent.u * 3; height: 30
+                                Rectangle {
+                                    id: etiq
+                                    readonly property color col: modelData.interrumpida ? "#8a929b" : modelData.medida ? "#d23b2c" : Tema.bien
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: tEtiq.implicitWidth + 22; height: 28; radius: 14
+                                    color: Qt.rgba(col.r, col.g, col.b, 0.18); border { width: 1.5; color: col }
+                                    Text { id: tEtiq; anchors.centerIn: parent; color: etiq.col
+                                           text: modelData.interrumpida ? "INTERRUMPIDA" : modelData.medida ? "MEDIDA" : "LIBRE"
+                                           font { family: Tema.fuente800; weight: Font.ExtraBold; pixelSize: 13; letterSpacing: 1 } }
+                                    MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: !modelData.interrumpida
+                                                onClicked: raiz.cambiarMedida(index) }
+                                } }
                             Text { width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
                             Text { width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
                                    color: modelData.difMs === undefined ? Tema.tintaSuave : raiz.colorDif(modelData.difMs)
@@ -185,7 +201,6 @@ Item {
                                    text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
                                    color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                         }
-                        MouseArea { anchors.fill: parent; enabled: !!modelData.m; onClicked: raiz.lap = index }
                     }
                 }
                 Item {
@@ -200,4 +215,5 @@ Item {
             }
         }
     }
+    Component.onCompleted: if (Contexto.prueba === "libre") cambiarMedida(1)   // solo para capturas
 }

@@ -65,7 +65,7 @@ void Crono::preparar(const QString& id) {
     };
     info_ = {{"nombre", QString::fromStdString(c.nombre)}, {"practica", c.practica},
              {"tiempoIdealMs", static_cast<qlonglong>(c.tiempoIdealMs)}, {"distanciaM", static_cast<qlonglong>(c.distanciaM)},
-             {"vueltasTotal", c.vueltasTotal}, {"ideal", tiempo(c.tiempoIdealMs)},
+             {"ideal", tiempo(c.tiempoIdealMs)},
              {"distancia", ar.toString(static_cast<qlonglong>(c.distanciaM))}, {"patron", QString::fromStdString(c.patron)}};
     emit carreraChanged();
     refrescar();
@@ -115,12 +115,6 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
     }
     emit marcado(QStringLiteral("marca"));
     if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
-    if (!terminarPendiente_.isEmpty()) {
-        const QString motivo = terminarPendiente_;
-        terminarPendiente_.clear();
-        terminarCon(motivo, false);
-        if (motivo == QStringLiteral("Carrera completa")) emit frase(motivo);
-    }
     refrescar();
     return QStringLiteral("marca");
 }
@@ -147,9 +141,9 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
             velMaxVuelta_ = 0;
             traza_.empezar(d.inicio);
             programador_.reiniciarVuelta();
-            const int total = datosLargada_ ? datosLargada_->vueltasTotal : 0;
+            // sin «Última vuelta»: no hay cantidad fija (en la carrera pueden agregar vueltas)
             if (datos_->config()["avisoInicio"].aBool(true))
-                if (auto f = anuncioVuelta(d.n, d.medida, total)) emit frase(QString::fromStdString(*f));
+                if (auto f = anuncioVuelta(d.n, d.medida, 0)) emit frase(QString::fromStdString(*f));
             break;
         }
         case Evento::Cerrada:
@@ -162,8 +156,6 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
                 const double dif = v.difMs ? *v.difMs : 0;
                 ultima_ = {{"n", v.n}, {"realMs", v.realMs}, {"difMs", dif}, {"medida", v.medida}};
                 emit ultimaChanged();
-                const int total = datosLargada_ ? datosLargada_->vueltasTotal : 0;
-                if (total > 0 && v.n >= total) terminarPendiente_ = QStringLiteral("Carrera completa");
             }
             break;
         }
@@ -206,7 +198,7 @@ void Crono::refrescar() {
                {"restanteMs", e.restanteMs}, {"proxMedida", e.proxMedida}, {"sinGps", e.sinGps},
                {"vActKmh", opt(e.vActKmh)}, {"vBaseKmh", opt(e.vBaseKmh)}, {"vNecKmh", opt(e.vNecKmh)},
                {"congelada", e.congelada}, {"restanteM", e.restanteM}, {"deltaS", opt(e.deltaS)},
-               {"velMaxVuelta", velMaxVuelta_}, {"vueltasTotal", datosLargada_->vueltasTotal},
+               {"velMaxVuelta", velMaxVuelta_},
                {"tiempoIdealMs", datosLargada_->tiempoIdealMs}, {"distanciaM", datosLargada_->distanciaM}};
     emit estadoChanged();
 }

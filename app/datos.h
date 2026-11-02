@@ -40,6 +40,8 @@ public:
     Q_INVOKABLE QVariantMap informe(const QString& id) const;
     Q_INVOKABLE QString nombreInforme(const QString& id) const;
     Q_INVOKABLE QString guardarInformeHtml(const QString& id) const;   // devuelve la ruta del archivo
+    // Desde el informe: marca una vuelta como medida o libre (la libre no suma error). No las interrumpidas.
+    Q_INVOKABLE bool cambiarMedida(const QString& id, int indice);
     // Lugar libre en la partición de datos, en texto («11,2 GB»)
     Q_INVOKABLE QString lugarLibre() const;
 

@@ -1,5 +1,5 @@
 // Prueba de una carrera entera en el crono, con reloj y GPS de mentira:
-// práctica que se guarda al largar, vueltas guardadas, antirrebote, carrera completa y vuelta interrumpida.
+// práctica que se guarda al largar, vueltas guardadas, antirrebote, carrera sin límite de vueltas y vuelta interrumpida.
 #include <QCoreApplication>
 #include <QTemporaryDir>
 #include <iostream>
@@ -61,9 +61,9 @@ int main(int argc, char** argv) {
     p = datos.buscar(idPractica);
     CHEQUEAR(p && p->vueltas.size() == 2 && p->vueltas[1].interrumpida && !p->vueltas[1].difMs);
 
-    // 2) Carrera de 2 vueltas: al cerrar la segunda termina sola
+    // 2) Carrera sin límite de vueltas: después de 2 vueltas sigue en curso; se termina a mano
     const QDate hoy = QDate::currentDate();
-    auto r = datos.guardarCarrera({{"nombre", "Prueba"}, {"fecha", hoy.toString(Qt::ISODate)}, {"vueltasTotal", 2},
+    auto r = datos.guardarCarrera({{"nombre", "Prueba"}, {"fecha", hoy.toString(Qt::ISODate)},
                                    {"distanciaM", 1000}, {"tiempoIdealMs", 60000}, {"patron", "alt1"}});
     const QString id = r["id"].toString();
     crono.preparar(id);
@@ -72,17 +72,20 @@ int main(int argc, char** argv) {
     CHEQUEAR(crono.marcar("pulsador") == "marca");
     andar(ahora + 60500, 1000.0 / 60);
     CHEQUEAR(crono.marcar("pulsador") == "marca");
+    CHEQUEAR(crono.enCurso());   // pueden agregar vueltas: no termina sola
+    crono.terminar();
     CHEQUEAR(!crono.enCurso());
-    CHEQUEAR(motivo == "Carrera completa" && vueltas == 2);
+    CHEQUEAR(motivo == "Carrera terminada" && vueltas == 2);
     const beto::Carrera* c = datos.buscar(id);
-    CHEQUEAR(c && c->vueltas.size() == 2);
+    CHEQUEAR(c && c->vueltas.size() == 2);   // la 3 recién empezada no se guarda (como la app)
     CHEQUEAR(c && c->vueltas[0].medida && !c->vueltas[1].medida);   // alt1
     CHEQUEAR(c && c->vueltas[0].fuente == "pulsador");
-    CHEQUEAR(datos.carrera(id)["finalizada"].toBool());
-    // Voz: anuncio de cada vuelta, «Última vuelta» y «Carrera completa»; clic en cada marca aceptada
+    CHEQUEAR(!datos.carrera(id)["finalizada"].toBool());   // es hoy: se puede volver a largar
+    CHEQUEAR(datos.carrera(id)["puedeLargar"].toBool());
+    // Voz: anuncio de cada vuelta, sin «Última vuelta»; clic en cada marca aceptada
     CHEQUEAR(frases.contains("Vuelta 1, medida"));
-    CHEQUEAR(frases.contains("Última vuelta, práctica"));
-    CHEQUEAR(frases.last() == "Carrera completa");
+    CHEQUEAR(frases.contains("Vuelta 2, práctica"));
+    CHEQUEAR(!frases.contains("Última vuelta, práctica"));
     CHEQUEAR(sonidos.count("clic") == 5);   // práctica: largada y 1 marca (la ignorada no suena); carrera: largada y 2 marcas
 
     // 3) Sin GPS: anda igual (solo cronómetro)

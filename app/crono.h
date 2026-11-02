@@ -74,7 +74,6 @@ private:
     beto::Traza traza_;
     std::optional<beto::Muestra> ultimaMuestra_;
     double velMaxVuelta_ = 0;
-    QString terminarPendiente_;
     QTimer reloj_;
     QTimer relojVoz_;
     beto::ProgramadorVoz programador_;

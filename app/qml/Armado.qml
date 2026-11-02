@@ -1,7 +1,8 @@
 pragma Singleton
 import QtQuick
 
-// Armados de la pantalla de carrera. Cada widget: { t, x, y, w, h, forma?, extra?, barra? }
+// Armados de la pantalla de carrera. Cada widget: { t, x, y, w, h, forma?, extra?, barra?, modo? }
+// modo (solo «cuenta»): "progresiva" (de fábrica, también si falta) o "regresiva".
 // en fracciones de la pantalla (6.6 de la app). Redondos: w = diámetro como fracción del ancho.
 // Se guardan en la configuración: «widgetsH» (horizontal) y «widgets» (vertical).
 QtObject {
@@ -23,7 +24,7 @@ QtObject {
         { t: "marcar", x: 20, y: 1026, w: 680, h: 234 }
     ]
     readonly property var tipos: [
-        { t: "cuenta", nombre: "Cuenta regresiva", vel: false },
+        { t: "cuenta", nombre: "Cronómetro de la vuelta", vel: false },
         { t: "tipo", nombre: "Vuelta y tipo", vel: false },
         { t: "delta", nombre: "Adelantado / atrasado", vel: true },
         { t: "velocimetro", nombre: "Velocímetro", vel: true },

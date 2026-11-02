@@ -172,7 +172,7 @@ Item {
         onClicked: raiz.elegido = -1
     }
 
-    Component { id: cCuenta; WCuenta { est: raiz.est; extra: parent.def.extra !== false; barra: parent.def.barra !== false } }
+    Component { id: cCuenta; WCuenta { est: raiz.est; extra: parent.def.extra !== false; barra: parent.def.barra !== false; modo: parent.def.modo || "progresiva" } }
     Component { id: cTipo; WTipo { est: raiz.est } }
     Component {
         id: cNecesaria

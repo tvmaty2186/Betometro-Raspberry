@@ -52,12 +52,12 @@ void Datos::guardar() {
     if (!almacen_.guardar(base_, &err)) emit error(q("No se pudo guardar: " + err));
 }
 
+// Sin cantidad de vueltas fija (en la carrera pueden agregar vueltas): queda terminada
+// cuando tiene vueltas corridas y su fecha ya pasó.
 bool Datos::finalizada(const Carrera& c) const {
-    if (c.vueltasTotal <= 0) return false;
-    std::map<int, int> n;
-    for (const auto& v : c.vueltas) if (!v.interrumpida) ++n[v.largada];
-    for (const auto& p : n) if (p.second >= c.vueltasTotal) return true;
-    return false;
+    if (c.practica || c.vueltas.empty()) return false;
+    const QDate f = QDate::fromString(q(c.fecha), Qt::ISODate);
+    return f.isValid() && hoy().daysTo(f) < 0;
 }
 
 QVariantMap Datos::resumen(const Carrera& c) const {
@@ -83,7 +83,6 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["fechaLarga"] = f.isValid() ? QLocale(QLocale::Spanish, QLocale::Argentina).toString(f, "dddd, d 'de' MMMM 'de' yyyy") : QString();
     r["notas"] = q(c.notas);
     r["practica"] = c.practica;
-    r["vueltasTotal"] = c.vueltasTotal;
     r["distanciaM"] = static_cast<qlonglong>(c.distanciaM);
     r["tiempoIdealMs"] = static_cast<qlonglong>(c.tiempoIdealMs);
     r["patron"] = q(c.patron);
@@ -101,7 +100,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
 
     // Línea de la tarjeta
     QStringList partes;
-    if (c.vueltasTotal > 0) partes << QString::number(c.vueltasTotal) + " vueltas";
+    if (!c.vueltas.empty()) partes << QString::number(c.vueltas.size()) + (c.vueltas.size() == 1 ? " vuelta" : " vueltas");
     if (medidas) {
         partes << "error total " + dur(suma);
     } else {
@@ -170,7 +169,6 @@ QVariantMap Datos::carrera(const QString& id) const {
     n.tiempoIdealMs = cfg_["tiempoIdealMs"].aEntero(240000);
     n.distanciaM = cfg_["distanciaM"].aEntero(3200);
     n.patron = cfg_["patron"].aTexto("alt1");
-    n.vueltasTotal = 10;
     QVariantMap r = resumen(n);
     r["id"] = QString();
     r["nueva"] = true;
@@ -181,11 +179,9 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
     QVariantMap r;
     auto falla = [&](const QString& e) { r["ok"] = false; r["error"] = e; return r; };
     const QString nombre = m.value("nombre").toString().trimmed();
-    const int vueltas = m.value("vueltasTotal").toInt();
     const qlonglong T = m.value("tiempoIdealMs").toLongLong();
     if (nombre.isEmpty()) return falla("Poné un nombre a la carrera.");
     if (!QDate::fromString(m.value("fecha").toString(), Qt::ISODate).isValid()) return falla("Elegí la fecha de la carrera.");
-    if (vueltas < 1) return falla("Poné la cantidad de vueltas de la carrera.");
     if (T < 5000) return falla("El tiempo ideal tiene que ser de al menos 5 segundos.");
 
     const QString id = m.value("id").toString();
@@ -199,7 +195,7 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
     }
     c->nombre = s(nombre.left(Carrera::kMaxNombre));
     c->fecha = s(m.value("fecha").toString());
-    c->vueltasTotal = std::min(300, vueltas);
+    c->vueltasTotal = 0;   // ya no se usa: no hay límite de vueltas
     if (m.contains("notas")) c->notas = s(m.value("notas").toString().left(Carrera::kMaxNotas));
     if (!c->parametrosFijos()) {   // con vueltas corridas no se cambian
         c->tiempoIdealMs = T;
@@ -278,6 +274,17 @@ bool Datos::agregarVuelta(const QString& id, const Vuelta& v) {
     return true;
 }
 
+bool Datos::cambiarMedida(const QString& id, int indice) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c || indice < 0 || indice >= static_cast<int>(c->vueltas.size())) return false;
+    Vuelta& v = c->vueltas[static_cast<size_t>(indice)];
+    if (v.interrumpida) return false;
+    v.medida = !v.medida;
+    guardar();
+    emit carrerasChanged();
+    return true;
+}
+
 bool Datos::borrarCarrera(const QString& id) {
     auto& v = base_.carreras;
     auto it = std::find_if(v.begin(), v.end(), [&](const Carrera& c) { return q(c.id) == id; });
@@ -337,7 +344,7 @@ void Datos::cargarMuestra() {
         c.id = nuevaId(1730000000000 + static_cast<int64_t>(base_.carreras.size()), 7);
         c.nombre = nombre;
         c.fecha = s(f.toString(Qt::ISODate));
-        c.vueltasTotal = vueltas;
+        (void)vueltas;
         c.tiempoIdealMs = T;
         c.distanciaM = D;
         c.patron = patron;

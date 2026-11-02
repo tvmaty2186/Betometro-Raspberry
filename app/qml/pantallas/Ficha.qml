@@ -10,7 +10,6 @@ Item {
     // Lo que se está editando (se guarda con Guardar o al largar)
     property string nombre: c.nombre
     property string fecha: c.fecha
-    property int vueltasTotal: c.vueltasTotal
     property int distanciaM: c.distanciaM
     property int tiempoIdealMs: c.tiempoIdealMs
     property string patron: c.patron
@@ -18,11 +17,11 @@ Item {
     property string error: ""
     readonly property bool nueva: !c.id
     readonly property bool fijos: c.tieneVueltas    // con vueltas no se cambian tiempo, distancia ni patrón
-    readonly property bool cambiada: nombre !== c.nombre || fecha !== c.fecha || vueltasTotal !== c.vueltasTotal
+    readonly property bool cambiada: nombre !== c.nombre || fecha !== c.fecha
                                      || distanciaM !== c.distanciaM || tiempoIdealMs !== c.tiempoIdealMs || patron !== c.patron
 
     function datos() {
-        return { id: c.id || "", nombre: nombre, fecha: fecha, vueltasTotal: vueltasTotal,
+        return { id: c.id || "", nombre: nombre, fecha: fecha,
                  distanciaM: distanciaM, tiempoIdealMs: tiempoIdealMs, patron: patron };
     }
     function guardar() {
@@ -71,10 +70,6 @@ Item {
             anchors.centerIn: parent
             spacing: raiz.h ? 50 : 60
             Column {
-                Sub { anchors.horizontalCenter: parent.horizontalCenter; text: "Vueltas" }
-                Digito { anchors.horizontalCenter: parent.horizontalCenter; tam: raiz.h ? 72 : 64; text: raiz.vueltasTotal }
-            }
-            Column {
                 Sub { anchors.horizontalCenter: parent.horizontalCenter; text: "Ideal" }
                 Digito { anchors.horizontalCenter: parent.horizontalCenter; tam: raiz.h ? 72 : 64; text: raiz.idealCorto(raiz.tiempoIdealMs) }
             }
@@ -108,18 +103,6 @@ Item {
                 etiqueta: "Fecha"
                 Campo { texto: Qt.formatDate(Formato.desdeIso(raiz.fecha), "dd/MM/yy"); editando: raiz.campo === "fecha"
                         onTocado: { raiz.campo = "fecha"; teclado.abrir("fecha", "Fecha de la carrera", Formato.desdeIso(raiz.fecha)); } }
-            }
-            Fila {
-                etiqueta: "Vueltas"
-                Row {
-                    spacing: 12
-                    BotonCromo { width: 46; height: 46; texto: "−"; tamTexto: 26; anchors.verticalCenter: parent.verticalCenter
-                                 onTocado: raiz.vueltasTotal = Math.max(1, raiz.vueltasTotal - 1) }
-                    Campo { texto: raiz.vueltasTotal; editando: raiz.campo === "vueltas"
-                            onTocado: { raiz.campo = "vueltas"; teclado.abrir("numero", "Cantidad de vueltas (1 a 300)", raiz.vueltasTotal, 3); } }
-                    BotonCromo { width: 46; height: 46; texto: "+"; tamTexto: 26; anchors.verticalCenter: parent.verticalCenter
-                                 onTocado: raiz.vueltasTotal = Math.min(300, raiz.vueltasTotal + 1) }
-                }
             }
             Fila {
                 etiqueta: "Distancia (m)"
@@ -164,7 +147,7 @@ Item {
                 required property int index
                 readonly property bool med: raiz.patron === "alt1" ? index % 2 === 0 : raiz.patron === "alt2" ? index % 2 === 1 : true
                 medida: med
-                texto: "V" + (index + 1) + (index < 3 ? (med ? " MEDIDA" : " PRÁCTICA") : "")
+                texto: "V" + (index + 1) + (index < 3 ? (med ? " MEDIDA" : " LIBRE") : "")
             }
         }
         Sub { text: "…"; anchors.verticalCenter: parent.verticalCenter }
@@ -221,7 +204,6 @@ Item {
         onAceptado: v => {
             if (raiz.campo === "nombre") raiz.nombre = String(v).trim();
             else if (raiz.campo === "fecha") raiz.fecha = Formato.fechaIso(v);
-            else if (raiz.campo === "vueltas") raiz.vueltasTotal = Math.max(1, Math.min(300, v));
             else if (raiz.campo === "distancia") raiz.distanciaM = Math.max(0, Math.min(1000000, v));
             else if (raiz.campo === "tiempo") { if (v >= 5000) raiz.tiempoIdealMs = v; else Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos"); }
         }

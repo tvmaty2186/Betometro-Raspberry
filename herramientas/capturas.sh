@@ -23,10 +23,12 @@ cap conectividad conectividad
 cap wifi wifi --prueba red-vecino
 cap chequeo chequeo
 cap informe informe --carrera "Santa Clara"
+cap informe-libre informe --carrera "Santa Clara" --prueba libre
 cap compartir compartir --carrera "Santa Clara"
 cap actualizar actualizar
 cap editor editor
 cap editor-elegido editor --prueba elegir
+cap editor-cuenta editor --prueba elegir-cuenta
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
 cap carrera-sin-gps carrera --carrera "Gualeguaychú" --prueba largar --sin-gps

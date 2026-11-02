@@ -143,7 +143,7 @@ Json Carrera::aJson() const {
     j["patron"] = patron;
     j["practica"] = practica;
     j["creada"] = creada;
-    if (!practica || vueltasTotal > 0) j["vueltasTotal"] = vueltasTotal;
+    if (vueltasTotal > 0) j["vueltasTotal"] = vueltasTotal;   // solo de versiones viejas
     for (const auto& p : extra.pares()) {
         bool conocido = false;
         for (const char* k : kConocidos) if (p.first == k) conocido = true;
@@ -283,7 +283,7 @@ DatosLargada datosLargada(const Carrera& c, const Json& cfg) {
     d.tiempoIdealMs = static_cast<double>(c.tiempoIdealMs);
     d.distanciaM = static_cast<double>(c.distanciaM);
     d.patron = c.patron;
-    d.vueltasTotal = c.vueltasTotal;
+    d.vueltasTotal = 0;   // sin límite: en la carrera pueden agregar vueltas
     d.antirreboteMs = cfg["antirreboteMs"].aNumero(3000);
     d.umbralPrecisionM = cfg["umbralPrecisionM"].aNumero(20);
     d.calibrar = cfg["calibrar"].aBool(true);

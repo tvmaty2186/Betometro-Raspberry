@@ -12,7 +12,9 @@ Item {
     property bool panel: false
     property bool lista: false
     readonly property var w: tablero.elegido >= 0 ? armado[tablero.elegido] : null
-    Component.onCompleted: if (Contexto.prueba === "elegir") { tablero.elegido = armado.findIndex(x => x.t === "velocimetro"); panel = true; }
+    Component.onCompleted: if (Contexto.prueba === "elegir" || Contexto.prueba === "elegir-cuenta") {   // solo para capturas
+        tablero.elegido = armado.findIndex(x => x.t === (Contexto.prueba === "elegir" ? "velocimetro" : "cuenta")); panel = true;
+    }
 
     function poner(a) { armado = a; cambiado = true; }
     function cambiarElegido(campos) {
@@ -28,7 +30,7 @@ Item {
     // Datos de muestra para ver los widgets llenos mientras se edita
     readonly property var muestra: ({ enCurso: true, n: 3, medida: true, transMs: 87700, restanteMs: 152300, proxMedida: false,
                                       sinGps: false, vActKmh: 78, vBaseKmh: 48, vNecKmh: 75, congelada: false, restanteM: 2310,
-                                      deltaS: 1.2, velMaxVuelta: 81, vueltasTotal: 10, tiempoIdealMs: 240000, distanciaM: 3200 })
+                                      deltaS: 1.2, velMaxVuelta: 81, tiempoIdealMs: 240000, distanciaM: 3200 })
 
     Fondo { anchors.fill: parent }
 
@@ -110,6 +112,10 @@ Item {
                     if (raiz.w.forma === "redondo") raiz.cambiarElegido({ forma: undefined, h: p.w / H });
                     else { const d = Math.min(p.w, p.h); raiz.cambiarElegido({ forma: "redondo", w: d / W, h: d / H }); }
                 } }
+            BotonCromo { width: parent.width; height: 46; tamTexto: 17
+                visible: !!raiz.w && raiz.w.t === "cuenta"
+                texto: raiz.w && raiz.w.modo === "regresiva" ? "Cambiar a cuenta progresiva" : "Cambiar a cuenta regresiva"
+                onTocado: raiz.cambiarElegido({ modo: raiz.w.modo === "regresiva" ? "progresiva" : "regresiva" }) }
             BotonCromo { width: parent.width; height: 46; tamTexto: 17
                 visible: !!raiz.w && ["cuenta", "necesaria", "velocimetro", "faltan", "ultima"].indexOf(raiz.w.t) >= 0
                 texto: raiz.w && raiz.w.extra ? "Sin dato extra" : "Dato extra"
