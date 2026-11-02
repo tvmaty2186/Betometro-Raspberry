@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><link rel="stylesheet" href="extra.css">
+<style>
+body{margin:0;background:#111}
+.punto{display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fd36b;box-shadow:0 0 8px #7fd36b;margin-right:10px}
+.dato{font:600 17px Barlow;color:#d6e6d2}
+.fila{padding:10px 20px;font-size:18px}
+.seg b{padding:7px 14px;font-size:16px}
+.vu{display:flex;gap:4px;align-items:center}.vu i{width:12px;height:22px;border-radius:3px;background:#7fd36b}.vu i.a{background:var(--ama)}.vu i.r{background:#d23b2c}.vu i.no{background:rgba(255,255,255,.18)}
+.lugar{height:16px;border-radius:9px;background:#0a2414;box-shadow:0 0 0 2px #cfd4d8;overflow:hidden}.lugar i{display:block;height:100%;width:22%;background:linear-gradient(180deg,#ffe07a,var(--ama))}
+</style></head><body>
+<div class="pi" id="k1">
+ <div class="cab" style="padding:20px 28px"><div class="volver">‹</div><div class="cromo-txt">CÁMARA Y MICRÓFONO</div></div>
+ <div class="rayasT"></div>
+
+ <!-- Izquierda: estado, vista previa, micrófono -->
+ <div class="abs" style="left:36px;top:96px;width:560px">
+  <div class="card" style="padding-bottom:12px"><div class="h3">Vista previa</div>
+   <div style="padding:2px 20px 4px"><span class="punto"></span><span style="font:italic 800 22px Barlow">ELP 1080p · H.264 · lista</span></div>
+   <div style="margin:8px 20px 0;height:250px;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 0 0 2px #cfd4d8">
+    <svg width="520" height="250" viewBox="0 0 640 308" preserveAspectRatio="none"><defs><linearGradient id="c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fb2e0"/><stop offset="1" stop-color="#f3dcae"/></linearGradient><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f7a49"/><stop offset="1" stop-color="#0d2a18"/></linearGradient></defs>
+     <rect width="640" height="140" fill="url(#c)"/><path d="M0 132 Q80 100 160 126 Q260 98 360 128 Q460 100 560 126 Q600 112 640 124 L640 142 L0 142Z" fill="#35532c"/>
+     <rect y="138" width="640" height="170" fill="#7c9447"/><path d="M300 138 L340 138 Q440 200 640 280 L640 308 L0 308 Q190 230 300 138Z" fill="#5b5b58"/>
+     <path d="M0 262 Q320 222 640 262 L640 308 L0 308Z" fill="url(#h)"/><path d="M0 262 Q320 222 640 262" stroke="#e8ebee" stroke-width="4" fill="none"/></svg>
+    <span class="chip-c" style="position:absolute;left:12px;top:10px">Solo para apuntarla · en carrera no se ve</span>
+   </div>
+   <div style="display:flex;gap:12px;padding:12px 20px 0"><span class="btn-cromo" style="flex:1;height:46px">↻ Girar 180°</span><span class="btn-cromo" style="flex:1;height:46px">Probar grabación 10 s</span></div>
+  </div>
+  <div class="card" style="margin-top:16px;padding-bottom:12px"><div class="h3">Micrófono</div>
+   <div class="fila" style="border:0">Hablá y mirá la barra
+    <span class="vu"><i></i><i></i><i></i><i></i><i></i><i class="a"></i><i class="a"></i><i class="no"></i><i class="no"></i><i class="no"></i></span></div>
+   <div style="display:flex;gap:12px;padding:0 20px"><span class="btn-cromo" style="flex:1;height:46px">● Grabar 5 s y escuchar</span></div>
+  </div>
+ </div>
+
+ <!-- Derecha: grabación y lugar -->
+ <div class="abs" style="left:620px;top:96px;width:624px">
+  <div class="card"><div class="h3">Grabación</div>
+   <div class="fila">Cámara<span class="toggle"></span></div>
+   <div class="fila">Empieza<div class="seg"><b class="on">Al abrir la carrera</b><b>En la largada</b><b>A mano</b></div></div>
+   <div class="fila">Termina<span><span class="campo" style="min-width:70px;font-size:22px;padding:4px 12px">10 s</span> <span class="dato">después de «Terminar»</span></span></div>
+   <div class="fila">Calidad<div class="seg"><b class="on">720p</b><b>1080p</b></div></div>
+   <div class="fila">Sonido<div class="seg"><b class="on">De la cámara</b><b>Micrófono USB</b><b>Sin sonido</b></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><div class="h3">Lugar en la tarjeta</div>
+   <div style="padding:6px 20px 4px"><div class="lugar"><i></i></div>
+    <div style="display:flex;justify-content:space-between;margin-top:8px"><span class="dato">Usado: 14 GB en 9 videos</span><span style="font:italic 800 20px Barlow;color:var(--ama)">Entran 96 h más</span></div></div>
+   <div class="fila">Borrar los videos más viejos si falta lugar<span class="toggle"></span></div>
+   <div class="fila" style="justify-content:center"><span class="btn-cromo" style="width:300px;height:46px">Videos guardados ›</span></div>
+  </div>
+ </div>
+ <div class="nota">Muestra: la imagen de la cámara es un dibujo</div>
+</div>
+</body></html>

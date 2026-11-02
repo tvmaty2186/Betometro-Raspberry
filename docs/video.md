@@ -1,6 +1,6 @@
 # Video de la carrera (para más adelante)
 
-Estado: **idea aprobada por Matías (02/11/2026), para después de la 1.0.0.** Muestra visual: [muestras-video-v1.png](muestras-video-v1.png) (informe con video) y [muestras-video-v2.png](muestras-video-v2.png) (en carrera, solo «REC»). Fuente: [muestras/video.html](muestras/video.html) (`#v1`, `#v2`).
+Estado: **aprobada por Matías (02/11/2026). Cambio del mismo día: la cámara entra en la imagen nueva (con el actualizador por wifi), no después de la 1.0.0.** Muestra visual: [muestras-video-v1.png](muestras-video-v1.png) (informe con video) y [muestras-video-v2.png](muestras-video-v2.png) (en carrera, solo «REC»). Fuente: [muestras/video.html](muestras/video.html) (`#v1`, `#v2`).
 
 ## Qué hace
 
@@ -29,6 +29,12 @@ Estado: **idea aprobada por Matías (02/11/2026), para después de la 1.0.0.** M
 
 Prueba al recibirla (USB): `v4l2-ctl --list-formats` tiene que mostrar **H264**.
 Fuentes: https://medium.com/@cmeister2/logitech-c920-c922-webcams-no-longer-provide-native-h-264-1e0e4b6a9b74 · https://www.megatone.net/producto/camara-de-seguridad-usb-elp-2mp-1080p-co_MKT0HGGNOC/
+
+## Ajustes → Cámara y micrófono (lista aprobada 02/11/2026)
+
+Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.html`, `#k1`). Se entra desde **Ajustes** (no va en el inicio).
+
+1. Cámara sí / no. 2. Estado («ELP 1080p · H.264 · lista»; también en el Chequeo previo). 3. Vista previa para apuntarla (nunca en carrera). 4. Girar 180°. 5. Empieza: al abrir la carrera (de fábrica) / en la largada / a mano (REC). 6. Termina: N s después de «Terminar» (10 s). 7. Calidad 720p / 1080p. 8. Sonido: de la cámara / **micrófono USB** / sin sonido. 9. Probar: grabación de 10 s; micrófono con barra de nivel y «Grabar 5 s y escuchar». 10. Lugar: horas que entran. 11. Borrar lo más viejo si falta lugar (nunca informes). 12. Videos guardados (borrar por carrera).
 
 ## Cuándo
 
