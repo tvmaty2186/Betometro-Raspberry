@@ -27,6 +27,9 @@ Estado: **aprobada por Matías (02/11/2026). Cambio del mismo día: la cámara e
 | 2 | **ELP 1080p con H.264** (familia USBFHD06H / USBFHD04H, lente 2,1 a 2,8 mm, «H.264» en la ficha) | USB: cable largo, va en cualquier lado. Entrega H.264 hecho | Que la ficha diga **H.264** (no solo MJPEG). Calidad de imagen justa |
 | ✗ | Logitech C920 / C922 nuevas, webcams genéricas | — | Desde fines de 2018 las Logitech no dan H.264; las genéricas solo MJPEG: la Pi tendría que comprimir |
 
+**Opción barata (02/11/2026):** cualquier webcam USB común que dé **MJPEG** (casi todas: Logitech C270, C920 nuevas, genéricas 1080p). La Raspberry la descomprime y la vuelve a comprimir en H.264 **con su chip de video** (bcm2835-codec: `v4l2jpegdec` → `v4l2h264enc`), sin cargar el procesador. El kernel de la imagen ya trae el driver; falta el cambio en `betometro-camara` (llega por actualización) y probarlo en la Pi (720p a 30 cuadros).
+Otras: cámara CSI barata OV5647 con lente de 160° (necesita libcamera y `camera_auto_detect` en config.txt: el gancho de la actualización tendría que actualizar config.txt). Cámara de acción aparte (GoPro, dashcam): graba sola; se sincroniza después con el pitido de la largada (manual).
+
 Prueba al recibirla (USB): `v4l2-ctl --list-formats` tiene que mostrar **H264**.
 Fuentes: https://medium.com/@cmeister2/logitech-c920-c922-webcams-no-longer-provide-native-h-264-1e0e4b6a9b74 · https://www.megatone.net/producto/camara-de-seguridad-usb-elp-2mp-1080p-co_MKT0HGGNOC/
 
