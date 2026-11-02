@@ -87,7 +87,7 @@ BR2_PACKAGE_QT6DECLARATIVE_QUICK=y
 BR2_PACKAGE_QT6SVG=y
 BR2_PACKAGE_QT6MULTIMEDIA=y
 BR2_PACKAGE_QT6MULTIMEDIA_ALSA=y
-BR2_PACKAGE_QT6MULTIMEDIA_GSTREAMER=y
+# Reproducir video en el informe (Qt Multimedia con GStreamer, pide QtConcurrent): llega por actualización
 
 # --- Cámara y micrófono: grabar con GStreamer (la cámara ya entrega H.264) ---
 BR2_PACKAGE_GSTREAMER1=y
