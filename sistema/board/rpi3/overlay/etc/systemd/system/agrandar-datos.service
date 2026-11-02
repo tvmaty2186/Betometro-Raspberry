@@ -1,0 +1,14 @@
+[Unit]
+Description=Agrandar la partición de datos hasta llenar la tarjeta (una sola vez)
+DefaultDependencies=no
+Before=datos.mount
+After=systemd-udev-settle.service
+ConditionPathExists=/dev/mmcblk0p4
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/betometro/agrandar-datos
+
+[Install]
+WantedBy=local-fs.target

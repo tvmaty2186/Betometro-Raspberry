@@ -7,10 +7,13 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
+| [docs/gps-neo-m8n.md](docs/gps-neo-m8n.md) | El módulo GPS (NEO-M8N-0-10): datos oficiales, configuración y pruebas al recibirlo |
 | [docs/app/lo-aprendido.md](docs/app/lo-aprendido.md) | **Todo lo que hace la app y por qué**: datos, motor, voz, ajustes, pantallas, widgets, informe. Es la especificación a copiar |
 | [docs/app/diseno.md](docs/app/diseno.md) | Guía estética de la app (temas, Avispón Verde, colores, tipografías) |
 | [docs/app/arquitectura.md](docs/app/arquitectura.md) | Cómo está hecha la app |
 | [docs/app/historial.md](docs/app/historial.md) | Versiones de la app y decisiones de Matías |
+| [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md) | E1: el motor en C++ (`app/nucleo/`) y cómo se compara con la app |
+| [docs/video.md](docs/video.md) | E7 (para después de la 1.0.0): grabar la carrera con cámara y verla en el informe |
 | [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer |
 
 ## Qué es
@@ -49,6 +52,10 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 
 - `recursos/fuentes/`: tipografías (copiadas de la app).
 - `recursos/img/leon.png`: el león de Matías. `recursos/img/inicio.jpg`: la foto fija del inicio. `recursos/img/betometro-icono-*.png`: ícono de la app.
+
+## Compilar y probar
+
+`cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output-on-failure` (necesita Node para comparar con la app).
 
 ## Muestras
 

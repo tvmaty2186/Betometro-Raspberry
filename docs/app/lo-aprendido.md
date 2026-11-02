@@ -937,3 +937,8 @@ Se actualiza cada **2 s**. Cada fila: ✓ (verde), ! (rojo) o – (neutro), nomb
 | Reloj monotónico (`performance.now`) | Reloj monotónico de C++ (`steady_clock`). La hora de la marca se toma en la interrupción del GPIO |
 | Ajustes como panel encima | Pantalla propia, con los grupos nuevos (Mi auto, Wifi, Apagar, Orientación, Brillo) |
 | Temas | Los mismos cuatro y el modo sol (ver diseno.md) |
+| Cantidad de vueltas de cada carrera (`vueltasTotal`, «Última vuelta», «Carrera completa») | **No hay** (Matías, 02/11/2026): en la carrera pueden agregar vueltas. Se termina a mano. La carrera pasa a «corridas» cuando tiene vueltas y su fecha pasó; el mismo día se puede volver a largar |
+| Vuelta medida o práctica según el patrón | Igual al correr, pero se dice **LIBRE** en todos lados (pantalla, voz «Vuelta 2, libre», informe). **En el informe** cada vuelta tiene la etiqueta MEDIDA / LIBRE: se toca y cambia. Las libres (por patrón o a mano) **nunca suman error** (Matías, 02/11/2026) |
+| Marca de más (dos marcas seguidas parten una vuelta) | **En el informe:** se toca la vuelta y aparece «Unir V5 con V6» (pide tocar dos veces). Junta tiempo, distancia y recorrido; queda el tipo de la primera y se renumeran las siguientes. Sin aviso en voz durante la carrera (Matías, 02/11/2026, después de la práctica real de Beto del 31/10) |
+| Cuenta regresiva (widget) | «Cronómetro de la vuelta» con dos modos: **progresiva** (de fábrica: cuenta para arriba, rojo al pasar el ideal) o regresiva (como la app). Se cambia en el editor (✎). Mismas funciones: dato extra y barra ± (Matías, 02/11/2026) |
+| Tiempo ideal a la vista | Siempre en la línea de arriba y, chiquito, en la esquina del cronómetro: «IDEAL 4:00,0» (Matías, 02/11/2026) |

@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Plan de ingeniería
 
-Versión del plan: 1 (01/11/2026). Estado: **propuesto, falta el OK de Matías.**
+Versión del plan: 1 (01/11/2026). Estado: **aprobado por Matías (01/11/2026).** E1 y E2 hechas; sigue E3.
 
 Este documento ordena el proyecto en etapas. Para cada etapa dice qué se hace, cómo se hace, qué se entrega y cómo se prueba que está bien.
 
@@ -27,6 +27,7 @@ Este documento ordena el proyecto en etapas. Para cada etapa dice qué se hace, 
 | **E4** | Equipo real | Sí (GPS, pulsador, auriculares) | GPS por cables, pulsador, voz por auriculares, hora del GPS |
 | **E5** | Wifi, compartir y actualizar | Sí (wifi) | Wifi, informe por QR, actualización A/B |
 | **E6** | Prueba en pista y 1.0.0 | Sí, en el auto | Versión 1.0.0 publicada |
+| E7 | Video de la carrera (después de la 1.0.0) | Sí, cámara | Grabar la carrera y verla en el informe, sincronizada. Ver [video.md](video.md) |
 
 E1 y E2 se hacen sin hardware. Mientras tanto Matías junta las piezas que faltan.
 
@@ -111,6 +112,12 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 
 **Entrega:** `app/nucleo/` + `pruebas/motor/` + informe de la comparación.
 
+**Estado: hecha (01/11/2026).** Diferencia cero contra la app en 65 casos. Ver [pruebas/motor/INFORME.md](../pruebas/motor/INFORME.md).
+- El JSON es propio (`app/nucleo/json.*`): el núcleo no depende de nada, ni de Qt.
+- La vuelta interrumpida no se guarda si dura menos que el antirrebote. Su `fuente` es `"terminar"`.
+- Orientación de fábrica: horizontal. Brillo mínimo: 10 %. Las redes wifi las guarda `wpa_supplicant` (E5), no la base.
+- Falta para E2: el programador de voz (`programador`) y el informe (`armarRecorrido`) también van al núcleo.
+
 ### E2 — Programa completo en PC
 
 **Objetivo:** todo Betómetro funcionando en una PC, con datos simulados.
@@ -124,10 +131,49 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 - **Voz:** las frases de la app (números de la cuenta, «cero», «Vuelta N, medida/práctica», clic, pitido) se graban con Piper (voz en español de Argentina) al compilar. Se cargan en memoria al arrancar. Anticipo configurable (valor inicial 40 ms, se ajusta en E4).
 - **Informe:** pantalla propia (recorrido coloreado, velocidad, aceleración, tabla con la vuelta interrumpida) con el mismo cálculo que la app (`armarRecorrido`). Exportación a HTML con la plantilla de la app (`informe-plantilla.html`), mismo nombre de archivo.
 - **Teclado en pantalla** con ñ, para el wifi y los nombres.
+- **Conectividad** (pantalla 13) y la página **Betómetro en la red** con datos de prueba. Ver [propuesta-mejoras.md](propuesta-mejoras.md).
 
 **Pruebas:**
 - Capturas automáticas de cada pantalla, en las 2 orientaciones y los 4 temas, comparadas a ojo con las muestras.
 - Carrera completa simulada de punta a punta: largar, vueltas, marcas, terminar, informe, exportar.
+
+**Avance (01/11/2026):** base del programa (Qt 6.8, QML), tema Avispón, navegación, giro para la pantalla real y la pantalla de **Inicio** en las dos orientaciones (95 % de los píxeles iguales a la muestra).
+- **Carreras, Ficha y Práctica libre** (01/11/2026) con datos reales (núcleo + almacén), teclado en pantalla (letras con ñ, números, tiempo m:ss,d y fecha), borrar con doble toque o manteniendo apretado. Prueba `prueba_datos` (30 chequeos).
+  - La ficha une el editor y el detalle de la app, como la muestra. En una carrera corrida el recuadro muestra Error total, Promedio y Mejor.
+  - LARGAR solo el día de la carrera; **sin hora del GPS se deja largar** (decisión de la Raspberry). Si no se puede, el botón dice por qué.
+  - La práctica **sí se guarda** en Corridas al largar (como la app); se cambió el texto de la muestra que decía lo contrario.
+- **Pantalla de carrera** (01/11/2026): motor de E1 conectado (`app/crono.*`), armados de fábrica de las muestras (horizontal y vertical), widgets cuenta, tipo, sugerida, velocidad digital y analógica, última vuelta, MARCAR (al apoyar el dedo, con efecto) y los demás tipos. Teclado USB (Enter, espacio, F9). Terminar con doble toque guarda la vuelta interrumpida. Carrera completa termina sola. Sin GPS anda como cronómetro. Prueba `prueba_crono` (29 chequeos).
+  - GPS simulado interno a 10 Hz para la PC (`app/gps.*`). El simulador de los mensajes del NEO-M8N por terminal virtual va en la parte del GPS.
+  - Indicador de vuelta como la app (fábrica «fondo»: toda la pantalla roja en medida y verde en práctica). Las muestras no lo mostraban; **Matías eligió «como la app»** (01/11/2026).
+  - Falta: editor de pantalla (mover y cambiar widgets), voz y modo sol.
+- **Ajustes, Conectividad y clave del wifi** (01/11/2026): Ajustes con Mi auto (número y nombre), Tema y pantalla (tema, orientación, modo sol, brillo, tipo de vuelta), Voz y sonido, Velocidad y marcas, Conexión y sistema (conectividad, versión, apagar con doble toque). Todo se guarda al instante. Conectividad igual a la muestra, con **QR real** (qrcodegen, MIT, en `app/terceros/`). Clave con teclado siempre a la vista.
+  - En la PC el wifi es simulado (`app/wifi.*`); el real con `wpa_supplicant` va en E5.
+  - Brillo y volumen con barra amarilla (en la muestra eran la barra de colores de adelanto).
+  - Nuevos en la configuración: `nombreAuto`, `informesRed`, `wifiPropia`.
+- **Chequeo, Informe, Compartir y Actualizar** (01/11/2026):
+  - **Informe:** `armarRecorrido` y `datosInforme` pasados a C++ (`app/nucleo/informe.*`). Prueba `informe_igual_a_la_app`: 30 carreras con cortes de señal, saltos y mala precisión, 881.156 números, **diferencia cero**. Pantalla con mapa coloreado (velocidad, aceleración, adelanto), gráfico de velocidad con la sugerida y tabla de vueltas (tocar una la elige).
+  - **HTML del informe:** la plantilla de la app copiada a `recursos/informe-plantilla.html`, con la vuelta interrumpida (sin error, no suma). Se guarda en `datos/informes/` con el nombre de la app («🏁 nombre dd-mm-aaaa.html»).
+  - **Compartir:** QR a `http://betometro.local/informe/<id>` y los 3 pasos. La página que lo sirve va en E5.
+  - **Chequeo:** GPS (señal, precisión, lecturas por segundo, hora), prueba del pulsador (la próxima marca no larga), voz, wifi, lugar libre y TODO LISTO.
+  - **Actualizar:** pantalla de la muestra; en la PC la descarga es simulada (la real con RAUC va en E5).
+- **Voz** (01/11/2026): programador de voz en C++ (`app/nucleo/programador.*`) con la lógica de la app: cuenta hacia abajo con anticipo, «cero» o pitido largo, pitidos en vez de voz, tic cada X s, «Vuelta N, medida», «Última vuelta…», «Carrera completa», clic en cada marca aceptada.
+  - Audios grabados con **Piper**, voz «Daniela» (español de Argentina, CC BY-SA 4.0): `voz/grabar.py` arma 192 archivos (cero y 1 a 60, «Vuelta 1…60, medida/práctica», pitidos, clic), sin silencio al principio. Se arman con `cmake --build build --target voz`; en la Raspberry, al armar la imagen (E3).
+  - Se cargan todos en memoria al arrancar (Qt Multimedia). Volumen de Ajustes en vivo; ▶ Probar dice «Betómetro listo».
+- **Simulador del NEO-M8N y lector del GPS** (01/11/2026):
+  - `app/nucleo/neo.*`: lee UBX NAV-PVT y NMEA (GGA + GST + RMC), arma los mismos mensajes y la configuración del módulo (115200, GPS + GLONASS a 5 Hz, automotor, solo NAV-PVT, guardar), MON-VER y vuelta a NMEA.
+  - `simulador/simular_neo`: crea un puerto virtual y manda lecturas a 5 Hz (`--hz`) como si el auto diera vueltas, y contesta la versión y la configuración como un NEO-M8N original (`--nmea`, `--mala`, `--corte`). Se usa con `betometro --gps /tmp/betometro-gps`.
+  - `GpsNeo` (`app/gps.*`) es el mismo lector que usará el UART real: ya hace **G2** (hora de cada lectura según el GPS) y **G6** (solo posición 3D buena). G4 y G5 cambian el motor: van en E4 con su prueba y su opción en Ajustes.
+  - Probado de punta a punta: chequeo con satélites, módulo y firmware, lecturas por segundo y hora del GPS; carrera con UBX y con NMEA.
+- **Editor de la pantalla de carrera** (01/11/2026): el tablero de widgets es uno solo (`widgets/Tablero.qml`) para la carrera y el editor. Tocar elige (borde amarillo y asa), mantener apretado 350 ms y arrastrar mueve con imán a 8 px y líneas fucsia, el asa cambia el tamaño (mínimos 60×44 y 70 de diámetro). ✎: redondo/cuadrado, dato extra, barra ±, quitar (MARCAR no se quita). + Widget, De fábrica (doble toque, solo la orientación elegida), Guardar. Los armados van en `widgetsH` y `widgets`, en fracciones como la app.
+  - Diferencia con la app: los cambios se guardan con **Guardar** (como la muestra), no al instante. Volver sin guardar los descarta.
+  - Nuevo widget «Adelantado / atrasado» (número).
+- **Los 4 temas y el modo sol** (01/11/2026): todos los colores y letras salen de `Tema.qml` (Avispón, Rally clásico, Deportivo moderno, Cabina de avión, tomados de la app) y el modo sol le gana a cualquiera (fondo claro, tinta negra, widgets blancos con borde negro, MARCAR negro). Imagen con los 5: [capturas-temas.png](capturas-temas.png). **Aprobados por Matías** («Quedaron hermosos», 01/11/2026).
+  - Lo del Avispón (león, rayas, banda, 101, curva de abajo, título cromado) solo aparece en el Avispón, como en la app.
+  - Pendiente si Matías lo quiere: las tarjetas tipo «carnet» de papel del Rally clásico en Carreras y en la ficha.
+
+**Estado de E2: completa y aceptada** (01/11/2026). Pasan las pruebas: núcleo (174 chequeos), motor y informe iguales a la app, datos y crono. Capturas en [capturas/](capturas/), se sacan con `herramientas/capturas.sh`.
+- Dibujo con `Canvas` (se pinta una vez y queda): no depende de efectos de la placa de video y sale igual en captura que en la Raspberry.
+- El sentido del giro (90° o −90°) depende de cómo se monte la pantalla: se ajusta en E3.
 
 **Aceptación:** Matías aprueba las capturas (incluidos los 3 temas que todavía no vio). La carrera simulada da los mismos tiempos que el motor de E1.
 
@@ -161,31 +207,45 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 
 **Entrega:** `betometro-raspberry-X.Y.Z.img.xz` en la *release* + guía para grabarla con Raspberry Pi Imager.
 
+**Avance (01/11/2026):** árbol externo en [`sistema/`](../sistema/LEEME.md).
+- Buildroot **2026.02.3** (LTS), Qt **6.9.1**, kernel de la Raspberry **6.12.61** (ya trae la Touch Display 2: `vc4-kms-dsi-ili9881-7inch`), toolchain Bootlin aarch64 glibc.
+- Placa de 64 bits (`raspberrypi3_64`). Mesa VC4 + GBM, Qt EGLFS sobre KMS, sonido por ALSA, `libgpiod` 1.x (el toolchain trae cabeceras 5.4; libgpiod 2 pide 5.10).
+- Tarjeta: arranque 64 MB (vfat), sistema A y B de 600 MB (squashfs zstd, solo lectura), datos ext4 que se agranda sola al primer arranque. `/var` en memoria, registro en memoria.
+- Arranque sin mensajes (`quiet`, consola en tty3), pantalla de arranque con el león (psplash, `board/rpi3/arranque.png`), Betómetro como servicio con `Restart=always`, vigilante del procesador (`RuntimeWatchdogSec=15`).
+- Sin U-Boot por ahora: la Raspberry 3 no tiene el arranque «tryboot» de las 4/5. Cómo se elige A o B se resuelve en E5 (RAUC).
+- La imagen la arma GitHub Actions (`imagen.yml`) con la voz de Piper; se publica con cada etiqueta `v*`.
+
 ### E4 — Equipo real
 
 **Objetivo:** GPS, pulsador y voz de verdad.
 
 **Especificación:**
 - **GPS por UART** (cableado en [cableado-gps.png](cableado-gps.png)): `enable_uart=1`, `dtoverlay=disable-bt`, puerto `/dev/ttyAMA0`.
-- **Configuración del NEO-M8N al arrancar** (mensajes UBX): 115200 baudios, **solo GPS a 10 Hz**, modelo dinámico «automotor», salida `NAV-PVT`. Se guarda en el módulo.
+- **Configuración del NEO-M8N al arrancar** (mensajes UBX): busca la velocidad (115200 o 9600 de fábrica), pasa a 115200, **GPS + GLONASS a 5 Hz** (máximo del NEO-M8N con dos sistemas; opción GPS solo a 10 Hz), modelo dinámico «automotor», salida `NAV-PVT`, se guarda en el módulo y se repite en cada arranque (por si es una copia sin flash). Pregunta la versión (MON-VER) y la muestra en el chequeo. Ver [gps-neo-m8n.md](gps-neo-m8n.md).
+- **Mejoras G1 a G7** de [propuesta-mejoras.md](propuesta-mejoras.md): GPS + GLONASS a 5 Hz (corregido: el NEO-M8N no da 10 Hz con dos sistemas), hora de cada lectura según el GPS (`iTOW`) atada al PPS, error de velocidad (`sAcc`), «sin GPS» a 1 s, solo posición 3D buena, arranque en caliente. G4 y G5 cambian el motor: van aparte, con su prueba, y en Ajustes se puede volver a lo de la app.
 - **Datos que se usan de `NAV-PVT`:** velocidad sobre el suelo (`gSpeed`, Doppler), posición, **precisión horizontal (`hAcc`) como «precisión»** contra el umbral de 20 m, hora UTC válida, cantidad de satélites. Así se resuelve la duda de la precisión.
 - **PPS** (opcional): para medir la demora del GPS.
 - **Hora:** cuando el GPS da hora válida, se pone en el reloj del sistema (hora de Argentina).
-- **Pulsador** en GPIO17 (pin 11) contra GND (pin 9), con la resistencia interna hacia arriba. Filtro eléctrico de 20 ms + el antirrebote de 3 s de la app.
+- **Pulsador** en GPIO17 (pin 11) contra GND (pin 9). **Marca al apretar, nunca al soltar.** Filtro ya programado y probado (`app/nucleo/pulsador.*`, 01/11/2026):
+  - La hora de la marca es la del **primer flanco de bajada**, tomada por el kernel en la interrupción (libgpiod, reloj monotónico). Se le pasa al crono como `edadMs`, así cuenta el instante del toque aunque el programa se entere después.
+  - **Antirruido:** tiene que quedar apretado 10 ms para valer (una chispa dura microsegundos). **Antirrebote:** los rebotes del contacto no cambian la hora ni dan marcas dobles. **Rearme:** suelto 30 ms antes de aceptar otra; mantenerlo apretado da una sola marca. Además, el antirrebote de 3 s de la app en el motor.
+  - **Cableado contra el ruido del auto:** resistencia de 10 kΩ de GPIO17 a 3,3 V (pin 1) además de la interna, capacitor de 100 nF entre GPIO17 y GND junto a la Raspberry, y cable trenzado (o mallado) hasta el pulsador.
 - **Audio** por la salida de 3,5 mm (`dtparam=audio=on`, `audio_pwm_mode=2` para menos ruido). Volumen de fábrica al máximo; se usa el último elegido.
 - **Brillo** de la pantalla desde Ajustes.
 
 **Pruebas:**
-- GPS: con antena en el techo, 10 lecturas por segundo estables, tiempo hasta tener señal.
+- GPS: con antena en el techo, 5 lecturas por segundo estables (10 con GPS solo), tiempo hasta tener señal.
 - Pulsador: 500 apretadas, ninguna perdida ni doble.
 - Voz: demora entre la hora prevista y el sonido, medida con grabación. Se ajusta el anticipo.
 
-**Aceptación:** demora de la voz menor a 50 ms; el pulsador nunca falla; el GPS da 10 Hz en el auto andando.
+**Aceptación:** demora de la voz menor a 50 ms; el pulsador nunca falla; el GPS da 5 Hz con GPS + GLONASS (o 10 Hz con GPS solo) en el auto andando; el chequeo muestra el NEO-M8N como original.
 
 ### E5 — Wifi, compartir y actualizar
 
 **Especificación:**
-- **Wifi:** buscar redes, conectar con clave, recordar redes (`wpa_supplicant`). La clave se guarda en la partición de datos.
+- **Wifi:** buscar redes, conectar con clave, recordar y olvidar redes (`wpa_supplicant`). La clave se guarda en la partición de datos. Hora por internet (NTP) cuando hay conexión.
+- **Betómetro en la red:** página en `http://betometro.local` (mDNS) con todas las carreras, cada informe y «Descargar todos» (.zip). Solo lectura. Se apaga durante la carrera.
+- **Wifi propia:** si no encuentra red guardada, arma «Betometro-<número del auto>» para conectar el celular directo.
 - **Compartir informe por QR:** un servidor web chico dentro del programa, solo mientras está abierta la pantalla de compartir. El QR lleva a `http://<ip>:<puerto>/<código>` y descarga el HTML. Se cierra al salir de la pantalla.
 - **Actualizar:** consulta la última *release* de **este repo**. Si hay versión nueva aparece «· Actualizar» en amarillo. Al tocarlo, descarga el paquete RAUC, verifica la firma, lo instala en la copia que no está en uso y reinicia. Si la nueva no arranca bien 3 veces, vuelve sola a la anterior.
 - **Firma de las actualizaciones:** clave privada en los secretos de GitHub (la carga Matías; nunca se escribe en el repo). La pública va dentro del sistema.

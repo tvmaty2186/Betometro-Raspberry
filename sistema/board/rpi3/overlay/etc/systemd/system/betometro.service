@@ -1,0 +1,31 @@
+[Unit]
+Description=Betómetro
+After=datos.mount systemd-udev-settle.service
+Wants=datos.mount
+# Si se cae 5 veces seguidas, se reinicia el equipo. Con una actualización nueva que no anda,
+# U-Boot termina volviendo a la copia anterior.
+StartLimitIntervalSec=120
+StartLimitBurst=5
+StartLimitAction=reboot
+
+[Service]
+Type=simple
+Environment=LANG=C.UTF-8
+Environment=QT_QPA_PLATFORM=eglfs
+Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms
+Environment=QT_QPA_EGLFS_ALWAYS_SET_MODE=1
+Environment=QT_QPA_EGLFS_HIDECURSOR=1
+Environment=XDG_RUNTIME_DIR=/run/betometro
+Environment=BETO_RASPBERRY=1
+Environment=BETO_DATOS=/datos
+Environment=BETO_GPS=/dev/ttyAMA0
+Environment=BETO_VOZ=/usr/share/betometro/voz
+RuntimeDirectory=betometro
+ExecStartPre=-/usr/bin/psplash-write QUIT
+ExecStart=/usr/bin/betometro --fisica
+Restart=always
+RestartSec=1
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target

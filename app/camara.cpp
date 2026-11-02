@@ -1,0 +1,285 @@
+#include "camara.h"
+
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QRegularExpression>
+#include <QStorageInfo>
+#include <QTextStream>
+
+#include "datos.h"
+#include "gps.h"
+
+#ifdef Q_OS_LINUX
+#include <fcntl.h>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+namespace {
+constexpr double kMBporHora = 2048;   // 720p H.264 + sonido: unos 2 GB por hora
+constexpr qint64 kMinimoLibre = 2LL * 1024 * 1024 * 1024;   // con menos de 2 GB libres se hace lugar
+
+struct Dispositivo { QString ruta, nombre; bool h264 = false, mjpeg = false; };
+
+QList<Dispositivo> buscarCamaras() {
+    QList<Dispositivo> r;
+#ifdef Q_OS_LINUX
+    for (int i = 0; i < 16; ++i) {
+        const QByteArray ruta = "/dev/video" + QByteArray::number(i);
+        const int fd = ::open(ruta.constData(), O_RDWR | O_NONBLOCK);
+        if (fd < 0) continue;
+        v4l2_capability cap{};
+        if (::ioctl(fd, VIDIOC_QUERYCAP, &cap) == 0) {
+            const quint32 caps = (cap.capabilities & V4L2_CAP_DEVICE_CAPS) ? cap.device_caps : cap.capabilities;
+            if ((caps & V4L2_CAP_VIDEO_CAPTURE) && QByteArray(reinterpret_cast<const char*>(cap.driver)) == "uvcvideo") {
+                Dispositivo d;
+                d.ruta = QString::fromLatin1(ruta);
+                d.nombre = QString::fromUtf8(reinterpret_cast<const char*>(cap.card)).trimmed();
+                v4l2_fmtdesc f{};
+                f.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                for (f.index = 0; ::ioctl(fd, VIDIOC_ENUM_FMT, &f) == 0; ++f.index) {
+                    if (f.pixelformat == V4L2_PIX_FMT_H264) d.h264 = true;
+                    if (f.pixelformat == V4L2_PIX_FMT_MJPEG) d.mjpeg = true;
+                }
+                r << d;
+            }
+        }
+        ::close(fd);
+    }
+#endif
+    return r;
+}
+
+// Micrófonos USB de /proc/asound/cards: « 1 [Camera         ]: USB-Audio - USB Camera»
+QVariantList buscarMicrofonos() {
+    QVariantList r;
+    QFile f(QStringLiteral("/proc/asound/cards"));
+    if (!f.open(QIODevice::ReadOnly)) return r;
+    static const QRegularExpression re(QStringLiteral("^\\s*(\\d+)\\s+\\[(\\S+)\\s*\\]:\\s*(\\S+)\\s+-\\s+(.*)$"));
+    for (const QString& l : QString::fromUtf8(f.readAll()).split('\n')) {
+        const auto m = re.match(l);
+        if (!m.hasMatch() || m.captured(3) != QLatin1String("USB-Audio")) continue;
+        if (!QFile::exists(QStringLiteral("/proc/asound/card%1/pcm0c").arg(m.captured(1)))) continue;   // sin captura
+        r << QVariantMap{{"id", m.captured(2)}, {"nombre", m.captured(4).trimmed()},
+                         {"dispositivo", QStringLiteral("plughw:CARD=%1").arg(m.captured(2))}};
+    }
+    return r;
+}
+
+bool parecido(const QString& a, const QString& b) {
+    for (const QString& p : a.toLower().split(QRegularExpression(QStringLiteral("\\W+")), Qt::SkipEmptyParts))
+        if (p.size() >= 3 && b.toLower().contains(p)) return true;
+    return false;
+}
+}  // namespace
+
+Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
+    : QObject(padre), datos_(datos), carpeta_(carpetaDatos + QStringLiteral("/videos")),
+      prueba_(qEnvironmentVariableIsSet("BETO_CAMARA_PRUEBA")) {
+    QDir().mkpath(carpeta_);
+    detenerTimer_.setSingleShot(true);
+    connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) grab_.terminate(); });
+
+    leer(grab_, [this](const QVariantMap& m) {
+        if (m.contains("primerCuadro")) {
+            primerCuadro_ = monotonicoAAhora(m.value("primerCuadro").toDouble());
+            emit primerCuadroListo(primerCuadro_);
+        }
+        if (m.contains("error")) { falla_ = m.value("error").toString(); emit grabandoChanged(); }
+    });
+    connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
+        if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
+        emit grabandoChanged();
+        if (s == QProcess::NotRunning) actualizarLugar();
+    });
+    leer(vistaProc_, [this](const QVariantMap& m) {
+        if (!m.value("foto").toBool()) return;
+        vista_ = QUrl::fromLocalFile(QDir::tempPath() + QStringLiteral("/betometro-vista.jpg"));
+        vista_.setQuery(QStringLiteral("n=%1").arg(++fotos_));   // otra dirección: la imagen se vuelve a leer
+        emit vistaChanged();
+    });
+    connect(&vistaProc_, &QProcess::stateChanged, this, &Camara::vistaChanged);
+    leer(nivelProc_, [this](const QVariantMap& m) {
+        if (m.contains("nivel")) { nivel_ = m.value("nivel").toDouble(); emit nivelChanged(); }
+    });
+    connect(&micProc_, &QProcess::finished, this, [this] {
+        const QString wav = QDir::tempPath() + QStringLiteral("/betometro-prueba-mic.wav");
+        if (pruebaMic_ == QLatin1String("grabando") && QFile::exists(wav)) {
+            pruebaMic_ = QStringLiteral("escuchando");
+            emit pruebaMicChanged();
+            micProc_.start(QStringLiteral("aplay"), {QStringLiteral("-q"), wav});   // por los auriculares
+            return;
+        }
+        pruebaMic_.clear();
+        emit pruebaMicChanged();
+    });
+    detectar();
+}
+
+Camara::~Camara() {
+    for (QProcess* p : {&grab_, &vistaProc_, &nivelProc_, &micProc_}) {
+        if (p->state() == QProcess::NotRunning) continue;
+        p->terminate();
+        if (!p->waitForFinished(3000)) p->kill();
+    }
+}
+
+void Camara::leer(QProcess& p, const std::function<void(const QVariantMap&)>& f) {
+    connect(&p, &QProcess::readyReadStandardOutput, this, [&p, f] {
+        while (p.canReadLine()) {
+            const QVariantMap m = QJsonDocument::fromJson(p.readLine()).toVariant().toMap();
+            if (!m.isEmpty()) f(m);
+        }
+    });
+}
+
+QString Camara::ayudante() const {
+    const QString junto = QCoreApplication::applicationDirPath() + QStringLiteral("/betometro-camara");
+    return QFile::exists(junto) ? junto : QStringLiteral("betometro-camara");
+}
+
+QStringList Camara::base() const { return prueba_ ? QStringList{QStringLiteral("--prueba")} : QStringList{}; }
+
+void Camara::detectar() {
+    dispVideo_.clear();
+    problema_.clear();
+    if (prueba_) {
+        dispVideo_ = QStringLiteral("prueba");
+        nombre_ = QStringLiteral("Cámara de prueba · H.264 · lista");
+        microfonos_ = {QVariantMap{{"id", "prueba"}, {"nombre", "Micrófono de prueba"}, {"dispositivo", "prueba"}}};
+    } else {
+        const auto cams = buscarCamaras();
+        for (const auto& d : cams) if (d.h264) { dispVideo_ = d.ruta; nombre_ = d.nombre + QStringLiteral(" · H.264 · lista"); break; }
+        if (dispVideo_.isEmpty()) {
+            nombre_.clear();
+            problema_ = cams.isEmpty() ? QStringLiteral("No se encontró la cámara")
+                                       : QStringLiteral("«%1» no entrega H.264: no sirve para grabar").arg(cams.first().nombre);
+        }
+        microfonos_ = buscarMicrofonos();
+    }
+    emit dispositivosChanged();
+    actualizarLugar();
+}
+
+QString Camara::dispositivoAudio() const {
+    const QString modo = datos_->config()["camaraSonido"].aTexto("camara") == "usb" ? QStringLiteral("usb")
+                       : datos_->config()["camaraSonido"].aTexto("camara") == "no" ? QStringLiteral("no") : QStringLiteral("camara");
+    if (modo == QLatin1String("no") || microfonos_.isEmpty()) return QStringLiteral("no");
+    if (prueba_) return QStringLiteral("prueba");
+    const QString cam = nombre_.section(QStringLiteral(" · "), 0, 0);
+    // de la cámara: el que se parece al nombre de la cámara; USB: otro (o el único que haya)
+    for (const auto& v : microfonos_) {
+        const auto m = v.toMap();
+        const bool esDeLaCamara = parecido(cam, m.value("nombre").toString()) || parecido(cam, m.value("id").toString());
+        if ((modo == QLatin1String("camara")) == esDeLaCamara) return m.value("dispositivo").toString();
+    }
+    return microfonos_.first().toMap().value("dispositivo").toString();
+}
+
+void Camara::empezarVista() {
+    if (!hay() || viendo() || grabando()) return;
+    QStringList a{QStringLiteral("vista"), QStringLiteral("--video"), dispVideo_,
+                  QStringLiteral("--salida"), QDir::tempPath() + QStringLiteral("/betometro-vista.jpg")};
+    vistaProc_.start(ayudante(), a + base());
+}
+
+void Camara::pararVista() { if (viendo()) vistaProc_.terminate(); }
+
+void Camara::empezarNivel() {
+    const QString audio = dispositivoAudio();
+    if (audio == QLatin1String("no") || nivelProc_.state() != QProcess::NotRunning) return;
+    nivelProc_.start(ayudante(), QStringList{QStringLiteral("nivel"), QStringLiteral("--audio"), audio} + base());
+}
+
+void Camara::pararNivel() {
+    if (nivelProc_.state() != QProcess::NotRunning) nivelProc_.terminate();
+    nivel_ = 0;
+    emit nivelChanged();
+}
+
+void Camara::probarMicrofono() {
+    const QString audio = dispositivoAudio();
+    if (audio == QLatin1String("no") || !pruebaMic_.isEmpty()) return;
+    pararNivel();
+    pruebaMic_ = QStringLiteral("grabando");
+    emit pruebaMicChanged();
+    micProc_.start(ayudante(), QStringList{QStringLiteral("probar"), QStringLiteral("--audio"), audio, QStringLiteral("--segundos"),
+                                           QStringLiteral("5"), QStringLiteral("--salida"),
+                                           QDir::tempPath() + QStringLiteral("/betometro-prueba-mic.wav")} + base());
+}
+
+void Camara::probarGrabacion() {
+    if (empezar(QStringLiteral("prueba-") + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss")))) detener(10);
+}
+
+bool Camara::empezar(const QString& nombreBase) {
+    if (!hay() || grabando()) return false;
+    pararVista();
+    pararNivel();
+    hacerLugar();
+    falla_.clear();
+    primerCuadro_ = 0;
+    detenerTimer_.stop();
+    archivo_ = carpeta_ + '/' + nombreBase + QStringLiteral(".mkv");
+    const bool hd = datos_->config()["camaraCalidad"].aTexto("720p") == "1080p";
+    QStringList a{QStringLiteral("grabar"), QStringLiteral("--video"), dispVideo_,
+                  QStringLiteral("--ancho"), hd ? QStringLiteral("1920") : QStringLiteral("1280"),
+                  QStringLiteral("--alto"), hd ? QStringLiteral("1080") : QStringLiteral("720"),
+                  QStringLiteral("--audio"), dispositivoAudio(), QStringLiteral("--salida"), archivo_};
+    // Prioridad baja de procesador y de disco: la carrera primero
+    grab_.setProgram(QStringLiteral("nice"));
+    grab_.setArguments(QStringList{QStringLiteral("-n"), QStringLiteral("15"), ayudante()} + a + base());
+    grab_.start();
+    emit grabandoChanged();
+    return true;
+}
+
+void Camara::detener(int retrasoS) {
+    if (!grabando()) return;
+    if (retrasoS <= 0) { grab_.terminate(); return; }
+    detenerTimer_.start(retrasoS * 1000);
+}
+
+void Camara::hacerLugar() {
+    if (!datos_->config()["camaraBorrarViejos"].aBool(true)) return;
+    QStorageInfo d(carpeta_);
+    if (!d.isValid() || d.bytesAvailable() >= kMinimoLibre) return;
+    // Del más viejo al más nuevo, hasta tener el doble del mínimo. Nunca toca los informes.
+    QFileInfoList l = QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files, QDir::Time | QDir::Reversed);
+    for (const QFileInfo& f : l) {
+        if (QStorageInfo(carpeta_).bytesAvailable() >= 2 * kMinimoLibre) break;
+        QFile::remove(f.absoluteFilePath());
+    }
+}
+
+QVariantList Camara::videos() const {
+    QVariantList r;
+    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files, QDir::Time))
+        r << QVariantMap{{"archivo", f.fileName()}, {"fecha", f.lastModified().toString(QStringLiteral("dd/MM/yy HH:mm"))},
+                         {"mb", qRound(f.size() / 1048576.0)}};
+    return r;
+}
+
+bool Camara::borrarVideo(const QString& archivo) {
+    if (archivo.contains('/') || !archivo.endsWith(QLatin1String(".mkv"))) return false;
+    const bool ok = QFile::remove(carpeta_ + '/' + archivo);
+    actualizarLugar();
+    return ok;
+}
+
+void Camara::actualizarLugar() {
+    qint64 usado = 0;
+    int n = 0;
+    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files)) { usado += f.size(); ++n; }
+    QStorageInfo d(carpeta_);
+    const double libreMB = d.isValid() ? d.bytesAvailable() / 1048576.0 : 0;
+    lugar_ = {{"usadoGB", QString::number(usado / 1073741824.0, 'f', 1).replace('.', ',')}, {"videos", n},
+              {"horas", qMax(0, qRound(libreMB / kMBporHora))},
+              {"porcentaje", d.isValid() && d.bytesTotal() > 0 ? double(usado) / d.bytesTotal() : 0.0}};
+    emit lugarChanged();
+}

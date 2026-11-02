@@ -1,0 +1,14 @@
+#!/bin/sh
+# Si la partición de datos no llega al final de la tarjeta, la agranda (pasa una sola vez, al primer arranque).
+DISCO=/dev/mmcblk0
+PART=${DISCO}p4
+total=$(cat /sys/block/mmcblk0/size)
+inicio=$(cat /sys/block/mmcblk0/mmcblk0p4/start)
+largo=$(cat /sys/block/mmcblk0/mmcblk0p4/size)
+fin=$((inicio + largo))
+if [ $((total - fin)) -gt 8192 ]; then
+	echo ", +" | sfdisk --no-reread -N 4 "$DISCO" && partx -u -n 4 "$DISCO"
+	e2fsck -fy "$PART" || true
+	resize2fs "$PART"
+fi
+exit 0

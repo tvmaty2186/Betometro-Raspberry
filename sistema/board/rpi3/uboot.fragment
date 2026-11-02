@@ -1,0 +1,14 @@
+# U-Boot de Betómetro: elige la copia del sistema (A o B) y arranca sin esperar.
+# -2: arranca directo, sin mirar el teclado ni el puerto serie (el GPS manda datos por ahí
+# y podría frenar el arranque).
+CONFIG_BOOTDELAY=-2
+CONFIG_CMD_SETEXPR=y
+# Variables (copia, intentos) en el archivo uboot.env de la partición de arranque
+CONFIG_ENV_IS_IN_FAT=y
+CONFIG_ENV_FAT_INTERFACE="mmc"
+CONFIG_ENV_FAT_DEVICE_AND_PART="0:1"
+CONFIG_ENV_FAT_FILE="uboot.env"
+CONFIG_ENV_SIZE=0x4000
+# Sin letras en la pantalla: se ve la pantalla de arranque y después Betómetro
+CONFIG_VIDEO=n
+CONFIG_SPLASH_SCREEN=n

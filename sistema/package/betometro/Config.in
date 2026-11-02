@@ -1,0 +1,11 @@
+config BR2_PACKAGE_BETOMETRO
+	bool "betometro"
+	depends on BR2_PACKAGE_QT6
+	select BR2_PACKAGE_QT6BASE_GUI
+	select BR2_PACKAGE_QT6DECLARATIVE
+	select BR2_PACKAGE_QT6DECLARATIVE_QUICK
+	select BR2_PACKAGE_QT6SVG
+	select BR2_PACKAGE_QT6MULTIMEDIA
+	help
+	  Betómetro: el programa (Qt 6 / QML) para el navegante de
+	  carreras de regularidad.

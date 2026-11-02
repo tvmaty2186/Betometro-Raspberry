@@ -1,0 +1,117 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><link rel="stylesheet" href="extra.css">
+<style>
+body{margin:0;background:#111}
+.pi.v{width:720px;height:1280px}
+.cabv{position:absolute;left:24px;top:24px;display:flex;align-items:center;gap:14px;z-index:3}.cabv .cromo-txt{font-size:40px}
+.senal{display:inline-flex;align-items:flex-end;gap:3px;height:22px;margin-right:14px;vertical-align:-3px}
+.senal i{width:6px;background:#f5f6f7;border-radius:2px}.senal i.no{background:rgba(255,255,255,.25)}
+.punto{display:inline-block;width:14px;height:14px;border-radius:50%;background:#7fd36b;box-shadow:0 0 8px #7fd36b;margin-right:10px}
+.dato{font:600 18px Barlow;color:#d6e6d2}
+.grande{font:italic 800 30px Barlow}
+.peq{height:40px;font-size:15px}
+.olvidar{width:110px;height:40px;font-size:15px}
+/* página en el celular */
+.cel{width:390px;height:844px;position:relative;overflow:hidden;border-radius:40px;box-shadow:0 0 0 10px #222,0 0 0 12px #555;
+ background:radial-gradient(120% 60% at 25% 0%,#3d8c57 0%,var(--v2) 40%,var(--v3) 100%);font-family:Barlow;color:#fff}
+.web-barra{height:44px;margin:14px 14px 0;border-radius:22px;background:rgba(0,0,0,.55);display:flex;align-items:center;padding:0 18px;font:600 16px Barlow;color:#d6e6d2}
+.web-cab{display:flex;align-items:center;gap:12px;padding:16px 18px 10px;border-bottom:3px solid var(--ama);background:linear-gradient(180deg,#123d24,#081a0f)}
+.web-cab .cromo-txt{font-size:28px}
+.web-car{margin:12px 14px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.web-car .fecha{width:52px;height:52px;font-size:22px}
+.btn-web{height:40px;padding:0 14px;font-size:15px;border-radius:12px}
+#todo{display:flex;gap:40px;padding:40px;flex-wrap:wrap;align-items:flex-start}
+</style></head><body><div id="todo">
+
+<!-- C1 CONECTIVIDAD, HORIZONTAL -->
+<div class="pi" id="c1">
+ <div class="cab" style="padding:24px 28px"><div class="volver">‹</div><div class="cromo-txt">CONECTIVIDAD</div></div>
+ <div class="rayasT"></div>
+
+ <div class="abs" style="left:40px;top:104px;width:590px">
+  <div class="card" style="padding-bottom:10px"><div class="h3">Estado</div>
+   <div style="padding:8px 22px 4px"><span class="punto"></span><span class="grande">Conectado a «Casa»</span></div>
+   <div class="fila"><span class="dato">Señal</span><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i class="no" style="height:22px"></i></span>Buena</span></div>
+   <div class="fila"><span class="dato">Hora</span><span>Puesta por internet ✓</span></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="h3">Betómetro en la red</div>
+   <div style="display:flex;gap:20px;align-items:center;padding:10px 22px 18px">
+    <div style="width:132px;height:132px;background:#fff;border-radius:14px;display:grid;place-items:center;flex:none"><canvas id="qr1" width="112" height="112"></canvas></div>
+    <div><div class="dato">Desde el celu o la compu, en la misma wifi:</div>
+     <div style="font:italic 800 34px Barlow;color:var(--ama);margin:6px 0">betometro.local</div>
+     <div class="dato" style="font-size:16px">Ahí están todas las carreras y sus informes.</div></div>
+   </div>
+   <div class="fila" style="border-top:1px solid rgba(255,255,255,.12)">Mostrar informes en la red<span class="toggle"></span></div>
+   <div class="fila">Wifi propia si no hay red <span class="dato" style="font-size:15px;flex:1;padding-left:10px">«Betometro-101»</span><span class="toggle"></span></div>
+  </div>
+ </div>
+
+ <div class="abs" style="left:660px;top:104px;width:580px">
+  <div class="card"><div class="h3">Redes guardadas</div>
+   <div class="fila" style="background:rgba(244,197,49,.18)"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i class="no" style="height:22px"></i></span>Casa</span><span style="display:flex;gap:14px;align-items:center"><span style="color:var(--ama);font-weight:700">conectada</span><span class="btn-cromo olvidar">Olvidar</span></span></div>
+   <div class="fila"><span><span class="senal"><i class="no" style="height:6px"></i><i class="no" style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Celu de Matías</span><span style="display:flex;gap:14px;align-items:center"><span class="dato">no está cerca</span><span class="btn-cromo olvidar">Olvidar</span></span></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="h3">Redes cerca</div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i style="height:22px"></i></span>Vecino_2.4G</span><span>🔒</span></div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Fibertel WiFi 552</span><span>🔒</span></div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i class="no" style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Invitados</span><span class="dato">abierta</span></div>
+   <div class="fila" style="justify-content:center;gap:14px"><span class="btn-ama" style="width:260px;height:52px;font-size:19px">↻ BUSCAR REDES</span></div>
+  </div>
+  <div class="dato abs" style="top:526px;left:6px;font-size:15px">Tocás una red → se abre la pantalla de la clave con el teclado.</div>
+ </div>
+</div>
+
+<!-- C2 CONECTIVIDAD, VERTICAL -->
+<div class="pi v" id="c2">
+ <div class="cabv"><div class="volver">‹</div><div class="cromo-txt">CONECTIVIDAD</div></div>
+ <div class="rayasT" style="right:30px"></div>
+ <div class="abs" style="left:24px;right:24px;top:110px">
+  <div class="card" style="padding-bottom:10px"><div class="h3">Estado</div>
+   <div style="padding:8px 22px 4px"><span class="punto"></span><span class="grande">Conectado a «Casa»</span></div>
+   <div class="fila"><span class="dato">Señal</span><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i class="no" style="height:22px"></i></span>Buena</span></div>
+   <div class="fila"><span class="dato">Hora</span><span>Puesta por internet ✓</span></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="h3">Betómetro en la red</div>
+   <div style="display:flex;gap:20px;align-items:center;padding:10px 22px 18px">
+    <div style="width:132px;height:132px;background:#fff;border-radius:14px;display:grid;place-items:center;flex:none"><canvas id="qr2" width="112" height="112"></canvas></div>
+    <div><div class="dato">Desde el celu o la compu, en la misma wifi:</div>
+     <div style="font:italic 800 34px Barlow;color:var(--ama);margin:6px 0">betometro.local</div></div>
+   </div>
+   <div class="fila" style="border-top:1px solid rgba(255,255,255,.12)">Mostrar informes en la red<span class="toggle"></span></div>
+   <div class="fila">Wifi propia si no hay red<span class="toggle"></span></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="h3">Redes guardadas</div>
+   <div class="fila" style="background:rgba(244,197,49,.18)"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i class="no" style="height:22px"></i></span>Casa</span><span style="display:flex;gap:14px;align-items:center"><span style="color:var(--ama);font-weight:700">conectada</span><span class="btn-cromo olvidar">Olvidar</span></span></div>
+   <div class="fila"><span><span class="senal"><i class="no" style="height:6px"></i><i class="no" style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Celu de Matías</span><span class="btn-cromo olvidar">Olvidar</span></div>
+  </div>
+  <div class="card" style="margin-top:18px"><div class="h3">Redes cerca</div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i style="height:16px"></i><i style="height:22px"></i></span>Vecino_2.4G</span><span>🔒</span></div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Fibertel WiFi 552</span><span>🔒</span></div>
+   <div class="fila"><span><span class="senal"><i style="height:6px"></i><i class="no" style="height:11px"></i><i class="no" style="height:16px"></i><i class="no" style="height:22px"></i></span>Invitados</span><span class="dato">abierta</span></div>
+   <div class="fila" style="justify-content:center"><span class="btn-ama" style="width:300px;height:58px;font-size:20px">↻ BUSCAR REDES</span></div>
+  </div>
+ </div>
+</div>
+
+<!-- C3 BETÓMETRO EN LA RED, EN EL CELULAR -->
+<div class="cel" id="c3">
+ <div class="web-barra">🌐 betometro.local</div>
+ <div class="web-cab" style="margin-top:12px"><img src="../../recursos/img/leon.png" style="height:40px"><div><div class="cromo-txt">BETÓMETRO</div><div class="sub">Avispón Verde · 101</div></div></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 14px 0">
+  <div class="bandaSec" style="margin:0;flex:1;font-size:15px">CORRIDAS</div>
+ </div>
+ <div class="card web-car"><div class="fecha">01<small>NOV</small></div><div style="flex:1"><div style="font:italic 800 19px Barlow">Gualeguaychú</div><div class="sub" style="font-size:10px">10 vueltas · error total 12,4 s</div></div><span class="btn-ama btn-web">Ver</span></div>
+ <div class="card web-car"><div class="fecha">18<small>OCT</small></div><div style="flex:1"><div style="font:italic 800 19px Barlow">Concepción del Uruguay</div><div class="sub" style="font-size:10px">8 vueltas · 1 interrumpida</div></div><span class="btn-ama btn-web">Ver</span></div>
+ <div class="card web-car"><div class="fecha">04<small>OCT</small></div><div style="flex:1"><div style="font:italic 800 19px Barlow">Práctica 04/10/26</div><div class="sub" style="font-size:10px">6 vueltas · práctica libre</div></div><span class="btn-ama btn-web">Ver</span></div>
+ <div class="card web-car"><div class="fecha">20<small>SEP</small></div><div style="flex:1"><div style="font:italic 800 19px Barlow">Colón</div><div class="sub" style="font-size:10px">12 vueltas · error total 9,8 s</div></div><span class="btn-ama btn-web">Ver</span></div>
+ <div style="padding:14px"><div class="btn-cromo" style="height:52px;font-size:17px">⬇ Descargar todos (.zip)</div></div>
+ <div class="dato" style="text-align:center;font-size:13px;padding:0 20px">Solo para mirar y bajar. Desde acá no se borra nada.</div>
+ <div class="swoosh" style="left:-80px;right:-80px;bottom:-80px;height:110px"></div>
+</div>
+
+</div>
+<script>
+function qr(id){const q=document.getElementById(id).getContext('2d'),n=25,u=112/n;let sd=11;const rnd=()=>(sd=(sd*9301+49297)%233280)/233280;
+for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(rnd()<.5){q.fillRect(x*u,y*u,u+.5,u+.5)}
+[[0,0],[n-7,0],[0,n-7]].forEach(([x,y])=>{q.fillStyle='#fff';q.fillRect((x-1)*u,(y-1)*u,9*u,9*u);q.fillStyle='#000';q.fillRect(x*u,y*u,7*u,7*u);q.fillStyle='#fff';q.fillRect((x+1)*u,(y+1)*u,5*u,5*u);q.fillStyle='#000';q.fillRect((x+2)*u,(y+2)*u,3*u,3*u)})}
+qr('qr1');qr('qr2');
+</script></body></html>
