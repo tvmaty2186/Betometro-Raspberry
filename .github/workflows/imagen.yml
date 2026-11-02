@@ -95,6 +95,7 @@ jobs:
         run: |
           if [ -z "$RAUC_CLAVE" ]; then echo "Sin el secreto RAUC_CLAVE: no se arma el paquete"; exit 0; fi
           V=${{ steps.v.outputs.version }}
+          export PATH="$PWD/salida/host/bin:$PWD/salida/host/sbin:$PATH"   # rauc usa mksquashfs de Buildroot
           umask 077
           printf '%s\n' "$RAUC_CLAVE" > clave.pem
           mkdir -p paquete

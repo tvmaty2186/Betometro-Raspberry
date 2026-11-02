@@ -22,6 +22,7 @@ Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). Plan apro
 - **E2 completa y aceptada** (01/11/2026): temas aprobados. Detalle en el plan.
 - **Cambios de Matías (02/11/2026) hechos:** sin cantidad de vueltas; MEDIDA/LIBRE en el informe; las libres no suman error; cronómetro progresivo (de fábrica) o regresivo; tiempo ideal siempre a la vista. Falta que los vea.
 - **Video de la carrera (E7, después de la 1.0.0):** idea aprobada, muestra hecha → [docs/video.md](docs/video.md). Falta elegir la cámara.
+- **Actualizador y cámara (02/11/2026):** programados. Falta: cargar el secreto `RAUC_CLAVE`, armar la imagen, probarla en la Raspberry (arranque A/B, actualización por pendrive) y el repo público de actualizaciones para bajar por internet. Después, por actualización: informe con video y «Videos guardados».
 - **E3 en curso:** configuración de Buildroot armada (`sistema/`); primera compilación en GitHub y acá. Falta probar en la Raspberry (necesita la fuente de 5 V 2,5 A).
 - ~~E2 en curso:~~ base del programa, Inicio, Carreras, Ficha, Práctica libre, pantalla de carrera, Ajustes, Conectividad, clave del wifi, Chequeo, Informe, Compartir y Actualizar hechas. Faltan: editor de pantalla, los otros 3 temas, modo sol, la voz y el simulador del NEO-M8N. Fondo en carrera: rojo/verde según la vuelta, como la app (decidido). Siguen las otras 12 pantallas, los widgets de carrera, los otros 3 temas, la voz y el informe.
 
