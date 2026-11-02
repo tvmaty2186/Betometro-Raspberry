@@ -130,10 +130,14 @@ Item {
                 TituloTarjeta { texto: "Conexión y sistema" }
                 Fila { etiqueta: "Conectividad"; tocable: true; onTocada: Navegacion.ir("conectividad")
                     Text { text: (Wifi.conectada || "Sin conexión") + "  ›"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
+                Fila { etiqueta: "Cámara y micrófono"; tocable: true; onTocada: Navegacion.ir("camara")
+                    Text { text: (!raiz.a.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara") + "  ›"
+                           color: raiz.a.camara && !Camara.hay ? Tema.alerta : Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
                 Fila { etiqueta: "Versión " + Contexto.version
                     BotonAmarillo { visible: !!Contexto.versionNueva; width: 210; height: 48; tamTexto: 18; texto: "Actualizar a " + Contexto.versionNueva
                         onTocado: Navegacion.ir("actualizar") }
-                    Sub { visible: !Contexto.versionNueva; text: "Al día" } }
+                    BotonCromo { visible: !Contexto.versionNueva; width: 210; height: 48; tamTexto: 17; texto: "Buscar actualización"
+                        onTocado: Navegacion.ir("actualizar") } }
                 Fila { etiqueta: "Apagar el equipo"; ultima: true
                     DobleToque { width: 170; height: 46; textoNormal: "Apagar"; onConfirmado: Sistema.apagar() } }
             }

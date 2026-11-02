@@ -49,6 +49,7 @@ qt_add_qml_module(betometro_qml
     componentes/Volver.qml
     pantallas/Actualizar.qml
     pantallas/Ajustes.qml
+    pantallas/AjustesCamara.qml
     pantallas/Carrera.qml
     pantallas/Carreras.qml
     pantallas/Chequeo.qml

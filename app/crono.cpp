@@ -1,5 +1,10 @@
 #include "crono.h"
 
+#include <QDateTime>
+#include <QFileInfo>
+
+#include "camara.h"
+
 #include <QLocale>
 #include <cmath>
 
@@ -30,6 +35,36 @@ Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), dat
     relojVoz_.setInterval(15);   // como la app
     connect(&relojVoz_, &QTimer::timeout, this, &Crono::voz);
     relojVoz_.start();
+}
+
+// ---------- Video de la carrera ----------
+void Crono::ponerCamara(Camara* c) {
+    camara_ = c;
+    if (camara_) connect(camara_, &Camara::primerCuadroListo, this, [this] { asociarVideo(); });
+}
+
+bool Crono::camaraActiva() const { return camara_ && camara_->hay() && datos_->config()["camara"].aBool(false); }
+
+void Crono::empezarVideo() {
+    if (!camaraActiva() || camara_->grabando()) return;
+    camara_->empezar(QStringLiteral("carrera-") + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss")));
+}
+
+// Anota en la carrera en qué momento del video fue la largada. Con eso el informe sabe
+// dónde empieza cada vuelta (las vueltas de una largada van una atrás de la otra).
+void Crono::asociarVideo() {
+    if (!videoPendiente_ || !camara_ || !camara_->grabando() || camara_->primerCuadro() <= 0 || carreraId_.isEmpty()) return;
+    videoPendiente_ = false;
+    datos_->agregarVideo(carreraId_, {{"archivo", QFileInfo(camara_->archivo()).fileName()}, {"largada", largada_},
+                                      {"desdeLargadaMs", qRound64(largadaT_ - camara_->primerCuadro())},
+                                      {"girar", datos_->config()["camaraGirar"].aBool(false)}});
+}
+
+void Crono::grabarAMano() {
+    if (!camaraActiva()) return;
+    if (camara_->grabando()) { camara_->detener(0); return; }
+    empezarVideo();
+    if (enCurso()) { videoPendiente_ = true; asociarVideo(); }
 }
 
 void Crono::preparar(const QString& id) {
@@ -69,6 +104,7 @@ void Crono::preparar(const QString& id) {
              {"distancia", ar.toString(static_cast<qlonglong>(c.distanciaM))}, {"patron", QString::fromStdString(c.patron)}};
     emit carreraChanged();
     refrescar();
+    if (datos_->config()["camaraInicio"].aTexto("abrir") == "abrir") empezarVideo();
 }
 
 QString Crono::marcar(const QString& fuente, double edadMs) {
@@ -104,6 +140,11 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         }
         emit enCursoChanged();
         emit marcado(QStringLiteral("largada"));
+        // Video: con «a mano» no arranca solo; si ya estaba grabando, se anota la largada
+        largadaT_ = t;
+        if (datos_->config()["camaraInicio"].aTexto("abrir") != "mano") empezarVideo();
+        videoPendiente_ = camara_ && camara_->grabando();
+        asociarVideo();
         refrescar();
         return QStringLiteral("largada");
     }
@@ -123,6 +164,7 @@ void Crono::terminar() { if (enCurso()) terminarCon(QStringLiteral("Carrera term
 
 void Crono::salir() {
     if (enCurso()) return;
+    if (camara_ && camara_->grabando()) camara_->detener(0);
     motor_.reset();
     datosLargada_.reset();
     emit carreraChanged();
@@ -130,6 +172,8 @@ void Crono::salir() {
 
 void Crono::terminarCon(const QString& motivo, bool aMano) {
     motor_->terminar(reloj_ms_(), aMano);
+    // El video sigue unos segundos más (para ver la llegada) y para solo
+    if (camara_ && camara_->grabando()) camara_->detener(static_cast<int>(datos_->config()["camaraFinS"].aNumero(10)));
     emit enCursoChanged();
     emit terminada(motivo, vueltasGuardadas_, carreraId_);
     refrescar();

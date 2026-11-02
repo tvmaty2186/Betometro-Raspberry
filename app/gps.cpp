@@ -7,9 +7,18 @@
 #include <unistd.h>
 #include <cmath>
 
-double ahoraMs() {
+static const QElapsedTimer& relojCarrera() {
     static QElapsedTimer reloj = [] { QElapsedTimer r; r.start(); return r; }();
-    return static_cast<double>(reloj.nsecsElapsed()) / 1e6 + 1000;   // como performance.now(), nunca 0
+    return reloj;
+}
+
+double ahoraMs() {
+    return static_cast<double>(relojCarrera().nsecsElapsed()) / 1e6 + 1000;   // como performance.now(), nunca 0
+}
+
+double monotonicoAAhora(double monoMs) {
+    // QElapsedTimer usa el reloj monotónico del sistema: su referencia es la hora en que arrancó
+    return monoMs - static_cast<double>(relojCarrera().msecsSinceReference()) + 1000;
 }
 
 GpsSimulado::GpsSimulado(QObject* padre) : FuenteGps(padre) {

@@ -15,6 +15,8 @@
 #include "motor.h"
 #include "programador.h"
 
+class Camara;
+
 class Crono : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool listo READ listo NOTIFY carreraChanged)           // hay carrera elegida
@@ -43,6 +45,8 @@ public:
     Q_INVOKABLE QString carreraId() const { return carreraId_; }
     void refrescarAhora() { refrescar(); }
     void ponerReloj(std::function<double()> r) { reloj_ms_ = std::move(r); }   // para pruebas
+    void ponerCamara(Camara* c);             // video de la carrera (puede no haber)
+    Q_INVOKABLE void grabarAMano();          // botón REC (modo «a mano»): empieza o para
 
 signals:
     void carreraChanged();
@@ -57,6 +61,9 @@ signals:
     void frase(const QString& texto);        // «Vuelta 3, medida», «Carrera completa»
 
 private:
+    bool camaraActiva() const;
+    void empezarVideo();
+    void asociarVideo();
     void alEvento(beto::Evento e, const beto::DatosEvento& d);
     void alMuestra(const beto::Muestra& m);
     void refrescar();
@@ -78,6 +85,9 @@ private:
     QTimer relojVoz_;
     beto::ProgramadorVoz programador_;
     std::function<double()> reloj_ms_ = ahoraMs;
+    Camara* camara_ = nullptr;
+    double largadaT_ = 0;          // hora de la largada (reloj de la carrera)
+    bool videoPendiente_ = false;  // falta anotar en qué momento del video fue la largada
     QVariantMap info_, estado_, ultima_, gpsInfo_;
     std::vector<double> tiemposGps_;
 };

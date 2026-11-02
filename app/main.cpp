@@ -25,6 +25,8 @@
 #include "gps.h"
 #include "qr.h"
 #include "sistema.h"
+#include "actualizador.h"
+#include "camara.h"
 #include "wifi.h"
 
 #include <QStandardPaths>
@@ -89,6 +91,11 @@ int main(int argc, char* argv[]) {
         else gps = new GpsSimulado(&app);
     }
     Crono crono(&datos, gps);
+    Camara camara(&datos, carpeta);
+    crono.ponerCamara(&camara);
+    Actualizador actualizador(carpeta);
+    contexto.setVersionNueva(actualizador.versionNueva());
+    QObject::connect(&actualizador, &Actualizador::cambio, &contexto, [&] { contexto.setVersionNueva(actualizador.versionNueva()); });
 
     Audio audio;
     audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());
@@ -114,6 +121,8 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
     motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);
+    motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
+    motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");

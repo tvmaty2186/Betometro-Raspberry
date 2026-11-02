@@ -68,6 +68,18 @@ Item {
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: 10; spacing: 10; z: 5
+        // Cámara: punto rojo «REC» mientras graba; gris con «Cámara» si falló. En «a mano» se toca para grabar.
+        Rectangle {
+            visible: !!Datos.ajustes.camara && (Camara.grabando || !!Camara.falla || Datos.ajustes.camaraInicio === "mano")
+            height: 32; radius: 16; width: tRec.implicitWidth + 40
+            color: Qt.rgba(0, 0, 0, 0.6); border { width: 1.5; color: "#c9ced3" }
+            Rectangle { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 11; height: 11; radius: 6
+                        color: Camara.grabando ? "#ff3b30" : "#8a929b" }
+            Text { id: tRec; x: 30; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta
+                   text: Camara.grabando ? "REC" : Camara.falla ? "Cámara" : "Grabar"
+                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 13; letterSpacing: 1 } }
+            MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: Datos.ajustes.camaraInicio === "mano"; onClicked: Crono.grabarAMano() }
+        }
         Chip {
             punto: Crono.gps.ok && !est.sinGps ? Tema.bien : Tema.alerta
             texto: Crono.gps.ok ? "GPS " + Crono.gps.hz + " Hz" + (raiz.h ? " · " + Math.round(Crono.gps.precision) + " m" : "") : "Sin GPS"

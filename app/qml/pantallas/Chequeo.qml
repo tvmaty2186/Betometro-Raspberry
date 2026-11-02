@@ -78,6 +78,11 @@ Item {
                 TituloTarjeta { texto: "Wifi" }
                 Fila { etiqueta: "Conectado a"
                     Text { text: Wifi.conectada || "Sin conexión"; color: Tema.tinta; font { family: Tema.fuente800; pixelSize: 20 } } }
+                TituloTarjeta { texto: "Cámara y micrófono" }
+                Fila { etiqueta: "Cámara"; tocable: true; onTocada: Navegacion.ir("camara")
+                    Text { color: !Datos.ajustes.camara ? Tema.tintaSuave : Camara.hay ? Tema.bien : Tema.alerta
+                           text: (!Datos.ajustes.camara ? "Apagada" : Camara.hay ? "Lista · entran " + (Camara.lugar.horas || 0) + " h" : Camara.problema) + "  ›"
+                           font { family: Tema.fuente800; pixelSize: 18 } } }
                 TituloTarjeta { texto: "Almacenamiento" }
                 Fila { etiqueta: "Lugar libre"; ultima: true; Campo { activo: false; opacity: 1; texto: Datos.lugarLibre() + (raiz.tic * 0 === 0 ? "" : "") } }
                 Item { width: 1; height: 8 }

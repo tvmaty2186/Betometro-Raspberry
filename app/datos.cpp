@@ -274,6 +274,27 @@ bool Datos::agregarVuelta(const QString& id, const Vuelta& v) {
     return true;
 }
 
+bool Datos::agregarVideo(const QString& id, const QVariantMap& v) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c) return false;
+    Json j = Json::objeto();
+    j["archivo"] = s(v.value("archivo").toString());
+    j["largada"] = static_cast<int64_t>(v.value("largada").toInt());
+    j["desdeLargadaMs"] = static_cast<int64_t>(v.value("desdeLargadaMs").toLongLong());
+    j["girar"] = v.value("girar").toBool();
+    if (!c->extra["videos"].esLista()) c->extra["videos"] = Json::lista();
+    c->extra["videos"].agregar(std::move(j));
+    guardar();
+    emit carrerasChanged();
+    return true;
+}
+
+QVariantList Datos::videos(const QString& id) const {
+    const Carrera* c = buscar(id);
+    if (!c || !c->extra["videos"].esLista()) return {};
+    return QJsonDocument::fromJson(QByteArray::fromStdString(c->extra["videos"].escribir())).toVariant().toList();
+}
+
 bool Datos::cambiarMedida(const QString& id, int indice) {
     Carrera* c = base_.buscar(s(id));
     if (!c || indice < 0 || indice >= static_cast<int>(c->vueltas.size())) return false;

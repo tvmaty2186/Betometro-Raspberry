@@ -1,7 +1,8 @@
 # Betómetro — firmware de la Raspberry Pi 3 B+ (64 bits)
 start_file=start.elf
 fixup_file=fixup.dat
-kernel=Image
+# Arranca U-Boot, que elige la copia del sistema (A o B) y su kernel
+kernel=u-boot.bin
 arm_64bit=1
 
 # Arranque rápido y sin el arcoíris del firmware

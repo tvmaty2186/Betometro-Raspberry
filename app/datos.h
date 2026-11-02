@@ -33,6 +33,9 @@ public:
     // Para el crono
     QString crearPractica();                                   // práctica nueva con los valores de cfg; devuelve el id
     bool agregarVuelta(const QString& id, const beto::Vuelta& v);
+    // Video de una largada: {archivo, largada, desdeLargadaMs, girar}. Va en «videos» de la carrera.
+    bool agregarVideo(const QString& id, const QVariantMap& video);
+    Q_INVOKABLE QVariantList videos(const QString& id) const;
     const beto::Carrera* buscar(const QString& id) const;
     const beto::Json& config() const { return cfg_; }
 

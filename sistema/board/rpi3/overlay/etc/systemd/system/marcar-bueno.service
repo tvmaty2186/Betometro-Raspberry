@@ -1,0 +1,12 @@
+[Unit]
+Description=Marcar esta copia del sistema como buena (si Betómetro anda)
+After=betometro.service arranque.mount
+Requires=arranque.mount
+
+[Service]
+Type=oneshot
+# Espera que Betómetro lleve un rato andando; si no, la copia no se marca y U-Boot vuelve a la otra
+ExecStart=/bin/sh -c 'sleep 30; systemctl is-active -q betometro && rauc status mark-good'
+
+[Install]
+WantedBy=multi-user.target

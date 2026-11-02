@@ -1,9 +1,12 @@
 // Prueba de una carrera entera en el crono, con reloj y GPS de mentira:
 // práctica que se guarda al largar, vueltas guardadas, antirrebote, carrera sin límite de vueltas y vuelta interrumpida.
 #include <QCoreApplication>
+#include <QElapsedTimer>
+#include <QFile>
 #include <QTemporaryDir>
 #include <iostream>
 
+#include "camara.h"
 #include "crono.h"
 
 static int fallas = 0, chequeos = 0;
@@ -103,6 +106,44 @@ int main(int argc, char** argv) {
     CHEQUEAR(crono2.marcar() == "marca");
     const beto::Carrera* s = datos2.buscar(crono2.carreraId());
     CHEQUEAR(s && s->vueltas.size() == 1 && !s->vueltas[0].distM.has_value());
+
+    // 4) Video (si está el ayudante betometro-camara y GStreamer): cámara de prueba, empieza al abrir
+    //    la carrera, se anota en qué momento del video fue la largada y para unos segundos después.
+    if (QFile::exists(QCoreApplication::applicationDirPath() + "/betometro-camara")) {
+        qputenv("BETO_CAMARA_PRUEBA", "1");
+        QTemporaryDir dir3;
+        Datos datos3(dir3.path());
+        datos3.ponerCfg("camara", true);
+        datos3.ponerCfg("camaraFinS", 1);
+        datos3.ponerCfg("camaraSonido", "no");
+        Camara cam(&datos3, dir3.path());
+        FuenteGps nada3;
+        Crono crono3(&datos3, &nada3);
+        crono3.ponerCamara(&cam);
+        auto esperar = [&](const std::function<bool()>& listo, int ms) {
+            QElapsedTimer t; t.start();
+            while (!listo() && t.elapsed() < ms) QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+            return listo();
+        };
+        crono3.preparar("");
+        CHEQUEAR(cam.grabando());
+        CHEQUEAR(esperar([&] { return cam.primerCuadro() > 0; }, 8000));
+        esperar([] { return false; }, 700);
+        CHEQUEAR(crono3.marcar() == "largada");
+        const auto v = datos3.videos(crono3.carreraId());
+        CHEQUEAR(v.size() == 1);
+        const double desde = v.isEmpty() ? 0 : v[0].toMap()["desdeLargadaMs"].toDouble();
+        CHEQUEAR(desde >= 500 && desde < 3000);   // la largada fue unos 0,7 s después del primer cuadro
+        crono3.terminar();
+        CHEQUEAR(cam.grabando());                 // sigue 1 s más
+        CHEQUEAR(esperar([&] { return !cam.grabando(); }, 8000));
+        CHEQUEAR(cam.falla().isEmpty());
+        const QString archivo = cam.archivo();
+        CHEQUEAR(QFile(archivo).size() > 10000);
+        CHEQUEAR(!v.isEmpty() && archivo.endsWith(v[0].toMap()["archivo"].toString()));
+    } else {
+        std::cout << "(sin betometro-camara: no se prueba el video)\n";
+    }
 
     std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
     return fallas ? 1 : 0;

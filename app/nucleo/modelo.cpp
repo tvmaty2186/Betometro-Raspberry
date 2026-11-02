@@ -249,7 +249,15 @@ Json configFabrica() {
     c["brillo"] = 100;                // %
     c["volumen"] = 100;
     c["gpsSoloGps"] = false;
-    c["gpsModulo"] = "auto";          // auto (se detecta), m8 (NEO-M8N), 7 (NEO-7M), 6 (NEO-6M)          // false: GPS + GLONASS a 5 Hz; true: GPS solo a 10 Hz (NEO-M8N)               // %; de fábrica al máximo, después el último elegido
+    c["gpsModulo"] = "auto";          // auto (se detecta), m8 (NEO-M8N), 7 (NEO-7M), 6 (NEO-6M)
+    // Cámara y micrófono (video de la carrera)
+    c["camara"] = false;              // de fábrica apagada: se prende al instalarla
+    c["camaraInicio"] = "abrir";      // abrir (al abrir la pantalla de carrera), largada, mano (botón REC)
+    c["camaraFinS"] = 10;             // segundos de más después de «Terminar»
+    c["camaraCalidad"] = "720p";      // 720p, 1080p
+    c["camaraSonido"] = "camara";     // camara (micrófono de la cámara), usb (micrófono USB), no
+    c["camaraGirar"] = false;         // girar 180° (cámara dada vuelta en el techo)
+    c["camaraBorrarViejos"] = true;   // si falta lugar, borra los videos más viejos (nunca informes)
     return c;
 }
 
@@ -304,6 +312,13 @@ Json armarConfig(const Json& guardado) {
     opcionEn(c, def, "gpsModulo", {"auto", "m8", "7", "6"});
     numeroEn(c, def, "brillo", 10, 100);     // nunca negro del todo
     numeroEn(c, def, "volumen", 0, 100);
+    boolEn(c, def, "camara");
+    opcionEn(c, def, "camaraInicio", {"abrir", "largada", "mano"});
+    numeroEn(c, def, "camaraFinS", 0, 120);
+    opcionEn(c, def, "camaraCalidad", {"720p", "1080p"});
+    opcionEn(c, def, "camaraSonido", {"camara", "usb", "no"});
+    boolEn(c, def, "camaraGirar");
+    boolEn(c, def, "camaraBorrarViejos");
     return c;
 }
 

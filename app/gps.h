@@ -17,6 +17,8 @@
 
 // Reloj monotónico común a todo el programa, en ms (como performance.now()).
 double ahoraMs();
+// Hora del reloj monotónico del sistema (ms, como CLOCK_MONOTONIC) pasada al reloj de la carrera
+double monotonicoAAhora(double monoMs);
 
 class FuenteGps : public QObject {
     Q_OBJECT

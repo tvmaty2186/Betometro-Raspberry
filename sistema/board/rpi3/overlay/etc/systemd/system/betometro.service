@@ -2,6 +2,11 @@
 Description=Betómetro
 After=datos.mount systemd-udev-settle.service
 Wants=datos.mount
+# Si se cae 5 veces seguidas, se reinicia el equipo. Con una actualización nueva que no anda,
+# U-Boot termina volviendo a la copia anterior.
+StartLimitIntervalSec=120
+StartLimitBurst=5
+StartLimitAction=reboot
 
 [Service]
 Type=simple

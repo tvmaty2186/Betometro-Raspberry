@@ -4,10 +4,11 @@ name: Imagen para la Raspberry
 # Tarda: la primera vez unas 3 horas; después, con la caché, bastante menos.
 on:
   workflow_dispatch:
+  # Solo cuando se pide: un commit con «[imagen]» en el mensaje, o una etiqueta v* (versión).
+  # Así, mientras se programa, no se gastan horas de GitHub en imágenes que nadie va a usar.
   push:
-    branches: ['**']       # sin esto, solo arrancaba con las etiquetas
-    tags: ['v*']           # con etiqueta no se miran las rutas: siempre arma y publica
-    paths: ['sistema/**', '.github/workflows/imagen.yml']
+    branches: ['**']
+    tags: ['v*']
 
 env:
   BUILDROOT: 2026.02.3
@@ -19,6 +20,7 @@ concurrency:
 
 jobs:
   imagen:
+    if: startsWith(github.ref, 'refs/tags/v') || contains(github.event.head_commit.message, '[imagen]') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     steps:
@@ -85,14 +87,37 @@ jobs:
           echo "version=$V" >> "$GITHUB_OUTPUT"
           ls -la salida/images
 
+      # Paquete de actualización (.raucb), firmado con la clave del secreto RAUC_CLAVE.
+      # Lo instala la Raspberry por wifi o desde un pendrive. Sin el secreto, no se arma.
+      - name: Paquete de actualización
+        env:
+          RAUC_CLAVE: ${{ secrets.RAUC_CLAVE }}
+        run: |
+          if [ -z "$RAUC_CLAVE" ]; then echo "Sin el secreto RAUC_CLAVE: no se arma el paquete"; exit 0; fi
+          V=${{ steps.v.outputs.version }}
+          umask 077
+          printf '%s\n' "$RAUC_CLAVE" > clave.pem
+          mkdir -p paquete
+          cp salida/images/rootfs.squashfs paquete/
+          cp sistema/board/rpi3/rauc/hook.sh paquete/
+          printf '[update]\ncompatible=betometro-rpi3\nversion=%s\n\n[bundle]\nformat=verity\n\n[hooks]\nfilename=hook.sh\n\n[image.rootfs]\nfilename=rootfs.squashfs\nhooks=post-install\n' "$V" > paquete/manifest.raucm
+          salida/host/bin/rauc bundle --cert=sistema/board/rpi3/rauc/certificado.pem --key=clave.pem paquete betometro-$V.raucb
+          rm -f clave.pem
+          salida/host/bin/rauc info --keyring=sistema/board/rpi3/rauc/certificado.pem betometro-$V.raucb
+
       - uses: actions/upload-artifact@v4
         with:
           name: betometro-${{ steps.v.outputs.version }}
-          path: betometro-${{ steps.v.outputs.version }}.img.xz
+          path: |
+            betometro-${{ steps.v.outputs.version }}.img.xz
+            betometro-${{ steps.v.outputs.version }}.raucb
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Publicar en la versión (solo con etiqueta v*)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: betometro-${{ steps.v.outputs.version }}.img.xz
+          files: |
+            betometro-${{ steps.v.outputs.version }}.img.xz
+            betometro-${{ steps.v.outputs.version }}.raucb

@@ -38,6 +38,7 @@ public:
     void setIdInicial(const QString& i) { idInicial_ = i; }
     QString version() const { return QStringLiteral(BETO_VERSION); }
     QString versionNueva() const { return versionNueva_; }
+    void setVersionNueva(const QString& v) { if (v != versionNueva_) { versionNueva_ = v; emit versionNuevaChanged(); } }
     QString numeroAuto() const { return numeroAuto_; }
     QString nombreAuto() const { return nombreAuto_; }
     int satelites() const { return satelites_; }
@@ -60,7 +61,7 @@ private:
     QString pantallaInicial_ = QStringLiteral("inicio");
     QString idInicial_;
     QString prueba_;
-    QString versionNueva_ = QStringLiteral("1.1.0");   // muestra
+    QString versionNueva_;                              // la pone el Actualizador
     QString numeroAuto_ = QStringLiteral("101");
     QString nombreAuto_ = QStringLiteral("Avispón Verde");
     int satelites_ = 9;                                 // muestra

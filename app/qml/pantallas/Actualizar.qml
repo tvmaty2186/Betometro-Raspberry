@@ -2,16 +2,14 @@ import QtQuick
 import Betometro
 
 // Pantalla 12: Actualizar. Muestras #s12 y #v12.
-// En la PC la descarga es simulada; la de verdad (paquete firmado, copia A/B) va en E5.
+// Baja el paquete firmado (por internet o de un pendrive) y lo instala con RAUC en la copia del
+// sistema que no se usa. En la PC la descarga es simulada.
 Item {
     id: raiz
     readonly property bool h: Contexto.horizontal
-    property real progreso: 0
-    property string estado: Crono.enCurso ? "carrera" : "descargando"   // descargando, lista, carrera
-    Timer {
-        running: raiz.estado === "descargando"; interval: 120; repeat: true
-        onTriggered: { raiz.progreso = Math.min(100, raiz.progreso + 1.5); if (raiz.progreso >= 100) raiz.estado = "lista"; }
-    }
+    readonly property string estado: Crono.enCurso ? "carrera" : Actualizador.estado   // nada, descargando, instalando, lista, error, carrera
+    readonly property real progreso: Actualizador.progreso
+    Component.onCompleted: if (!Actualizador.versionNueva) Actualizador.buscar()
 
     Fondo { anchors.fill: parent }
     CabeceraPantalla { titulo: "ACTUALIZAR"; derechaRayas: raiz.h ? 90 : 30; onVolver: Navegacion.ir("inicio") }
@@ -33,8 +31,9 @@ Item {
                          Digito { anchors.horizontalCenter: parent.horizontalCenter; text: Contexto.versionNueva || Contexto.version; tam: 100; color: Tema.acento } }
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
-                   text: "Qué trae: arreglos y mejoras de la pantalla de carrera"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 22 } }
+                   text: Actualizador.versionNueva ? "Qué trae: " + (Actualizador.notas || "mejoras") : "No hay una versión nueva por internet."; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 22 } }
             Rectangle {
+                visible: raiz.estado === "descargando" || raiz.estado === "instalando" || raiz.estado === "lista"
                 width: parent.width; height: 22; radius: 11; color: "#0a2414"; border { width: 2; color: Tema.bordeCromo }
                 Rectangle {
                     x: 2; y: 2; height: parent.height - 4; radius: 9; width: Math.max(height, (parent.width - 4) * raiz.progreso / 100)
@@ -42,13 +41,25 @@ Item {
                 }
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter
-                   text: raiz.estado === "carrera" ? "Terminá la carrera antes de actualizar" : raiz.estado === "lista" ? "Lista: se usa al reiniciar el equipo" : "Descargando… " + Math.floor(raiz.progreso) + " %"
+                   text: raiz.estado === "carrera" ? "Terminá la carrera antes de actualizar"
+                         : raiz.estado === "lista" ? "Lista: se usa al reiniciar el equipo"
+                         : raiz.estado === "descargando" ? "Descargando… " + Math.floor(raiz.progreso) + " %"
+                         : raiz.estado === "instalando" ? "Instalando… " + Math.floor(raiz.progreso) + " %"
+                         : raiz.estado === "error" ? Actualizador.mensaje
+                         : Actualizador.versionNueva ? "Versión " + Actualizador.versionNueva + (Actualizador.origen === "pendrive" ? " en el pendrive" : " disponible") : "Estás al día"
                    color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.3
                    text: "Podés seguir usando Betómetro. Se instala en la copia de reserva.\nSi algo falla, vuelve solo a la versión anterior."
                    color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 19 } }
-            BotonAmarillo { visible: raiz.estado === "lista"; anchors.horizontalCenter: parent.horizontalCenter; width: 300; height: 64; texto: "REINICIAR"
-                            onTocado: Navegacion.avisar("En la Raspberry reinicia en la versión nueva") }
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter; spacing: 16
+                BotonAmarillo { visible: raiz.estado === "lista"; width: 300; height: 64; texto: "REINICIAR"
+                                onTocado: { Actualizador.reiniciar(); if (!Sistema.raspberry) Navegacion.avisar("En la Raspberry reinicia en la versión nueva"); } }
+                BotonAmarillo { visible: (raiz.estado === "nada" || raiz.estado === "error") && !!Actualizador.versionNueva
+                                width: 300; height: 64; texto: "ACTUALIZAR"; onTocado: Actualizador.actualizar() }
+                BotonCromo { visible: raiz.estado === "nada" || raiz.estado === "error"; width: 260; height: 64; tamTexto: 18
+                             texto: "Buscar en pendrive"; onTocado: Actualizador.buscarPendrive() }
+            }
         }
     }
 }
