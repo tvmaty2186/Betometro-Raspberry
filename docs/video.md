@@ -17,7 +17,7 @@ Estado: **idea aprobada por Matías (02/11/2026), para después de la 1.0.0.** M
 - **Sincronía:** al arrancar se anota la hora monotónica del primer cuadro; cada cuadro lleva su hora. Con eso cada marca, muestra del GPS y vuelta cae en un momento exacto del video. Se guarda junto a la carrera: `datos/video/<id carrera>-L<largada>.mkv` y en la carrera `video: {archivo, inicioMs}`.
 - **Lugar:** 720p H.264 ≈ 2 GB por hora. En la partición de datos (tarjeta de 32 GB: unas 12 horas). Aviso si queda poco lugar; se pueden borrar videos viejos desde Ajustes.
 - **Reproducción:** Qt Multimedia con decodificación por hardware de la Pi. 720p anda; 1080p puede andar a los tirones.
-- **Sistema (E3):** agregar al kernel UVC (`CONFIG_USB_VIDEO_CLASS`) y a Buildroot GStreamer con `gst1-plugins-good` (v4l2, matroska). Corriente: la cámara toma unos 0,3–0,5 A del USB; con la fuente de 2,5 A alcanza.
+- **Sistema:** volver a prender `CONFIG_MEDIA_SUPPORT` (se apagó en E3 para que el kernel compile más rápido) y agregar UVC (`CONFIG_USB_VIDEO_CLASS`) y a Buildroot GStreamer con `gst1-plugins-good` (v4l2, matroska). Corriente: la cámara toma unos 0,3–0,5 A del USB; con la fuente de 2,5 A alcanza.
 
 ## Cámaras (02/11/2026)
 
