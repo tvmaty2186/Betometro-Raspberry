@@ -12,6 +12,11 @@ on:
 env:
   BUILDROOT: 2026.02.3
 
+# Una a la vez: si hay una armándose, la nueva espera (y aprovecha su caché)
+concurrency:
+  group: imagen-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   imagen:
     runs-on: ubuntu-24.04
@@ -31,7 +36,7 @@ jobs:
           sudo apt-get install -y build-essential rsync cpio unzip bc file wget python3 python3-pip libncurses-dev
 
       - name: Caché de descargas y compilación
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             sistema/cache
@@ -53,10 +58,23 @@ jobs:
           make -C buildroot-${BUILDROOT} BR2_EXTERNAL=$PWD/sistema O=$PWD/salida betometro_rpi3_defconfig
 
       - name: Compilar la imagen
-        run: make -C salida -j$(nproc) 2>&1 | tee compilacion.log | grep -E '^>>>|[Ee]rror' || true; test ${PIPESTATUS[0]} -eq 0
+        timeout-minutes: 320   # corta antes que el trabajo, así se guarda la caché y la próxima sigue desde ahí
+        run: |
+          set +e +o pipefail
+          make -C salida -j$(nproc) 2>&1 | tee compilacion.log | grep -E '^>>>|[Ee]rror'
+          exit ${PIPESTATUS[0]}
+
+      - name: Guardar la caché (también si falló o se cortó)
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            sistema/cache
+            ~/.cache/betometro-voz
+          key: buildroot-${{ env.BUILDROOT }}-${{ hashFiles('sistema/configs/*', 'sistema/board/rpi3/linux.fragment') }}-${{ github.run_id }}
 
       - name: Registro de la compilación (si falló)
-        if: failure()
+        if: failure() || cancelled()
         run: tail -n 300 compilacion.log
 
       - name: Nombre con la versión
