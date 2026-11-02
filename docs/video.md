@@ -1,0 +1,24 @@
+# Video de la carrera (para más adelante)
+
+Estado: **idea aprobada por Matías (02/11/2026), para después de la 1.0.0.** Muestra visual: [muestras-video-v1.png](muestras-video-v1.png) (informe con video) y [muestras-video-v2.png](muestras-video-v2.png) (en carrera, solo «REC»). Fuente: [muestras/video.html](muestras/video.html) (`#v1`, `#v2`).
+
+## Qué hace
+
+- Una cámara en el auto graba **toda la carrera**: arranca con la largada y para con «Terminar».
+- En el informe, botón **Informe / Video**. Con Video: mitad de la pantalla el video, mitad el informe.
+  - Mientras corre el video: el auto se mueve en el mapa, se marca la vuelta en la tabla y se ven velocidad, sugerida y adelanto de ese momento.
+  - La línea del video tiene las marcas de cada vuelta (rojo medida, verde libre). Tocar una vuelta de la tabla salta el video ahí.
+- **En carrera no se ve el video**: solo un punto rojo «REC» arriba, al lado del GPS. Si la cámara falla, sigue todo igual y el punto se apaga.
+
+## Cómo se hace (técnico)
+
+- **Cámara:** USB que entregue **H.264** ya comprimido (UVC con H.264), 720p a 30 cuadros. Alternativa: Camera Module 3 por la ficha CSI (comprime el chip de la Raspberry; cable plano de hasta 1–2 m). Las webcams que solo dan MJPEG o YUY2 obligan a comprimir en la Pi: **no**.
+- **Grabación:** programa aparte (GStreamer: `v4l2src` → `h264parse` → `matroskamux` → archivo), con prioridad baja (`nice 19`, `ionice idle`). Betómetro lo arranca y lo para; nunca espera por él.
+- **Sincronía:** al arrancar se anota la hora monotónica del primer cuadro; cada cuadro lleva su hora. Con eso cada marca, muestra del GPS y vuelta cae en un momento exacto del video. Se guarda junto a la carrera: `datos/video/<id carrera>-L<largada>.mkv` y en la carrera `video: {archivo, inicioMs}`.
+- **Lugar:** 720p H.264 ≈ 2 GB por hora. En la partición de datos (tarjeta de 32 GB: unas 12 horas). Aviso si queda poco lugar; se pueden borrar videos viejos desde Ajustes.
+- **Reproducción:** Qt Multimedia con decodificación por hardware de la Pi. 720p anda; 1080p puede andar a los tirones.
+- **Sistema (E3):** agregar al kernel UVC (`CONFIG_USB_VIDEO_CLASS`) y a Buildroot GStreamer con `gst1-plugins-good` (v4l2, matroska). Corriente: la cámara toma unos 0,3–0,5 A del USB; con la fuente de 2,5 A alcanza.
+
+## Cuándo
+
+Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la carrera. Aceptación de E7: con la cámara grabando, la prueba de demora de voz y pulsador da igual que sin cámara, y el video queda sincronizado al décimo de segundo con las marcas.

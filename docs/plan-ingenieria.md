@@ -27,6 +27,7 @@ Este documento ordena el proyecto en etapas. Para cada etapa dice qué se hace, 
 | **E4** | Equipo real | Sí (GPS, pulsador, auriculares) | GPS por cables, pulsador, voz por auriculares, hora del GPS |
 | **E5** | Wifi, compartir y actualizar | Sí (wifi) | Wifi, informe por QR, actualización A/B |
 | **E6** | Prueba en pista y 1.0.0 | Sí, en el auto | Versión 1.0.0 publicada |
+| E7 | Video de la carrera (después de la 1.0.0) | Sí, cámara | Grabar la carrera y verla en el informe, sincronizada. Ver [video.md](video.md) |
 
 E1 y E2 se hacen sin hardware. Mientras tanto Matías junta las piezas que faltan.
 
