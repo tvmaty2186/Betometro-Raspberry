@@ -5,7 +5,8 @@ name: Imagen para la Raspberry
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    branches: ['**']       # sin esto, solo arrancaba con las etiquetas
+    tags: ['v*']           # con etiqueta no se miran las rutas: siempre arma y publica
     paths: ['sistema/**', '.github/workflows/imagen.yml']
 
 env:
