@@ -24,6 +24,7 @@ cap wifi wifi --prueba red-vecino
 cap chequeo chequeo
 cap informe informe --carrera "Santa Clara"
 cap informe-libre informe --carrera "Santa Clara" --prueba libre
+cap informe-unir informe --carrera "Santa Clara" --prueba unir
 cap compartir compartir --carrera "Santa Clara"
 cap actualizar actualizar
 cap editor editor

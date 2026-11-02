@@ -74,6 +74,10 @@ struct Carrera {
     bool parametrosFijos() const { return !vueltas.empty(); }
     int proximaLargada() const;             // máx(largada) + 1
     std::vector<const Vuelta*> vueltasDeLargada(int largada) const;
+    // Solo Raspberry, desde el informe: junta la vuelta `i` con la siguiente (una marca de más
+    // partió una vuelta en dos). Misma largada, ninguna interrumpida. Queda el tipo (medida/libre)
+    // de la primera; las siguientes de esa largada se renumeran. Devuelve false si no se puede.
+    bool unirConSiguiente(size_t i);
 
     Json aJson() const;
     static Carrera desdeJson(const Json& j);

@@ -285,6 +285,14 @@ bool Datos::cambiarMedida(const QString& id, int indice) {
     return true;
 }
 
+bool Datos::unirConSiguiente(const QString& id, int indice) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c || indice < 0 || !c->unirConSiguiente(static_cast<size_t>(indice))) return false;
+    guardar();
+    emit carrerasChanged();
+    return true;
+}
+
 bool Datos::borrarCarrera(const QString& id) {
     auto& v = base_.carreras;
     auto it = std::find_if(v.begin(), v.end(), [&](const Carrera& c) { return q(c.id) == id; });

@@ -14,6 +14,9 @@ Item {
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
     property string modo: "vel"      // vel, acel, ade
+    property int fila: -1            // fila tocada en la tabla (para «Unir»), aunque no tenga recorrido
+    property bool confirmarUnir: false
+    onFilaChanged: confirmarUnir = false
     readonly property var vu: lap >= 0 ? vueltas[lap] : null
     readonly property real dist: inf.distanciaM || 0
     readonly property real sug: dist > 0 ? dist / (inf.idealMs / 1000) * 3.6 : 0
@@ -30,6 +33,21 @@ Item {
     function cambiarMedida(i) {
         const l = lap;
         if (Datos.cambiarMedida(id_, i)) { rev++; lap = l; }
+    }
+    // Una marca de más parte una vuelta en dos: se juntan desde acá
+    function puedeUnir(i) {
+        if (i < 0 || i + 1 >= vueltas.length) return false;
+        const a = vueltas[i], b = vueltas[i + 1];
+        return a.largada === b.largada && !a.interrumpida && !b.interrumpida;
+    }
+    function unir() {
+        if (!confirmarUnir) { confirmarUnir = true; return; }
+        const i = fila;
+        if (Datos.unirConSiguiente(id_, i)) {
+            rev++; fila = -1;
+            lap = vueltas[i] && vueltas[i].m ? i : (conTraza.length ? conTraza[0] : -1);
+        }
+        confirmarUnir = false;
     }
     function colorDif(ms) { const s = Math.abs(ms / 1000); return s <= 0.2 ? Tema.bien : s <= 0.5 ? Tema.acento : Tema.alerta; }
     onLapChanged: { mapa.requestPaint(); grafico.requestPaint(); }
@@ -160,7 +178,19 @@ Item {
         oscura: true
         x: cajaVel.x; y: raiz.h ? 362 : 900
         width: cajaVel.width; height: raiz.h ? 338 : 360
-        Sub { x: 22; y: 16; text: "Todas las vueltas · tocá MEDIDA o LIBRE para cambiarla"; tam: 12 }
+        Sub { x: 22; y: 16; text: raiz.puedeUnir(raiz.fila) ? "Todas las vueltas" : "Todas las vueltas · tocá MEDIDA o LIBRE para cambiarla"; tam: 12 }
+        BotonCromo {   // «Unir V5 con V6»: para una marca de más
+            visible: raiz.puedeUnir(raiz.fila)
+            anchors { right: parent.right; rightMargin: 18; top: parent.top; topMargin: 6 }
+            width: tUnir.implicitWidth + 28; height: 30; tamTexto: 14
+            texto: ""
+            Text { id: tUnir; anchors.centerIn: parent
+                   text: !raiz.puedeUnir(raiz.fila) ? "" : raiz.confirmarUnir ? "¿Seguro? Tocá de nuevo"
+                         : "Unir " + raiz.nombreV(raiz.vueltas[raiz.fila]) + " con " + raiz.nombreV(raiz.vueltas[raiz.fila + 1])
+                   color: raiz.confirmarUnir ? Tema.acento : Tema.tinta
+                   font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 14 } }
+            onTocado: raiz.unir()
+        }
         Flickable {
             id: tabla
             anchors { fill: parent; topMargin: 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
@@ -173,8 +203,8 @@ Item {
                         required property var modelData
                         required property int index
                         width: colT.width; height: 40
-                        Rectangle { anchors.fill: parent; radius: 8; color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, 0.18); visible: index === raiz.lap }
-                        MouseArea { anchors.fill: parent; enabled: !!modelData.m; onClicked: raiz.lap = index }
+                        Rectangle { anchors.fill: parent; radius: 8; color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, 0.18); visible: index === (raiz.fila >= 0 ? raiz.fila : raiz.lap) }
+                        MouseArea { anchors.fill: parent; onClicked: { raiz.fila = index; if (modelData.m) raiz.lap = index; } }
                         Row {
                             anchors.verticalCenter: parent.verticalCenter; x: 6
                             readonly property real u: (colT.width - 12) / 10
@@ -215,5 +245,8 @@ Item {
             }
         }
     }
-    Component.onCompleted: if (Contexto.prueba === "libre") cambiarMedida(1)   // solo para capturas
+    Component.onCompleted: {   // solo para capturas
+        if (Contexto.prueba === "libre") cambiarMedida(1);
+        else if (Contexto.prueba === "unir") fila = 3;
+    }
 }

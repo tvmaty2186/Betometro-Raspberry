@@ -563,7 +563,47 @@ static void pulsador() {
     }
 }
 
+// Marca doble (caso real del 31/10/2026, ideal 1:50,0): la V5 duró 4,1 s y la V6 106,3 s.
+// Unidas dan una vuelta de 110,5 s; las siguientes se renumeran.
+static void unirVueltas() {
+    Carrera c;
+    c.tiempoIdealMs = 110000;
+    auto vuelta = [&](int n, bool medida, int64_t real, double dist, double vmax) {
+        Vuelta v;
+        v.n = n; v.medida = medida; v.idealMs = 110000; v.realMs = real; v.difMs = real - 110000;
+        v.distM = dist; v.velMaxKmh = vmax; v.velPromKmh = dist / (real / 1000.0) * 3.6;
+        v.traza = {FilaTraza{0, 0, 90, 0, 0, 3}, FilaTraza{real / 1000.0, dist, 90, 0, 0, 3}};
+        c.vueltas.push_back(v);
+    };
+    vuelta(4, false, 110071, 2710, 115.3);
+    vuelta(5, true, 4125, 112, 100);
+    vuelta(6, false, 106336, 2597, 112);
+    vuelta(7, true, 101164, 2747, 129.7);
+    CHEQUEAR(!c.unirConSiguiente(3));            // la última no tiene siguiente
+    CHEQUEAR(c.unirConSiguiente(1));
+    IGUAL(c.vueltas.size(), size_t(3));
+    const Vuelta& u = c.vueltas[1];
+    IGUAL(u.n, 5);
+    CHEQUEAR(u.medida);                          // queda el tipo de la primera
+    IGUAL(u.realMs, int64_t(110461));
+    IGUAL(*u.difMs, int64_t(461));
+    IGUAL(*u.distM, 2709.0);
+    IGUAL(*u.velPromKmh, 88.3);
+    IGUAL(*u.velMaxKmh, 112.0);
+    IGUAL(u.traza.size(), size_t(4));
+    IGUAL(u.traza[2][0], 4.1);                   // la traza de la segunda sigue a la primera
+    IGUAL(u.traza[3][1], 2709.0);
+    IGUAL(c.vueltas[2].n, 6);                    // la 7 pasa a ser la 6
+    // Otra largada o interrumpida: no se une
+    c.vueltas[2].largada = 2;
+    CHEQUEAR(!c.unirConSiguiente(1));
+    c.vueltas[2].largada = 1;
+    c.vueltas[2].interrumpida = true;
+    CHEQUEAR(!c.unirConSiguiente(1));
+}
+
 int main() {
+    unirVueltas();
     pulsador();
     gpsNeo();
     voz();

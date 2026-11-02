@@ -114,9 +114,13 @@ int main(int argc, char** argv) {
             CHEQUEAR(d.cambiarMedida(id, 0));
             CHEQUEAR(d.carrera(id)["errorTotal"] == "9,6 s");
             CHEQUEAR(!d.cambiarMedida(id, 99));
+            // Unir la V4 con la V5 (marca de más): quedan 5 vueltas
+            CHEQUEAR(d.unirConSiguiente(id, 3));
+            CHEQUEAR(d.buscar(id)->vueltas.size() == 5 && d.buscar(id)->vueltas[4].n == 5);
+            CHEQUEAR(!d.unirConSiguiente(id, 4));
             const QVariantMap inf = d.informe(id);
             CHEQUEAR(!inf["pista"].toList().isEmpty());
-            CHEQUEAR(inf["vueltas"].toList().size() == 6);
+            CHEQUEAR(inf["vueltas"].toList().size() == 5);
             CHEQUEAR(d.nombreInforme(id).endsWith(".html") && d.nombreInforme(id).contains("Santa Clara"));
             const QString ruta = d.guardarInformeHtml(id);
             QFile f(ruta);

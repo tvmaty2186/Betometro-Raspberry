@@ -124,6 +124,35 @@ int Carrera::proximaLargada() const {
     return m + 1;
 }
 
+bool Carrera::unirConSiguiente(size_t i) {
+    if (i + 1 >= vueltas.size()) return false;
+    Vuelta& a = vueltas[i];
+    const Vuelta& b = vueltas[i + 1];
+    if (a.largada != b.largada || a.interrumpida || b.interrumpida) return false;
+    const double segA = static_cast<double>(a.realMs) / 1000.0;
+    const double dA = a.distM ? *a.distM : (a.traza.empty() ? 0.0 : a.traza.back()[1]);
+    for (FilaTraza f : b.traza) {   // la traza de la segunda sigue a la de la primera
+        f[0] = fijarDecimalesJs(f[0] + segA, 1);
+        f[1] = fijarDecimalesJs(f[1] + dA, 1);
+        a.traza.push_back(f);
+    }
+    a.realMs += b.realMs;
+    a.difMs = a.realMs - a.idealMs;
+    a.fuente = b.fuente;
+    a.fin = b.fin;
+    if (a.distM && b.distM) a.distM = fijarDecimalesJs(*a.distM + *b.distM, 1);
+    else a.distM.reset();
+    if (a.distM && a.realMs > 0) a.velPromKmh = fijarDecimalesJs(*a.distM / (a.realMs / 1000.0) * 3.6, 1);
+    else a.velPromKmh.reset();
+    if (a.velMaxKmh || b.velMaxKmh) a.velMaxKmh = std::max(a.velMaxKmh.value_or(0), b.velMaxKmh.value_or(0));
+    a.factorVuelta.reset();   // era de cada pedazo: ya no vale
+    const int largada = a.largada;
+    vueltas.erase(vueltas.begin() + static_cast<long>(i) + 1);
+    for (size_t k = i + 1; k < vueltas.size(); ++k)
+        if (vueltas[k].largada == largada) --vueltas[k].n;
+    return true;
+}
+
 std::vector<const Vuelta*> Carrera::vueltasDeLargada(int largada) const {
     std::vector<const Vuelta*> r;
     for (const auto& v : vueltas) if (v.largada == largada) r.push_back(&v);
