@@ -49,7 +49,7 @@ std::vector<Sonido> ProgramadorVoz::tic(const Estado& e, const AjustesVoz& a) {
 
 std::optional<std::string> anuncioVuelta(int n, bool medida, int vueltasTotal) {
     if (vueltasTotal > 0 && n > vueltasTotal) return std::nullopt;
-    const std::string tipo = medida ? "medida" : "práctica";
+    const std::string tipo = medida ? "medida" : "libre";
     if (vueltasTotal > 0 && n == vueltasTotal) return "Última vuelta, " + tipo;
     return "Vuelta " + std::to_string(n) + ", " + tipo;
 }

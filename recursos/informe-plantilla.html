@@ -76,14 +76,14 @@ const color=p=>modo==='vel'?colVel(p[2]):modo==='ace'?colAce(p[3]):colAde(p[4]);
 const nombreV=v=>'V'+v.n+(C.largadas>1?' L'+v.largada:'');
 // tabla con todas las vueltas
 (()=>{let h='<table><tr><th>VUELTA</th><th>TIPO</th><th>TIEMPO</th><th>DIF.</th><th>PROM</th><th>MÁX</th></tr>';
-  C.vueltas.forEach((v,i)=>{h+=`<tr data-i="${i}" class="${v.m?'clic':''}"><td><b>${nombreV(v)}</b></td><td><span class="tag" style="background:${v.interrumpida?'#8a929b':v.medida?'var(--rojo)':'var(--verde)'}"></span>${v.interrumpida?'interrumpida':v.medida?'medida':'práctica'}</td><td>${tfmt(v.realMs)}</td><td style="color:${v.difMs==null?'#8a929b':colAde(v.difMs/1000)}">${v.difMs==null?'–':dif(v.difMs)}</td><td>${v.velPromKmh!=null?nf(v.velPromKmh,1):'–'}</td><td>${v.velMaxKmh!=null?Math.round(v.velMaxKmh):'–'}</td></tr>`});
+  C.vueltas.forEach((v,i)=>{h+=`<tr data-i="${i}" class="${v.m?'clic':''}"><td><b>${nombreV(v)}</b></td><td><span class="tag" style="background:${v.interrumpida?'#8a929b':v.medida?'var(--rojo)':'var(--verde)'}"></span>${v.interrumpida?'interrumpida':v.medida?'medida':'libre'}</td><td>${tfmt(v.realMs)}</td><td style="color:${v.difMs==null?'#8a929b':colAde(v.difMs/1000)}">${v.difMs==null?'–':dif(v.difMs)}</td><td>${v.velPromKmh!=null?nf(v.velPromKmh,1):'–'}</td><td>${v.velMaxKmh!=null?Math.round(v.velMaxKmh):'–'}</td></tr>`});
   const med=C.vueltas.filter(v=>v.medida&&v.difMs!=null);
   if(med.length){const s=med.reduce((a,v)=>a+Math.abs(v.difMs),0);h+=`<tr class="tot"><td colspan="3">Error total · ${med.length} medida${med.length>1?'s':''}</td><td colspan="3">${dur(s)}</td></tr>`;$('totInfo').textContent='promedio '+dur(s/med.length);}
   $('tabla').innerHTML=h+'</table>';
   $('tabla').querySelectorAll('tr.clic').forEach(r=>r.onclick=()=>{lap=+r.dataset.i;sel=null;dibujar();scrollTo({top:0,behavior:'smooth'})});})();
 if(lap<0){$('conRecorrido').innerHTML='<div class="card aviso">Esta carrera no tiene el recorrido grabado. Se graba con el GPS en las carreras corridas desde la versión 1.8 de Betómetro.</div>';}
 else{
-conT.forEach(i=>{const v=C.vueltas[i],b=document.createElement('button');b.className='chip';b.dataset.i=i;b.innerHTML=nombreV(v)+'<small>'+(v.interrumpida?'interrumpida':v.medida?'medida':'práctica')+'</small>';b.onclick=()=>{lap=i;sel=null;dibujar()};$('vueltas').append(b)});
+conT.forEach(i=>{const v=C.vueltas[i],b=document.createElement('button');b.className='chip';b.dataset.i=i;b.innerHTML=nombreV(v)+'<small>'+(v.interrumpida?'interrumpida':v.medida?'medida':'libre')+'</small>';b.onclick=()=>{lap=i;sel=null;dibujar()};$('vueltas').append(b)});
 for(const k in MODOS){if(k==='ade'&&!C.distanciaM)continue;const b=document.createElement('button');b.className='chip modo';b.dataset.m=k;b.textContent=MODOS[k];b.onclick=()=>{modo=k;dibujar()};$('modos').append(b)}
 dibujar();}
 function X(d,W){return 30+(W-36)*d/C.vueltas[lap].L}

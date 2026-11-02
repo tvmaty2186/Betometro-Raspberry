@@ -938,6 +938,6 @@ Se actualiza cada **2 s**. Cada fila: ✓ (verde), ! (rojo) o – (neutro), nomb
 | Ajustes como panel encima | Pantalla propia, con los grupos nuevos (Mi auto, Wifi, Apagar, Orientación, Brillo) |
 | Temas | Los mismos cuatro y el modo sol (ver diseno.md) |
 | Cantidad de vueltas de cada carrera (`vueltasTotal`, «Última vuelta», «Carrera completa») | **No hay** (Matías, 02/11/2026): en la carrera pueden agregar vueltas. Se termina a mano. La carrera pasa a «corridas» cuando tiene vueltas y su fecha pasó; el mismo día se puede volver a largar |
-| Vuelta medida o práctica según el patrón | Igual al correr. **En el informe** cada vuelta tiene la etiqueta MEDIDA / LIBRE: se toca y cambia. Las libres (por patrón o a mano) **nunca suman error** (Matías, 02/11/2026) |
+| Vuelta medida o práctica según el patrón | Igual al correr, pero se dice **LIBRE** en todos lados (pantalla, voz «Vuelta 2, libre», informe). **En el informe** cada vuelta tiene la etiqueta MEDIDA / LIBRE: se toca y cambia. Las libres (por patrón o a mano) **nunca suman error** (Matías, 02/11/2026) |
 | Cuenta regresiva (widget) | «Cronómetro de la vuelta» con dos modos: **progresiva** (de fábrica: cuenta para arriba, rojo al pasar el ideal) o regresiva (como la app). Se cambia en el editor (✎). Mismas funciones: dato extra y barra ± (Matías, 02/11/2026) |
 | Tiempo ideal a la vista | Siempre en la línea de arriba y, chiquito, en la esquina del cronómetro: «IDEAL 4:00,0» (Matías, 02/11/2026) |

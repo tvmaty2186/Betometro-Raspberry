@@ -400,7 +400,7 @@ static void voz() {
     CHEQUEAR(d[0].second.tipo == T::Tic);
     // Anuncios
     IGUAL(*anuncioVuelta(3, true, 10), std::string("Vuelta 3, medida"));
-    IGUAL(*anuncioVuelta(10, false, 10), std::string("Última vuelta, práctica"));
+    IGUAL(*anuncioVuelta(10, false, 10), std::string("Última vuelta, libre"));
     CHEQUEAR(!anuncioVuelta(11, true, 10).has_value());
     IGUAL(*anuncioVuelta(25, true, 0), std::string("Vuelta 25, medida"));
 }

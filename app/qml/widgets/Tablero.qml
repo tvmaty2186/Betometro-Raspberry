@@ -197,7 +197,7 @@ Item {
     Component { id: cFaltan; WNumero { etiqueta: "Faltan"; numero: Formato.miles(Math.max(0, raiz.est.restanteM || 0)) + " m"; extra: parent.def.extra !== false ? "de " + Formato.miles(raiz.est.distanciaM || 0) + " m" : "" } }
     Component { id: cTranscurrido; WNumero { etiqueta: "Transcurrido"; numero: Formato.reloj(raiz.est.transMs || 0, false) } }
     Component { id: cIdeal; WNumero { etiqueta: "Ideal"; numero: Formato.reloj(raiz.est.tiempoIdealMs || 0, false) } }
-    Component { id: cProxima; WNumero { etiqueta: "Próxima vuelta"; numero: raiz.est.proxMedida ? "MEDIDA" : "PRÁCTICA" } }
+    Component { id: cProxima; WNumero { etiqueta: "Próxima vuelta"; numero: raiz.est.proxMedida ? "MEDIDA" : "LIBRE" } }
     Component { id: cDelta; WDelta { est: raiz.est } }
     property var botonMarcar: null
     function efectoMarcar() { if (botonMarcar) botonMarcar.efecto(); }

@@ -1,7 +1,7 @@
 import QtQuick
 import Betometro
 
-// Vuelta y tipo: redondel V3 / MEDIDA (amarillo) o PRÁCTICA (crema). Antes de largar: V1 / LISTO (sin cantidad fija de vueltas).
+// Vuelta y tipo: redondel V3 / MEDIDA (amarillo) o LIBRE (crema). Antes de largar: V1 / LISTO (sin cantidad fija de vueltas).
 Item {
     id: raiz
     property var est: ({})
@@ -32,7 +32,7 @@ Item {
             Text {
                 width: parent.width; horizontalAlignment: Text.AlignHCenter
                 fontSizeMode: Text.HorizontalFit; minimumPixelSize: 8
-                text: raiz.enCurso ? (raiz.medida ? "MEDIDA" : "PRÁCTICA") : "LISTO"
+                text: raiz.enCurso ? (raiz.medida ? "MEDIDA" : "LIBRE") : "LISTO"
                 color: raiz.medida ? (Tema.avispon ? "#1d3a24" : Tema.acentoTinta) : (Tema.avispon ? "#1d3a24" : Tema.tinta)
                 font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: parent.parent.height * 0.105; letterSpacing: parent.parent.height * 0.01 }
             }

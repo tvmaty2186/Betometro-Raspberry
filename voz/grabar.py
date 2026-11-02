@@ -39,11 +39,11 @@ def frases():
         f["n%02d" % k] = str(k)
     for n in range(1, 61):
         f["vuelta_%02d_m" % n] = "Vuelta %d, medida" % n
-        f["vuelta_%02d_p" % n] = "Vuelta %d, práctica" % n
+        f["vuelta_%02d_p" % n] = "Vuelta %d, libre" % n
     f["ultima_m"] = "Última vuelta, medida"
-    f["ultima_p"] = "Última vuelta, práctica"
+    f["ultima_p"] = "Última vuelta, libre"
     f["medida"] = "medida"
-    f["practica"] = "práctica"
+    f["practica"] = "libre"
     f["completa"] = "Carrera completa"
     f["pulsador"] = "Pulsador desconectado"
     f["prueba"] = "Betómetro listo"

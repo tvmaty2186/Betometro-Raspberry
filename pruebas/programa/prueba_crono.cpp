@@ -84,8 +84,8 @@ int main(int argc, char** argv) {
     CHEQUEAR(datos.carrera(id)["puedeLargar"].toBool());
     // Voz: anuncio de cada vuelta, sin «Última vuelta»; clic en cada marca aceptada
     CHEQUEAR(frases.contains("Vuelta 1, medida"));
-    CHEQUEAR(frases.contains("Vuelta 2, práctica"));
-    CHEQUEAR(!frases.contains("Última vuelta, práctica"));
+    CHEQUEAR(frases.contains("Vuelta 2, libre"));
+    CHEQUEAR(!frases.contains("Última vuelta, libre"));
     CHEQUEAR(sonidos.count("clic") == 5);   // práctica: largada y 1 marca (la ignorada no suena); carrera: largada y 2 marcas
 
     // 3) Sin GPS: anda igual (solo cronómetro)
