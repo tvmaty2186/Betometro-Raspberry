@@ -9,7 +9,8 @@ grep -q '/datos' "$TARGET_DIR/etc/fstab" || cat >> "$TARGET_DIR/etc/fstab" <<'FS
 /dev/mmcblk0p1	/arranque	vfat	rw,noatime,flush,nofail	0	0
 /dev/mmcblk0p4	/datos	ext4	noatime,commit=5,nofail,x-systemd.requires=agrandar-datos.service	0	2
 FSTAB
-# El programa arranca solo
+# El programa arranca solo (la carpeta .wants no viene hecha)
+mkdir -p "$TARGET_DIR/etc/systemd/system/multi-user.target.wants"
 ln -sf ../betometro.service "$TARGET_DIR/etc/systemd/system/multi-user.target.wants/betometro.service"
 ln -sf ../agrandar-datos.service "$TARGET_DIR/etc/systemd/system/multi-user.target.wants/agrandar-datos.service"
 ln -sf ../marcar-bueno.service "$TARGET_DIR/etc/systemd/system/multi-user.target.wants/marcar-bueno.service"
