@@ -1,37 +1,31 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 01/11/2026.
+Actualizado el 02/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
-## Diseño
-- Hecho: sistema acordado, cableado del GPS, muestras horizontales de las 12 pantallas (aprobadas).
-- Muestras verticales aprobadas (01/11/2026). El diseño visual está cerrado.
+## Hecho
+- E1 (motor igual a la app), E2 (programa completo, temas aprobados).
+- Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
+- Imagen 1.0.0 con actualizador (U-Boot A/B + RAUC, por pendrive o internet) y cámara/micrófono. Primer paquete `.raucb` firmado. Secreto `RAUC_CLAVE` cargado.
 
-## Dudas para charlar con Matías (salieron de leer la app)
+## Ahora (Matías)
+1. Grabar la tarjeta con `betometro-1.0.0.img.xz` y probar: león de arranque, Betómetro, toque en la pantalla.
+2. Guardar `betometro-1.0.0.raucb` en un pendrive (para probar la actualización).
 
-Resueltas el 01/11/2026: largar sin hora, correr sin GPS, informes sí y respaldo no, vuelta interrumpida, simulador NMEA, MARCAR en pantalla siempre visible. Ver «Decisiones propias» en `docs/diseno-sistema.md`.
+## Después de que arranque (E3 → E4)
+- Probar la actualización por pendrive y la vuelta sola a la copia anterior.
+- Conectar GPS (NEO-M8N), pulsador y auriculares; chequeo previo; medir demoras.
+- Medir rendimiento en la Pi 3: pantalla fluida, procesador, temperatura.
+- Pantalla de arranque con la foto de los pilotos: aprobada, guardada en `sistema/arranque/`; va por actualización.
 
-- **Precisión del GPS:** técnica, la resuelve Claude (qué dato del NEO-M8N usar; umbral de fábrica 20 m).
+## Más adelante (por actualización, sin regrabar)
+- Repo público de actualizaciones (`Betometro-Actualizaciones`) para bajar por internet.
+- E5: wifi real, «Betómetro en la red», compartir por QR.
+- Video: informe con video (mitad y mitad), «Videos guardados», webcam común MJPEG comprimida por el chip de la Pi ([docs/video.md](docs/video.md)). Elegir la cámara.
+- E6: prueba en pista y versión 1.0.0 definitiva.
+- App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).
 
-
-## Programar
-
-Se sigue [docs/plan-ingenieria.md](docs/plan-ingenieria.md) (E1 a E6). Plan aprobado por Matías el 01/11/2026.
-
-- **E1 hecha** (01/11/2026): motor y modelo de datos en C++, idénticos a la app. Informe: [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md).
-- **Propuesta aprobada entera** (01/11/2026): conectividad, GPS y mejoras → [docs/propuesta-mejoras.md](docs/propuesta-mejoras.md). Muestra de Conectividad aprobada.
-- **E2 completa y aceptada** (01/11/2026): temas aprobados. Detalle en el plan.
-- **Cambios de Matías (02/11/2026) hechos:** sin cantidad de vueltas; MEDIDA/LIBRE en el informe; las libres no suman error; cronómetro progresivo (de fábrica) o regresivo; tiempo ideal siempre a la vista. Falta que los vea.
-- **Video de la carrera (E7, después de la 1.0.0):** idea aprobada, muestra hecha → [docs/video.md](docs/video.md). Falta elegir la cámara.
-- **Actualizador y cámara (02/11/2026):** programados. Verificado acá: U-Boot, guion de arranque, RAUC (paquete firmado de prueba), GStreamer, Qt Multimedia y Betómetro compilan para la Raspberry. Falta: cargar el secreto `RAUC_CLAVE`, armar la imagen, probarla en la Raspberry (arranque A/B, actualización por pendrive) y el repo público de actualizaciones para bajar por internet. Después, por actualización: informe con video y «Videos guardados».
-- **E3 en curso:** configuración de Buildroot armada (`sistema/`); primera compilación en GitHub y acá. Falta probar en la Raspberry (necesita la fuente de 5 V 2,5 A).
-- ~~E2 en curso:~~ base del programa, Inicio, Carreras, Ficha, Práctica libre, pantalla de carrera, Ajustes, Conectividad, clave del wifi, Chequeo, Informe, Compartir y Actualizar hechas. Faltan: editor de pantalla, los otros 3 temas, modo sol, la voz y el simulador del NEO-M8N. Fondo en carrera: rojo/verde según la vuelta, como la app (decidido). Siguen las otras 12 pantallas, los widgets de carrera, los otros 3 temas, la voz y el informe.
-
-- Imagen Buildroot (solo lectura, A/B, watchdog) armada por GitHub Actions.
-- Pantallas en Qt/QML, con los 4 temas de la app. Mostrarle a Matías capturas de cada tema (Rally clásico, Deportivo moderno, Cabina de avión) antes de cerrar.
-- GPS por UART, pulsador por GPIO, voz con Piper pregrabada por la salida de auriculares, volumen en Ajustes.
-
-## Compras que faltan
-- Fuente de 5 V 2,5 A y cable micro-USB.
-- Auriculares con cable (ficha de 3,5 mm), si no tenés.
-- Cables dupont y pulsador.
-- Más adelante: convertidor de 12 V a 5 V 3 A, fichas GX12 y cable espiralado.
+## Compras
+- Fuente de 5 V 2,5 A y cable micro-USB corto y grueso.
+- Auriculares con cable (3,5 mm), cables dupont, pulsador (10 kΩ y 100 nF).
+- Para el auto: convertidor 12 → 5 V (mejor 5 A), diodo Schottky, TVS 24–27 V, 2 × 4.700 µF 35 V, fusible 3 A, fichas GX12, cable espiralado, disipadores.
+- Webcam USB MJPEG 1080p gran angular (para el video).
