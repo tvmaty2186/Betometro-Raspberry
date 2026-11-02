@@ -19,6 +19,17 @@ Estado: **idea aprobada por Matías (02/11/2026), para después de la 1.0.0.** M
 - **Reproducción:** Qt Multimedia con decodificación por hardware de la Pi. 720p anda; 1080p puede andar a los tirones.
 - **Sistema (E3):** agregar al kernel UVC (`CONFIG_USB_VIDEO_CLASS`) y a Buildroot GStreamer con `gst1-plugins-good` (v4l2, matroska). Corriente: la cámara toma unos 0,3–0,5 A del USB; con la fuente de 2,5 A alcanza.
 
+## Cámaras (02/11/2026)
+
+| | Modelo | Por qué | Ojo |
+|---|---|---|---|
+| 1 (la mejor) | **Raspberry Pi Camera Module 3 Wide** (120°, HDR, autofoco) | Oficial. Comprime el chip de la Pi, casi sin procesador. HDR: aguanta sol y sombra. Gran angular para el parabrisas | Cable plano (1 m como mucho, comprar uno largo). En el sistema hace falta `libcamera` |
+| 2 | **ELP 1080p con H.264** (familia USBFHD06H / USBFHD04H, lente 2,1 a 2,8 mm, «H.264» en la ficha) | USB: cable largo, va en cualquier lado. Entrega H.264 hecho | Que la ficha diga **H.264** (no solo MJPEG). Calidad de imagen justa |
+| ✗ | Logitech C920 / C922 nuevas, webcams genéricas | — | Desde fines de 2018 las Logitech no dan H.264; las genéricas solo MJPEG: la Pi tendría que comprimir |
+
+Prueba al recibirla (USB): `v4l2-ctl --list-formats` tiene que mostrar **H264**.
+Fuentes: https://medium.com/@cmeister2/logitech-c920-c922-webcams-no-longer-provide-native-h-264-1e0e4b6a9b74 · https://www.megatone.net/producto/camara-de-seguridad-usb-elp-2mp-1080p-co_MKT0HGGNOC/
+
 ## Cuándo
 
 Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la carrera. Aceptación de E7: con la cámara grabando, la prueba de demora de voz y pulsador da igual que sin cámara, y el video queda sincronizado al décimo de segundo con las marcas.
