@@ -47,6 +47,8 @@ public:
     Q_INVOKABLE bool cambiarMedida(const QString& id, int indice);
     // Desde el informe: junta una vuelta con la siguiente (marca de más)
     Q_INVOKABLE bool unirConSiguiente(const QString& id, int indice);
+    Q_INVOKABLE bool restablecer(const QString& id);        // vuelve la carrera a como se corrió
+    Q_INVOKABLE bool modificada(const QString& id) const;   // ¿se cambió algo desde el informe?
     // Lugar libre en la partición de datos, en texto («11,2 GB»)
     Q_INVOKABLE QString lugarLibre() const;
 

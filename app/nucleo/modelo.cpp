@@ -124,6 +124,22 @@ int Carrera::proximaLargada() const {
     return m + 1;
 }
 
+void Carrera::guardarOriginal() {
+    if (modificada()) return;
+    Json l = Json::lista();
+    for (const auto& v : vueltas) l.agregar(v.aJson());
+    extra.poner("original", std::move(l));
+}
+
+bool Carrera::restablecer() {
+    if (!modificada() || !extra["original"].esLista()) return false;
+    std::vector<Vuelta> vs;
+    for (const auto& j : extra["original"].elementos()) vs.push_back(Vuelta::desdeJson(j));
+    vueltas = std::move(vs);
+    extra.sacar("original");
+    return true;
+}
+
 bool Carrera::unirConSiguiente(size_t i) {
     if (i + 1 >= vueltas.size()) return false;
     Vuelta& a = vueltas[i];

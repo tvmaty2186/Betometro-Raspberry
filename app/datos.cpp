@@ -88,6 +88,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["patron"] = q(c.patron);
     r["tieneVueltas"] = !c.vueltas.empty();
     r["finalizada"] = fin;
+    r["modificada"] = c.modificada();   // hay una carrera original para restablecer
     r["medidas"] = medidas;
     r["errorTotal"] = medidas ? dur(suma) : QString();
     r["promedio"] = medidas ? dur(suma / medidas) : QString();
@@ -300,6 +301,7 @@ bool Datos::cambiarMedida(const QString& id, int indice) {
     if (!c || indice < 0 || indice >= static_cast<int>(c->vueltas.size())) return false;
     Vuelta& v = c->vueltas[static_cast<size_t>(indice)];
     if (v.interrumpida) return false;
+    c->guardarOriginal();
     v.medida = !v.medida;
     guardar();
     emit carrerasChanged();
@@ -308,10 +310,27 @@ bool Datos::cambiarMedida(const QString& id, int indice) {
 
 bool Datos::unirConSiguiente(const QString& id, int indice) {
     Carrera* c = base_.buscar(s(id));
-    if (!c || indice < 0 || !c->unirConSiguiente(static_cast<size_t>(indice))) return false;
+    if (!c || indice < 0) return false;
+    Carrera antes = *c;
+    if (!c->unirConSiguiente(static_cast<size_t>(indice))) return false;
+    if (!antes.modificada()) { antes.guardarOriginal(); c->extra = antes.extra; }
     guardar();
     emit carrerasChanged();
     return true;
+}
+
+bool Datos::restablecer(const QString& id) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c || !c->restablecer()) return false;
+    guardar();
+    emit carrerasChanged();
+    return true;
+}
+
+bool Datos::modificada(const QString& id) const {
+    for (const auto& c : base_.carreras)
+        if (q(c.id) == id) return c.modificada();
+    return false;
 }
 
 bool Datos::borrarCarrera(const QString& id) {

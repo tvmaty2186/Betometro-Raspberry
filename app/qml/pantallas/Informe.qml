@@ -14,9 +14,18 @@ Item {
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
     property string modo: "vel"      // vel, acel, ade
-    property int fila: -1            // fila tocada en la tabla (para «Unir»), aunque no tenga recorrido
+    property int fila: -1            // vuelta elegida para «Unir» (manteniéndola apretada 3 s, como la app 2.4.1)
     property bool confirmarUnir: false
+    property bool menuAbierto: false
+    property bool confirmarRest: false
     onFilaChanged: confirmarUnir = false
+    Timer { id: tUnirVuelve; interval: 3000; onTriggered: raiz.confirmarUnir = false }
+    Timer { id: tRestVuelve; interval: 3000; onTriggered: raiz.confirmarRest = false }
+    function restablecer() {
+        if (!confirmarRest) { confirmarRest = true; tRestVuelve.restart(); return; }
+        confirmarRest = false; menuAbierto = false;
+        if (Datos.restablecer(id_)) { rev++; fila = -1; lap = conTraza.length ? conTraza[0] : -1; Navegacion.avisar("Carrera restablecida"); }
+    }
     readonly property var vu: lap >= 0 ? vueltas[lap] : null
     readonly property real dist: inf.distanciaM || 0
     readonly property real sug: dist > 0 ? dist / (inf.idealMs / 1000) * 3.6 : 0
@@ -41,11 +50,12 @@ Item {
         return a.largada === b.largada && !a.interrumpida && !b.interrumpida;
     }
     function unir() {
-        if (!confirmarUnir) { confirmarUnir = true; return; }
+        if (!confirmarUnir) { confirmarUnir = true; tUnirVuelve.restart(); return; }
         const i = fila;
         if (Datos.unirConSiguiente(id_, i)) {
             rev++; fila = -1;
             lap = vueltas[i] && vueltas[i].m ? i : (conTraza.length ? conTraza[0] : -1);
+            Navegacion.avisar("Vueltas unidas");
         }
         confirmarUnir = false;
     }
@@ -178,22 +188,28 @@ Item {
         oscura: true
         x: cajaVel.x; y: raiz.h ? 362 : 900
         width: cajaVel.width; height: raiz.h ? 338 : 360
-        Sub { x: 22; y: 16; text: raiz.puedeUnir(raiz.fila) ? "Todas las vueltas" : "Todas las vueltas · tocá MEDIDA o LIBRE para cambiarla"; tam: 12 }
-        BotonCromo {   // «Unir V5 con V6»: para una marca de más
+        Sub { x: 22; y: 16; text: "Todas las vueltas"; tam: 12 }
+        // Menú ⋮ (app 2.4.1): restablecer la carrera original y compartir
+        Item {
+            id: mas3
+            anchors { right: parent.right; rightMargin: 10; top: parent.top; topMargin: 4 }
+            width: 44; height: 36
+            Rectangle { anchors.fill: parent; radius: 18; color: raiz.menuAbierto ? Qt.rgba(1, 1, 1, 0.12) : "transparent" }
+            Text { anchors.centerIn: parent; text: "⋮"; color: Tema.tinta; font { pixelSize: 26; weight: Font.Black } }
+            MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: { raiz.menuAbierto = !raiz.menuAbierto; raiz.confirmarRest = false; } }
+        }
+        // «Unir V5 con V6»: barra amarilla, aparece al mantener apretada una vuelta 3 s
+        BotonAmarillo {
+            id: barraUnir
             visible: raiz.puedeUnir(raiz.fila)
-            anchors { right: parent.right; rightMargin: 18; top: parent.top; topMargin: 6 }
-            width: tUnir.implicitWidth + 28; height: 30; tamTexto: 14
-            texto: ""
-            Text { id: tUnir; anchors.centerIn: parent
-                   text: !raiz.puedeUnir(raiz.fila) ? "" : raiz.confirmarUnir ? "¿Seguro? Tocá de nuevo"
-                         : "Unir " + raiz.nombreV(raiz.vueltas[raiz.fila]) + " con " + raiz.nombreV(raiz.vueltas[raiz.fila + 1])
-                   color: raiz.confirmarUnir ? Tema.acento : Tema.tinta
-                   font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 14 } }
+            x: 22; y: 40; width: parent.width - 44; height: 40; tamTexto: 16
+            texto: !visible ? "" : raiz.confirmarUnir ? "¿Seguro? Tocá de nuevo"
+                   : "Unir " + raiz.nombreV(raiz.vueltas[raiz.fila]) + " con " + raiz.nombreV(raiz.vueltas[raiz.fila + 1])
             onTocado: raiz.unir()
         }
         Flickable {
             id: tabla
-            anchors { fill: parent; topMargin: 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
+            anchors { fill: parent; topMargin: barraUnir.visible ? 90 : 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
             contentHeight: colT.height; clip: true; boundsBehavior: Flickable.StopAtBounds
             Column {
                 id: colT; width: tabla.width
@@ -203,8 +219,21 @@ Item {
                         required property var modelData
                         required property int index
                         width: colT.width; height: 40
-                        Rectangle { anchors.fill: parent; radius: 8; color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, 0.18); visible: index === (raiz.fila >= 0 ? raiz.fila : raiz.lap) }
-                        MouseArea { anchors.fill: parent; onClicked: { raiz.fila = index; if (modelData.m) raiz.lap = index; } }
+                        Rectangle { anchors.fill: parent; radius: 8; color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, index === raiz.fila ? 0.32 : 0.18); visible: index === (raiz.fila >= 0 ? raiz.fila : raiz.lap) }
+                        Rectangle {   // se llena mientras se mantiene apretada
+                            id: llenado; height: parent.height; radius: 8; width: 0
+                            color: Qt.rgba(244 / 255, 197 / 255, 49 / 255, 0.25)
+                            NumberAnimation on width { id: animLlenado; running: false; from: 0; to: colT.width; duration: 3000 }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            pressAndHoldInterval: 3000
+                            onPressed: animLlenado.restart()
+                            onReleased: { animLlenado.stop(); llenado.width = 0; }
+                            onCanceled: { animLlenado.stop(); llenado.width = 0; }
+                            onClicked: { raiz.fila = -1; if (modelData.m) raiz.lap = index; }
+                            onPressAndHold: { raiz.fila = index; if (modelData.m) raiz.lap = index; }
+                        }
                         Row {
                             anchors.verticalCenter: parent.verticalCenter; x: 6
                             readonly property real u: (colT.width - 12) / 10
@@ -234,19 +263,49 @@ Item {
                     }
                 }
                 Item {
-                    width: colT.width; height: 46
+                    width: colT.width; height: 64
                     readonly property var med: raiz.vueltas.filter(v => v.medida && v.difMs !== undefined)
                     visible: med.length > 0
                     Rectangle { width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.2) }
-                    Sub { x: 6; anchors.verticalCenter: parent.verticalCenter; tam: 13; text: "Error total · " + parent.med.length + (parent.med.length === 1 ? " medida" : " medidas") }
-                    Text { anchors { right: parent.right; rightMargin: 6; verticalCenter: parent.verticalCenter }
+                    Sub { x: 6; y: 12; tam: 13; text: "Error total · " + parent.med.length + (parent.med.length === 1 ? " medida" : " medidas") }
+                    Sub { x: 6; y: 40; tam: 12; text: "promedio " + (raiz.c.promedio || "–") + " · mejor " + (raiz.c.mejor || "–") }
+                    Text { anchors { right: parent.right; rightMargin: 6; top: parent.top; topMargin: 6 }
                            text: raiz.c.errorTotal || ""; color: Tema.acento; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 } }
                 }
+            }
+        }
+    }
+    // Menú ⋮ abierto: tocar afuera lo cierra
+    MouseArea { anchors.fill: parent; visible: raiz.menuAbierto; onClicked: { raiz.menuAbierto = false; raiz.confirmarRest = false; } }
+    Rectangle {
+        visible: raiz.menuAbierto
+        readonly property point p: mas3.mapToItem(raiz, mas3.width, mas3.height)
+        x: p.x - width; y: p.y + 4
+        width: 330; height: colMenu.height + 12; radius: 12
+        color: "#22262b"; border { width: 1; color: Qt.rgba(1, 1, 1, 0.18) }
+        Column {
+            id: colMenu; x: 6; y: 6; width: parent.width - 12
+            Rectangle {
+                width: parent.width; height: 52; radius: 8
+                readonly property bool puede: !!raiz.c.modificada
+                color: raiz.confirmarRest ? Tema.alerta : (mr.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
+                opacity: puede ? 1 : 0.35
+                Text { x: 12; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 24; elide: Text.ElideRight
+                       text: raiz.confirmarRest ? "¿Seguro? Se pierden los cambios" : "↺ Restablecer la carrera original"
+                       color: raiz.confirmarRest ? "#fff" : Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
+                MouseArea { id: mr; anchors.fill: parent; enabled: parent.puede; onClicked: raiz.restablecer() }
+            }
+            Rectangle {
+                width: parent.width; height: 52; radius: 8
+                color: mc.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "⤴ Compartir informe"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
+                MouseArea { id: mc; anchors.fill: parent; onClicked: { raiz.menuAbierto = false; Navegacion.ir("compartir", { id: raiz.id_ }); } }
             }
         }
     }
     Component.onCompleted: {   // solo para capturas
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
+        else if (Contexto.prueba === "menu") menuAbierto = true;
     }
 }

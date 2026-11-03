@@ -641,9 +641,37 @@ static void informeReal() {
     IGUAL(c.vueltas[7].n, 8);
 }
 
+// «Restablecer» (app 2.4): antes del primer cambio se guarda la carrera como se corrió; volver
+// atrás deshace uniones y cambios de MEDIDA/LIBRE, y se puede volver a guardar después.
+static void restablecerCarrera() {
+    Carrera c;
+    c.tiempoIdealMs = 100000;
+    for (int n = 1; n <= 4; n++) {
+        Vuelta v;
+        v.n = n; v.medida = n % 2 == 1; v.idealMs = 100000; v.realMs = n == 2 ? 4000 : 99000; v.difMs = v.realMs - 100000;
+        c.vueltas.push_back(v);
+    }
+    const Json antes = c.aJson()["vueltas"];
+    CHEQUEAR(!c.modificada());
+    CHEQUEAR(!c.restablecer());                  // sin cambios no hay nada que restablecer
+    c.guardarOriginal();
+    CHEQUEAR(c.unirConSiguiente(0));
+    c.guardarOriginal();                         // la segunda vez no pisa la original
+    c.vueltas[1].medida = !c.vueltas[1].medida;
+    IGUAL(c.vueltas.size(), size_t(3));
+    CHEQUEAR(c.modificada());
+    const Carrera leida = Carrera::desdeJson(Json::leer(c.aJson().escribir()));   // se guarda y se lee
+    CHEQUEAR(leida.modificada());
+    CHEQUEAR(c.restablecer());
+    IGUAL(c.vueltas.size(), size_t(4));
+    CHEQUEAR(!c.modificada());
+    CHEQUEAR(c.aJson()["vueltas"] == antes);
+}
+
 int main() {
     unirVueltas();
     informeReal();
+    restablecerCarrera();
     pulsador();
     gpsNeo();
     voz();

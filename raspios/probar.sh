@@ -21,3 +21,17 @@ if grep -qiE "No pude cargar la fuente|is not installed|module .* not found|Cann
   echo "MAL: faltan piezas (ver arriba)"; exit 1
 fi
 echo "BIEN: Betómetro anduvo 40 s sin problemas"
+
+# Capturas de pantallas (para mirarlas antes de entregar): quedan en salida-pi/capturas
+mkdir -p salida-pi/capturas /tmp/cap
+cap() { n=$1; shift
+  QT_QPA_PLATFORM=offscreen LANG=C.UTF-8 XDG_RUNTIME_DIR=/tmp/run BETO_VOZ=/usr/share/betometro/voz \
+    timeout 120 /usr/bin/betometro --datos /tmp/cap --muestra --orientacion h --captura "salida-pi/capturas/$n.png" "$@" \
+    >/dev/null 2>&1 || echo "OJO: no salió la captura $n"; }
+cap inicio --pantalla inicio
+cap informe --pantalla informe --carrera "Santa Clara"
+cap informe-unir --pantalla informe --carrera "Santa Clara" --prueba unir
+cap informe-menu --pantalla informe --carrera "Santa Clara" --prueba menu
+cap ajustes --pantalla ajustes
+ls -la salida-pi/capturas
+

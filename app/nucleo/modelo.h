@@ -78,6 +78,11 @@ struct Carrera {
     // partió una vuelta en dos). Misma largada, ninguna interrumpida. Queda el tipo (medida/libre)
     // de la primera; las siguientes de esa largada se renumeran. Devuelve false si no se puede.
     bool unirConSiguiente(size_t i);
+    // Antes del primer cambio desde el informe (MEDIDA/LIBRE o unir) se guarda la carrera tal como
+    // se corrió, en extra["original"]. «Restablecer» la vuelve atrás (como la app 2.4).
+    void guardarOriginal();
+    bool modificada() const { return extra.tiene("original"); }
+    bool restablecer();
 
     Json aJson() const;
     static Carrera desdeJson(const Json& j);
