@@ -239,7 +239,7 @@ Item {
         }
     }
     Component { id: cVelocidad; WVelocidad { est: raiz.est; barra: parent.def.barra !== false; extra: !!parent.def.extra; ancho: parent.def.ancho || 1 } }
-    Component { id: cVelocimetro; WVelocimetro { est: raiz.est } }
+    Component { id: cVelocimetro; WVelocimetro { est: raiz.est; extra: !!parent.def.extra } }
     Component {
         id: cUltima
         WNumero {

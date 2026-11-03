@@ -63,10 +63,15 @@ Item {
         Chip { texto: Wifi.conectada ? "Wifi: " + Wifi.conectada : "Sin wifi" }
     }
 
+    // Se mueve solo, cerca de la sugerida (48), como el inicio de la app: 47 + 2,5·sen(0,9 t) + 1,2·sen(2,3 t)
     Velocimetro {
+        id: velInicio
         x: raiz.h ? 930 : 379; y: raiz.h ? 280 : 668
         width: raiz.h ? 320 : 500; height: width
-        valor: 78
+        property real t: 0
+        valor: Contexto.prueba ? 47 : 47 + 2.5 * Math.sin(0.9 * t) + 1.2 * Math.sin(2.3 * t)
+        sugerida: 48
+        Timer { interval: 80; repeat: true; running: raiz.visible && !Contexto.prueba; onTriggered: velInicio.t += 0.08 }
     }
 
     Repeater {
