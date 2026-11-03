@@ -5,3 +5,4 @@ sistema/salida/
 build-pi/
 salida-pi/
 .ccache/
+__pycache__/
