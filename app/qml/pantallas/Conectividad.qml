@@ -6,7 +6,7 @@ Item {
     id: raiz
     readonly property bool h: Contexto.horizontal
     readonly property var a: Datos.ajustes
-    readonly property string url: "http://" + Wifi.direccion
+    readonly property string url: "http://" + Wifi.direccion + (Servidor.puerto !== 80 ? ":" + Servidor.puerto : "")
 
     Fondo { anchors.fill: parent }
     CabeceraPantalla { titulo: "CONECTIVIDAD"; derechaRayas: raiz.h ? 90 : 30; onVolver: Navegacion.ir("ajustes") }

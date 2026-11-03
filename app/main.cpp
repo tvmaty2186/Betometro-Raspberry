@@ -27,6 +27,7 @@
 #include "sistema.h"
 #include "actualizador.h"
 #include "camara.h"
+#include "servidor.h"
 #include "wifi.h"
 
 #include <QStandardPaths>
@@ -107,6 +108,9 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
+    // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
+    Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
+    QObject::connect(&crono, &Crono::enCursoChanged, &servidor, [&] { servidor.prender(!crono.enCurso()); });   // apagado en carrera
     Sistema sistema;
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
@@ -120,6 +124,7 @@ int main(int argc, char* argv[]) {
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
+    motor.rootContext()->setContextProperty(QStringLiteral("Servidor"), &servidor);
     motor.rootContext()->setContextProperty(QStringLiteral("Audio"), &audio);
     motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);

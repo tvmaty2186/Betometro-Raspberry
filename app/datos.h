@@ -43,6 +43,7 @@ public:
     Q_INVOKABLE QVariantMap informe(const QString& id) const;
     Q_INVOKABLE QString nombreInforme(const QString& id) const;
     Q_INVOKABLE QString guardarInformeHtml(const QString& id) const;   // devuelve la ruta del archivo
+    QByteArray informeHtml(const QString& id) const;                   // el HTML del informe (vacío si no está)
     // Desde el informe: marca una vuelta como medida o libre (la libre no suma error). No las interrumpidas.
     Q_INVOKABLE bool cambiarMedida(const QString& id, int indice);
     // Desde el informe: junta una vuelta con la siguiente (marca de más)

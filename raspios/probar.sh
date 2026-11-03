@@ -6,7 +6,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends $(grep -v '^#' raspios/paquetes.txt) >/dev/null
+apt-get install -y -qq --no-install-recommends $(grep -v '^#' raspios/paquetes.txt) curl unzip >/dev/null
 cp -a salida-pi/raiz/. /
 mkdir -p /tmp/datos /tmp/run
 set +e
@@ -21,6 +21,18 @@ if grep -qiE "No pude cargar la fuente|is not installed|module .* not found|Cann
   echo "MAL: faltan piezas (ver arriba)"; exit 1
 fi
 echo "BIEN: Betómetro anduvo 40 s sin problemas"
+
+# «Betómetro en la red»: la página del celular (en la PC/GitHub escucha en el 8080)
+mkdir -p /tmp/srv
+QT_QPA_PLATFORM=offscreen LANG=C.UTF-8 XDG_RUNTIME_DIR=/tmp/run timeout 150 /usr/bin/betometro --sin-gps --datos /tmp/srv --muestra >/tmp/srv.log 2>&1 &
+for i in $(seq 1 60); do curl -sf -o /tmp/pag.html http://127.0.0.1:8080/ && break; sleep 2; done
+grep -q "Santa Clara" /tmp/pag.html || { echo "MAL: la página de carreras no lista las carreras"; cat /tmp/srv.log | head -20; exit 1; }
+id=$(grep -o 'href="/informe/[^"?]*"' /tmp/pag.html | head -1 | sed 's|href="/informe/||; s|"||')
+curl -sf -o /tmp/inf.html "http://127.0.0.1:8080/informe/$id" && grep -qi "<html" /tmp/inf.html || { echo "MAL: no abre el informe $id"; exit 1; }
+curl -sf -D /tmp/h.txt -o /dev/null "http://127.0.0.1:8080/informe/$id?descargar=1" && grep -qi "attachment" /tmp/h.txt || { echo "MAL: no descarga el informe"; exit 1; }
+curl -sf -o /tmp/todos.zip http://127.0.0.1:8080/todos.zip && unzip -tq /tmp/todos.zip || { echo "MAL: el .zip de todos no está bien"; exit 1; }
+echo "BIEN: Betómetro en la red: $(unzip -l /tmp/todos.zip | tail -1)"
+kill %1 2>/dev/null || true
 
 # Capturas de pantallas (para mirarlas antes de entregar): quedan en salida-pi/capturas
 mkdir -p salida-pi/capturas /tmp/cap

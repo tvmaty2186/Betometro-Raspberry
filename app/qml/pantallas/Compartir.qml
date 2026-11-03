@@ -8,7 +8,7 @@ Item {
     readonly property bool h: Contexto.horizontal
     readonly property string id_: Navegacion.parametros.id || ""
     readonly property string archivo: Datos.nombreInforme(id_)
-    readonly property string url: "http://" + Wifi.direccion + "/informe/" + id_
+    readonly property string url: "http://" + Wifi.direccion + (Servidor.puerto !== 80 ? ":" + Servidor.puerto : "") + "/informe/" + encodeURIComponent(id_)
     Component.onCompleted: Datos.guardarInformeHtml(id_)
 
     Fondo { anchors.fill: parent }

@@ -223,17 +223,24 @@ QString Datos::nombreInforme(const QString& id) const {
     return c ? q(beto::nombreInforme(*c)) : QString();
 }
 
-QString Datos::guardarInformeHtml(const QString& id) const {
+QByteArray Datos::informeHtml(const QString& id) const {
     const Carrera* c = buscar(id);
     if (!c) return {};
     QFile p(QStringLiteral(":/recursos/informe-plantilla.html"));
     if (!p.open(QIODevice::ReadOnly)) return {};
-    const std::string html = informeHtml(*c, cfg_["umbralPrecisionM"].aNumero(20), p.readAll().toStdString());
+    return QByteArray::fromStdString(beto::informeHtml(*c, cfg_["umbralPrecisionM"].aNumero(20), p.readAll().toStdString()));
+}
+
+QString Datos::guardarInformeHtml(const QString& id) const {
+    const Carrera* c = buscar(id);
+    if (!c) return {};
+    const QByteArray html = informeHtml(id);
+    if (html.isEmpty()) return {};
     QDir().mkpath(carpeta_ + "/informes");
     const QString ruta = carpeta_ + "/informes/" + q(beto::nombreInforme(*c));
     QFile f(ruta);
     if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) return {};
-    f.write(QByteArray::fromStdString(html));
+    f.write(html);
     return ruta;
 }
 
