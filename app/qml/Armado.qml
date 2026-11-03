@@ -1,14 +1,15 @@
 pragma Singleton
 import QtQuick
 
-// Armados de la pantalla de carrera. Cada widget: { t, x, y, w, h, forma?, extra?, barra?, modo? }
+// Armados de la pantalla de carrera. Cada widget: { t, x, y, w, h, forma?, extra?, barra?, modo?, ancho? }
+// ancho: «Números − / +» (0,7 a 1,8; estira los números a lo ancho). La cuenta de fábrica, 1,2 como la app.
 // modo (solo «cuenta»): "progresiva" (de fábrica, también si falta) o "regresiva".
 // en fracciones de la pantalla (6.6 de la app). Redondos: w = diámetro como fracción del ancho.
 // Se guardan en la configuración: «widgetsH» (horizontal) y «widgets» (vertical).
 QtObject {
     // De fábrica, medidos en las muestras aprobadas (px de 1280×720 y 720×1280)
     readonly property var pxH: [
-        { t: "cuenta", x: 24, y: 56, w: 1232, h: 320, extra: true, barra: true },
+        { t: "cuenta", x: 24, y: 56, w: 1232, h: 320, extra: true, barra: true, ancho: 1.2 },
         { t: "tipo", x: 50, y: 90, w: 210, h: 210, forma: "redondo" },
         { t: "necesaria", x: 1010, y: 96, w: 220, h: 200 },
         { t: "velocimetro", x: 24, y: 400, w: 330, h: 300, barra: true },
@@ -19,7 +20,7 @@ QtObject {
         { t: "velocimetro", forma: "redondo", x: 150, y: 72, w: 420, h: 420 },
         { t: "tipo", x: 20, y: 410, w: 190, h: 190, forma: "redondo" },
         { t: "necesaria", x: 500, y: 430, w: 200, h: 160 },
-        { t: "cuenta", x: 20, y: 620, w: 680, h: 270, extra: true, barra: true },
+        { t: "cuenta", x: 20, y: 620, w: 680, h: 270, extra: true, barra: true, ancho: 1.2 },
         { t: "ultima", x: 20, y: 910, w: 680, h: 96 },
         { t: "marcar", x: 20, y: 1026, w: 680, h: 234 }
     ]

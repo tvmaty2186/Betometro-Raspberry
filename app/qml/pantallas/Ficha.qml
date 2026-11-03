@@ -48,18 +48,21 @@ Item {
         x: raiz.h ? 680 : 24; y: raiz.h ? 110 : 100
         width: raiz.h ? 560 : parent.width - 48; height: raiz.h ? 150 : 140
         // Corrida: error total, promedio y mejor (como el detalle de la app)
-        Row {
+        Row {   // tres columnas iguales: el número se achica si no entra (temas de letra ancha, como Cabina)
             visible: c.medidas > 0
             anchors.centerIn: parent
-            spacing: raiz.h ? 44 : 54
+            readonly property real col: (resumen.width - 40) / 3
             Repeater {
                 model: [{ t: "Error total", v: c.errorTotal }, { t: "Promedio", v: c.promedio }, { t: "Mejor", v: c.mejor }]
                 Column {
                     required property var modelData
                     required property int index
+                    width: parent.col
                     Sub { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.t }
                     Digito {
-                        anchors.horizontalCenter: parent.horizontalCenter; tam: raiz.h ? 56 : 52; text: modelData.v
+                        width: parent.width - 30; anchors.horizontalCenter: parent.horizontalCenter
+                        horizontalAlignment: Text.AlignHCenter; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 20
+                        tam: raiz.h ? 56 : 52; text: modelData.v
                         color: index === 0 ? (c.nivel === "ok" ? Tema.bien : c.nivel === "medio" ? Tema.acento : c.nivel === "mal" ? Tema.alerta : Tema.numero) : Tema.numero
                     }
                 }
@@ -96,7 +99,7 @@ Item {
             TituloTarjeta { texto: "Datos de la carrera" }
             Fila {
                 etiqueta: "Nombre"
-                Campo { anchoMinimo: 260; texto: raiz.nombre || "–"; editando: raiz.campo === "nombre"
+                Campo { anchoMinimo: 260; libre: true; texto: raiz.nombre || "–"; editando: raiz.campo === "nombre"
                         onTocado: { raiz.campo = "nombre"; teclado.abrir("texto", "Nombre de la carrera", raiz.nombre, 80); } }
             }
             Fila {
@@ -144,6 +147,7 @@ Item {
         Repeater {
             model: raiz.h ? 4 : 3
             Etiqueta {
+                tam: 15   // en la pantalla de 5" las de 11 no se leían (Matías, 03/11)
                 required property int index
                 readonly property bool med: raiz.patron === "alt1" ? index % 2 === 0 : raiz.patron === "alt2" ? index % 2 === 1 : true
                 medida: med

@@ -11,6 +11,7 @@ Caja {
     property bool extra: true
     property bool barra: true
     property string modo: "progresiva"
+    property real ancho: 1.2
     readonly property bool progresiva: modo !== "regresiva"
     readonly property real restante: est.restanteMs || 0
     readonly property bool pasado: restante < 0
@@ -32,8 +33,7 @@ Caja {
                text: raiz.progresiva ? (raiz.pasado ? "Pasado el ideal" : "Vuelta") : (raiz.pasado ? "Pasado" : "Falta") }
         Numero {
             width: parent.width
-            height: raiz.height * (raiz.barra ? 0.52 : 0.62)
-            maximo: raiz.height * (raiz.barra ? 0.6 : 0.7)
+            pAlto: raiz.barra ? 66 : 82; pAncho: 105; alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.ancho
             color: raiz.pasado ? Tema.alerta : Tema.numero
             text: raiz.progresiva ? Formato.reloj(raiz.trans, false)
                   : raiz.pasado ? "+" + Formato.reloj(-raiz.restante, false) : Formato.reloj(raiz.restante, !!raiz.est.enCurso)

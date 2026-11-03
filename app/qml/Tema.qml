@@ -28,6 +28,8 @@ QtObject {
     readonly property color bordeCromoOscuro: de("#4b5258", "#2a2118", "#15171a", "#0d1418", "#000000")
     readonly property real anchoBorde: sol ? 4 : avispon ? 2 : 1.5
     readonly property real radio: de(18, 12, 4, 6, 12)
+    // Cuánto entra por carácter en los números grandes (--k de la app). En sol, el del tema elegido.
+    readonly property real k: nombre === "rally" ? 235 : nombre === "sport" ? 165 : nombre === "cabina" ? 150 : 190
 
     // Acento (botones LARGAR y MARCAR, lo elegido) y su tinta
     readonly property color acento: de("#f4c531", "#ffb000", "#e10600", "#2fd162", "#000000")

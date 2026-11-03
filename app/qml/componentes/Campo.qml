@@ -8,6 +8,7 @@ Rectangle {
     property real anchoMinimo: 96
     property bool activo: true
     property bool editando: false
+    property bool libre: false     // texto común (nombre): letra de la interfaz, no la de números (Cabina es de máquina)
     signal tocado()
     implicitWidth: Math.max(anchoMinimo, t.implicitWidth + 32)
     implicitHeight: t.implicitHeight + 14
@@ -20,7 +21,8 @@ Rectangle {
         anchors.centerIn: parent
         text: raiz.texto
         color: Tema.tinta
-        font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 }
+        font { family: raiz.libre ? Tema.fuente600 : Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 }
+        width: Math.min(implicitWidth, raiz.width - 24); elide: Text.ElideRight
     }
     MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: raiz.activo; onClicked: raiz.tocado() }
 }

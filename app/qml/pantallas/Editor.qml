@@ -124,6 +124,18 @@ Item {
                 visible: !!raiz.w && (raiz.w.t === "cuenta" || (raiz.w.t === "velocimetro" && raiz.w.forma !== "redondo"))
                 texto: raiz.w && raiz.w.barra !== false ? "Sin barra ±" : "Barra ±"
                 onTocado: raiz.cambiarElegido({ barra: raiz.w.barra === false }) }
+            // «Números − / +» (app 1.3.2): achica o estira los números a lo ancho, de 0,7 a 1,8
+            Row {
+                id: filaAncho
+                visible: !!raiz.w && ["marcar", "tipo"].indexOf(raiz.w.t) < 0 && !(raiz.w.t === "velocimetro" && raiz.w.forma === "redondo")
+                spacing: 10
+                readonly property real valor: raiz.w ? (raiz.w.ancho || (raiz.w.t === "cuenta" ? 1.2 : 1)) : 1
+                function cambiar(d) { raiz.cambiarElegido({ ancho: Math.round(Math.max(0.7, Math.min(1.8, valor + d)) * 10) / 10 }); }
+                BotonCromo { width: (colP.width - 10) / 2; height: 46; tamTexto: 17; texto: "Números −"
+                             activo: filaAncho.valor > 0.71; onTocado: filaAncho.cambiar(-0.1) }
+                BotonCromo { width: (colP.width - 10) / 2; height: 46; tamTexto: 17; texto: "Números +"
+                             activo: filaAncho.valor < 1.79; onTocado: filaAncho.cambiar(0.1) }
+            }
             BotonCromo { width: parent.width; height: 46; tamTexto: 17
                 texto: raiz.w && raiz.w.t === "marcar" ? "MARCAR no se quita" : "✕ Quitar"
                 activo: !!raiz.w && raiz.w.t !== "marcar"

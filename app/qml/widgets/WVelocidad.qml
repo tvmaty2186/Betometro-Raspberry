@@ -7,6 +7,7 @@ Caja {
     property var est: ({})
     property bool barra: true
     property bool extra: false
+    property real ancho: 1
     readonly property bool sinGps: est.vActKmh === undefined || est.vActKmh === null
     Column {
         anchors.centerIn: parent
@@ -14,8 +15,8 @@ Caja {
         spacing: raiz.height * 0.03
         Etiq { alto: raiz.height; width: parent.width; text: "Velocidad km/h" }
         Numero {
-            width: parent.width; height: raiz.height * 0.5
-            maximo: raiz.height * (raiz.sinGps ? 0.2 : 0.5)
+            width: parent.width
+            pAlto: raiz.sinGps ? 20 : (raiz.barra ? 46 : 58); alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.sinGps ? 1 : raiz.ancho
             text: raiz.sinGps ? "SIN GPS" : Math.round(raiz.est.vActKmh)
         }
         Sub { visible: raiz.extra; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: "máx " + Math.round(raiz.est.velMaxVuelta || 0); tam: 14 }
