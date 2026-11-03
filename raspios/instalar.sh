@@ -74,7 +74,9 @@ if command -v plymouth-set-default-theme >/dev/null; then
   agregar "disable_splash=1"   # sin el arcoíris de la placa
   CMD=/boot/firmware/cmdline.txt
   sed -i 's/console=tty1/console=tty3/' "$CMD"
-  for p in quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3; do
+  # La Pi 3 tiene además una salida de TV (720×480) y Plymouth tomaba ese tamaño: la foto quedaba
+  # en un pedazo de la pantalla. Se apaga esa salida.
+  for p in video=Composite-1:d quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3; do
     grep -qw -- "$p" "$CMD" || sed -i "1 s/\$/ $p/" "$CMD"
   done
   # Si cambió la foto o el tema, se rearma el arranque (la foto va adentro del initramfs)
