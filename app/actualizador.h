@@ -1,6 +1,6 @@
-// Actualizador: busca una versión nueva (por internet o en un pendrive), la baja y la instala
-// con RAUC en la copia del sistema que no se está usando. Al reiniciar arranca la nueva; si no
-// anda, U-Boot vuelve sola a la anterior. Nunca durante una carrera (lo frena la pantalla).
+// Actualizador: busca una versión nueva (por internet en el repo público Betometro-actualizaciones,
+// o en un pendrive), la baja y corre su instalador (raspios/instalar.sh), que guarda la versión
+// anterior, pone la nueva y reinicia. Nunca durante una carrera (lo frena la pantalla).
 // En la PC simula la descarga y la instalación (para ver la pantalla).
 #pragma once
 
@@ -35,7 +35,7 @@ public:
     QString mensaje() const { return mensaje_; }
 
     Q_INVOKABLE void buscar();             // por internet (si hay wifi)
-    Q_INVOKABLE bool buscarPendrive();     // un .raucb en un pendrive
+    Q_INVOKABLE bool buscarPendrive();     // un betometro-pi-X.Y.Z.tar.gz en un pendrive
     Q_INVOKABLE void actualizar();         // baja (si hace falta) e instala
     Q_INVOKABLE void reiniciar();
 
@@ -59,6 +59,6 @@ private:
     QNetworkAccessManager red_;
     QPointer<QNetworkReply> respuesta_;
     QFile* destino_ = nullptr;
-    QProcess rauc_;
+    QProcess rauc_;                        // desarma el paquete y lanza el instalador
     QTimer sim_;
 };

@@ -10,11 +10,13 @@
 #include <QVersionNumber>
 
 namespace {
-// Donde se publican las versiones (paquetes .raucb firmados). Se puede cambiar con BETO_ACTUALIZACIONES.
-const char* kUrl = "https://api.github.com/repos/tvmaty2186/Betometro-Actualizaciones/releases/latest";
+// Donde se publican las versiones (repo público, solo los paquetes). Se puede cambiar con BETO_ACTUALIZACIONES.
+const char* kUrl = "https://api.github.com/repos/tvmaty2186/Betometro-actualizaciones/releases/latest";
+// Paquete: betometro-pi-X.Y.Z.tar.gz con la carpeta del instalador (instalar.sh y lo demás)
+const QString kPatron = QStringLiteral("betometro-pi-*.tar.gz");
 const QString kPendrive = QStringLiteral("/run/betometro/pendrive");
 
-QString versionDeNombre(const QString& n) {   // betometro-1.2.0.raucb → 1.2.0
+QString versionDeNombre(const QString& n) {   // betometro-pi-1.2.0.tar.gz → 1.2.0
     static const QRegularExpression re(QStringLiteral("(\\d+\\.\\d+\\.\\d+)"));
     return re.match(n).captured(1);
 }
@@ -29,19 +31,12 @@ Actualizador::Actualizador(const QString& carpetaDatos, QObject* padre)
         notas_ = QStringLiteral("Arreglos y mejoras de la pantalla de carrera");
         origen_ = QStringLiteral("internet");
     }
-    connect(&rauc_, &QProcess::readyReadStandardOutput, this, [this] {
-        // rauc install: «  40% Copying image to rootfs.1»
-        static const QRegularExpression re(QStringLiteral("(\\d+)%"));
-        while (rauc_.canReadLine()) {
-            const auto m = re.match(QString::fromUtf8(rauc_.readLine()));
-            if (m.hasMatch()) poner(QStringLiteral("instalando"), m.captured(1).toInt());
-        }
-    });
+    connect(&rauc_, &QProcess::readyReadStandardOutput, this, [this] { rauc_.readAllStandardOutput(); });
     connect(&rauc_, &QProcess::finished, this, [this](int codigo, QProcess::ExitStatus s) {
         if (!archivoPendrive_.isEmpty()) { QProcess::execute(QStringLiteral("umount"), {kPendrive}); archivoPendrive_.clear(); }
         if (s == QProcess::NormalExit && codigo == 0) {
-            QFile::remove(descarga_);
-            poner(QStringLiteral("lista"), 100, QStringLiteral("Lista: se usa al reiniciar el equipo"));
+            // El instalador corre aparte (systemd-run) y al terminar reinicia el equipo solo
+            poner(QStringLiteral("lista"), 100, QStringLiteral("Instalando… el equipo se reinicia solo en unos minutos"));
         } else {
             const QString err = QString::fromUtf8(rauc_.readAllStandardError()).trimmed().section('\n', -1);
             poner(QStringLiteral("error"), 0, QStringLiteral("No se pudo instalar") + (err.isEmpty() ? QString() : ": " + err));
@@ -76,6 +71,7 @@ void Actualizador::buscar() {
     if (!raspberry_ || estado_ == QLatin1String("descargando") || estado_ == QLatin1String("instalando")) return;
     QNetworkRequest q{QUrl(url_)};
     q.setRawHeader("Accept", "application/vnd.github+json");
+    q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);   // GitHub rechaza pedidos sin User-Agent
     q.setTransferTimeout(15000);
     QNetworkReply* r = red_.get(q);
     connect(r, &QNetworkReply::finished, this, [this, r] {
@@ -86,7 +82,8 @@ void Actualizador::buscar() {
         if (!masNueva(v, version())) return;
         for (const auto& a : o.value(QStringLiteral("assets")).toArray()) {
             const QJsonObject x = a.toObject();
-            if (!x.value(QStringLiteral("name")).toString().endsWith(QLatin1String(".raucb"))) continue;
+            const QString nombre = x.value(QStringLiteral("name")).toString();
+            if (!nombre.startsWith(QLatin1String("betometro-pi-")) || !nombre.endsWith(QLatin1String(".tar.gz"))) continue;
             versionNueva_ = v;
             notas_ = o.value(QStringLiteral("body")).toString().section('\n', 0, 2).trimmed();
             origen_ = QStringLiteral("internet");
@@ -107,7 +104,7 @@ bool Actualizador::buscarPendrive() {
     for (const QString& d : discos) {
         if (QProcess::execute(QStringLiteral("mount"), {QStringLiteral("-o"), QStringLiteral("ro"), "/dev/" + d, kPendrive}) != 0) continue;
         QString mejor, mejorV;
-        for (const QString& f : QDir(kPendrive).entryList({QStringLiteral("*.raucb")}, QDir::Files)) {
+        for (const QString& f : QDir(kPendrive).entryList({kPatron}, QDir::Files)) {
             const QString v = versionDeNombre(f);
             if (mejor.isEmpty() || masNueva(v, mejorV)) { mejor = f; mejorV = v; }
         }
@@ -121,7 +118,7 @@ bool Actualizador::buscarPendrive() {
         }
         QProcess::execute(QStringLiteral("umount"), {kPendrive});
     }
-    poner(QStringLiteral("error"), 0, QStringLiteral("No hay ninguna actualización (.raucb) en el pendrive"));
+    poner(QStringLiteral("error"), 0, QStringLiteral("No hay ninguna actualización (betometro-pi-….tar.gz) en el pendrive"));
     return false;
 }
 
@@ -131,7 +128,7 @@ void Actualizador::actualizar() {
     if (origen_ == QLatin1String("pendrive") && !archivoPendrive_.isEmpty()) { instalar(archivoPendrive_); return; }
     if (descarga_.isEmpty()) { poner(QStringLiteral("error"), 0, QStringLiteral("No hay versión nueva para bajar")); return; }
 
-    const QString archivo = carpeta_ + QStringLiteral("/betometro-") + versionNueva_ + QStringLiteral(".raucb");
+    const QString archivo = carpeta_ + QStringLiteral("/betometro-pi-") + versionNueva_ + QStringLiteral(".tar.gz");
     delete destino_;
     destino_ = new QFile(archivo + QStringLiteral(".parte"), this);
     if (!destino_->open(QIODevice::WriteOnly | QIODevice::Truncate)) {
@@ -141,6 +138,7 @@ void Actualizador::actualizar() {
     QNetworkRequest q{QUrl(descarga_)};
     q.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     q.setRawHeader("Accept", "application/octet-stream");
+    q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);
     respuesta_ = red_.get(q);
     poner(QStringLiteral("descargando"), 0);
     connect(respuesta_, &QNetworkReply::readyRead, this, [this] { destino_->write(respuesta_->readAll()); });
@@ -166,8 +164,15 @@ void Actualizador::actualizar() {
 
 void Actualizador::instalar(const QString& archivo) {
     poner(QStringLiteral("instalando"), 0);
-    // RAUC verifica la firma, escribe la copia que no se usa y le pasa el kernel (gancho del paquete)
-    rauc_.start(QStringLiteral("rauc"), {QStringLiteral("install"), archivo});
+    // Se desarma el paquete en una carpeta propia y se corre su instalar.sh como servicio aparte:
+    // el instalador detiene Betómetro, guarda la versión anterior, pone la nueva y reinicia.
+    const QString dir = carpeta_ + QStringLiteral("/nueva");
+    QDir(dir).removeRecursively();
+    QDir().mkpath(dir);
+    const QString orden = QStringLiteral("tar -xzf '%1' -C '%2' && f=$(ls -d '%2'/*/instalar.sh | head -1) && "
+                                         "systemd-run --unit=betometro-actualizar --collect bash \"$f\"")
+                              .arg(archivo, dir);
+    rauc_.start(QStringLiteral("/bin/sh"), {QStringLiteral("-c"), orden});
 }
 
 void Actualizador::reiniciar() {

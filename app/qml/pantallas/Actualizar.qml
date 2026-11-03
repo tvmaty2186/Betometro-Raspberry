@@ -2,8 +2,8 @@ import QtQuick
 import Betometro
 
 // Pantalla 12: Actualizar. Muestras #s12 y #v12.
-// Baja el paquete firmado (por internet o de un pendrive) y lo instala con RAUC en la copia del
-// sistema que no se usa. En la PC la descarga es simulada.
+// Baja el paquete (por internet o de un pendrive) y corre su instalador, que guarda la versión
+// anterior, pone la nueva y reinicia el equipo. En la PC la descarga es simulada.
 Item {
     id: raiz
     readonly property bool h: Contexto.horizontal
@@ -42,14 +42,14 @@ Item {
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter
                    text: raiz.estado === "carrera" ? "Terminá la carrera antes de actualizar"
-                         : raiz.estado === "lista" ? "Lista: se usa al reiniciar el equipo"
+                         : raiz.estado === "lista" ? "Lista: el equipo se reinicia solo"
                          : raiz.estado === "descargando" ? "Descargando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "instalando" ? "Instalando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "error" ? Actualizador.mensaje
                          : Actualizador.versionNueva ? "Versión " + Actualizador.versionNueva + (Actualizador.origen === "pendrive" ? " en el pendrive" : " disponible") : "Estás al día"
                    color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.3
-                   text: "Podés seguir usando Betómetro. Se instala en la copia de reserva.\nSi algo falla, vuelve solo a la versión anterior."
+                   text: "Al terminar, el equipo se reinicia solo.\nSe guarda la versión anterior por si algo falla."
                    color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 19 } }
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter; spacing: 16

@@ -6,11 +6,23 @@ cd "$(dirname "$0")"
 if [ "$(id -u)" != 0 ]; then echo "Hay que correrlo con sudo:  sudo bash instalar.sh"; exit 1; fi
 
 echo "== 1/5 Programas que necesita (tarda unos minutos la primera vez)"
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $(grep -v '^#' paquetes.txt)
+faltan=$(for p in $(grep -v '^#' paquetes.txt); do dpkg -s "$p" >/dev/null 2>&1 || echo "$p"; done)
+if [ -n "$faltan" ]; then
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $faltan
+else
+  echo "Ya está todo (no hace falta internet)"
+fi
 
 echo "== 2/5 Betómetro"
 systemctl stop betometro 2>/dev/null || true
+# Se guarda la versión que estaba, por si la nueva falla:  sudo bash /var/lib/betometro-anterior/volver.sh
+if [ -x /usr/bin/betometro ]; then
+  rm -rf /var/lib/betometro-anterior && mkdir -p /var/lib/betometro-anterior
+  tar -C / -czf /var/lib/betometro-anterior/betometro.tar.gz usr/bin/betometro usr/bin/betometro-camara usr/share/betometro 2>/dev/null || true
+  printf '#!/bin/bash\nsystemctl stop betometro; tar -C / -xzf /var/lib/betometro-anterior/betometro.tar.gz && systemctl start betometro\n' > /var/lib/betometro-anterior/volver.sh
+  chmod +x /var/lib/betometro-anterior/volver.sh
+fi
 tar -C / --no-same-owner -xzf betometro.tar.gz
 install -m 0644 betometro.service pulseaudio-sistema.service despertar-touch.service /etc/systemd/system/
 # Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)
