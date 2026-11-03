@@ -19,7 +19,8 @@ Caja {
             pAlto: raiz.sinGps ? 20 : (raiz.barra ? 46 : 58); alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.sinGps ? 1 : raiz.ancho
             text: raiz.sinGps ? "SIN GPS" : Math.round(raiz.est.vActKmh)
         }
-        Sub { visible: raiz.extra; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: "máx " + Math.round(raiz.est.velMaxVuelta || 0); tam: 14 }
+        Text { visible: raiz.extra; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: "máx " + Math.round(raiz.est.velMaxVuelta || 0)
+               color: Tema.tinta; opacity: 0.85; font { family: Tema.fuente600; pixelSize: Math.max(13, Math.min(20, raiz.height * 0.07)) } }
         Barra {
             visible: raiz.barra
             anchors.horizontalCenter: parent.horizontalCenter

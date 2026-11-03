@@ -39,6 +39,21 @@ Item {
         return { x: nx, y: ny };
     }
 
+    // Ancho libre en el medio del widget i: sin lo que tapan los widgets que tiene encima (en el armado de
+    // fábrica, el V1 y la sugerida van adentro de la cuenta). Así el número no se mete debajo de ellos.
+    function anchoLibre(i) {
+        const a = px(armado[i]), cx = a.x + a.w / 2;
+        let izq = a.x, der = a.x + a.w;
+        armado.forEach((o, k) => {
+            if (k === i) return;
+            const b = px(o);
+            if (b.w * b.h >= a.w * a.h) return;                                  // solo los que van adelante (más chicos)
+            if (b.y >= a.y + a.h || b.y + b.h <= a.y || b.x >= a.x + a.w || b.x + b.w <= a.x) return;   // no se tocan
+            if (b.x + b.w / 2 < cx) izq = Math.max(izq, b.x + b.w); else der = Math.min(der, b.x);
+        });
+        return Math.max(60, 2 * Math.min(cx - izq, der - cx));
+    }
+
     // Los más grandes primero, así los chicos quedan adelante
     readonly property var orden: armado.map((w, i) => i).sort((a, b) => armado[b].w * armado[b].h - armado[a].w * armado[a].h)
 
@@ -211,7 +226,8 @@ Item {
         onClicked: raiz.elegido = -1
     }
 
-    Component { id: cCuenta; WCuenta { est: raiz.est; extra: !!parent.def.extra; barra: parent.def.barra !== false; modo: parent.def.modo || "progresiva"; ancho: parent.def.ancho || 1.2 } }
+    Component { id: cCuenta; WCuenta { est: raiz.est; extra: !!parent.def.extra; barra: parent.def.barra !== false; modo: parent.def.modo || "progresiva"; ancho: parent.def.ancho || 1.2
+                                    anchoLibre: raiz.anchoLibre(parent.parent.i) } }
     Component { id: cTipo; WTipo { est: raiz.est } }
     Component {
         id: cNecesaria

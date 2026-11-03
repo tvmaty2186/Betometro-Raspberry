@@ -12,6 +12,7 @@ Caja {
     property bool barra: true
     property string modo: "progresiva"
     property real ancho: 1.2
+    property real anchoLibre: 100000   // espacio del medio sin widgets encima (lo calcula el tablero)
     readonly property bool progresiva: modo !== "regresiva"
     readonly property real restante: est.restanteMs || 0
     readonly property bool pasado: restante < 0
@@ -33,8 +34,8 @@ Caja {
                text: raiz.progresiva ? (raiz.pasado ? "Pasado el ideal" : "Vuelta") : (raiz.pasado ? "Pasado" : "Falta") }
         Numero {
             width: parent.width
-            pAlto: raiz.barra ? 66 : 82; pAncho: 105; alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.ancho
-            color: raiz.pasado ? Tema.alerta : Tema.numero
+            pAlto: raiz.barra ? 66 : 82; pAncho: 105; alto: raiz.height - 16; anchoCaja: Math.min(raiz.width, raiz.anchoLibre) - 24; ancho: raiz.ancho
+            color: !raiz.pasado ? Tema.numero : raiz.progresiva ? Tema.mal : Tema.warn
             text: raiz.progresiva ? Formato.reloj(raiz.trans, false)
                   : raiz.pasado ? "+" + Formato.reloj(-raiz.restante, false) : Formato.reloj(raiz.restante, !!raiz.est.enCurso)
         }

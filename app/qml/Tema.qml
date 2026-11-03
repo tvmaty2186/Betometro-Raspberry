@@ -74,5 +74,8 @@ QtObject {
     readonly property string fuente600: de("Barlow SemiBold", "Barlow SemiBold", "Chakra Petch", "B612", "Barlow SemiBold")
     readonly property string fuente800: de("Barlow ExtraBold", "Barlow ExtraBold", "Chakra Petch", "B612", "Barlow ExtraBold")
     readonly property string fuenteNum: de("Barlow Condensed", "Big Shoulders Display Thin", "Chakra Petch", "B612 Mono", "Barlow Condensed")
-    readonly property bool cursiva: avispon || rally || sol
+    readonly property bool cursiva: avispon   // como la app: números en cursiva solo en Avispón (no en sol)
+    // «Pasado» de la cuenta regresiva y «ATRASADO» (--warn) y «Pasado el ideal» de la progresiva (--mal), como la app
+    readonly property color warn: de("#f4c531", "#ffb000", "#ffd400", "#ffd23f", "#a33a00")
+    readonly property color mal: de("#ff6b5a", "#c0162c", "#e10600", "#ff4d5e", "#c4001a")
 }

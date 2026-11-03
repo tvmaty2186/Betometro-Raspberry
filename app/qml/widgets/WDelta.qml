@@ -14,7 +14,7 @@ Caja {
         Numero {
             width: parent.width
             pAlto: 70; pAncho: 95; alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.ancho
-            color: raiz.d !== null && raiz.d <= -0.05 ? Tema.alerta : Tema.numero
+            color: raiz.d !== null && raiz.d <= -0.05 ? Tema.warn : Tema.numero
             text: raiz.d === null ? (raiz.est.enCurso ? "SIN DATOS" : "EN TIEMPO")
                 : Math.abs(raiz.d) < 0.05 ? "EN TIEMPO"
                 : (raiz.d > 0 ? "ADELANTADO " : "ATRASADO ") + Math.abs(raiz.d).toFixed(1).replace(".", ",") + " s"
