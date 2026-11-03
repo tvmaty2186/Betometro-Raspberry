@@ -48,6 +48,22 @@ systemctl disable --now serial-getty@ttyAMA0 2>/dev/null || true
 mkdir -p /etc/systemd/system.conf.d
 printf '[Manager]\nRuntimeWatchdogSec=15\nRebootWatchdogSec=30\n' > /etc/systemd/system.conf.d/betometro-vigilante.conf
 
+echo "== 3b Pantalla de arranque: foto de los pilotos con barra de carga, sin letras"
+if command -v plymouth-set-default-theme >/dev/null; then
+  install -d /usr/share/plymouth/themes/betometro
+  install -m 0644 arranque/* /usr/share/plymouth/themes/betometro/
+  agregar "disable_splash=1"   # sin el arcoíris de la placa
+  CMD=/boot/firmware/cmdline.txt
+  sed -i 's/console=tty1/console=tty3/' "$CMD"
+  for p in quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3; do
+    grep -qw -- "$p" "$CMD" || sed -i "1 s/\$/ $p/" "$CMD"
+  done
+  if [ "$(plymouth-set-default-theme)" != betometro ]; then
+    echo "   (rearmando el arranque: tarda uno o dos minutos)"
+    plymouth-set-default-theme -R betometro || plymouth-set-default-theme betometro || true
+  fi
+fi
+
 echo "== 4/5 Arranque directo en Betómetro"
 systemctl daemon-reload
 systemctl enable pulseaudio-sistema despertar-touch betometro

@@ -21,6 +21,8 @@ Environment=BETO_GPS=/dev/ttyAMA0
 Environment=BETO_VOZ=/usr/share/betometro/voz
 RuntimeDirectory=betometro
 StateDirectory=betometro
+# La foto de arranque queda en pantalla hasta que Betómetro dibuja (sin parpadeo negro)
+ExecStartPre=-/usr/bin/plymouth quit --retain-splash
 ExecStart=/usr/bin/betometro --fisica
 Restart=always
 RestartSec=2

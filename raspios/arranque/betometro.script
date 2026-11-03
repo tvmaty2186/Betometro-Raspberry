@@ -1,0 +1,27 @@
+# Pantalla de arranque de Betómetro.
+# La pantalla es de pie (720×1280) y se usa acostada: la foto ya viene girada 90° a la derecha.
+# En la foto girada, la franja amarilla de abajo queda vertical, a la izquierda (x 16 a 24 de 720),
+# y se llena de arriba hacia abajo (en la foto acostada: de izquierda a derecha).
+W = Window.GetWidth();
+H = Window.GetHeight();
+fondo = Sprite(Image("fondo.png").Scale(W, H));
+fondo.SetPosition(0, 0, 0);
+
+apagado = Image("apagado.png");
+bx = 15 * W / 720;
+bw = 11 * W / 720;
+tapa = Sprite();
+tapa.SetZ(10);
+
+fun progreso(duracion, avance) {
+    y = Math.Int(avance * H);
+    if (y < H) {
+        tapa.SetImage(apagado.Scale(bw, H - y));
+        tapa.SetPosition(bx, y, 10);
+        tapa.SetOpacity(1);
+    } else {
+        tapa.SetOpacity(0);
+    }
+}
+Plymouth.SetBootProgressFunction(progreso);
+progreso(0, 0);

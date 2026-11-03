@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Betometro
+Description=Foto de los pilotos; la franja amarilla de abajo es la barra de carga
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/betometro
+ScriptFile=/usr/share/plymouth/themes/betometro/betometro.script

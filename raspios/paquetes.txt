@@ -21,3 +21,5 @@ alsa-utils
 # Sonido: Qt de Debian saca el audio solo por PulseAudio (corre como servicio del sistema)
 pulseaudio
 pulseaudio-utils
+# Pantalla de arranque (foto con barra de carga, sin letras)
+plymouth

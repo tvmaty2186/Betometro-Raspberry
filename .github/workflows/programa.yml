@@ -70,6 +70,7 @@ jobs:
           mkdir -p "$P"
           tar -C salida-pi/raiz -czf "$P/betometro.tar.gz" usr
           cp raspios/instalar.sh raspios/paquetes.txt raspios/*.service "$P/"
+          cp -r raspios/arranque "$P/"
           echo "$V ($(git rev-parse --short HEAD))" > "$P/version.txt"
           ls -la "$P"
           # Paquete para Ajustes → Actualizar (internet o pendrive)
