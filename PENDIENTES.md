@@ -23,6 +23,10 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 2. Elegir la pantalla de arranque (muestra: foto de los pilotos con la franja amarilla como barra de carga).
 
 ## Siguiente
+- **Detalles de pantalla de la app que faltan** (pedido de Matías, 03/11): lista completa en
+  [docs/app/diferencias-pantalla.md](docs/app/diferencias-pantalla.md). Lo principal: tamaño de los dígitos con la
+  fórmula de la app (y «Números − / +»), dígitos de ancho fijo, widgets chicos al frente en el editor, cara de
+  instrumento con reflejo, colores de pasado/atrasado, estilos Anillo y Barra, redondo en más widgets.
 - **Ficha de la carrera (foto de Matías, 03/11):** los números grandes del resumen se salen del recuadro
   (error total cortado a la izquierda, mejor a la derecha); los chips de vueltas («V1 MEDIDA») muy chicos
   para la pantalla de 5"; en el nombre «02: 46» sale con espacio raro por la tipografía.
