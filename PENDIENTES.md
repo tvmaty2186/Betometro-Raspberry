@@ -27,6 +27,11 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   (error total cortado a la izquierda, mejor a la derecha); los chips de vueltas («V1 MEDIDA») muy chicos
   para la pantalla de 5"; en el nombre «02: 46» sale con espacio raro por la tipografía.
 - Pantalla de arranque horizontal con barra de carga, sin letras (Plymouth).
+- **Reporte de errores automático (pedido de Matías, 03/11):** Betómetro junta solo lo que falla (cierres,
+  avisos del programa, GPS, sonido, wifi, actualizaciones; con versión y hora) y, cuando hay internet y no hay
+  carrera, lo manda a un repo de reportes para mejorar las próximas versiones. Sin datos personales.
+  A definir: repo (privado, por ejemplo `Betometro-reportes`, como issues) y una llave que solo pueda crear
+  reportes ahí (la Raspberry la lleva adentro: que no sirva para nada más).
 - Probar Ajustes → Actualizar con una versión 1.0.1 publicada.
 - Conectar GPS (NEO-M8N) y pulsador (GPIO17, pin 11 / GND pin 9; pull-up 10 kΩ a 3,3 V); chequeo previo; medir demoras.
 - Leer el pulsador en el programa (GPIO).
