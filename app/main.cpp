@@ -17,6 +17,16 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QSocketNotifier>
+
+#include <csignal>
+#include <sys/socket.h>
+#include <unistd.h>
+
+// Al apagar (systemctl stop / poweroff) llega SIGTERM: se cierra prolijo, así el reporte de
+// errores no lo toma como una caída. La señal se pasa por un socket (seguro dentro de una señal).
+static int gAvisoSalir[2] = {-1, -1};
+static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0) {} }
 
 #include "contexto.h"
 #include "crono.h"
@@ -28,6 +38,7 @@
 #include "actualizador.h"
 #include "camara.h"
 #include "pulsador_gpio.h"
+#include "reportes.h"
 #include "servidor.h"
 #include "wifi.h"
 
@@ -43,6 +54,13 @@ static void cargarFuentes() {
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
+    QSocketNotifier* avisoSalir = nullptr;
+    if (::socketpair(AF_UNIX, SOCK_STREAM, 0, gAvisoSalir) == 0) {
+        avisoSalir = new QSocketNotifier(gAvisoSalir[1], QSocketNotifier::Read, &app);
+        QObject::connect(avisoSalir, &QSocketNotifier::activated, &app, [] { char c; if (::read(gAvisoSalir[1], &c, 1) < 0) {} QCoreApplication::quit(); });
+        std::signal(SIGTERM, alTerminar);
+        std::signal(SIGINT, alTerminar);
+    }
     app.setApplicationName(QStringLiteral("Betómetro"));
     app.setApplicationVersion(QStringLiteral(BETO_VERSION));
 
@@ -76,6 +94,9 @@ int main(int argc, char* argv[]) {
     if (carpeta.isEmpty()) carpeta = qEnvironmentVariable("BETO_DATOS");
     if (carpeta.isEmpty()) carpeta = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     Datos datos(carpeta);
+    // Reporte de errores: desde acá se anota todo lo que falle (también las pantallas QML)
+    Reportes reportes(carpeta);
+    if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) reportes.instalar();
     if (op.isSet(oMuestra)) datos.cargarMuestra();
     if (op.isSet(oCarrera)) {
         for (const auto& c : datos.base().carreras)
@@ -114,7 +135,11 @@ int main(int argc, char* argv[]) {
     if (pulsador && !pulsador->activo()) qWarning("Pulsador: %s", qPrintable(pulsador->error()));
     // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
     Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
-    QObject::connect(&crono, &Crono::enCursoChanged, &servidor, [&] { servidor.prender(!crono.enCurso()); });   // apagado en carrera
+    servidor.ponerReportes(&reportes);
+    QObject::connect(&crono, &Crono::enCursoChanged, &servidor, [&] {
+        servidor.prender(!crono.enCurso());     // apagado en carrera
+        reportes.ponerOcupado(crono.enCurso());  // y los reportes no se mandan en carrera
+    });
     Sistema sistema;
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());

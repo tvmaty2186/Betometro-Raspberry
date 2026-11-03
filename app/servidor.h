@@ -8,6 +8,7 @@
 #include <QTcpServer>
 
 class Datos;
+class Reportes;
 
 class Servidor : public QObject {
     Q_OBJECT
@@ -18,6 +19,7 @@ public:
     bool activo() const { return tcp_.isListening(); }
     int puerto() const { return puerto_; }
     void prender(bool si);
+    void ponerReportes(Reportes* r) { reportes_ = r; }
 
     // Para probar sin red: arma la respuesta HTTP completa de un pedido «GET ruta»
     QByteArray responder(const QByteArray& ruta) const;
@@ -30,6 +32,7 @@ signals:
 private:
     QByteArray pagina() const;
     Datos* datos_;
+    Reportes* reportes_ = nullptr;
     quint16 puerto_;
     QTcpServer tcp_;
 };

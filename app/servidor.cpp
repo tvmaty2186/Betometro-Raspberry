@@ -1,6 +1,7 @@
 #include "servidor.h"
 
 #include "datos.h"
+#include "reportes.h"
 
 #include <QTcpSocket>
 #include <QUrl>
@@ -99,6 +100,11 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
         if (html.isEmpty()) return respuesta(404, "text/plain; charset=utf-8", "No está esa carrera");
         return respuesta(200, "text/html; charset=utf-8", html, descargar ? adjunto(datos_->nombreInforme(id)) : QByteArray());
     }
+    if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
+        const QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
+        return respuesta(200, "text/plain; charset=utf-8", t.isEmpty() ? QByteArray("Sin errores anotados.\n") : t,
+                         descargar ? adjunto(QStringLiteral("betometro-errores.txt")) : QByteArray());
+    }
     if (ruta == QLatin1String("/todos.zip")) {
         QList<QPair<QString, QByteArray>> archivos;
         for (const QVariant& v : datos_->corridas() + datos_->proximas()) {
@@ -139,7 +145,8 @@ QByteArray Servidor::pagina() const {
         ".z{display:block;text-align:center;text-decoration:none;margin-top:22px;border:2px solid #f4c531;color:#f4c531;font-weight:800;border-radius:12px;padding:12px}"
         ".v{color:#d6e6d2}</style></head><body><header><h1>BETÓMETRO</h1><p>Regularidad para el navegante · %1 carreras</p></header>"
         "<main>%2%3<p class=v style=\"font-size:12px;margin-top:22px\">Tocá una carrera para ver el informe. «Descargar» lo guarda en el teléfono; "
-        "desde ahí se puede mandar a Drive o por WhatsApp.</p></main></body></html>")
+        "desde ahí se puede mandar a Drive o por WhatsApp.</p>"
+        "<p class=v style=\"font-size:12px\"><a style=\"color:#d6e6d2\" href=\"/reportes?descargar=1\">Reporte de errores</a></p></main></body></html>")
                              .arg(n)
                              .arg(filas, n ? QStringLiteral("<a class=z href=\"/todos.zip\">Descargar todos (.zip)</a>") : QString());
     return html.toUtf8();
