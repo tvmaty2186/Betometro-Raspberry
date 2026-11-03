@@ -139,6 +139,8 @@ BR2_PACKAGE_KMOD_TOOLS=y
 # Los módulos del kernel vienen comprimidos (.ko.xz): sin xz, kmod no los puede cargar
 # y no arranca nada que sea módulo (video vc4, pantalla, wifi, sonido)
 BR2_PACKAGE_XZ=y
+# Las tipografías de Betómetro son .woff2: FreeType necesita brotli para leerlas
+BR2_PACKAGE_BROTLI=y
 
 # --- Pantalla de arranque con el león ---
 BR2_PACKAGE_PSPLASH=y
