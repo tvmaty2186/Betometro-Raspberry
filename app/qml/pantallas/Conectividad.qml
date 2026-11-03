@@ -142,7 +142,7 @@ Item {
             id: der; visible: raiz.h; x: 620; width: raiz.h ? 580 : 0; spacing: 18; topPadding: 6
             Loader { width: parent.width; sourceComponent: raiz.h ? gGuardadas : null }
             Loader { width: parent.width; sourceComponent: raiz.h ? gCerca : null }
-            Sub { text: "Tocás una red → se abre la pantalla de la clave con el teclado"; tam: 13; leftPadding: 6 }
+            Sub { width: parent.width; wrapMode: Text.WordWrap; text: "Tocás una red → se abre la pantalla de la clave con el teclado"; tam: 11; leftPadding: 6 }
         }
         Column {
             id: unica; visible: !raiz.h; width: lista.width; spacing: 18; topPadding: 6

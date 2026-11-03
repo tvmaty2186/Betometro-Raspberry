@@ -47,7 +47,7 @@ Item {
                         x: 12; y: 10; radius: 14; height: 28; width: tAviso.implicitWidth + 24; color: Qt.rgba(0, 0, 0, 0.55)
                         border { width: 1.5; color: "#c9ced3" }
                         Text { id: tAviso; anchors.centerIn: parent; text: "Solo para apuntarla · en carrera no se ve"; color: "#fff"
-                               font { family: Tema.fuente600; italic: true; pixelSize: 13 } }
+                               font { family: Tema.fuente600; italic: true; pixelSize: 16 } }
                     }
                 }
                 Row {

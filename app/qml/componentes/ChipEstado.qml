@@ -11,5 +11,5 @@ Rectangle {
     border { width: 1.5; color: tinta }
     implicitWidth: t.implicitWidth + 22; implicitHeight: t.implicitHeight + 8
     Text { id: t; anchors.centerIn: parent; text: parent.texto; color: parent.tinta
-           font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 13; letterSpacing: 13 * 0.06 } }
+           font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 16; letterSpacing: 16 * 0.06 } }
 }

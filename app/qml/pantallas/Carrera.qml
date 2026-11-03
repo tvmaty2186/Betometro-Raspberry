@@ -79,7 +79,7 @@ Item {
                         color: Camara.grabando ? "#ff3b30" : "#8a929b" }
             Text { id: tRec; x: 30; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta
                    text: Camara.grabando ? "REC" : Camara.falla ? "Cámara" : "Grabar"
-                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 13; letterSpacing: 1 } }
+                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 16; letterSpacing: 1 } }
             MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: Datos.ajustes.camaraInicio === "mano"; onClicked: Crono.grabarAMano() }
         }
         Chip {

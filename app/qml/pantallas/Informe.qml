@@ -102,7 +102,7 @@ Item {
                     color: raiz.modo === modelData.m ? Tema.acento : Qt.rgba(0, 0, 0, 0.4)
                     border { width: 1; color: Tema.bordeCromo }
                     Text { id: tm; anchors.centerIn: parent; text: modelData.t; color: raiz.modo === modelData.m ? Tema.acentoTinta : Tema.tinta
-                           font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 13 } }
+                           font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 16 } }
                     MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: raiz.modo = modelData.m }
                 }
             }
@@ -277,7 +277,7 @@ Item {
                                     color: Qt.rgba(col.r, col.g, col.b, 0.18); border { width: 1.5; color: col }
                                     Text { id: tEtiq; anchors.centerIn: parent; color: etiq.col
                                            text: modelData.interrumpida ? "INTERRUMPIDA" : modelData.medida ? "MEDIDA" : "LIBRE"
-                                           font { family: Tema.fuente800; weight: Font.ExtraBold; pixelSize: 13; letterSpacing: 1 } }
+                                           font { family: Tema.fuente800; weight: Font.ExtraBold; pixelSize: 16; letterSpacing: 1 } }
                                     MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: !modelData.interrumpida
                                                 onClicked: raiz.cambiarMedida(index) }
                                 } }

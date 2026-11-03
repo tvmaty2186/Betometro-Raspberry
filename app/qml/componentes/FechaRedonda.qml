@@ -24,6 +24,6 @@ Item {
         Text { anchors.horizontalCenter: parent.horizontalCenter; text: raiz.dia; color: Tema.numeroVerde
                font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 } }
         Text { anchors.horizontalCenter: parent.horizontalCenter; text: raiz.mes; color: Tema.numeroVerde
-               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 12 } }
+               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 15 } }
     }
 }

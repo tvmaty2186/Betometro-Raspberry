@@ -15,7 +15,7 @@ Rectangle {
         id: fila
         anchors.centerIn: parent
         spacing: 6
-        Text { text: "●"; color: raiz.punto; font { pixelSize: 13 } anchors.verticalCenter: parent.verticalCenter }
-        Text { text: raiz.texto; color: Tema.tinta; font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 13 } }
+        Text { text: "●"; color: raiz.punto; font { pixelSize: 16 } anchors.verticalCenter: parent.verticalCenter }
+        Text { text: raiz.texto; color: Tema.tinta; font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 16 } }
     }
 }
