@@ -136,6 +136,9 @@ BR2_PACKAGE_UTIL_LINUX_PARTX=y
 BR2_PACKAGE_UTIL_LINUX_BINARIES=y
 BR2_PACKAGE_KMOD=y
 BR2_PACKAGE_KMOD_TOOLS=y
+# Los módulos del kernel vienen comprimidos (.ko.xz): sin xz, kmod no los puede cargar
+# y no arranca nada que sea módulo (video vc4, pantalla, wifi, sonido)
+BR2_PACKAGE_XZ=y
 
 # --- Pantalla de arranque con el león ---
 BR2_PACKAGE_PSPLASH=y
