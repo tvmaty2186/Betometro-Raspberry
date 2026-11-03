@@ -2,32 +2,60 @@
 # La pantalla es de pie (720×1280) y se usa acostada: la foto ya viene girada 90° a la derecha.
 # En la foto girada, la franja amarilla de abajo queda vertical, a la izquierda (x 16 a 24 de 720),
 # y se llena de arriba hacia abajo (en la foto acostada: de izquierda a derecha).
-# Todo se ubica desde Window.GetX()/GetY(): la ventana puede no empezar en 0,0 (varias pantallas).
-X = Window.GetX();
-Y = Window.GetY();
-W = Window.GetWidth();
-H = Window.GetHeight();
+#
+# Ojo: la Pi 3 tiene además la salida de TV (720×480). Window.GetWidth() sin número da la medida
+# de la pantalla MÁS CHICA, y la foto quedaba apretada en un costado. Por eso se busca la más
+# grande, y se vuelve a revisar mientras arranca (la pantalla de 5" aparece un poco después).
 Window.SetBackgroundTopColor(0.04, 0.16, 0.09);
 Window.SetBackgroundBottomColor(0.04, 0.16, 0.09);
 
-fondo = Sprite(Image("fondo.png").Scale(W, H));
-fondo.SetPosition(X, Y, 0);
-
+imagen = Image("fondo.png");
 apagado = Image("apagado.png");
-bx = X + 15 * W / 720;
-bw = 11 * W / 720;
+fondo = Sprite();
+fondo.SetZ(0);
 tapa = Sprite();
 tapa.SetZ(10);
+W = 0; H = 0; X = 0; Y = 0;
+avanceActual = 0;
 
-fun progreso(duracion, avance) {
-    y = Math.Int(avance * H);
-    if (y < H) {
-        tapa.SetImage(apagado.Scale(bw, H - y));
-        tapa.SetPosition(bx, Y + y, 10);
+fun medir() {
+    w = 0; h = 0; x = 0; y = 0;
+    i = 0;
+    while (i < 4) {
+        a = Window.GetWidth(i);
+        b = Window.GetHeight(i);
+        if (a && b) {
+            if (a * b > w * h) { w = a; h = b; x = Window.GetX(i); y = Window.GetY(i); }
+        }
+        i = i + 1;
+    }
+    if (w * h == 0) { w = Window.GetWidth(); h = Window.GetHeight(); x = Window.GetX(); y = Window.GetY(); }
+    if (w != global.W || h != global.H || x != global.X || y != global.Y) {
+        global.W = w; global.H = h; global.X = x; global.Y = y;
+        fondo.SetImage(imagen.Scale(w, h));
+        fondo.SetPosition(x, y, 0);
+        dibujarTapa();
+    }
+}
+
+fun dibujarTapa() {
+    bx = global.X + 15 * global.W / 720;
+    bw = 11 * global.W / 720;
+    y = Math.Int(global.avanceActual * global.H);
+    if (y < global.H) {
+        tapa.SetImage(apagado.Scale(bw, global.H - y));
+        tapa.SetPosition(bx, global.Y + y, 10);
         tapa.SetOpacity(1);
     } else {
         tapa.SetOpacity(0);
     }
 }
+
+fun progreso(duracion, avance) {
+    global.avanceActual = avance;
+    dibujarTapa();
+}
+
 Plymouth.SetBootProgressFunction(progreso);
-progreso(0, 0);
+Plymouth.SetRefreshFunction(medir);
+medir();
