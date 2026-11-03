@@ -1,0 +1,14 @@
+[Unit]
+Description=Despertar el touch de la pantalla (Goodix)
+# El touch toma corriente de la pantalla. Al arrancar, el sistema lo busca antes de que la
+# pantalla lo encienda, falla y no reintenta. Acá se lo vuelve a buscar ya con la pantalla prendida.
+After=systemd-modules-load.service systemd-udev-settle.service
+Before=betometro.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'for i in 1 2 3 4 5; do ls /sys/bus/i2c/drivers/Goodix-TS/ 2>/dev/null | grep -q 005d && exit 0; sleep 2; modprobe -r goodix_ts; sleep 1; modprobe goodix_ts; done; exit 0'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

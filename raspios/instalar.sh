@@ -12,7 +12,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $(grep
 echo "== 2/5 Betómetro"
 systemctl stop betometro 2>/dev/null || true
 tar -C / --no-same-owner -xzf betometro.tar.gz
-install -m 0644 betometro.service pulseaudio-sistema.service /etc/systemd/system/
+install -m 0644 betometro.service pulseaudio-sistema.service despertar-touch.service /etc/systemd/system/
 # Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)
 usermod -aG pulse-access root
 systemctl --global disable pulseaudio.service pulseaudio.socket 2>/dev/null || true
@@ -37,7 +37,7 @@ printf '[Manager]\nRuntimeWatchdogSec=15\nRebootWatchdogSec=30\n' > /etc/systemd
 
 echo "== 4/5 Arranque directo en Betómetro"
 systemctl daemon-reload
-systemctl enable pulseaudio-sistema betometro
+systemctl enable pulseaudio-sistema despertar-touch betometro
 systemctl disable getty@tty1 2>/dev/null || true
 
 echo "== 5/5 Listo. Versión: $(cat version.txt 2>/dev/null || echo '?')"
