@@ -134,6 +134,8 @@ int main(int argc, char* argv[]) {
                                               datos.cfg(QStringLiteral("numeroAuto")).toString()); };
     ponerPropia();
     QObject::connect(&datos, &Datos::cfgChanged, &wifi, ponerPropia);
+    // Apenas conecta el wifi, se busca si hay versión nueva (para el «· Actualizar» del inicio)
+    QObject::connect(&wifi, &Wifi::conectado, &actualizador, [&] { QTimer::singleShot(5000, &actualizador, &Actualizador::buscar); });
     // Pulsador por cable (GPIO17, pin 11 a GND pin 9), con la pull-up interna. Solo en la Raspberry.
     PulsadorGpio* pulsador = qEnvironmentVariableIsSet("BETO_RASPBERRY") ? new PulsadorGpio(17, &app) : nullptr;
     if (pulsador && !pulsador->activo()) qWarning("Pulsador: %s", qPrintable(pulsador->error()));

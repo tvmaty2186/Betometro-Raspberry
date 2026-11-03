@@ -3,6 +3,7 @@
 #include "datos.h"
 #include "reportes.h"
 
+#include <QFile>
 #include <QTcpSocket>
 #include <QUrl>
 
@@ -100,6 +101,15 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
         if (html.isEmpty()) return respuesta(404, "text/plain; charset=utf-8", "No está esa carrera");
         return respuesta(200, "text/html; charset=utf-8", html, descargar ? adjunto(datos_->nombreInforme(id)) : QByteArray());
     }
+    if (ruta.startsWith(QLatin1String("/r/"))) {   // león y tipografías para la página (de los recursos del programa)
+        const QString n = ruta.mid(3);
+        const QString archivo = n == QLatin1String("leon.png") ? QStringLiteral(":/recursos/img/leon.png")
+                                : QStringLiteral(":/recursos/fuentes/") + n;
+        if (n.contains(QLatin1String("..")) || n.contains('/')) return respuesta(404, "text/plain", "No está");
+        QFile f(archivo);
+        if (!f.open(QIODevice::ReadOnly)) return respuesta(404, "text/plain", "No está");
+        return respuesta(200, n.endsWith(QLatin1String(".png")) ? "image/png" : "font/woff2", f.readAll(), "Cache-Control: max-age=86400\r\n");
+    }
     if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
         const QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
         return respuesta(200, "text/plain; charset=utf-8", t.isEmpty() ? QByteArray("Sin errores anotados.\n") : t,
@@ -125,28 +135,50 @@ QByteArray Servidor::pagina() const {
         if (!c.value("tieneVueltas").toBool()) continue;
         const QString id = QString::fromUtf8(QUrl::toPercentEncoding(c.value("id").toString()));
         const QString err = c.value("errorTotal").toString();
-        filas += QStringLiteral("<a class=c href=\"/informe/%1\"><b>%2</b><span>%3%4</span></a>"
-                                "<a class=d href=\"/informe/%1?descargar=1\">Descargar</a>")
+        filas += QStringLiteral("<div class=c><a class=info href=\"/informe/%1\"><span class=dia>%5<small>%6</small></span>"
+                                "<span class=txt><b>%2</b><span>%3</span></span>%4</a>"
+                                "<div class=bot><a class=ver href=\"/informe/%1\">Ver informe</a><a class=bajar href=\"/informe/%1?descargar=1\">Descargar</a></div></div>")
                      .arg(id, esc(c.value("nombre").toString()), esc(c.value("fechaLarga").toString()),
-                          err.isEmpty() ? QString() : QStringLiteral(" · error ") + esc(err));
+                          err.isEmpty() ? QString() : QStringLiteral("<span class=err>%1</span>").arg(esc(err)),
+                          esc(c.value("dia").toString()), esc(c.value("mes").toString()));
         n++;
     }
     if (!n) filas = QStringLiteral("<p class=v>Todavía no hay carreras corridas.</p>");
     const QString html = QStringLiteral(
         "<!doctype html><html lang=es><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\">"
-        "<title>Betómetro</title><style>"
-        "body{margin:0;font-family:system-ui,sans-serif;background:#0b2a17;color:#f7f7f2}"
-        "header{background:linear-gradient(#1d5c33,#0f3b20);padding:18px 16px;border-bottom:4px solid #f4c531}"
-        "h1{margin:0;font-size:26px;font-style:italic;letter-spacing:.02em}header p{margin:4px 0 0;color:#d6e6d2;font-size:13px}"
-        "main{padding:12px 16px 40px;max-width:720px;margin:auto}"
-        ".c{display:block;text-decoration:none;color:inherit;background:#143d24;border:1px solid #2b6b41;border-radius:12px 12px 0 0;padding:12px 14px;margin-top:12px}"
-        ".c b{display:block;font-size:18px}.c span{color:#d6e6d2;font-size:13px}"
-        ".d{display:block;text-align:center;text-decoration:none;background:#f4c531;color:#111;font-weight:800;border-radius:0 0 12px 12px;padding:10px}"
-        ".z{display:block;text-align:center;text-decoration:none;margin-top:22px;border:2px solid #f4c531;color:#f4c531;font-weight:800;border-radius:12px;padding:12px}"
-        ".v{color:#d6e6d2}</style></head><body><header><h1>BETÓMETRO</h1><p>Regularidad para el navegante · %1 carreras</p></header>"
-        "<main>%2%3<p class=v style=\"font-size:12px;margin-top:22px\">Tocá una carrera para ver el informe. «Descargar» lo guarda en el teléfono; "
-        "desde ahí se puede mandar a Drive o por WhatsApp.</p>"
-        "<p class=v style=\"font-size:12px\"><a style=\"color:#d6e6d2\" href=\"/reportes?descargar=1\">Reporte de errores</a></p></main></body></html>")
+        "<title>Betómetro · Avispón Verde</title><style>"
+        "@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}"
+        "@font-face{font-family:Barlow;font-weight:600;font-style:italic;src:url(/r/barlow-latin-600-italic.woff2)}"
+        "@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}"
+        "@font-face{font-family:'Barlow Condensed';font-weight:700;src:url(/r/barlow-condensed-latin-700-normal.woff2)}"
+        "*{box-sizing:border-box}body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;"
+        "background:linear-gradient(180deg,rgba(11,42,23,0) 0,#0b2a17 260px),repeating-conic-gradient(#ffffff09 0 25%,transparent 0 50%) 0 0/22px 22px,"
+        "radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}"
+        "main{max-width:620px;margin:auto;padding:0 16px 40px}"
+        ".cab{position:relative;display:flex;align-items:center;gap:10px;padding:16px 0 12px;margin-bottom:6px;border-bottom:3px solid #f4c531;overflow:hidden}"
+        ".cab img{height:50px;filter:drop-shadow(0 2px 2px #0008)}.cab .bar{width:2px;height:42px;background:linear-gradient(#fff,#9aa3ad);transform:skewX(-18deg);opacity:.8}"
+        ".marca b{display:block;font:800 italic 28px/1 Barlow;background:linear-gradient(180deg,#fff 0%,#d9dde1 45%,#8d959c 55%,#e9ecef 100%);"
+        "-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 1px #000a)}"
+        ".marca span{display:block;font:600 9px/1.4 Barlow;letter-spacing:.2em;color:#b9cdb8;margin-top:3px}"
+        ".rayas{position:absolute;right:-6px;top:-10px;bottom:-4px;width:74px;background:linear-gradient(105deg,transparent 0 30%,#f7f7f2 30% 46%,transparent 46% 58%,#f4c531 58% 74%,transparent 74%)}"
+        "h2{font:800 italic 13px Barlow;letter-spacing:.18em;color:#b9cdb8;margin:16px 2px 4px}"
+        ".c{position:relative;margin-top:14px;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#1f4a2f,#08190e);"
+        "box-shadow:0 0 0 2px #cfd4d8,0 0 0 3px #4b5258,0 10px 18px #0008,inset 0 1px 0 #ffffff4d}"
+        ".info{display:flex;align-items:center;gap:12px;padding:12px 14px;text-decoration:none;color:inherit}"
+        ".dia{flex:none;width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;"
+        "background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;font:700 22px/1 'Barlow Condensed';box-shadow:0 0 0 2px #fff,0 3px 6px #0008}"
+        ".dia small{font:800 italic 9px Barlow;letter-spacing:.1em}"
+        ".txt{flex:1;min-width:0}.txt b{display:block;font:800 italic 21px/1.1 Barlow;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+        ".txt span{display:block;color:#b9cdb8;font-size:12px;font-style:italic;margin-top:2px}"
+        ".err{flex:none;font:700 italic 24px 'Barlow Condensed';color:#f4c531}"
+        ".bot{display:flex;border-top:1px solid #ffffff22}.bot a{flex:1;text-align:center;text-decoration:none;padding:12px;font:800 italic 15px Barlow}"
+        ".ver{color:#f7f7f2}.bajar{background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f}"
+        ".z{display:block;text-align:center;text-decoration:none;margin-top:22px;border:2px solid #f4c531;color:#f4c531;font:800 italic 16px Barlow;border-radius:14px;padding:13px}"
+        ".v{color:#b9cdb8;font-style:italic}.pie{font-size:12px;margin-top:22px}.pie a{color:#b9cdb8}</style></head><body><main>"
+        "<div class=cab><img alt=\"\" src=\"/r/leon.png\"><div class=bar></div><div class=marca><b>BETÓMETRO</b><span>REGULARIDAD PARA EL NAVEGANTE</span></div><div class=rayas></div></div>"
+        "<h2>CARRERAS · %1</h2>%2%3"
+        "<p class=\"v pie\">Tocá una carrera para ver el informe. «Descargar» lo guarda en el teléfono; desde ahí se puede mandar a Drive o por WhatsApp.</p>"
+        "<p class=\"v pie\"><a href=\"/reportes?descargar=1\">Reporte de errores</a> · Avispón Verde #101</p></main></body></html>")
                              .arg(n)
                              .arg(filas, n ? QStringLiteral("<a class=z href=\"/todos.zip\">Descargar todos (.zip)</a>") : QString());
     return html.toUtf8();

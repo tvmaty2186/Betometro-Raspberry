@@ -47,10 +47,17 @@ Actualizador::Actualizador(const QString& carpetaDatos, QObject* padre)
     QDir().mkpath(carpeta_);
     if (raspberry_) {
         // Al rato de prender y después cada media hora (cuando aparezca la wifi o se ponga la hora)
+        // Al prender el wifi tarda en conectar: se busca a los 20 s, y si no hubo respuesta se reintenta
+        // cada minuto hasta que la haya; después, cada 15 minutos. También apenas conecta el wifi
+        // (lo pide main.cpp). Antes, si fallaba la primera, no volvía a buscar hasta 30 minutos después
+        // y el «· Actualizar» amarillo del inicio no aparecía.
         QTimer::singleShot(20000, this, &Actualizador::buscar);
         auto* cada = new QTimer(this);
         connect(cada, &QTimer::timeout, this, [this] { if (versionNueva_.isEmpty()) buscar(); });
-        cada->start(30 * 60 * 1000);
+        cada->start(15 * 60 * 1000);
+        reintento_.setSingleShot(true);
+        reintento_.setInterval(60 * 1000);
+        connect(&reintento_, &QTimer::timeout, this, &Actualizador::buscar);
     }
 }
 
@@ -76,7 +83,7 @@ void Actualizador::buscar() {
     QNetworkReply* r = red_.get(q);
     connect(r, &QNetworkReply::finished, this, [this, r] {
         r->deleteLater();
-        if (r->error() != QNetworkReply::NoError) return;   // sin internet: no pasa nada
+        if (r->error() != QNetworkReply::NoError) { reintento_.start(); return; }   // sin internet todavía: de nuevo en un minuto
         const QJsonObject o = QJsonDocument::fromJson(r->readAll()).object();
         const QString v = o.value(QStringLiteral("tag_name")).toString().remove(QLatin1Char('v'));
         if (!masNueva(v, version())) return;

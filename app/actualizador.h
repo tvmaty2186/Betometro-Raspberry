@@ -61,4 +61,5 @@ private:
     QFile* destino_ = nullptr;
     QProcess rauc_;                        // desarma el paquete y lanza el instalador
     QTimer sim_;
+    QTimer reintento_;
 };
