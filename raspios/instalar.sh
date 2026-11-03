@@ -63,17 +63,24 @@ grep -qw "fsck.repair=yes" /boot/firmware/cmdline.txt || sed -i '1 s/$/ fsck.rep
 
 echo "== 3b Pantalla de arranque: foto de los pilotos con barra de carga, sin letras"
 if command -v plymouth-set-default-theme >/dev/null; then
-  install -d /usr/share/plymouth/themes/betometro
-  install -m 0644 arranque/* /usr/share/plymouth/themes/betometro/
+  T=/usr/share/plymouth/themes/betometro
+  cambio=0
+  for f in arranque/*; do cmp -s "$f" "$T/$(basename "$f")" || cambio=1; done
+  install -d "$T"
+  install -m 0644 arranque/* "$T/"
+  # Escala 1: la pantalla de 5" tiene mucha definición y Plymouth la agrandaba al doble
+  mkdir -p /etc/plymouth
+  grep -q "^DeviceScale=1" /etc/plymouth/plymouthd.conf 2>/dev/null || { printf '[Daemon]\nTheme=betometro\nDeviceScale=1\n' > /etc/plymouth/plymouthd.conf; cambio=1; }
   agregar "disable_splash=1"   # sin el arcoíris de la placa
   CMD=/boot/firmware/cmdline.txt
   sed -i 's/console=tty1/console=tty3/' "$CMD"
   for p in quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3; do
     grep -qw -- "$p" "$CMD" || sed -i "1 s/\$/ $p/" "$CMD"
   done
-  if [ "$(plymouth-set-default-theme)" != betometro ]; then
-    echo "   (rearmando el arranque: tarda uno o dos minutos)"
-    plymouth-set-default-theme -R betometro || plymouth-set-default-theme betometro || true
+  # Si cambió la foto o el tema, se rearma el arranque (la foto va adentro del initramfs)
+  if [ "$(plymouth-set-default-theme)" != betometro ] || [ "$cambio" = 1 ]; then
+    echo "   (rearmando el arranque: tarda unos minutos, no apagues)"
+    plymouth-set-default-theme -R betometro || { plymouth-set-default-theme betometro; update-initramfs -u; } || true
   fi
 fi
 
