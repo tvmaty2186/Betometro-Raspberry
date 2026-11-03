@@ -23,7 +23,7 @@ Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y ver
 | Pin | Uso |
 |---|---|
 | 2 y 6 | Alimentación de la pantalla |
-| 4 (5 V), 14 (GND) | GPS |
+| 17 (3,3 V), 14 (GND) | GPS (no el pin 4: lo tapa la ficha de 3 lugares de la pantalla, que ocupa 2, 4 y 6) |
 | 8 (TX) → RXD del GPS | GPS |
 | 10 (RX) ← TXD del GPS | GPS |
 | 7 (GPIO4) | PPS del GPS (opcional) |

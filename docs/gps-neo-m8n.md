@@ -20,7 +20,7 @@ Investigación del 01/11/2026, con las fotos del módulo que mandó Matías.
 | NAV-PVT | 92 bytes; campos y posiciones | — | Revisados uno por uno contra la especificación: coinciden |
 | Configuración | CFG-PRT, CFG-GNSS, CFG-RATE, CFG-NAV5 (4 = automotor), CFG-MSG, CFG-CFG | Faltaba CFG-GNSS | Agregado (GPS + QZSS + SBAS, GLONASS; Galileo y BeiDou apagados). Se espera medio segundo después, como recomienda u-blox |
 | PPS | 1 pulso por segundo, de 100 ms | — | Para medir demoras (opcional, pin 7) |
-| Alimentación | Módulo: 2,7 a 3,6 V. Entradas y salidas a 3,3 V | — | La placa tiene regulador: va al pin 4 (5 V) de la Raspberry. Los pines TX/RX son de 3,3 V, igual que la Raspberry |
+| Alimentación | Módulo: 2,7 a 3,6 V. Entradas y salidas a 3,3 V | — | La placa tiene regulador (3,3 a 5 V): va al **pin 17 (3,3 V)** de la Raspberry. El pin 4 no se puede usar: la ficha de la pantalla tapa los pines 2, 4 y 6. Los pines TX/RX son de 3,3 V, igual que la Raspberry |
 
 ¿Por qué GPS + GLONASS a 5 Hz y no GPS solo a 10 Hz?
 - Más satélites: se pierde menos la señal entre árboles o tribunas.
