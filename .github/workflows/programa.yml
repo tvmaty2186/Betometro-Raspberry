@@ -1,0 +1,70 @@
+name: Programa para Raspberry Pi OS
+
+# Compila Betómetro para Raspberry Pi OS Lite 64 bits (Debian trixie) y lo prueba antes de
+# entregarlo. Sale un .zip con el instalador: se copia a la Raspberry y se corre
+# «sudo bash instalar.sh». Tarda unos minutos (no arma un sistema entero como imagen.yml).
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+    paths:
+      - 'app/**'
+      - 'recursos/**'
+      - 'voz/**'
+      - 'raspios/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/programa.yml'
+
+concurrency:
+  group: programa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  programa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Caché (voz y compilación)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/betometro-voz
+            .ccache
+          key: programa-${{ github.run_id }}
+          restore-keys: programa-
+
+      - name: Voz (Piper)
+        run: |
+          pip install --break-system-packages piper-tts
+          python3 voz/grabar.py salida-pi/voz
+
+      - name: Simulador de ARM (la Raspberry es arm64)
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Compilar (Debian trixie arm64, como Raspberry Pi OS)
+        run: docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie bash /src/raspios/compilar.sh
+
+      - name: Probar en un sistema limpio
+        run: docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie bash /src/raspios/probar.sh
+
+      - name: Armar el paquete
+        run: |
+          V=$(grep -oP 'project\(betometro VERSION \K[0-9.]+' CMakeLists.txt)
+          echo "V=$V" >> "$GITHUB_ENV"
+          sudo chown -R "$USER" salida-pi .ccache
+          P=salida-pi/betometro-pi-$V
+          mkdir -p "$P"
+          tar -C salida-pi/raiz -czf "$P/betometro.tar.gz" usr
+          cp raspios/instalar.sh raspios/paquetes.txt raspios/betometro.service "$P/"
+          echo "$V ($(git rev-parse --short HEAD))" > "$P/version.txt"
+          ls -la "$P"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betometro-pi-${{ env.V }}
+          path: salida-pi/betometro-pi-${{ env.V }}
+          retention-days: 30

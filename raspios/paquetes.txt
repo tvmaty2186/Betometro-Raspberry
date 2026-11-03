@@ -1,0 +1,20 @@
+# Lo que Betómetro necesita en Raspberry Pi OS Lite (Debian 13 «trixie», 64 bits).
+# Lo usan instalar.sh (en la Raspberry) y probar.sh (en GitHub, para comprobarlo antes).
+# Qt: pantalla directa (eglfs), QML, SVG y sonido
+qt6-qpa-plugins
+qml6-module-qtquick
+qml6-module-qtquick-window
+qml6-module-qtqml-workerscript
+libqt6svg6
+qt6-svg-plugins
+libqt6multimedia6
+# Placa de video (Mesa: EGL y GLES con el driver vc4)
+libegl1
+libgles2
+libgbm1
+libgl1-mesa-dri
+# Cámara y micrófono (betometro-camara usa GStreamer) y aplay para escuchar el micrófono
+gstreamer1.0-plugins-base
+gstreamer1.0-plugins-good
+gstreamer1.0-alsa
+alsa-utils

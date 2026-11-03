@@ -2,3 +2,6 @@ build/
 sistema/cache/
 sistema/voz-grabada/
 sistema/salida/
+build-pi/
+salida-pi/
+.ccache/
