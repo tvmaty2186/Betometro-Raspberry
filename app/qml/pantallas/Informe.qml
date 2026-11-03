@@ -185,10 +185,13 @@ Item {
 
     // Todas las vueltas
     Tarjeta {
+        z: raiz.menuAbierto ? 20 : 0   // con el menú abierto, la tarjeta queda arriba de la capa que lo cierra
         oscura: true
         x: cajaVel.x; y: raiz.h ? 362 : 900
         width: cajaVel.width; height: raiz.h ? 338 : 360
         Sub { x: 22; y: 16; text: "Todas las vueltas"; tam: 12 }
+        // Con el menú abierto, tocar en otra parte de la tarjeta lo cierra
+        MouseArea { anchors.fill: parent; z: 9; visible: raiz.menuAbierto; onClicked: { raiz.menuAbierto = false; raiz.confirmarRest = false; } }
         // Menú ⋮ (app 2.4.1): restablecer la carrera original y compartir
         Item {
             id: mas3
@@ -197,6 +200,32 @@ Item {
             Rectangle { anchors.fill: parent; radius: 18; color: raiz.menuAbierto ? Qt.rgba(1, 1, 1, 0.12) : "transparent" }
             Text { anchors.centerIn: parent; text: "⋮"; color: Tema.tinta; font { pixelSize: 26; weight: Font.Black } }
             MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: { raiz.menuAbierto = !raiz.menuAbierto; raiz.confirmarRest = false; } }
+        }
+        Rectangle {
+            visible: raiz.menuAbierto
+            z: 10
+            anchors { right: mas3.right; top: mas3.bottom; topMargin: 4 }
+            width: 330; height: colMenu.height + 12; radius: 12
+            color: "#22262b"; border { width: 1; color: Qt.rgba(1, 1, 1, 0.18) }
+            Column {
+                id: colMenu; x: 6; y: 6; width: parent.width - 12
+                Rectangle {
+                    width: parent.width; height: 52; radius: 8
+                    readonly property bool puede: !!raiz.c.modificada
+                    color: raiz.confirmarRest ? Tema.alerta : (mr.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
+                    opacity: puede ? 1 : 0.35
+                    Text { x: 12; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 24; elide: Text.ElideRight
+                           text: raiz.confirmarRest ? "¿Seguro? Se pierden los cambios" : "↺ Restablecer la carrera original"
+                           color: raiz.confirmarRest ? "#fff" : Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
+                    MouseArea { id: mr; anchors.fill: parent; enabled: parent.puede; onClicked: raiz.restablecer() }
+                }
+                Rectangle {
+                    width: parent.width; height: 52; radius: 8
+                    color: mc.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                    Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "⤴ Compartir informe"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
+                    MouseArea { id: mc; anchors.fill: parent; onClicked: { raiz.menuAbierto = false; Navegacion.ir("compartir", { id: raiz.id_ }); } }
+                }
+            }
         }
         // «Unir V5 con V6»: barra amarilla, aparece al mantener apretada una vuelta 3 s
         BotonAmarillo {
@@ -277,32 +306,6 @@ Item {
     }
     // Menú ⋮ abierto: tocar afuera lo cierra
     MouseArea { anchors.fill: parent; visible: raiz.menuAbierto; onClicked: { raiz.menuAbierto = false; raiz.confirmarRest = false; } }
-    Rectangle {
-        visible: raiz.menuAbierto
-        readonly property point p: mas3.mapToItem(raiz, mas3.width, mas3.height)
-        x: p.x - width; y: p.y + 4
-        width: 330; height: colMenu.height + 12; radius: 12
-        color: "#22262b"; border { width: 1; color: Qt.rgba(1, 1, 1, 0.18) }
-        Column {
-            id: colMenu; x: 6; y: 6; width: parent.width - 12
-            Rectangle {
-                width: parent.width; height: 52; radius: 8
-                readonly property bool puede: !!raiz.c.modificada
-                color: raiz.confirmarRest ? Tema.alerta : (mr.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
-                opacity: puede ? 1 : 0.35
-                Text { x: 12; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 24; elide: Text.ElideRight
-                       text: raiz.confirmarRest ? "¿Seguro? Se pierden los cambios" : "↺ Restablecer la carrera original"
-                       color: raiz.confirmarRest ? "#fff" : Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
-                MouseArea { id: mr; anchors.fill: parent; enabled: parent.puede; onClicked: raiz.restablecer() }
-            }
-            Rectangle {
-                width: parent.width; height: 52; radius: 8
-                color: mc.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
-                Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "⤴ Compartir informe"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
-                MouseArea { id: mc; anchors.fill: parent; onClicked: { raiz.menuAbierto = false; Navegacion.ir("compartir", { id: raiz.id_ }); } }
-            }
-        }
-    }
     Component.onCompleted: {   // solo para capturas
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
