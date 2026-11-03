@@ -23,9 +23,12 @@ Item {
                     Rectangle { width: 14; height: 14; radius: 7; anchors.verticalCenter: parent.verticalCenter
                                 color: Wifi.conectada ? Tema.bien : (Wifi.conectando ? Tema.acento : Tema.alerta) }
                     Text { color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 }
-                           text: Wifi.conectando ? "Conectando…" : Wifi.conectada ? "Conectado a «" + Wifi.conectada + "»" : "Sin conexión" }
+                           text: Wifi.conectando ? "Conectando…" : Wifi.propia ? "Wifi propia «" + Wifi.nombrePropia + "»"
+                                 : Wifi.conectada ? "Conectado a «" + Wifi.conectada + "»" : "Sin conexión" }
                 }
-                Fila { altoMinimo: 58; etiqueta: "Señal"; colorEtiqueta: Tema.tintaSuave
+                Fila { visible: Wifi.propia; altoMinimo: 58; etiqueta: "Conectá el celu a «" + Wifi.nombrePropia + "», clave"; colorEtiqueta: Tema.tintaSuave
+                    Text { text: Wifi.clavePropia; color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 24 } } }
+                Fila { visible: !Wifi.propia; altoMinimo: 58; etiqueta: "Señal"; colorEtiqueta: Tema.tintaSuave
                     Row { spacing: 12
                         Senal { nivel: Wifi.senal; anchors.verticalCenter: parent.verticalCenter }
                         Text { text: ["Sin señal", "Débil", "Regular", "Buena", "Excelente"][Wifi.senal]; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } } }

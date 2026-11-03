@@ -130,16 +130,25 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
+    auto ponerPropia = [&] { wifi.ponerPropia(datos.cfg(QStringLiteral("wifiPropia")).toBool() || !datos.cfg(QStringLiteral("wifiPropia")).isValid(),
+                                              datos.cfg(QStringLiteral("numeroAuto")).toString()); };
+    ponerPropia();
+    QObject::connect(&datos, &Datos::cfgChanged, &wifi, ponerPropia);
     // Pulsador por cable (GPIO17, pin 11 a GND pin 9), con la pull-up interna. Solo en la Raspberry.
     PulsadorGpio* pulsador = qEnvironmentVariableIsSet("BETO_RASPBERRY") ? new PulsadorGpio(17, &app) : nullptr;
     if (pulsador && !pulsador->activo()) qWarning("Pulsador: %s", qPrintable(pulsador->error()));
     // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
     Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
     servidor.ponerReportes(&reportes);
-    QObject::connect(&crono, &Crono::enCursoChanged, &servidor, [&] {
-        servidor.prender(!crono.enCurso());     // apagado en carrera
-        reportes.ponerOcupado(crono.enCurso());  // y los reportes no se mandan en carrera
-    });
+    // Prendido si la opción «Mostrar informes en la red» está prendida y no hay carrera
+    auto prenderServidor = [&] {
+        const QVariant v = datos.cfg(QStringLiteral("informesRed"));
+        servidor.prender(!crono.enCurso() && (!v.isValid() || v.isNull() || v.toBool()));
+        reportes.ponerOcupado(crono.enCurso());  // los reportes no se mandan en carrera
+    };
+    prenderServidor();
+    QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);
+    QObject::connect(&datos, &Datos::cfgChanged, &servidor, prenderServidor);
     Sistema sistema;
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());

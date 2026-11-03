@@ -20,6 +20,10 @@ class Wifi : public QObject {
     Q_PROPERTY(bool horaInternet READ horaInternet NOTIFY cambio)
     Q_PROPERTY(QString direccion READ direccion NOTIFY cambio)        // para el celular: la IP (Android no entiende «.local»)
     Q_PROPERTY(QString error READ error NOTIFY cambio)
+    // Wifi propia: si no hay ninguna red guardada cerca, la Raspberry arma la suya («Betometro-101»)
+    Q_PROPERTY(bool propia READ propia NOTIFY cambio)
+    Q_PROPERTY(QString nombrePropia READ nombrePropia NOTIFY cambio)
+    Q_PROPERTY(QString clavePropia READ clavePropia CONSTANT)
 
 public:
     explicit Wifi(QObject* padre = nullptr);
@@ -29,7 +33,11 @@ public:
     bool buscando() const { return buscando_; }
     QVariantList cerca() const;
     QVariantList guardadas() const;
-    bool horaInternet() const { return !conectada_.isEmpty(); }
+    bool horaInternet() const { return !conectada_.isEmpty() && !propia_; }
+    bool propia() const { return propia_; }
+    QString nombrePropia() const { return QStringLiteral("Betometro-") + numero_; }
+    QString clavePropia() const { return QStringLiteral("betometro"); }
+    void ponerPropia(bool permitida, const QString& numeroAuto);   // desde Ajustes → Conectividad
     QString direccion() const;
     QString error() const { return error_; }
 
@@ -49,6 +57,8 @@ private:
     struct Red { QString nombre; int senal; bool clave; };
     void nmcli(const QStringList& args, std::function<void(int, const QString&, const QString&)> listo);
     void refrescar();             // red conectada, señal y redes guardadas
+    void revisarPropia();         // ¿hay que armar la wifi propia?
+    void apagarPropia();
 
     bool real_ = false;
     QList<Red> redes_;            // las que se ven
@@ -57,5 +67,8 @@ private:
     QString conectada_, error_;
     int senalConectada_ = 0;
     bool conectando_ = false, buscando_ = false;
+    bool propia_ = false, propiaPermitida_ = true;
+    QString numero_ = QStringLiteral("101");
+    qint64 sinRedDesde_ = 0;      // ms desde que no hay red (para esperar antes de armar la propia)
     QTimer cada_;
 };

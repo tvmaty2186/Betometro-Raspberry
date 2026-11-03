@@ -2,6 +2,7 @@
 
 #include <QHostAddress>
 #include <QNetworkInterface>
+#include <QDateTime>
 #include <QProcess>
 
 #include <algorithm>
@@ -20,6 +21,7 @@ Wifi::Wifi(QObject* padre) : QObject(padre), real_(qEnvironmentVariableIsSet("BE
         return;
     }
     connect(&cada_, &QTimer::timeout, this, &Wifi::refrescar);
+    connect(&cada_, &QTimer::timeout, this, &Wifi::revisarPropia);
     cada_.start(10000);
     refrescar();
     QTimer::singleShot(3000, this, &Wifi::buscar);
@@ -50,7 +52,43 @@ void Wifi::nmcli(const QStringList& args, std::function<void(int, const QString&
     p->start(QStringLiteral("nmcli"), args);
 }
 
+namespace { const QString kConPropia = QStringLiteral("betometro-propia"); }
+
+void Wifi::ponerPropia(bool permitida, const QString& numeroAuto) {
+    const QString n = numeroAuto.trimmed().isEmpty() ? QStringLiteral("101") : numeroAuto.trimmed();
+    if (n != numero_) { numero_ = n; emit cambio(); }
+    propiaPermitida_ = permitida;
+    if (!permitida && propia_) apagarPropia();
+}
+
+void Wifi::apagarPropia() {
+    if (!real_) { propia_ = false; emit cambio(); return; }
+    nmcli({"connection", "down", kConPropia}, [this](int, const QString&, const QString&) { propia_ = false; sinRedDesde_ = 0; refrescar(); emit cambio(); });
+}
+
+// Si en 90 s no hay ninguna red guardada (casa, celular), se arma la wifi propia para entrar desde el
+// celular a los informes. Se apaga sola al tocar «Buscar redes» o al apagar la opción.
+void Wifi::revisarPropia() {
+    if (!real_ || propia_ || conectando_) return;
+    const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
+    if (!conectada_.isEmpty()) { sinRedDesde_ = 0; return; }
+    if (sinRedDesde_ == 0) { sinRedDesde_ = ahora; return; }
+    if (!propiaPermitida_ || ahora - sinRedDesde_ < 90000) return;
+    for (const auto& r : redes_) if (guardadas_.contains(r.nombre)) return;   // hay una guardada cerca: se conecta sola
+    nmcli({"dev", "wifi", "hotspot", "ifname", "wlan0", "con-name", kConPropia, "ssid", nombrePropia(), "password", clavePropia()},
+          [this](int codigo, const QString&, const QString& err) {
+              if (codigo != 0) { qWarning("Wifi propia: no se pudo armar (%s)", qPrintable(err)); sinRedDesde_ = 0; return; }
+              propia_ = true;
+              emit cambio();
+          });
+}
+
 void Wifi::refrescar() {
+    // ¿Está armada la wifi propia?
+    nmcli({"-t", "-f", "NAME", "connection", "show", "--active"}, [this](int, const QString& out, const QString&) {
+        const bool p = out.split('\n').contains(kConPropia);
+        if (p != propia_) { propia_ = p; emit cambio(); }
+    });
     // Red conectada y su señal
     nmcli({"-t", "-f", "ACTIVE,SIGNAL,SSID", "dev", "wifi", "list", "--rescan", "no"}, [this](int, const QString& out, const QString&) {
         QString red;
@@ -73,7 +111,7 @@ void Wifi::refrescar() {
         QStringList nombres;
         for (const auto& l : out.split('\n', Qt::SkipEmptyParts)) {
             const QStringList c = campos(l);
-            if (c.size() >= 2 && c[1] == QLatin1String("802-11-wireless")) nombres << c[0];
+            if (c.size() >= 2 && c[1] == QLatin1String("802-11-wireless") && c[0] != kConPropia) nombres << c[0];
         }
         auto pendientes = std::make_shared<int>(static_cast<int>(nombres.size()));
         auto nuevo = std::make_shared<QHash<QString, QString>>();
@@ -134,6 +172,7 @@ bool Wifi::tieneClave(const QString& red) const {
 
 void Wifi::buscar() {
     if (buscando_) return;
+    if (propia_) { apagarPropia(); QTimer::singleShot(3000, this, &Wifi::buscar); return; }
     buscando_ = true;
     emit cambio();
     if (!real_) {
