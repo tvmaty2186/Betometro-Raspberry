@@ -67,7 +67,7 @@ Item {
     }
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
-        y: 10; spacing: 10; z: 5
+        y: 6; spacing: 10; z: 5
         // Cámara: punto rojo «REC» mientras graba; gris con «Cámara» si falló. En «a mano» se toca para grabar.
         Rectangle {
             visible: !!Datos.ajustes.camara && (Camara.grabando || !!Camara.falla || Datos.ajustes.camaraInicio === "mano")
@@ -87,15 +87,15 @@ Item {
         Rectangle {
             id: terminar
             property bool armado: false
-            height: 32; radius: 16
-            width: tt.implicitWidth + 28
+            height: 42; radius: 21   // un poco más grande que los chips: cuesta tocarlo en movimiento (Matías, 03/11)
+            width: tt.implicitWidth + 40
             color: armado ? Tema.acento : Qt.rgba(0, 0, 0, 0.55)
             border { width: 1.5; color: "#c9ced3" }
             Text { id: tt; anchors.centerIn: parent; color: terminar.armado ? Tema.acentoTinta : Tema.tinta
                    text: Crono.enCurso ? (terminar.armado ? "Tocá otra vez" : "Terminar") : "Salir"
-                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 13 } }
+                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 16 } }
             MouseArea {
-                anchors.fill: parent; anchors.margins: -10
+                anchors.fill: parent; anchors.margins: -14
                 onClicked: {
                     if (!Crono.enCurso) { raiz.volver(); return; }
                     if (terminar.armado) { terminar.armado = false; Crono.terminar(); }
