@@ -1,5 +1,6 @@
 // Reproductor de la voz y los sonidos. Todos los archivos se cargan en memoria al arrancar,
-// así suenan sin demora. En la Raspberry salen por los auriculares (3,5 mm).
+// así suenan sin demora. Los sonidos (pitidos, clic) están en la carpeta de la voz y las frases
+// en una subcarpeta por voz (elena, tomas); si no hay subcarpeta, se usan las de la carpeta. En la Raspberry salen por los auriculares (3,5 mm).
 #pragma once
 
 #include <QHash>
@@ -17,6 +18,7 @@ public:
 
     Q_INVOKABLE void reproducir(const QString& nombre);     // «n05», «clic», «vuelta_03_m»…
     Q_INVOKABLE void ponerVolumen(double porcentaje);       // 0 a 100
+    Q_INVOKABLE void ponerVoz(const QString& voz);          // elena, tomas
     Q_INVOKABLE void probar() { reproducir(QStringLiteral("prueba")); }
     // «Vuelta 3, medida» → el archivo que corresponde
     static QString archivoDeFrase(const QString& frase);
@@ -26,6 +28,8 @@ signals:
 
 private:
     QString carpeta() const;
+    void cargar(const QString& dir);
+    QString voz_;
     QHash<QString, QSoundEffect*> efectos_;
     double volumen_ = 1;
 };

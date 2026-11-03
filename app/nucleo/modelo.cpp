@@ -227,6 +227,7 @@ Json configFabrica() {
     c["patron"] = "alt1";
     c["cuentaN"] = 20;
     c["modoCuenta"] = "voz";
+    c["voz"] = "elena";               // Raspberry: voz grabada (elena, tomas)
     c["pitidoCero"] = false;
     c["clicMarca"] = true;
     c["anticipoMs"] = 40;             // como la app nativa, hasta medirlo en E4
@@ -291,6 +292,7 @@ Json armarConfig(const Json& guardado) {
     opcionEn(c, def, "patron", {"todas", "alt1", "alt2"});
     numeroEn(c, def, "cuentaN", 0, 60);
     opcionEn(c, def, "modoCuenta", {"voz", "pitidos"});
+    opcionEn(c, def, "voz", {"elena", "tomas"});
     boolEn(c, def, "pitidoCero");
     boolEn(c, def, "clicMarca");
     numeroEn(c, def, "anticipoMs", 0, 1500);

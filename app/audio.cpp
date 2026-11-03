@@ -9,7 +9,7 @@ QString Audio::carpeta() const {
     const QStringList opciones = {qEnvironmentVariable("BETO_VOZ"), QCoreApplication::applicationDirPath() + "/voz",
                                   QStringLiteral("/usr/share/betometro/voz")};
     for (const auto& c : opciones)
-        if (!c.isEmpty() && QDir(c).exists("n05.wav")) return c;
+        if (!c.isEmpty() && (QDir(c).exists("n05.wav") || QDir(c).exists("elena/n05.wav"))) return c;
     return {};
 }
 
@@ -19,11 +19,25 @@ Audio::Audio(QObject* padre) : QObject(padre) {
         qWarning("No encontré los audios de la voz (se arman con voz/grabar.py)");
         return;
     }
+    cargar(dir);   // sonidos y, si las hay, frases sueltas
+    emit cambio();
+}
+
+void Audio::cargar(const QString& dir) {
     for (const auto& f : QDir(dir).entryInfoList({QStringLiteral("*.wav")}, QDir::Files)) {
-        auto* e = new QSoundEffect(this);
+        auto* e = efectos_.value(f.baseName());
+        if (!e) { e = new QSoundEffect(this); efectos_.insert(f.baseName(), e); }
         e->setSource(QUrl::fromLocalFile(f.absoluteFilePath()));
-        efectos_.insert(f.baseName(), e);
+        e->setVolume(static_cast<float>(volumen_));
     }
+}
+
+void Audio::ponerVoz(const QString& voz) {
+    if (voz == voz_) return;
+    const QString dir = carpeta();
+    if (dir.isEmpty() || !QDir(dir).exists(voz)) return;   // en la PC con la voz vieja: queda la de la carpeta
+    voz_ = voz;
+    cargar(dir + '/' + voz);
     emit cambio();
 }
 

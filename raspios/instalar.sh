@@ -23,6 +23,7 @@ if [ -x /usr/bin/betometro ]; then
   printf '#!/bin/bash\nsystemctl stop betometro; tar -C / -xzf /var/lib/betometro-anterior/betometro.tar.gz && systemctl start betometro\n' > /var/lib/betometro-anterior/volver.sh
   chmod +x /var/lib/betometro-anterior/volver.sh
 fi
+rm -rf /usr/share/betometro/voz   # la voz vieja no queda mezclada con la nueva
 tar -C / --no-same-owner -xzf betometro.tar.gz
 install -m 0644 betometro.service pulseaudio-sistema.service despertar-touch.service /etc/systemd/system/
 # Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)

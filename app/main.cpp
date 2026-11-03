@@ -99,7 +99,11 @@ int main(int argc, char* argv[]) {
 
     Audio audio;
     audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());
-    QObject::connect(&datos, &Datos::cfgChanged, &audio, [&] { audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble()); });
+    audio.ponerVoz(datos.cfg(QStringLiteral("voz")).toString());
+    QObject::connect(&datos, &Datos::cfgChanged, &audio, [&] {
+        audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());
+        audio.ponerVoz(datos.cfg(QStringLiteral("voz")).toString());
+    });
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;

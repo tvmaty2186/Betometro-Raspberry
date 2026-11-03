@@ -18,8 +18,8 @@ rm -rf salida-pi/raiz
 DESTDIR="$PWD/salida-pi/raiz" cmake --install build-pi --prefix /usr
 test -x salida-pi/raiz/usr/bin/betometro
 mkdir -p salida-pi/raiz/usr/share/betometro/voz
-if ls salida-pi/voz/*.wav >/dev/null 2>&1; then
-  cp salida-pi/voz/*.wav salida-pi/raiz/usr/share/betometro/voz/
+if ls salida-pi/voz/elena/*.wav >/dev/null 2>&1; then
+  cp -r salida-pi/voz/. salida-pi/raiz/usr/share/betometro/voz/
 else
   echo "OJO: no hay voz grabada (salida-pi/voz): el programa queda sin voz"
 fi

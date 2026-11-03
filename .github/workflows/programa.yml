@@ -38,9 +38,9 @@ jobs:
           key: programa-${{ github.run_id }}
           restore-keys: programa-
 
-      - name: Voz (Piper)
+      - name: Voz (Elena y Tomás)
         run: |
-          pip install --break-system-packages piper-tts
+          pip install --break-system-packages edge-tts
           python3 voz/grabar.py salida-pi/voz
 
       - name: Simulador de ARM (la Raspberry es arm64)

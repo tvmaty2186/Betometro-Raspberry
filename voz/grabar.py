@@ -1,36 +1,56 @@
 #!/usr/bin/env python3
-"""Graba con Piper todas las frases de Betómetro y arma los sonidos (pitidos y clic).
+"""Graba todas las frases de Betómetro con dos voces y arma los sonidos (pitidos y clic).
 
 Uso: python3 voz/grabar.py <carpeta de salida>
+     → <salida>/elena/*.wav, <salida>/tomas/*.wav (frases) y <salida>/*.wav (sonidos)
 
-- Voz: «Daniela», español de Argentina (rhasspy/piper-voices, licencia CC BY-SA 4.0).
-  Se baja una sola vez a ~/.cache/betometro-voz.
-- Se recorta el silencio del principio y del final: así la voz sale enseguida (importa para el anticipo).
-- En la Raspberry esto se hace al armar la imagen (E3); el programa solo reproduce los archivos.
+- Voces: Elena y Tomás, español de Argentina (voces neuronales de Microsoft, con edge-tts).
+  Elegidas por Matías el 03/11/2026 (la de Piper sonaba peor y cortada). Se eligen en Ajustes.
+- Velocidad 1,15, como la voz pregrabada de la app nativa.
+- Cada frase se baja una sola vez y queda en ~/.cache/betometro-voz (no se vuelve a pedir).
+- Se recorta el silencio del principio (la voz sale enseguida, importa para el anticipo) y
+  del final, pero con margen: un recorte fuerte se comía la última sílaba («medida» → «media»).
+- Se hace al compilar (GitHub); la Raspberry solo reproduce los archivos, sin internet.
 """
 import array
-import io
+import asyncio
 import math
 import os
 import random
+import subprocess
 import sys
-import urllib.request
 import wave
 
-VOZ = "es_AR-daniela-high"
-URL = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_AR/daniela/high/"
+VOCES = {"elena": "es-AR-ElenaNeural", "tomas": "es-AR-TomasNeural"}
+VELOCIDAD = "+15%"
 TASA = 22050
+CACHE = os.path.expanduser("~/.cache/betometro-voz/edge")
 
 
-def modelo():
-    cache = os.path.expanduser("~/.cache/betometro-voz")
-    os.makedirs(cache, exist_ok=True)
-    for ext in (".onnx", ".onnx.json"):
-        ruta = os.path.join(cache, VOZ + ext)
-        if not os.path.exists(ruta):
-            print("Bajando", VOZ + ext)
-            urllib.request.urlretrieve(URL + VOZ + ext, ruta)
-    return os.path.join(cache, VOZ + ".onnx")
+async def bajar(voz, nombre, texto):
+    """mp3 de la frase (de la caché si ya se bajó)."""
+    import edge_tts
+    carpeta = os.path.join(CACHE, voz)
+    os.makedirs(carpeta, exist_ok=True)
+    ruta = os.path.join(carpeta, "%s-%s.mp3" % (nombre, VELOCIDAD.replace("%", "")))
+    if not os.path.exists(ruta) or os.path.getsize(ruta) == 0:
+        for intento in range(4):
+            try:
+                await edge_tts.Communicate(texto, VOCES[voz], rate=VELOCIDAD).save(ruta + ".parte")
+                os.replace(ruta + ".parte", ruta)
+                break
+            except Exception as e:
+                print("Reintento", voz, nombre, e)
+                await asyncio.sleep(2 * (intento + 1))
+        else:
+            raise SystemExit("No se pudo grabar «%s» con %s" % (texto, voz))
+    return ruta
+
+
+def muestras_de(mp3):
+    crudo = subprocess.run(["ffmpeg", "-v", "error", "-i", mp3, "-ac", "1", "-ar", str(TASA), "-f", "s16le", "-"],
+                           check=True, capture_output=True).stdout
+    return array.array("h", crudo)
 
 
 def frases():
@@ -50,14 +70,19 @@ def frases():
     return f
 
 
-def recortar(muestras, umbral=500, margen=int(TASA * 0.01)):
+def recortar(muestras, umbral=300, margen=int(TASA * 0.01), umbral_fin=60, margen_fin=int(TASA * 0.08)):
+    """Saca el silencio: al principio casi todo; al final con margen (las sílabas finales son suaves)."""
     a = 0
     while a < len(muestras) and abs(muestras[a]) < umbral:
         a += 1
     b = len(muestras)
-    while b > a and abs(muestras[b - 1]) < umbral:
+    while b > a and abs(muestras[b - 1]) < umbral_fin:
         b -= 1
-    return muestras[max(0, a - margen):min(len(muestras), b + margen)]
+    m = array.array("h", muestras[max(0, a - margen):min(len(muestras), b + margen_fin)])
+    n = min(len(m), int(TASA * 0.01))   # 10 ms de bajada al final: sin chasquido
+    for i in range(n):
+        m[len(m) - n + i] = int(m[len(m) - n + i] * (n - i) / n)
+    return m
 
 
 def guardar(ruta, muestras):
@@ -94,21 +119,22 @@ def clic():
 def main():
     salida = sys.argv[1] if len(sys.argv) > 1 else "voz-grabada"
     os.makedirs(salida, exist_ok=True)
-    from piper import PiperVoice
-    voz = PiperVoice.load(modelo())
-    for nombre, texto in frases().items():
-        buf = io.BytesIO()
-        with wave.open(buf, "wb") as w:
-            voz.synthesize_wav(texto, w)
-        buf.seek(0)
-        with wave.open(buf, "rb") as r:
-            datos = array.array("h", r.readframes(r.getnframes()))
-        guardar(os.path.join(salida, nombre + ".wav"), recortar(datos))
+
+    async def todas():
+        for voz in VOCES:
+            carpeta = os.path.join(salida, voz)
+            os.makedirs(carpeta, exist_ok=True)
+            for nombre, texto in frases().items():
+                mp3 = await bajar(voz, nombre, texto)
+                guardar(os.path.join(carpeta, nombre + ".wav"), recortar(muestras_de(mp3)))
+            print(voz, ":", len(os.listdir(carpeta)), "frases")
+
+    asyncio.run(todas())
     guardar(os.path.join(salida, "corto.wav"), tono(880, 90))
     guardar(os.path.join(salida, "largo.wav"), tono(1320, 450))
     guardar(os.path.join(salida, "tic.wav"), tono(1000, 70))
     guardar(os.path.join(salida, "clic.wav"), clic())
-    print("Listo:", len(os.listdir(salida)), "archivos en", salida)
+    print("Listo en", salida)
 
 
 if __name__ == "__main__":

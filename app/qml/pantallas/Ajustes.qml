@@ -77,6 +77,9 @@ Item {
                             property QtObject vol: QtObject { property real v: raiz.a.volumen }
                             onMovido: x => { vol.v = x; Audio.ponerVolumen(x); }; onSoltado: x => { raiz.poner("volumen", x); Audio.probar(); } }
                         BotonCromo { width: 100; height: 42; texto: "▶ Probar"; tamTexto: 15; onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") } } }
+                Fila { etiqueta: "Voz"
+                    Segmentado { opciones: [{ texto: "Elena", valor: "elena" }, { texto: "Tomás", valor: "tomas" }]
+                        valor: raiz.a.voz || "elena"; onElegido: v => { raiz.poner("voz", v); Qt.callLater(Audio.probar); } } }
                 Fila { etiqueta: "Segundos que cuenta en voz"
                     Campo { texto: raiz.a.cuentaN; onTocado: raiz.editar("cuentaN", "numero", "Segundos que cuenta en voz (0 a 60, 0 = sin cuenta)", raiz.a.cuentaN, 2) } }
                 Fila { etiqueta: "Cómo contar"
