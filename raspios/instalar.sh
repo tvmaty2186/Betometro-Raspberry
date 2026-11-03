@@ -48,6 +48,17 @@ systemctl disable --now serial-getty@ttyAMA0 2>/dev/null || true
 mkdir -p /etc/systemd/system.conf.d
 printf '[Manager]\nRuntimeWatchdogSec=15\nRebootWatchdogSec=30\n' > /etc/systemd/system.conf.d/betometro-vigilante.conf
 
+echo "== 3c Para que cortar el contacto no rompa nada: casi nada se escribe en la tarjeta"
+# - Los registros del sistema van a la memoria (no a la tarjeta)
+mkdir -p /etc/systemd/journald.conf.d
+printf '[Journal]\nStorage=volatile\nRuntimeMaxUse=20M\n' > /etc/systemd/journald.conf.d/betometro.conf
+# - Sin tareas de fondo que escriben (actualizar la lista de programas, manuales)
+systemctl disable --now apt-daily.timer apt-daily-upgrade.timer man-db.timer 2>/dev/null || true
+# - Si la tarjeta quedó a medio escribir, se repara sola al prender
+grep -qw "fsck.repair=yes" /boot/firmware/cmdline.txt || sed -i '1 s/$/ fsck.repair=yes/' /boot/firmware/cmdline.txt
+# - Las carreras se guardan siempre en un archivo nuevo, forzado a disco, y recién ahí reemplaza al anterior
+#   (si se corta a la mitad, queda la versión de antes: almacen.cpp)
+
 echo "== 3b Pantalla de arranque: foto de los pilotos con barra de carga, sin letras"
 if command -v plymouth-set-default-theme >/dev/null; then
   install -d /usr/share/plymouth/themes/betometro
