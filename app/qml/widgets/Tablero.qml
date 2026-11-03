@@ -3,7 +3,9 @@ import Betometro
 
 // El tablero de widgets de la pantalla de carrera. Lo usan la carrera y el editor.
 // En el editor (`editando`): tocar elige, mantener apretado 350 ms y arrastrar mueve (con imán a 8 px
-// y líneas guía fucsia), el asa de abajo a la derecha cambia el tamaño. Como el editor de la app (6.8).
+// y líneas guía fucsia), las asas cambian el tamaño (4 en los cuadrados, 1 en los redondos). Como el
+// editor de la app (6.8 y 2.4.1): el elegido NO sube de capa (los chicos siguen adelante y se pueden
+// tocar); solo sube el que se está moviendo. El borde punteado y las asas van en una capa arriba de todo.
 Item {
     id: raiz
     property var armado: []          // en fracciones
@@ -14,6 +16,7 @@ Item {
     signal cambio(var armado)        // el editor guarda la lista nueva
     signal marcar()
     property var guias: []           // líneas del imán: [{v: true/false, p: px}]
+    property Item celdaSel: null     // la celda elegida (para dibujar borde y asas arriba de todo)
 
     function px(w) {
         const W = width, H = height, r = w.forma === "redondo";
@@ -56,8 +59,13 @@ Item {
             visible: !oculto
             x: moviendo ? mx : p.x; y: moviendo ? my : p.y
             width: moviendo ? mw : p.w; height: moviendo ? mh : p.h
-            z: raiz.elegido === i ? 10 : 0
+            z: moviendo ? 20 : 0
             opacity: moviendo && zona.arrastre ? 0.6 : 1
+            readonly property bool redondo: def.forma === "redondo"
+            readonly property bool sel: raiz.editando && raiz.elegido === i
+            onSelChanged: if (sel) raiz.celdaSel = celda; else if (raiz.celdaSel === celda) raiz.celdaSel = null
+            Component.onCompleted: if (sel) raiz.celdaSel = celda
+            Component.onDestruction: if (raiz.celdaSel === celda) raiz.celdaSel = null
 
             Loader {
                 anchors.fill: parent
@@ -81,12 +89,6 @@ Item {
             }
 
             // ---- Edición ----
-            Rectangle {   // borde punteado amarillo del elegido
-                visible: raiz.editando && raiz.elegido === celda.i
-                anchors.fill: parent; anchors.margins: -6
-                radius: celda.def.forma === "redondo" ? width / 2 : 26
-                color: "transparent"; border { width: 3; color: Tema.acento }
-            }
             MouseArea {
                 id: zona
                 enabled: raiz.editando
@@ -96,7 +98,11 @@ Item {
                 property bool arrastre: false
                 property real px0: 0
                 property real py0: 0
-                onPressed: m => { px0 = m.x; py0 = m.y; arrastre = false; }
+                onPressed: m => {
+                    // En los redondos, el toque cuenta solo dentro del círculo (golpe() de la app)
+                    if (celda.redondo && Math.hypot(m.x - width / 2, m.y - height / 2) > width / 2) { m.accepted = false; return; }
+                    px0 = m.x; py0 = m.y; arrastre = false;
+                }
                 onPressAndHold: {
                     arrastre = true;
                     celda.mx = celda.p.x; celda.my = celda.p.y; celda.mw = celda.p.w; celda.mh = celda.p.h;
@@ -118,38 +124,71 @@ Item {
                     }
                 }
             }
-            Rectangle {   // asa para cambiar el tamaño
-                visible: raiz.editando && raiz.elegido === celda.i
+        }
+    }
+    // Borde punteado y asas del elegido: arriba de todos los widgets
+    Item {
+        id: capaSel
+        z: 25
+        visible: raiz.celdaSel !== null
+        readonly property Item c: raiz.celdaSel
+        x: c ? c.x : 0; y: c ? c.y : 0; width: c ? c.width : 0; height: c ? c.height : 0
+        Canvas {   // borde punteado amarillo (#ffd23f, 3 px, a 7 px), como la app
+            id: borde
+            anchors.fill: parent; anchors.margins: -10
+            onWidthChanged: requestPaint(); onHeightChanged: requestPaint()
+            Connections { target: capaSel; function onCChanged() { borde.requestPaint(); } }
+            onPaint: {
+                const g = getContext("2d"); g.reset();
+                g.strokeStyle = "#ffd23f"; g.lineWidth = 3; g.setLineDash([4, 3]);
+                const r = capaSel.c && capaSel.c.redondo ? Math.min(width, height) / 2 - 2 : 28;
+                g.beginPath(); g.roundedRect(1.5, 1.5, width - 3, height - 3, r, r); g.stroke();
+            }
+        }
+        Repeater {
+            // Cuadrados: 4 asas (la esquina opuesta queda quieta). Redondos: 1 asa, crece desde el centro.
+            model: capaSel.c && capaSel.c.redondo ? ["re"] : ["nw", "ne", "sw", "se"]
+            Rectangle {
+                required property string modelData
+                readonly property bool der: modelData === "ne" || modelData === "se" || modelData === "re"
+                readonly property bool abajo: modelData === "sw" || modelData === "se" || modelData === "re"
                 width: 36; height: 36; radius: 18
-                x: celda.def.forma === "redondo" ? parent.width / 2 + parent.width / 2 * 0.707 - 18 : parent.width - 18
-                y: celda.def.forma === "redondo" ? parent.height / 2 + parent.height / 2 * 0.707 - 18 : parent.height - 18
+                x: modelData === "re" ? capaSel.width / 2 + capaSel.width / 2 * 0.707 - 18 : (der ? capaSel.width - 18 : -18)
+                y: modelData === "re" ? capaSel.height / 2 + capaSel.height / 2 * 0.707 - 18 : (abajo ? capaSel.height - 18 : -18)
                 color: Tema.acento; border { width: 2; color: "#000" }
-                Text { anchors.centerIn: parent; text: "⇲"; color: "#000"; font { pixelSize: 20; bold: true } }
+                Text { anchors.centerIn: parent; text: "⇲"   // apunta hacia su esquina
+                       rotation: parent.modelData === "nw" ? 180 : parent.modelData === "ne" ? -90 : parent.modelData === "sw" ? 90 : 0
+                       color: "#000"; font { pixelSize: 20; bold: true } }
                 MouseArea {
                     anchors.fill: parent; anchors.margins: -12
                     preventStealing: true
                     property real ax: 0
                     property real ay: 0
                     onPressed: m => {
+                        const c = capaSel.c; if (!c) return;
                         const g = mapToItem(raiz, m.x, m.y); ax = g.x; ay = g.y;
-                        celda.mx = celda.p.x; celda.my = celda.p.y; celda.mw = celda.p.w; celda.mh = celda.p.h;
-                        celda.moviendo = true;
+                        c.mx = c.p.x; c.my = c.p.y; c.mw = c.p.w; c.mh = c.p.h;
+                        c.moviendo = true;
                     }
                     onPositionChanged: m => {
+                        const c = capaSel.c; if (!c) return;
                         const g = mapToItem(raiz, m.x, m.y);
-                        const r = celda.def.forma === "redondo";
-                        if (r) {   // crece desde el centro
-                            const cx = celda.p.x + celda.p.w / 2, cy = celda.p.y + celda.p.h / 2;
-                            const d = Math.max(70, Math.min(Math.hypot(g.x - cx, g.y - cy) * 2 / 1.414 * 1.0, Math.min(raiz.width, raiz.height)));
-                            celda.mw = d; celda.mh = d; celda.mx = cx - d / 2; celda.my = cy - d / 2;
-                        } else {
-                            celda.mw = Math.max(60, Math.min(raiz.width - celda.p.x, celda.p.w + g.x - ax));
-                            celda.mh = Math.max(44, Math.min(raiz.height - celda.p.y, celda.p.h + g.y - ay));
+                        if (c.redondo) {   // crece desde el centro: diámetro = 2 × distancia al centro
+                            const cx = c.p.x + c.p.w / 2, cy = c.p.y + c.p.h / 2;
+                            const d = Math.max(70, Math.min(2 * Math.hypot(g.x - cx, g.y - cy), Math.min(raiz.width, raiz.height)));
+                            c.mw = d; c.mh = d; c.mx = cx - d / 2; c.my = cy - d / 2;
+                            return;
                         }
+                        const dx = g.x - ax, dy = g.y - ay;
+                        if (parent.der) c.mw = Math.max(60, Math.min(raiz.width - c.p.x, c.p.w + dx));
+                        else { const nx = Math.max(0, Math.min(c.p.x + c.p.w - 60, c.p.x + dx)); c.mw = c.p.x + c.p.w - nx; c.mx = nx; }
+                        if (parent.abajo) c.mh = Math.max(44, Math.min(raiz.height - c.p.y, c.p.h + dy));
+                        else { const ny = Math.max(0, Math.min(c.p.y + c.p.h - 44, c.p.y + dy)); c.mh = c.p.y + c.p.h - ny; c.my = ny; }
                     }
                     onReleased: {
-                        raiz.cambio(raiz.aFrac(celda.i, Math.max(0, celda.mx), Math.max(0, celda.my), celda.mw, celda.mh));
-                        celda.moviendo = false;
+                        const c = capaSel.c; if (!c) return;
+                        raiz.cambio(raiz.aFrac(c.i, Math.max(0, c.mx), Math.max(0, c.my), c.mw, c.mh));
+                        c.moviendo = false;
                     }
                 }
             }
