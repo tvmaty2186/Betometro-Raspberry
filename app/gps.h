@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QSocketNotifier>
+#include <QStringList>
 #include <QTimer>
 
 #include "neo.h"
@@ -39,6 +40,9 @@ signals:
 // Al arrancar: busca la velocidad del puerto (115200 si ya estaba configurado, 9600 de fábrica), pregunta la
 // versión del módulo, lo pasa a 115200, lo configura (GPS + GLONASS a 5 Hz, o GPS solo a 10 Hz) y lo guarda.
 // Si después no llegan NAV-PVT (un módulo que no es M8), vuelve a NMEA, que el lector también entiende.
+// Con `dispositivo` = «auto» (la Raspberry) lo busca solo: primero por USB (VK-172, VK-162, NEO-M8N por su
+// micro USB: /dev/ttyACM*, o un adaptador USB-serie: /dev/ttyUSB*) y si no, por los pines (/dev/ttyAMA0).
+// Se puede enchufar o desenchufar con el programa andando: si un puerto se calla 6 s, prueba el siguiente.
 class GpsNeo : public FuenteGps {
     Q_OBJECT
 public:
@@ -47,8 +51,13 @@ public:
                     QObject* padre = nullptr);
     ~GpsNeo() override;
     bool abierto() const { return fd_ >= 0; }
+    // Puertos donde buscar en modo «auto»: USB primero, los pines al final. Público para probarlo.
+    static QStringList candidatos(const QString& carpetaDev = QStringLiteral("/dev"));
 
 private:
+    void abrir(const QString& ruta);
+    void cerrar();
+    void vigilar();               // modo «auto»: cambia de puerto si este se calla o aparece uno USB
     void leer();
     void velocidad(int baudios);
     void escribir(const std::vector<uint8_t>& m);
@@ -61,7 +70,14 @@ private:
     beto::FamiliaNeo familia_ = beto::FamiliaNeo::M8;
     int validosAntes_ = 0;
     bool configurado_ = false;
-    QString dispositivo_;
+    QString dispositivo_;         // el pedido («auto» o una ruta)
+    QString actual_;              // el que está abierto
+    bool automatico_ = false;
+    int vuelta_ = 0;              // sube con cada puerto nuevo: los temporizadores del anterior se ignoran
+    double ultimoDato_ = 0;       // ms (ahoraMs) del último mensaje sano
+    int validosVistos_ = 0;
+    QStringList mudos_;           // puertos USB que no hablan
+    QTimer vigia_;
     int fd_ = -1;
     QSocketNotifier* aviso_ = nullptr;
     beto::DecodificadorNeo dec_;

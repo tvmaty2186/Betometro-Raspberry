@@ -71,3 +71,12 @@ Son los que más se consiguen (placas GY-GPSV3-NEO y GY-NEO6MV2). **Sirven los d
 - Notas del firmware SPG 3.01: https://content.u-blox.com/sites/default/files/GNSS-FW3.01_ReleaseNotes_(UBX-16000319)_Public.pdf
 - Módulos falsos: https://hagensieker.com/2022/08/01/beware-the-fake-gps-modules/ y https://forum.arduino.cc/t/u-blox-neo-m8n-attenzione-ai-fake/493575
 - Placas con antena cerámica y externa: https://www.rocketryforum.com/threads/issues-with-new-gps-modules.173178/
+
+## Por USB (desde la 1.0.9)
+- El programa busca el GPS solo: **primero por USB** (`/dev/ttyACM*`: VK-172, VK-162, NEO-M8N por su micro USB;
+  `/dev/ttyUSB*`: adaptador USB-serie) y si no hay, **por los pines** (`/dev/ttyAMA0`).
+- Se puede enchufar o desenchufar con el programa andando: si un puerto se calla 6 s, prueba el siguiente.
+- La configuración es la misma (reconoce M8, 7 o 6). Por USB no se cambia la velocidad del puerto (no hace falta).
+- En el Chequeo previo, «Módulo» dice «· USB» o «· pines».
+- **Ojo con la placa NEO-M8N:** en algunas el micro USB solo da corriente. Prueba: enchufarla a la PC con un cable
+  de datos; si en el Administrador de dispositivos aparece «u-blox GNSS receiver» o un puerto COM nuevo, pasa datos.

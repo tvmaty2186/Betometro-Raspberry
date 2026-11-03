@@ -17,7 +17,7 @@ Environment=XDG_RUNTIME_DIR=/run/betometro
 Environment=PULSE_SERVER=unix:/var/run/pulse/native
 Environment=BETO_RASPBERRY=1
 Environment=BETO_DATOS=/var/lib/betometro
-Environment=BETO_GPS=/dev/ttyAMA0
+Environment=BETO_GPS=auto
 Environment=BETO_VOZ=/usr/share/betometro/voz
 RuntimeDirectory=betometro
 StateDirectory=betometro

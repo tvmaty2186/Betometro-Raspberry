@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oMuestra(QStringLiteral("muestra"), QStringLiteral("Carreras de ejemplo"));
     QCommandLineOption oPrueba(QStringLiteral("prueba"), QStringLiteral("Abrir algo al empezar (capturas)"), QStringLiteral("que"));
     QCommandLineOption oSinGps(QStringLiteral("sin-gps"), QStringLiteral("Sin GPS (solo cronómetro)"));
-    QCommandLineOption oGps(QStringLiteral("gps"), QStringLiteral("Puerto del GPS (en la Raspberry /dev/ttyAMA0; con el simulador /tmp/betometro-gps)"), QStringLiteral("puerto"));
+    QCommandLineOption oGps(QStringLiteral("gps"), QStringLiteral("Puerto del GPS («auto»: USB y si no los pines; o una ruta como /dev/ttyAMA0 o /tmp/betometro-gps)"), QStringLiteral("puerto"));
     QCommandLineOption oEspera(QStringLiteral("espera"), QStringLiteral("ms antes de la captura"), QStringLiteral("ms"), QStringLiteral("1200"));
     QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
     op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps, oEspera});
