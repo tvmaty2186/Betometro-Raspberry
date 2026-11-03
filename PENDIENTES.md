@@ -12,6 +12,8 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 ## Hecho
 - E1 (motor igual a la app), E2 (programa completo, temas aprobados).
 - Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
+- 03/11 (1.0.4): el programa lee el pulsador (GPIO17, pin 11 a GND pin 9) con la pull-up interna y la hora
+  exacta del kernel; marca en la carrera y responde en el Chequeo previo. Falta probarlo con el pulsador real.
 - 03/11 noche (1.0.3): dígitos con la fórmula de la app y «Números − / +», editor con los chicos al frente
   y 4 asas, cara de instrumento con reflejo, colores de pasado/atrasado, estilos Anillo y Barra, redondo en
   más widgets, velocímetro liviano (aguja sin GPS, «máx», inicio animado), ficha para temas de letra ancha,
@@ -38,7 +40,6 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   A definir: repo (privado, por ejemplo `Betometro-reportes`, como issues) y una llave que solo pueda crear
   reportes ahí (la Raspberry la lleva adentro: que no sirva para nada más).
 - Conectar GPS (NEO-M8N) y pulsador (GPIO17, pin 11 / GND pin 9; pull-up 10 kΩ a 3,3 V); chequeo previo; medir demoras.
-- Leer el pulsador en el programa (GPIO).
 - Medir rendimiento en la Pi 3: pantalla fluida, procesador, temperatura.
 - Solo lectura (overlay de Pi OS) para que cortar el contacto no rompa nada, con las carreras en un lugar aparte.
 - Revisar letras chicas en la pantalla de 5" con el auto en movimiento.

@@ -27,6 +27,7 @@
 #include "sistema.h"
 #include "actualizador.h"
 #include "camara.h"
+#include "pulsador_gpio.h"
 #include "servidor.h"
 #include "wifi.h"
 
@@ -108,6 +109,9 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
+    // Pulsador por cable (GPIO17, pin 11 a GND pin 9), con la pull-up interna. Solo en la Raspberry.
+    PulsadorGpio* pulsador = qEnvironmentVariableIsSet("BETO_RASPBERRY") ? new PulsadorGpio(17, &app) : nullptr;
+    if (pulsador && !pulsador->activo()) qWarning("Pulsador: %s", qPrintable(pulsador->error()));
     // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
     Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, [&] { servidor.prender(!crono.enCurso()); });   // apagado en carrera
@@ -125,6 +129,7 @@ int main(int argc, char* argv[]) {
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
     motor.rootContext()->setContextProperty(QStringLiteral("Servidor"), &servidor);
+    motor.rootContext()->setContextProperty(QStringLiteral("Pulsador"), pulsador);   // null en la PC
     motor.rootContext()->setContextProperty(QStringLiteral("Audio"), &audio);
     motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);

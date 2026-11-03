@@ -21,6 +21,7 @@ Item {
         if (pulsador !== "esperando") return;
         pulsador = "funciona"; llegoPor = por;
     }
+    Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca() { raiz.recibido("el pulsador"); } }
     Keys.onPressed: e => {
         if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter || e.key === Qt.Key_Space || e.key === Qt.Key_F9) { recibido("el teclado"); e.accepted = true; }
     }

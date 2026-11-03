@@ -12,10 +12,12 @@ Item {
 
     readonly property var armado: Armado.cargar(h, Datos.ajustes)
 
-    function marcar(fuente) {
-        const r = Crono.marcar(fuente);
+    function marcar(fuente, edadMs) {
+        const r = Crono.marcar(fuente, edadMs || 0);
         if (r === "largada" || r === "marca") tablero.efectoMarcar();
     }
+    // Pulsador por cable: la marca vale cuando se apoyó el dedo (edadMs atrás)
+    Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca(edadMs) { raiz.marcar("pulsador", edadMs); } }
     function volver() {
         if (Crono.enCurso) { Navegacion.avisar("Para salir, terminá la carrera"); return; }
         const id = Crono.carreraId;
