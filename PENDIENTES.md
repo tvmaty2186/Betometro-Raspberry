@@ -1,31 +1,43 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 02/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+
+## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
+- Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
+  Motivo: cada imagen de Buildroot tardaba 2–3 h y fallaba por piezas del sistema. Ahora se compila solo el programa (~15 min con caché).
+- Se pierde: copias A/B (queda la versión anterior guardada para volver a mano) y unos segundos de arranque.
+- Buildroot (`sistema/`, `imagen.yml`) queda guardado sin usar.
+- Cómo se arma e instala: `raspios/` y `.github/workflows/programa.yml`.
 
 ## Hecho
 - E1 (motor igual a la app), E2 (programa completo, temas aprobados).
 - Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
-- Imagen 1.0.0 con actualizador (U-Boot A/B + RAUC, por pendrive o internet) y cámara/micrófono. Primer paquete `.raucb` firmado. Secreto `RAUC_CLAVE` cargado.
+- 03/11: **Betómetro anda en la Raspberry** (Pi OS Lite): arranca solo, pantalla, touch y voz por auriculares.
+  - Pantalla: es la Touch Display 2 de **5"** (720×1280), no de 7".
+  - Touch: se despierta con `despertar-touch.service` (el sistema lo busca antes de que la pantalla lo encienda).
+  - Sonido: el Qt de Debian solo sale por PulseAudio → `pulseaudio-sistema.service`.
+  - GitHub prueba cada versión en un Debian arm64 limpio antes de entregarla.
 
 ## Ahora (Matías)
-1. Grabar la tarjeta con `betometro-1.0.0.img.xz` y probar: león de arranque, Betómetro, toque en la pantalla.
-2. Guardar `betometro-1.0.0.raucb` en un pendrive (para probar la actualización).
+1. Para publicar actualizaciones: README en `Betometro-actualizaciones` (público), token con Contents: Read and write y secreto `ACTUALIZACIONES_TOKEN` en este repo.
+2. Elegir la pantalla de arranque (muestra: foto de los pilotos con la franja amarilla como barra de carga).
 
-## Después de que arranque (E3 → E4)
-- Probar la actualización por pendrive y la vuelta sola a la copia anterior.
-- Conectar GPS (NEO-M8N), pulsador y auriculares; chequeo previo; medir demoras.
+## Siguiente
+- Pantalla de arranque horizontal con barra de carga, sin letras (Plymouth).
+- Probar Ajustes → Actualizar con una versión 1.0.1 publicada.
+- Conectar GPS (NEO-M8N) y pulsador (GPIO17, pin 11 / GND pin 9; pull-up 10 kΩ a 3,3 V); chequeo previo; medir demoras.
+- Leer el pulsador en el programa (GPIO).
 - Medir rendimiento en la Pi 3: pantalla fluida, procesador, temperatura.
-- Pantalla de arranque con la foto de los pilotos: aprobada, guardada en `sistema/arranque/`; va por actualización.
+- Solo lectura (overlay de Pi OS) para que cortar el contacto no rompa nada, con las carreras en un lugar aparte.
+- Revisar letras chicas en la pantalla de 5" con el auto en movimiento.
 
-## Más adelante (por actualización, sin regrabar)
-- Repo público de actualizaciones (`Betometro-Actualizaciones`) para bajar por internet.
-- E5: wifi real, «Betómetro en la red», compartir por QR.
-- Video: informe con video (mitad y mitad), «Videos guardados», webcam común MJPEG comprimida por el chip de la Pi ([docs/video.md](docs/video.md)). Elegir la cámara.
+## Más adelante
+- E5: wifi real (hoy simulado), «Betómetro en la red», compartir por QR.
+- Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).
 - E6: prueba en pista y versión 1.0.0 definitiva.
 - App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).
 
 ## Compras
-- Fuente de 5 V 2,5 A y cable micro-USB corto y grueso.
-- Auriculares con cable (3,5 mm), cables dupont, pulsador (10 kΩ y 100 nF).
-- Para el auto: convertidor 12 → 5 V (mejor 5 A), diodo Schottky, TVS 24–27 V, 2 × 4.700 µF 35 V, fusible 3 A, fichas GX12, cable espiralado, disipadores.
+- Auriculares con cable (3,5 mm), pulsador (10 kΩ y 100 nF).
+- Para el auto: placa de borneras a tornillo para los GPIO, convertidor 12 → 5 V (3 A o más, ajustado a 5,1 V), fusible 3 A, cable de 0,75 mm², fichas GX12, cable espiralado, disipadores.
 - Webcam USB MJPEG 1080p gran angular (para el video).
