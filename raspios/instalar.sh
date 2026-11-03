@@ -12,7 +12,11 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends $(grep
 echo "== 2/5 Betómetro"
 systemctl stop betometro 2>/dev/null || true
 tar -C / --no-same-owner -xzf betometro.tar.gz
-install -m 0644 betometro.service /etc/systemd/system/betometro.service
+install -m 0644 betometro.service pulseaudio-sistema.service /etc/systemd/system/
+# Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)
+usermod -aG pulse-access root
+systemctl --global disable pulseaudio.service pulseaudio.socket 2>/dev/null || true
+systemctl --global mask pulseaudio.service pulseaudio.socket 2>/dev/null || true
 
 echo "== 3/5 Pantalla, GPS, sonido y vigilante (config.txt)"
 CFG=/boot/firmware/config.txt
@@ -33,7 +37,7 @@ printf '[Manager]\nRuntimeWatchdogSec=15\nRebootWatchdogSec=30\n' > /etc/systemd
 
 echo "== 4/5 Arranque directo en Betómetro"
 systemctl daemon-reload
-systemctl enable betometro
+systemctl enable pulseaudio-sistema betometro
 systemctl disable getty@tty1 2>/dev/null || true
 
 echo "== 5/5 Listo. Versión: $(cat version.txt 2>/dev/null || echo '?')"

@@ -59,7 +59,7 @@ jobs:
           P=salida-pi/betometro-pi-$V
           mkdir -p "$P"
           tar -C salida-pi/raiz -czf "$P/betometro.tar.gz" usr
-          cp raspios/instalar.sh raspios/paquetes.txt raspios/betometro.service "$P/"
+          cp raspios/instalar.sh raspios/paquetes.txt raspios/*.service "$P/"
           echo "$V ($(git rev-parse --short HEAD))" > "$P/version.txt"
           ls -la "$P"
 
