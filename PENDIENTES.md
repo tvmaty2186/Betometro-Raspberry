@@ -12,6 +12,11 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 ## Hecho
 - E1 (motor igual a la app), E2 (programa completo, temas aprobados).
 - Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
+- 03/11 noche (1.0.3): dígitos con la fórmula de la app y «Números − / +», editor con los chicos al frente
+  y 4 asas, cara de instrumento con reflejo, colores de pasado/atrasado, estilos Anillo y Barra, redondo en
+  más widgets, velocímetro liviano (aguja sin GPS, «máx», inicio animado), ficha para temas de letra ancha,
+  botón Terminar más grande. **Arreglo:** el armado guardado en el editor nunca se cargaba.
+- 03/11: actualización por wifi probada (1.0.1 → 1.0.2). Wifi real y «Betómetro en la red».
 - 03/11: **Betómetro anda en la Raspberry** (Pi OS Lite): arranca solo, pantalla, touch y voz por auriculares.
   - Pantalla: es la Touch Display 2 de **5"** (720×1280), no de 7".
   - Touch: se despierta con `despertar-touch.service` (el sistema lo busca antes de que la pantalla lo encienda).
@@ -23,20 +28,15 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 2. Elegir la pantalla de arranque (muestra: foto de los pilotos con la franja amarilla como barra de carga).
 
 ## Siguiente
-- **Detalles de pantalla de la app que faltan** (pedido de Matías, 03/11): lista completa en
-  [docs/app/diferencias-pantalla.md](docs/app/diferencias-pantalla.md). Lo principal: tamaño de los dígitos con la
-  fórmula de la app (y «Números − / +»), dígitos de ancho fijo, widgets chicos al frente en el editor, cara de
-  instrumento con reflejo, colores de pasado/atrasado, estilos Anillo y Barra, redondo en más widgets.
-- **Ficha de la carrera (foto de Matías, 03/11):** los números grandes del resumen se salen del recuadro
-  (error total cortado a la izquierda, mejor a la derecha); los chips de vueltas («V1 MEDIDA») muy chicos
-  para la pantalla de 5"; en el nombre «02: 46» sale con espacio raro por la tipografía.
+- **Detalles de pantalla que quedan** (de [docs/app/diferencias-pantalla.md](docs/app/diferencias-pantalla.md)):
+  pellizco con dos dedos en el editor, cartel de ayuda que se va a los 5 s, colores exactos de la barra ±,
+  espaciado de MARCAR, marco del indicador en sol, glow de los temas Rally/Deportivo/Cabina.
 - Pantalla de arranque horizontal con barra de carga, sin letras (Plymouth).
 - **Reporte de errores automático (pedido de Matías, 03/11):** Betómetro junta solo lo que falla (cierres,
   avisos del programa, GPS, sonido, wifi, actualizaciones; con versión y hora) y, cuando hay internet y no hay
   carrera, lo manda a un repo de reportes para mejorar las próximas versiones. Sin datos personales.
   A definir: repo (privado, por ejemplo `Betometro-reportes`, como issues) y una llave que solo pueda crear
   reportes ahí (la Raspberry la lleva adentro: que no sirva para nada más).
-- Probar Ajustes → Actualizar con una versión 1.0.1 publicada.
 - Conectar GPS (NEO-M8N) y pulsador (GPIO17, pin 11 / GND pin 9; pull-up 10 kΩ a 3,3 V); chequeo previo; medir demoras.
 - Leer el pulsador en el programa (GPIO).
 - Medir rendimiento en la Pi 3: pantalla fluida, procesador, temperatura.

@@ -1,5 +1,9 @@
 # Detalles de pantalla de la app 2.4.1 que faltan en la Raspberry
 
+**Estado (1.0.3, 03/11/2026):** hechos A1-A6, B7-B11 y B13, C14-C17, D19, E21, E22, E24, E25, F28 y F29.
+Quedan: B12 (pellizco), C18 (menores del editor), D20 (glow de otros temas), E23 (colores de la barra ±),
+E26 (espaciado de MARCAR) y F27 (marco en sol).
+
 Relevado el 03/11/2026 a pedido de Matías («hay detalles del diseño de la app que acá no están»).
 Referencia de la app: `www/index.html` (CSS de widgets: líneas 124-160, 269-312, 314-343, 419-434,
 636-660; JS de widgets y editor desde la línea 1526: `crearWidget`, `construirTablero`,
