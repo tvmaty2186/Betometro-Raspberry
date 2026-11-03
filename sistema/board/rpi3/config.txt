@@ -9,9 +9,9 @@ arm_64bit=1
 disable_splash=1
 boot_delay=0
 
-# Pantalla: placa de video con KMS y la Touch Display 2 de 7" (720×1280, de pie)
+# Pantalla: placa de video con KMS y la Touch Display 2 de 5" (720×1280, de pie)
 dtoverlay=vc4-kms-v3d
-dtoverlay=vc4-kms-dsi-ili9881-7inch
+dtoverlay=vc4-kms-dsi-ili9881-5inch
 gpu_mem=128
 
 # GPS por el UART bueno (ttyAMA0): se apaga el Bluetooth

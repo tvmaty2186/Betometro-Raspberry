@@ -2,7 +2,7 @@
 
 ## Comprado
 - Raspberry Pi 3 B+ (Element14)
-- Raspberry Pi Touch Display 2 de 7" (DSI)
+- Raspberry Pi Touch Display 2 de 5" (DSI, 720×1280)
 - microSD SanDisk Ultra de 16 GB
 - Módulo GPS GY-NEO-M8N (u-blox NEO-M8N-0-10) con SMA, micro USB, pila de respaldo y LED PPS
 - Antena GPS activa de 1 m, SMA macho

@@ -18,7 +18,7 @@ echo "== 3/5 Pantalla, GPS, sonido y vigilante (config.txt)"
 CFG=/boot/firmware/config.txt
 agregar() { grep -qxF "$1" "$CFG" || echo "$1" >> "$CFG"; }
 grep -q "^# Betómetro" "$CFG" || printf '\n# Betómetro\n' >> "$CFG"
-agregar "dtoverlay=vc4-kms-dsi-ili9881-7inch"
+agregar "dtoverlay=vc4-kms-dsi-ili9881-5inch"
 agregar "enable_uart=1"
 agregar "dtoverlay=disable-bt"
 agregar "dtparam=audio=on"

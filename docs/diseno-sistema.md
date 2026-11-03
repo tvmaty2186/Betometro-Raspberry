@@ -13,7 +13,7 @@ Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y ver
 ## Equipo
 
 - Raspberry Pi 3 B+
-- Pantalla Raspberry Pi Touch Display 2 de 7" (DSI)
+- Pantalla Raspberry Pi Touch Display 2 de 5" (DSI, 720×1280)
 - GPS GY-NEO-M8N por UART (cableado en [cableado-gps.png](cableado-gps.png))
 - **Auriculares con cable** en la salida de audio de la Raspberry (ficha de 3,5 mm), para la voz
 - Pulsador en GPIO
