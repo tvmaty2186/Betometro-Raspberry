@@ -391,7 +391,9 @@ void Datos::ponerCfg(const QString& clave, const QVariant& valor) {
 }
 
 void Datos::cargarMuestra() {
+    const Json config = base_.config;   // las carreras de ejemplo no pisan la configuración (armados de prueba)
     base_ = Base{};
+    base_.config = config;
     const QDate h = hoy();
     auto agregar = [&](const char* nombre, QDate f, int vueltas, int64_t T, int64_t D, const char* patron,
                        std::vector<int> errores, bool practica = false) {

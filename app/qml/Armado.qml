@@ -44,7 +44,12 @@ QtObject {
     }
     function fabrica(horizontal) { return horizontal ? aFracciones(pxH, 1280, 720) : aFracciones(pxV, 720, 1280); }
     function cargar(horizontal, ajustes) {
+        // Ojo: la lista guardada llega de C++ como lista de Qt, no como Array de JavaScript
+        // (Array.isArray da false): se recorre por índice. Antes se ignoraba y siempre quedaba la de fábrica.
         const g = ajustes[horizontal ? "widgetsH" : "widgets"];
-        return Array.isArray(g) && g.length ? g.map(w => Object.assign({}, w)) : fabrica(horizontal);
+        if (!g || typeof g !== "object" || !(g.length > 0)) return fabrica(horizontal);
+        const l = [];
+        for (let i = 0; i < g.length; i++) if (g[i] && g[i].t) l.push(Object.assign({}, g[i]));
+        return l.length ? l : fabrica(horizontal);
     }
 }

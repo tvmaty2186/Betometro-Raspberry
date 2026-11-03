@@ -105,13 +105,20 @@ Item {
             id: colP; x: 18; y: 14; width: parent.width - 36; spacing: 10
             Sub { text: "Widget: " + (raiz.w ? Armado.nombre(raiz.w.t) : ""); tam: 13 }
             BotonCromo { width: parent.width; height: 46; tamTexto: 17
-                visible: !!raiz.w && (raiz.w.t === "velocimetro" || raiz.w.t === "tipo")
+                visible: !!raiz.w && raiz.w.t !== "marcar"   // como la app: cualquiera menos MARCAR
                 texto: raiz.w && raiz.w.forma === "redondo" ? "Cuadrado" : "Redondo"
                 onTocado: {
                     const W = tablero.width, H = tablero.height, p = tablero.px(raiz.w);
                     if (raiz.w.forma === "redondo") raiz.cambiarElegido({ forma: undefined, h: p.w / H });
                     else { const d = Math.min(p.w, p.h); raiz.cambiarElegido({ forma: "redondo", w: d / W, h: d / H }); }
                 } }
+            // «Estilo» (app 1.3): cuenta en Números o Anillo; adelantado/atrasado en Número o Barra
+            BotonCromo { width: parent.width; height: 46; tamTexto: 17
+                visible: !!raiz.w && (raiz.w.t === "cuenta" || raiz.w.t === "delta")
+                readonly property var estilos: raiz.w && raiz.w.t === "delta" ? [["numero", "Número"], ["barra", "Barra"]] : [["numeros", "Números"], ["anillo", "Anillo"]]
+                readonly property int actual: raiz.w ? Math.max(0, estilos.findIndex(x => x[0] === raiz.w.e)) : 0
+                texto: "Estilo: " + estilos[actual][1] + "  ›"
+                onTocado: raiz.cambiarElegido({ e: estilos[(actual + 1) % estilos.length][0] }) }
             BotonCromo { width: parent.width; height: 46; tamTexto: 17
                 visible: !!raiz.w && raiz.w.t === "cuenta"
                 texto: raiz.w && raiz.w.modo === "regresiva" ? "Cambiar a cuenta progresiva" : "Cambiar a cuenta regresiva"
@@ -121,13 +128,14 @@ Item {
                 texto: raiz.w && raiz.w.extra ? "Sin dato extra" : "Dato extra"
                 onTocado: raiz.cambiarElegido({ extra: !raiz.w.extra }) }
             BotonCromo { width: parent.width; height: 46; tamTexto: 17
-                visible: !!raiz.w && (raiz.w.t === "cuenta" || (raiz.w.t === "velocimetro" && raiz.w.forma !== "redondo"))
+                visible: !!raiz.w && ((raiz.w.t === "cuenta" && raiz.w.e !== "anillo") || (raiz.w.t === "velocimetro" && raiz.w.forma !== "redondo"))
                 texto: raiz.w && raiz.w.barra !== false ? "Sin barra ±" : "Barra ±"
                 onTocado: raiz.cambiarElegido({ barra: raiz.w.barra === false }) }
             // «Números − / +» (app 1.3.2): achica o estira los números a lo ancho, de 0,7 a 1,8
             Row {
                 id: filaAncho
                 visible: !!raiz.w && ["marcar", "tipo"].indexOf(raiz.w.t) < 0 && !(raiz.w.t === "velocimetro" && raiz.w.forma === "redondo")
+                         && !(raiz.w.t === "delta" && raiz.w.e === "barra") && !(raiz.w.t === "cuenta" && raiz.w.e === "anillo")
                 spacing: 10
                 readonly property real valor: raiz.w ? (raiz.w.ancho || (raiz.w.t === "cuenta" ? 1.2 : 1)) : 1
                 function cambiar(d) { raiz.cambiarElegido({ ancho: Math.round(Math.max(0.7, Math.min(1.8, valor + d)) * 10) / 10 }); }

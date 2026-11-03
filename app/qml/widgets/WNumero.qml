@@ -7,17 +7,19 @@ Caja {
     property string etiqueta: ""
     property string numero: ""
     property string extra: ""
-    property bool fila: width > height * 3   // muy ancho y bajito: etiqueta y número en una línea
+    property bool fila: !redondo && width > height * 3   // muy ancho y bajito: etiqueta y número en una línea
     property color colorNumero: Tema.numero
     property real ancho: 1
+    readonly property real interiorA: redondo ? width * 0.68 : width - 24
+    readonly property real interiorH: redondo ? height * 0.68 : height - 16
     Column {
         visible: !raiz.fila
         anchors.centerIn: parent
-        width: parent.width - 24
+        width: raiz.interiorA
         Etiq { alto: raiz.height; width: parent.width; text: raiz.etiqueta; wrapMode: Text.WordWrap }
         Numero {
             width: parent.width
-            pAlto: 58; alto: raiz.height - 16; anchoCaja: raiz.width - 24; ancho: raiz.ancho
+            pAlto: 58; alto: raiz.interiorH; anchoCaja: raiz.interiorA; ancho: raiz.ancho
             text: raiz.numero; color: raiz.colorNumero
         }
         Text { visible: raiz.extra !== ""; width: parent.width; horizontalAlignment: Text.AlignHCenter; text: raiz.extra   // en minúscula, como la app

@@ -227,12 +227,13 @@ Item {
     }
 
     Component { id: cCuenta; WCuenta { est: raiz.est; extra: !!parent.def.extra; barra: parent.def.barra !== false; modo: parent.def.modo || "progresiva"; ancho: parent.def.ancho || 1.2
+                                    estilo: parent.def.e || "numeros"; redondo: parent.def.forma === "redondo"
                                     anchoLibre: raiz.anchoLibre(parent.parent.i) } }
     Component { id: cTipo; WTipo { est: raiz.est } }
     Component {
         id: cNecesaria
         WNumero {
-            ancho: parent.def.ancho || 1
+            ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"
             etiqueta: "Sugerida"
             numero: raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
             extra: parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
@@ -243,7 +244,7 @@ Item {
     Component {
         id: cUltima
         WNumero {
-            ancho: parent.def.ancho || 1
+            ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"
             etiqueta: fila ? "Última vuelta" + (Crono.ultima.n ? " · V" + Crono.ultima.n : "")
                            : "Última vuelta" + (Crono.ultima.n ? "\nV" + Crono.ultima.n : "")
             numero: Crono.ultima.realMs ? Formato.reloj(Crono.ultima.realMs, false) : "–"
@@ -251,11 +252,11 @@ Item {
         }
     }
     Component { id: cMarcar; WMarcar { id: wm; est: raiz.est; onMarcar: if (!raiz.editando) raiz.marcar(); Component.onCompleted: raiz.botonMarcar = wm } }
-    Component { id: cFaltan; WNumero { ancho: parent.def.ancho || 1; etiqueta: "Faltan"; numero: Formato.miles(Math.max(0, raiz.est.restanteM || 0)) + " m"; extra: parent.def.extra ? "de " + Formato.miles(raiz.est.distanciaM || 0) + " m" : "" } }
-    Component { id: cTranscurrido; WNumero { ancho: parent.def.ancho || 1; etiqueta: "Transcurrido"; numero: Formato.reloj(raiz.est.transMs || 0, false) } }
-    Component { id: cIdeal; WNumero { ancho: parent.def.ancho || 1; etiqueta: "Ideal"; numero: Formato.reloj(raiz.est.tiempoIdealMs || 0, false) } }
-    Component { id: cProxima; WNumero { ancho: parent.def.ancho || 1; etiqueta: "Próxima vuelta"; numero: raiz.est.proxMedida ? "MEDIDA" : "LIBRE" } }
-    Component { id: cDelta; WDelta { est: raiz.est; ancho: parent.def.ancho || 1 } }
+    Component { id: cFaltan; WNumero { ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"; etiqueta: "Faltan"; numero: Formato.miles(Math.max(0, raiz.est.restanteM || 0)) + " m"; extra: parent.def.extra ? "de " + Formato.miles(raiz.est.distanciaM || 0) + " m" : "" } }
+    Component { id: cTranscurrido; WNumero { ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"; etiqueta: "Transcurrido"; numero: Formato.reloj(raiz.est.transMs || 0, false) } }
+    Component { id: cIdeal; WNumero { ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"; etiqueta: "Ideal"; numero: Formato.reloj(raiz.est.tiempoIdealMs || 0, false) } }
+    Component { id: cProxima; WNumero { ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"; etiqueta: "Próxima vuelta"; numero: raiz.est.proxMedida ? "MEDIDA" : "LIBRE" } }
+    Component { id: cDelta; WDelta { est: raiz.est; ancho: parent.def.ancho || 1; estilo: parent.def.e || "numero"; redondo: parent.def.forma === "redondo" } }
     property var botonMarcar: null
     function efectoMarcar() { if (botonMarcar) botonMarcar.efecto(); }
 }
