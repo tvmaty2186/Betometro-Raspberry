@@ -12,6 +12,9 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 ## Hecho
 - E1 (motor igual a la app), E2 (programa completo, temas aprobados).
 - Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
+- 03/11 (1.0.5): pantalla de arranque con barra de carga y sin letras; pulsador por cable (1.0.4); letras chicas
+  más grandes para 5"; últimos detalles de la app (pellizco, cartel de 5 s, barra ±, MARCAR, marco en sol, brillo
+  de los temas); reporte de errores automático; wifi propia «Betometro-101»; menos escrituras en la tarjeta.
 - 03/11 (1.0.4): el programa lee el pulsador (GPIO17, pin 11 a GND pin 9) con la pull-up interna y la hora
   exacta del kernel; marca en la carrera y responde en el Chequeo previo. Falta probarlo con el pulsador real.
 - 03/11 noche (1.0.3): dígitos con la fórmula de la app y «Números − / +», editor con los chicos al frente
@@ -26,26 +29,17 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   - GitHub prueba cada versión en un Debian arm64 limpio antes de entregarla.
 
 ## Ahora (Matías)
-1. Para publicar actualizaciones: README en `Betometro-actualizaciones` (público), token con Contents: Read and write y secreto `ACTUALIZACIONES_TOKEN` en este repo.
-2. Elegir la pantalla de arranque (muestra: foto de los pilotos con la franja amarilla como barra de carga).
+1. Actualizar a la 1.0.5 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
+2. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
+   pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
+   errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
 ## Siguiente
-- **Detalles de pantalla que quedan** (de [docs/app/diferencias-pantalla.md](docs/app/diferencias-pantalla.md)):
-  pellizco con dos dedos en el editor, cartel de ayuda que se va a los 5 s, colores exactos de la barra ±,
-  espaciado de MARCAR, marco del indicador en sol, glow de los temas Rally/Deportivo/Cabina.
-- Pantalla de arranque horizontal con barra de carga, sin letras (Plymouth).
-- **Reporte de errores automático (pedido de Matías, 03/11):** Betómetro junta solo lo que falla (cierres,
-  avisos del programa, GPS, sonido, wifi, actualizaciones; con versión y hora) y, cuando hay internet y no hay
-  carrera, lo manda a un repo de reportes para mejorar las próximas versiones. Sin datos personales.
-  A definir: repo (privado, por ejemplo `Betometro-reportes`, como issues) y una llave que solo pueda crear
-  reportes ahí (la Raspberry la lleva adentro: que no sirva para nada más).
-- Conectar GPS (NEO-M8N) y pulsador (GPIO17, pin 11 / GND pin 9; pull-up 10 kΩ a 3,3 V); chequeo previo; medir demoras.
-- Medir rendimiento en la Pi 3: pantalla fluida, procesador, temperatura.
-- Solo lectura (overlay de Pi OS) para que cortar el contacto no rompa nada, con las carreras en un lugar aparte.
-- Revisar letras chicas en la pantalla de 5" con el auto en movimiento.
+- Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
+- Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
+  Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
 
 ## Más adelante
-- E5: wifi real (hoy simulado), «Betómetro en la red», compartir por QR.
 - Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).
 - E6: prueba en pista y versión 1.0.0 definitiva.
 - App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).
