@@ -3,10 +3,16 @@ name: Programa para Raspberry Pi OS
 # Compila Betómetro para Raspberry Pi OS Lite 64 bits (Debian trixie) y lo prueba antes de
 # entregarlo. Sale un .zip con el instalador: se copia a la Raspberry y se corre
 # «sudo bash instalar.sh». Tarda unos minutos (no arma un sistema entero como imagen.yml).
-# Con una etiqueta vX.Y.Z (igual a la versión de CMakeLists.txt) además se publica en el repo
-# público Betometro-actualizaciones, de donde la Raspberry baja las actualizaciones sola.
+# Se publica en el repo público Betometro-actualizaciones (de donde la Raspberry baja las
+# actualizaciones sola) con: «[publicar]» en el mensaje del commit, el botón «Run workflow» con
+# «publicar» tildado, o una etiqueta vX.Y.Z. La versión es la de CMakeLists.txt.
 on:
   workflow_dispatch:
+    inputs:
+      publicar:
+        description: 'Publicar en Betometro-actualizaciones'
+        type: boolean
+        default: false
   push:
     branches: ['**']
     tags: ['v*']
@@ -74,12 +80,17 @@ jobs:
           path: salida-pi/betometro-pi-${{ env.V }}
           retention-days: 30
 
-      - name: Publicar en Betometro-actualizaciones (solo con etiqueta v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publicar en Betometro-actualizaciones
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.publicar || contains(github.event.head_commit.message, '[publicar]')
         env:
           GH_TOKEN: ${{ secrets.ACTUALIZACIONES_TOKEN }}
         run: |
-          test "${GITHUB_REF_NAME#v}" = "$V" || { echo "La etiqueta ($GITHUB_REF_NAME) no coincide con la versión de CMakeLists.txt ($V)"; exit 1; }
-          git log -1 --format=%B > notas.txt
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            test "${GITHUB_REF_NAME#v}" = "$V" || { echo "La etiqueta ($GITHUB_REF_NAME) no coincide con la versión de CMakeLists.txt ($V)"; exit 1; }
+          fi
+          if gh release view "v$V" --repo tvmaty2186/Betometro-actualizaciones >/dev/null 2>&1; then
+            echo "La versión $V ya está publicada: subí el número en CMakeLists.txt"; exit 1
+          fi
+          git log -1 --format=%B | grep -v -e '^Co-Authored-By' -e '^Claude-Session' | sed 's/ *\[publicar\]//' > notas.txt
           gh release create "v$V" "salida-pi/betometro-pi-$V.tar.gz" \
             --repo tvmaty2186/Betometro-actualizaciones --title "Betómetro $V" --notes-file notas.txt
