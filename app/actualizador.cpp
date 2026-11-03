@@ -36,7 +36,7 @@ Actualizador::Actualizador(const QString& carpetaDatos, QObject* padre)
         if (!archivoPendrive_.isEmpty()) { QProcess::execute(QStringLiteral("umount"), {kPendrive}); archivoPendrive_.clear(); }
         if (s == QProcess::NormalExit && codigo == 0) {
             // El instalador corre aparte (systemd-run) y al terminar reinicia el equipo solo
-            poner(QStringLiteral("lista"), 100, QStringLiteral("Instalando… el equipo se reinicia solo en unos minutos"));
+            poner(QStringLiteral("lista"), 100, QStringLiteral("Instalando… no la apagues: se reinicia sola"));
         } else {
             const QString err = QString::fromUtf8(rauc_.readAllStandardError()).trimmed().section('\n', -1);
             poner(QStringLiteral("error"), 0, QStringLiteral("No se pudo instalar") + (err.isEmpty() ? QString() : ": " + err));

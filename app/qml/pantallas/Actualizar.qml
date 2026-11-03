@@ -42,18 +42,19 @@ Item {
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter
                    text: raiz.estado === "carrera" ? "Terminá la carrera antes de actualizar"
-                         : raiz.estado === "lista" ? "Lista: el equipo se reinicia solo"
+                         : raiz.estado === "lista" ? "Instalando… no la apagues"
                          : raiz.estado === "descargando" ? "Descargando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "instalando" ? "Instalando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "error" ? Actualizador.mensaje
                          : Actualizador.versionNueva ? "Versión " + Actualizador.versionNueva + (Actualizador.origen === "pendrive" ? " en el pendrive" : " disponible") : "Estás al día"
                    color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.3
-                   text: "Al terminar, el equipo se reinicia solo.\nSe guarda la versión anterior por si algo falla."
+                   text: raiz.estado === "lista" ? "Puede tardar hasta 10 minutos y la pantalla puede quedar negra.\nAl terminar, se reinicia sola en la versión nueva."
+                         : "Al terminar, el equipo se reinicia solo.\nSe guarda la versión anterior por si algo falla."
                    color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 19 } }
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter; spacing: 16
-                BotonAmarillo { visible: raiz.estado === "lista"; width: 300; height: 64; texto: "REINICIAR"
+                BotonAmarillo { visible: false; width: 300; height: 64; texto: "REINICIAR"   // no: cortaba la instalación a la mitad
                                 onTocado: { Actualizador.reiniciar(); if (!Sistema.raspberry) Navegacion.avisar("En la Raspberry reinicia en la versión nueva"); } }
                 BotonAmarillo { visible: (raiz.estado === "nada" || raiz.estado === "error") && !!Actualizador.versionNueva
                                 width: 300; height: 64; texto: "ACTUALIZAR"; onTocado: Actualizador.actualizar() }

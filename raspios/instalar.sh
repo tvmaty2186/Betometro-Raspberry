@@ -6,6 +6,8 @@ cd "$(dirname "$0")"
 if [ "$(id -u)" != 0 ]; then echo "Hay que correrlo con sudo:  sudo bash instalar.sh"; exit 1; fi
 
 echo "== 1/5 Programas que necesita (tarda unos minutos la primera vez)"
+# Si una instalación anterior quedó a medias (se apagó en el medio), se termina de acomodar
+dpkg --configure -a || true
 faltan=$(for p in $(grep -v '^#' paquetes.txt); do dpkg -s "$p" >/dev/null 2>&1 || echo "$p"; done)
 if [ -n "$faltan" ]; then
   apt-get update
