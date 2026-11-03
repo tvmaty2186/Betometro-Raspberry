@@ -56,7 +56,7 @@ Item {
     }
     Rectangle {   // indicador «marco»: borde interior de 7 px
         anchors.fill: parent; color: "transparent"
-        border { width: 7; color: est.medida ? Datos.cfg("colMedida") : Datos.cfg("colPractica") }
+        border { width: Tema.sol ? 11 : 7; color: est.medida ? Datos.cfg("colMedida") : Datos.cfg("colPractica") }   // en sol 11 px, como la app
         visible: Crono.enCurso && Datos.cfg("indicador") === "marco"
     }
 

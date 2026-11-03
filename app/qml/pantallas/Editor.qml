@@ -76,8 +76,11 @@ Item {
                 onTocado: { Datos.ponerCfg(raiz.h ? "widgetsH" : "widgets", raiz.armado); raiz.cambiado = false; Navegacion.avisar("Pantalla guardada"); } }
         }
     }
+    property bool ayudaVista: false   // el cartel se va solo a los 5 s o al primer toque, como la app
+    Timer { interval: 5000; running: true; onTriggered: raiz.ayudaVista = true }
+    Connections { target: tablero; function onElegidoChanged() { raiz.ayudaVista = true; } }
     Rectangle {
-        visible: tablero.elegido < 0 && !raiz.lista
+        visible: tablero.elegido < 0 && !raiz.lista && !raiz.ayudaVista
         z: 6
         anchors.horizontalCenter: parent.horizontalCenter
         y: raiz.h ? 300 : 134
@@ -169,8 +172,11 @@ Item {
                         width: colL.width; height: 46; tamTexto: 17; texto: modelData.nombre
                         onTocado: {
                             const W = tablero.width, H = tablero.height;
-                            const n = modelData.t === "velocimetro" ? { t: "velocimetro", forma: "redondo", x: 0.3, y: 0.3, w: 220 / W, h: 220 / H }
-                                    : { t: modelData.t, x: (W - 240) / 2 / W, y: (H - 90) / 2 / H, w: 240 / W, h: 90 / H };
+                            // Como la app: MARCAR va a su lugar de fábrica; los demás, en fracciones de la pantalla
+                            const fab = Armado.fabrica(raiz.h).find(x => x.t === "marcar");
+                            const n = modelData.t === "marcar" && fab ? Object.assign({}, fab)
+                                    : modelData.t === "velocimetro" ? { t: "velocimetro", forma: "redondo", x: 0.3, y: 0.25, w: 0.22 * Math.min(W, H) / W, h: 0.22 * Math.min(W, H) / H }
+                                    : { t: modelData.t, x: 0.36, y: 0.38, w: 0.28, h: 0.22 };
                             const a = raiz.armado.concat([n]);
                             raiz.poner(a); tablero.elegido = a.length - 1; raiz.lista = false;
                         }

@@ -160,6 +160,32 @@ Item {
                 g.beginPath(); g.roundedRect(1.5, 1.5, width - 3, height - 3, r, r); g.stroke();
             }
         }
+        // Pellizco con dos dedos sobre el elegido: lo agranda o achica desde el centro (mínimo 60×44), como la app
+        PinchHandler {
+            target: null
+            property real w0: 0
+            property real h0: 0
+            property real cx: 0
+            property real cy: 0
+            onActiveChanged: {
+                const c = capaSel.c; if (!c) return;
+                if (active) {
+                    w0 = c.p.w; h0 = c.p.h; cx = c.p.x + c.p.w / 2; cy = c.p.y + c.p.h / 2;
+                    c.mx = c.p.x; c.my = c.p.y; c.mw = c.p.w; c.mh = c.p.h; c.moviendo = true;
+                } else if (c.moviendo) {
+                    raiz.cambio(raiz.aFrac(c.i, Math.max(0, c.mx), Math.max(0, c.my), c.mw, c.mh));
+                    c.moviendo = false;
+                }
+            }
+            onActiveScaleChanged: {
+                const c = capaSel.c; if (!c || !active) return;
+                const tope = c.redondo ? Math.min(raiz.width, raiz.height) : raiz.width;
+                const w = Math.max(c.redondo ? 70 : 60, Math.min(tope, w0 * activeScale));
+                const h = c.redondo ? w : Math.max(44, Math.min(raiz.height, h0 * activeScale));
+                c.mw = w; c.mh = h;
+                c.mx = Math.max(0, Math.min(raiz.width - w, cx - w / 2)); c.my = Math.max(0, Math.min(raiz.height - h, cy - h / 2));
+            }
+        }
         Repeater {
             // Cuadrados: 4 asas (la esquina opuesta queda quieta). Redondos: 1 asa, crece desde el centro.
             model: capaSel.c && capaSel.c.redondo ? ["re"] : ["nw", "ne", "sw", "se"]

@@ -17,7 +17,7 @@ Item {
             width: parent.width; horizontalAlignment: Text.AlignHCenter
             fontSizeMode: Text.Fit; height: raiz.height * 0.5; verticalAlignment: Text.AlignVCenter
             text: raiz.enCurso ? "MARCAR" : "LARGAR"; color: Tema.acentoTinta
-            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.min(raiz.height * 0.47, raiz.width * 0.19) }
+            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.min(raiz.height * 0.47, raiz.width * 0.17); letterSpacing: font.pixelSize * 0.14 }
         }
         Text {
             width: parent.width; horizontalAlignment: Text.AlignHCenter

@@ -76,6 +76,8 @@ QtObject {
     readonly property string fuenteNum: de("Barlow Condensed", "Big Shoulders Display Thin", "Chakra Petch", "B612 Mono", "Barlow Condensed")
     readonly property bool cursiva: avispon   // como la app: números en cursiva solo en Avispón (no en sol)
     // «Pasado» de la cuenta regresiva y «ATRASADO» (--warn) y «Pasado el ideal» de la progresiva (--mal), como la app
+    // Brillo alrededor de los widgets (0 0 20px 5px var(--glow) de la app); Avispón y sol no tienen
+    readonly property color glow: sol ? "transparent" : de("transparent", Qt.rgba(1, 170 / 255, 40 / 255, 0.5), Qt.rgba(1, 40 / 255, 20 / 255, 0.55), Qt.rgba(79 / 255, 195 / 255, 247 / 255, 0.32), "transparent")
     readonly property color warn: de("#f4c531", "#ffb000", "#ffd400", "#ffd23f", "#a33a00")
     readonly property color mal: de("#ff6b5a", "#c0162c", "#e10600", "#ff4d5e", "#c4001a")
 }

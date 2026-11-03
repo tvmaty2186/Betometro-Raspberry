@@ -12,19 +12,25 @@ Item {
         anchors.fill: parent; radius: height / 2
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: "#d23b2c" }
-            GradientStop { position: 0.25; color: "#f4c531" }
-            GradientStop { position: 0.45; color: "#7fd36b" }
-            GradientStop { position: 0.55; color: "#7fd36b" }
-            GradientStop { position: 0.75; color: "#f4c531" }
-            GradientStop { position: 1; color: "#d23b2c" }
+            // los colores de la app (.w-barra)
+            GradientStop { position: 0; color: "#d7263d" }
+            GradientStop { position: 0.25; color: "#f5c518" }
+            GradientStop { position: 0.45; color: "#2ecc71" }
+            GradientStop { position: 0.55; color: "#2ecc71" }
+            GradientStop { position: 0.75; color: "#f5c518" }
+            GradientStop { position: 1; color: "#d7263d" }
         }
     }
+    Rectangle {   // sombra del cursor (0 0 6px rgba(0,0,0,.6))
+        width: cursor.width + 6; height: cursor.height + 6; radius: width / 2
+        x: cursor.x - 3; y: cursor.y - 3; color: Qt.rgba(0, 0, 0, 0.3); opacity: cursor.opacity
+    }
     Rectangle {
-        width: 7; height: raiz.height * 2.2; radius: 3
+        id: cursor
+        width: Math.max(4, raiz.height * 0.5); height: Math.max(14, raiz.height * 2.6); radius: width / 2
         y: (raiz.height - height) / 2
         x: raiz.pos * raiz.width - width / 2
-        color: "#ffffff"; border { width: 1.5; color: "#000" }
+        color: Tema.rally ? "#2a2118" : "#ffffff"; border { width: 1.5; color: Tema.rally ? "#f3e7c8" : "#111" }
         opacity: raiz.valor === null || raiz.valor === undefined ? 0.35 : 1
         Behavior on x { NumberAnimation { duration: 250 } }
     }

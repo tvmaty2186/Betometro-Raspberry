@@ -7,6 +7,17 @@ Item {
     id: raiz
     property bool redondo: false
     property real radio: redondo ? width / 2 : Tema.radio + 4
+    // Brillo de Rally, Deportivo y Cabina: capas cada vez más anchas y suaves (20 px)
+    Repeater {
+        model: Tema.glow.a > 0 ? 5 : 0
+        Rectangle {
+            required property int index
+            readonly property real m: 3 + index * 4
+            anchors.fill: parent; anchors.margins: -m
+            radius: raiz.radio + m; color: "transparent"
+            border { width: 4; color: Qt.rgba(Tema.glow.r, Tema.glow.g, Tema.glow.b, Tema.glow.a * [0.55, 0.35, 0.2, 0.1, 0.05][index]) }
+        }
+    }
     // Sombra difuminada abajo (0 10px 18px rgba(0,0,0,.5) de la app): capas cada vez más anchas y suaves
     Repeater {
         model: Tema.sol ? 0 : 4
