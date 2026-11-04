@@ -12,6 +12,7 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 ## Hecho
 - E1 (motor igual a la app), E2 (programa completo, temas aprobados).
 - Cambios de Matías: sin cantidad de vueltas, MEDIDA/LIBRE y «Unir vueltas» en el informe, libres sin error, cronómetro progresivo/regresivo, ideal a la vista, «libre» en todos lados.
+- 04/11 (1.0.10): el brillo cambia la pantalla de verdad (antes solo se guardaba); botón BUSCAR por internet en Actualizar.
 - 04/11 (1.0.9): GPS por USB (VK-172, VK-162, NEO-M8N por micro USB) o por los pines, lo busca solo.
 - 03/11 (1.0.8): foto de arranque en toda la pantalla (la salida de TV de la Pi 3 la achicaba).
 - 03/11 (1.0.7): foto de arranque: escala 1 y posición real.
@@ -33,7 +34,7 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   - GitHub prueba cada versión en un Debian arm64 limpio antes de entregarla.
 
 ## Ahora (Matías)
-1. Actualizar a la 1.0.9 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
+1. Actualizar a la 1.0.10 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
 2. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
