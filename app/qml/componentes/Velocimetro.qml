@@ -72,11 +72,13 @@ Item {
             c.beginPath();
             c.arc(cx, cy, r - 5 * k, -ang(s - 2), -ang(s + 2), false);
             c.strokeStyle = String(Tema.zona); c.lineWidth = 10 * k; c.lineCap = "butt"; c.stroke();
+            // Si la sugerida pasa el máximo del dial, la marca queda en el máximo y se pone roja (Matías, 04/11/2026)
+            const pasada = s > raiz.maximo;
             const a = ang(s);
             c.beginPath();
             c.moveTo(cx + Math.cos(a) * (r + 4 * k), cy - Math.sin(a) * (r + 4 * k));
             c.lineTo(cx + Math.cos(a) * (r - 26 * k), cy - Math.sin(a) * (r - 26 * k));
-            c.strokeStyle = String(Tema.sugerida); c.lineWidth = 7 * k; c.stroke();
+            c.strokeStyle = pasada ? "#d23b2c" : String(Tema.sugerida); c.lineWidth = 7 * k; c.stroke();
         }
     }
 
