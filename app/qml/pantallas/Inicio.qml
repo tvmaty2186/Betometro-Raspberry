@@ -39,14 +39,25 @@ Item {
         text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.acento + "'>· Actualizar</font>" : "")
         color: Tema.tinta
         font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
-        x: raiz.h ? parent.width - 28 - width : 24
+        x: raiz.h ? parent.width - 28 - width : 24 + senalWifi.width + 12
         y: raiz.h ? 30 : 84
         MouseArea { anchors.fill: parent; anchors.margins: -10; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
+    }
+    // Rayitas del wifi, como en los celulares, a la izquierda de la versión (Matías, 04/11/2026). Tocarlas: Conectividad.
+    Senal {
+        id: senalWifi
+        grosor: 5; paso: 4.5
+        nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0
+        opacity: Wifi.conectada ? 1 : 0.6
+        x: raiz.h ? version.x - width - 10 : 24
+        y: version.y + version.height - height - 3
+        MouseArea { anchors.fill: parent; anchors.margins: -12; onClicked: Navegacion.ir("conectividad") }
     }
 
     Banda { visible: Tema.avispon; x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
     Numero101 { visible: Tema.avispon; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
     Text {
+        id: nombreAuto
         x: raiz.h ? 190 : 28; y: raiz.h ? 600 : 556
         text: Datos.ajustes.nombreAuto || ""
         color: Tema.tinta
@@ -54,14 +65,19 @@ Item {
         font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }
     }
     Flow {
-        x: raiz.h ? 190 : parent.width - 16 - width
-        y: raiz.h ? 640 : 130
-        width: raiz.h ? 600 : 260
-        spacing: 8
+        // En horizontal, al lado del nombre del auto (abajo ya no entraban, por la franja curva)
+        x: raiz.h ? nombreAuto.x + nombreAuto.width + 18 : parent.width - 16 - width
+        y: raiz.h ? nombreAuto.y + (nombreAuto.height - 40) / 2 : 130
+        width: raiz.h ? 770 - x : 330
+        spacing: 10
         layoutDirection: raiz.h ? Qt.LeftToRight : Qt.RightToLeft
-        Chip { texto: !Crono.gps.ok ? "Sin GPS" : Crono.gps.satelites ? "GPS " + Crono.gps.satelites + " satélites" : "GPS " + Crono.gps.hz + " Hz" }
-        Chip { texto: Wifi.conectada ? "Wifi: " + Wifi.conectada : "Sin wifi" }
+        // Más grandes, con el punto verde si anda y rojo si no (Matías, 04/11/2026: no se llegaban a leer)
+        Chip { tam: 20; punto: Crono.gps.ok ? Tema.bien : Tema.alerta
+               texto: !Crono.gps.ok ? "Sin GPS" : Crono.gps.satelites ? "GPS " + Crono.gps.satelites + " satélites" : "GPS " + Crono.gps.hz + " Hz" }
+        Chip { tam: 20; punto: Wifi.conectada ? Tema.bien : Tema.alerta
+               texto: Wifi.conectada ? "Wifi: " + (Wifi.conectada.length > 14 ? Wifi.conectada.slice(0, 13) + "…" : Wifi.conectada) : "Sin wifi" }
         Chip {   // tensión baja o calor (Salud): solo si pasa
+            tam: 20
             visible: Salud.tensionBaja || Salud.calor
             punto: Tema.alerta
             texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
