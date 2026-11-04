@@ -82,8 +82,8 @@ Item {
                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 16; letterSpacing: 1 } }
             MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: Datos.ajustes.camaraInicio === "mano"; onClicked: Crono.grabarAMano() }
         }
-        Chip {   // tensión baja o calor (Salud): solo si pasa
-            visible: Salud.tensionBaja || Salud.calor
+        Chip {   // tensión baja o calor (Salud): solo antes de largar; en carrera no distrae (Matías, 04/11)
+            visible: (Salud.tensionBaja || Salud.calor) && !Crono.enCurso
             punto: Tema.alerta
             texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
         }

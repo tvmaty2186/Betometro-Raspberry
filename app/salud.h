@@ -4,9 +4,10 @@
 // - Vigilante: le avisa a systemd que el programa sigue vivo. Si se congela (la pantalla queda
 //   quieta), systemd lo reinicia solo (WatchdogSec en betometro.service).
 // - Procesador al máximo durante la carrera (sin subir y bajar la velocidad, que da tirones);
-//   fuera de la carrera vuelve a como estaba.
+//   fuera de la carrera vuelve a como estaba. Con calor o tensión baja se lo deja bajar para aguantar.
 #pragma once
 
+#include <QElapsedTimer>
 #include <QObject>
 #include <QStringList>
 #include <QTimer>
@@ -42,12 +43,15 @@ signals:
 
 private:
     void revisar();
+    void aplicar();                         // procesador al máximo o como estaba
     static void avisarSystemd(const char* mensaje);
     bool raspberry_ = false;
     unsigned estado_ = 0;
     int temperatura_ = -1;
     bool sabe_ = false;
     bool carrera_ = false;
+    bool alMaximo_ = false, huboProblema_ = false;
+    QElapsedTimer sinProblemaDesde_;
     QStringList gobernadores_;              // cómo estaba cada núcleo antes de la carrera
     QTimer cada_, vivo_;
 };
