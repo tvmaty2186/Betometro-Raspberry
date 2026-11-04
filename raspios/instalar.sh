@@ -51,9 +51,28 @@ mkdir -p /etc/systemd/system.conf.d
 printf '[Manager]\nRuntimeWatchdogSec=15\nRebootWatchdogSec=30\n' > /etc/systemd/system.conf.d/betometro-vigilante.conf
 
 echo "== 3c Para que cortar el contacto no rompa nada: casi nada se escribe en la tarjeta"
-# - Los registros del sistema van a la memoria (no a la tarjeta)
-mkdir -p /etc/systemd/journald.conf.d
-printf '[Journal]\nStorage=volatile\nRuntimeMaxUse=20M\n' > /etc/systemd/journald.conf.d/betometro.conf
+# - Registros del sistema: solo los avisos y errores se guardan en la tarjeta (son pocos), para saber
+#   qué pasó si la Raspberry se colgó o se cortó la corriente. El resto, nada.
+mkdir -p /etc/systemd/journald.conf.d /var/log/journal
+printf '[Journal]\nStorage=persistent\nMaxLevelStore=warning\nSystemMaxUse=16M\nSyncIntervalSec=30s\n' > /etc/systemd/journald.conf.d/betometro.conf
+# - Si el núcleo se cuelga, deja lo último en una memoria que sobrevive al reinicio (Betómetro lo
+#   suma al reporte de errores al prender)
+[ -f /boot/firmware/overlays/ramoops.dtbo ] && agregar "dtoverlay=ramoops"
+# - Memoria de reserva comprimida en la RAM (zram) en vez de un archivo en la tarjeta: más rápida y
+#   no gasta la SD. La Pi 3 tiene 1 GB.
+if systemctl list-unit-files dphys-swapfile.service >/dev/null 2>&1; then
+  dphys-swapfile swapoff 2>/dev/null || true
+  systemctl disable --now dphys-swapfile 2>/dev/null || true
+  rm -f /var/swap
+fi
+if dpkg -s rpi-swap >/dev/null 2>&1; then
+  # Raspberry Pi OS nuevo: su propio armado de la memoria de reserva; se le pide solo zram
+  mkdir -p /etc/rpi/swap.conf.d
+  printf '[Main]\nMechanism=zram\n' > /etc/rpi/swap.conf.d/80-betometro.conf
+else
+  dpkg -s systemd-zram-generator >/dev/null 2>&1 || apt-get install -y -qq systemd-zram-generator || true
+  printf '[zram0]\nzram-size = ram / 2\ncompression-algorithm = zstd\n' > /etc/systemd/zram-generator.conf
+fi
 # - Sin tareas de fondo que escriben (actualizar la lista de programas, manuales)
 systemctl disable --now apt-daily.timer apt-daily-upgrade.timer man-db.timer 2>/dev/null || true
 # - Si la tarjeta quedó a medio escribir, se repara sola al prender

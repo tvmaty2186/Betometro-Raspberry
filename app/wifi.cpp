@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <QProcess>
 
+#include <unistd.h>
+
 #include <algorithm>
 #include <memory>
 
@@ -42,6 +44,7 @@ QStringList Wifi::campos(const QString& linea) {
 
 void Wifi::nmcli(const QStringList& args, std::function<void(int, const QString&, const QString&)> listo) {
     auto* p = new QProcess(this);
+    p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(10); });   // el wifi espera: primero GPS, cronómetro y pulsador
     connect(p, &QProcess::finished, this, [p, listo](int codigo, QProcess::ExitStatus) {
         listo(codigo, QString::fromUtf8(p->readAllStandardOutput()), QString::fromUtf8(p->readAllStandardError()).trimmed());
         p->deleteLater();

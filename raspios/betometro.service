@@ -26,7 +26,13 @@ ExecStartPre=-/usr/bin/plymouth quit --retain-splash
 ExecStart=/usr/bin/betometro --fisica
 Restart=always
 RestartSec=2
-Nice=-5
+# Vigilante: Betómetro avisa «sigo vivo» cada 5 s; si se congela 30 s, se reinicia solo
+WatchdogSec=30
+NotifyAccess=main
+# Prioridad: GPS, cronómetro y pulsador primero. El wifi (nice 10) y la cámara (nice 5) después
+Nice=-10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=0
 
 [Install]
 WantedBy=multi-user.target

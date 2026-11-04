@@ -82,6 +82,11 @@ Item {
                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 16; letterSpacing: 1 } }
             MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: Datos.ajustes.camaraInicio === "mano"; onClicked: Crono.grabarAMano() }
         }
+        Chip {   // tensión baja o calor (Salud): solo si pasa
+            visible: Salud.tensionBaja || Salud.calor
+            punto: Tema.alerta
+            texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
+        }
         Chip {
             punto: Crono.gps.ok && !est.sinGps ? Tema.bien : Tema.alerta
             texto: Crono.gps.ok ? "GPS " + Crono.gps.hz + " Hz" + (raiz.h ? " · " + Math.round(Crono.gps.precision) + " m" : "") : "Sin GPS"

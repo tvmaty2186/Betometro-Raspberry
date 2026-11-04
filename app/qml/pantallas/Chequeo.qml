@@ -67,6 +67,22 @@ Item {
             }
         }
     }
+    // Alimentación y temperatura (Salud): la tensión baja es típica con la fuente del auto
+    Component {
+        id: gSalud
+        Tarjeta {
+            height: cS.height + 10
+            Column { id: cS; width: parent.width
+                TituloTarjeta { texto: "Alimentación y temperatura" }
+                Fila { etiqueta: "Tensión"
+                    Estado { bien: !Salud.tensionBaja && !Salud.huboTensionBaja
+                             texto: Salud.tensionBaja ? "Baja ahora" : Salud.huboTensionBaja ? "Bajó desde que prendió" : "Bien" } }
+                Fila { etiqueta: "Temperatura"; ultima: true
+                    Estado { bien: !Salud.calor && !Salud.huboCalor
+                             texto: (Salud.temperatura >= 0 ? Salud.temperatura + " °C" : "—") + (Salud.calor ? " · se frena" : Salud.huboCalor ? " · se frenó" : "") } }
+            }
+        }
+    }
     Component {
         id: gEquipo
         Tarjeta {
@@ -106,12 +122,14 @@ Item {
         clip: true; boundsBehavior: Flickable.StopAtBounds
         Column { id: izq; visible: raiz.h; width: raiz.h ? 590 : 0; spacing: 18; topPadding: 6
             Loader { width: parent.width; sourceComponent: raiz.h ? gGps : null }
-            Loader { width: parent.width; sourceComponent: raiz.h ? gPulsador : null } }
+            Loader { width: parent.width; sourceComponent: raiz.h ? gPulsador : null }
+            Loader { width: parent.width; sourceComponent: raiz.h && Salud.sabe ? gSalud : null } }
         Column { id: der; visible: raiz.h; x: 620; width: raiz.h ? 580 : 0; spacing: 18; topPadding: 6
             Loader { width: parent.width; sourceComponent: raiz.h ? gEquipo : null } }
         Column { id: unica; visible: !raiz.h; width: lista.width; spacing: 18; topPadding: 6
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gGps }
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gPulsador }
+            Loader { width: parent.width; sourceComponent: !raiz.h && Salud.sabe ? gSalud : null }
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gEquipo } }
     }
     // Tocar la pantalla mientras se espera también cuenta (como en la app)

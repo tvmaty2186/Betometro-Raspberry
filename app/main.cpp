@@ -33,6 +33,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "datos.h"
 #include "audio.h"
 #include "gps.h"
+#include "salud.h"
 #include "qr.h"
 #include "sistema.h"
 #include "actualizador.h"
@@ -152,6 +153,14 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);
     QObject::connect(&datos, &Datos::cfgChanged, &servidor, prenderServidor);
     Sistema sistema;
+    // Salud del equipo: tensión baja, calor, vigilante y procesador al máximo en carrera
+    Salud salud;
+    QObject::connect(&salud, &Salud::aviso, &app, [&](const QString& texto) {
+        const int n = crono.estado().value(QStringLiteral("n")).toInt();
+        qWarning("%s", qPrintable(texto + (crono.enCurso() && n > 0 ? QStringLiteral(" · en la vuelta %1").arg(n) : QString())));
+    });
+    salud.modoCarrera(crono.enCurso());
+    QObject::connect(&crono, &Crono::enCursoChanged, &salud, [&] { salud.modoCarrera(crono.enCurso()); });
     // Brillo: al prender y cada vez que cambia en Ajustes
     auto ponerBrillo = [&] {
         const QVariant b = datos.cfg(QStringLiteral("brillo"));
@@ -180,10 +189,12 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);
     motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
+    motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");
     if (motor.rootObjects().isEmpty()) return 1;
+    salud.listo();
 
     if (op.isSet(oCaptura)) {
         auto* ventana = qobject_cast<QQuickWindow*>(motor.rootObjects().first());

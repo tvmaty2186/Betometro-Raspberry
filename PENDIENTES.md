@@ -33,6 +33,11 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   - Sonido: el Qt de Debian solo sale por PulseAudio → `pulseaudio-sistema.service`.
   - GitHub prueba cada versión en un Debian arm64 limpio antes de entregarla.
 
+- 04/11 (próxima): aviso de tensión baja y calor (inicio, carrera, Chequeo previo y reporte con la vuelta);
+  vigilante: si Betómetro se congela 30 s, se reinicia solo; procesador al máximo en carrera; prioridad a GPS,
+  cronómetro y pulsador (wifi y cámara después); el reporte suma lo último del sistema si se colgó o se cortó
+  la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
+
 ## Ahora (Matías)
 1. Actualizar a la 1.0.10 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
 2. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
@@ -43,6 +48,9 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
   Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
+
+- Retomar la carrera si Betómetro se reinicia en medio (hoy el vigilante lo reinicia, pero la carrera en curso
+  se corta y hay que largar de nuevo; las vueltas ya marcadas quedan guardadas).
 
 ## Más adelante
 - Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).

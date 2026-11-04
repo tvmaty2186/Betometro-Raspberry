@@ -25,6 +25,8 @@ public:
 
 private:
     void enviar();
+    static QByteArray leerArranque();        // número del arranque del sistema (/proc/sys/kernel/random/boot_id)
+    void juntarSistema(bool arranqueAnterior);
     QString carpeta_, archivo_, enviadoHasta_, marcaVivo_;
     QNetworkAccessManager red_;
     QTimer cada_;

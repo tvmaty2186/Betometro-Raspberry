@@ -61,6 +61,12 @@ Item {
         layoutDirection: raiz.h ? Qt.LeftToRight : Qt.RightToLeft
         Chip { texto: !Crono.gps.ok ? "Sin GPS" : Crono.gps.satelites ? "GPS " + Crono.gps.satelites + " satélites" : "GPS " + Crono.gps.hz + " Hz" }
         Chip { texto: Wifi.conectada ? "Wifi: " + Wifi.conectada : "Sin wifi" }
+        Chip {   // tensión baja o calor (Salud): solo si pasa
+            visible: Salud.tensionBaja || Salud.calor
+            punto: Tema.alerta
+            texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
+        }
+
     }
 
     // Se mueve solo, cerca de la sugerida (48), como el inicio de la app: 47 + 2,5·sen(0,9 t) + 1,2·sen(2,3 t)

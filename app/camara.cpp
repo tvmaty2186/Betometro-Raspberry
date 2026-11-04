@@ -81,6 +81,8 @@ bool parecido(const QString& a, const QString& b) {
 Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     : QObject(padre), datos_(datos), carpeta_(carpetaDatos + QStringLiteral("/videos")),
       prueba_(qEnvironmentVariableIsSet("BETO_CAMARA_PRUEBA")) {
+    // La cámara después del GPS, el cronómetro y el pulsador
+    for (QProcess* p : {&grab_, &vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
     QDir().mkpath(carpeta_);
     detenerTimer_.setSingleShot(true);
     connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) grab_.terminate(); });

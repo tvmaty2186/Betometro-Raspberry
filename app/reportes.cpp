@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QMutex>
 #include <QNetworkReply>
+#include <QProcess>
 #include <QSysInfo>
 
 namespace {
@@ -40,10 +41,22 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
     archivo_ = carpeta_ + QStringLiteral("/errores.log");
     enviadoHasta_ = carpeta_ + QStringLiteral("/enviado");
     marcaVivo_ = carpeta_ + QStringLiteral("/corriendo");
-    // Si quedó la marca de la vez anterior, no se cerró bien: se cayó o se cortó el contacto
-    if (QFile::exists(marcaVivo_)) anotar(QStringLiteral("cierre"), QStringLiteral("La vez anterior Betómetro no se cerró bien (se cayó o se cortó el contacto)"));
+    // Si quedó la marca de la vez anterior, no se cerró bien: se cayó o se cortó el contacto.
+    // La marca guarda el número del arranque del sistema: si es otro, se apagó toda la Raspberry
+    // (corte o cuelgue) y se suma lo último que anotó el sistema antes de caerse.
+    const QByteArray arranque = leerArranque();
+    QFile previa(marcaVivo_);
+    if (previa.open(QIODevice::ReadOnly)) {
+        const QByteArray m = previa.readAll();
+        previa.close();
+        const QByteArray arranquePrevio = m.split('\n').value(1).trimmed();
+        const bool mismo = !arranque.isEmpty() && arranquePrevio == arranque;
+        anotar(QStringLiteral("cierre"), mismo ? QStringLiteral("La vez anterior Betómetro se cerró solo (se cayó o se trabó) y se volvió a abrir")
+                                               : QStringLiteral("La vez anterior no se apagó bien (se cortó el contacto o se colgó la Raspberry)"));
+        if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) juntarSistema(!mismo);
+    }
     QFile v(marcaVivo_);
-    if (v.open(QIODevice::WriteOnly)) v.write(QDateTime::currentDateTime().toString(Qt::ISODate).toUtf8());
+    if (v.open(QIODevice::WriteOnly)) v.write(QDateTime::currentDateTime().toString(Qt::ISODate).toUtf8() + '\n' + arranque + '\n');
     connect(&cada_, &QTimer::timeout, this, &Reportes::enviar);
     cada_.start(10 * 60 * 1000);
     QTimer::singleShot(60 * 1000, this, &Reportes::enviar);
@@ -52,6 +65,35 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
 Reportes::~Reportes() {
     if (gReportes == this) { qInstallMessageHandler(gAnterior); gReportes = nullptr; }
     QFile::remove(marcaVivo_);   // se cerró bien
+}
+
+QByteArray Reportes::leerArranque() {
+    QFile f(QStringLiteral("/proc/sys/kernel/random/boot_id"));
+    return f.open(QIODevice::ReadOnly) ? f.readAll().trimmed() : QByteArray();
+}
+
+// Lo último que anotó el sistema: errores del arranque anterior (si se apagó toda la Raspberry) o de
+// este (si solo se cayó Betómetro), y si el núcleo se colgó, lo que dejó en la memoria que sobrevive al
+// reinicio (pstore, con dtoverlay=ramoops). Se suma al reporte de errores.
+void Reportes::juntarSistema(bool arranqueAnterior) {
+    QProcess j;
+    j.start(QStringLiteral("journalctl"), {arranqueAnterior ? QStringLiteral("-b-1") : QStringLiteral("-b"), QStringLiteral("-p"), QStringLiteral("err"),
+                                            QStringLiteral("-n"), QStringLiteral("20"), QStringLiteral("--no-pager"), QStringLiteral("-o"), QStringLiteral("short")});
+    if (j.waitForFinished(4000)) {
+        const QStringList lineas = QString::fromUtf8(j.readAllStandardOutput()).split('\n', Qt::SkipEmptyParts);
+        for (const QString& l : lineas)
+            if (!l.startsWith(QLatin1String("--")) && !esRuido(l)) anotar(QStringLiteral("sistema"), l.trimmed());
+    }
+    const QDir pstore(QStringLiteral("/sys/fs/pstore"));
+    for (const QString& n : pstore.entryList(QDir::Files)) {
+        QFile f(pstore.filePath(n));
+        if (!f.open(QIODevice::ReadOnly)) continue;
+        const QList<QByteArray> lineas = f.readAll().split('\n');
+        for (qsizetype i = std::max<qsizetype>(0, lineas.size() - 25); i < lineas.size(); ++i)
+            if (!lineas[i].trimmed().isEmpty()) anotar(QStringLiteral("cuelgue"), QString::fromUtf8(lineas[i]).trimmed());
+        f.close();
+        QFile::remove(pstore.filePath(n));   // ya se anotó: se libera para el próximo
+    }
 }
 
 void Reportes::instalar() {
