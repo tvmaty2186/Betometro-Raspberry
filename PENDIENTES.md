@@ -42,8 +42,8 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
 ## Ahora (Matías)
 1. Ya tiene la 1.0.12 (04/11). Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
-2. GPS: probar si el micro USB de su placa NEO-M8N pasa datos (en la PC: Administrador de dispositivos →
-   «u-blox GNSS receiver» o un COM nuevo). Si pasa, va por USB sin soldar; si no, por pines o con un VK-172/VK-162.
+2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
+   RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
 3. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».

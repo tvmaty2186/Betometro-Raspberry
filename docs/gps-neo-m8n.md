@@ -78,5 +78,6 @@ Son los que más se consiguen (placas GY-GPSV3-NEO y GY-NEO6MV2). **Sirven los d
 - Se puede enchufar o desenchufar con el programa andando: si un puerto se calla 6 s, prueba el siguiente.
 - La configuración es la misma (reconoce M8, 7 o 6). Por USB no se cambia la velocidad del puerto (no hace falta).
 - En el Chequeo previo, «Módulo» dice «· USB» o «· pines».
+- **La placa de Matías (04/11/2026): el micro USB solo da corriente, no pasa datos.** Va por los pines.
 - **Ojo con la placa NEO-M8N:** en algunas el micro USB solo da corriente. Prueba: enchufarla a la PC con un cable
   de datos; si en el Administrador de dispositivos aparece «u-blox GNSS receiver» o un puerto COM nuevo, pasa datos.
