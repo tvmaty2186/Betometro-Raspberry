@@ -33,13 +33,14 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   - Sonido: el Qt de Debian solo sale por PulseAudio → `pulseaudio-sistema.service`.
   - GitHub prueba cada versión en un Debian arm64 limpio antes de entregarla.
 
+- 04/11 (1.0.12): en carrera sin cartel de calor/tensión y procesador al máximo salvo con calor o tensión baja; Actualizar busca en la página de GitHub si la API no contesta.
 - 04/11 (1.0.11): aviso de tensión baja y calor (inicio, carrera, Chequeo previo y reporte con la vuelta);
   vigilante: si Betómetro se congela 30 s, se reinicia solo; procesador al máximo en carrera; prioridad a GPS,
   cronómetro y pulsador (wifi y cámara después); el reporte suma lo último del sistema si se colgó o se cortó
   la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
 
 ## Ahora (Matías)
-1. Actualizar a la 1.0.11 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
+1. Actualizar a la 1.0.12 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
 2. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
