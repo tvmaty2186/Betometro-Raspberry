@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -40,8 +40,11 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
   la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
 
 ## Ahora (Matías)
-1. Actualizar a la 1.0.12 y probar: pantalla de arranque, pulsador (pin 11 y 9), wifi propia (lejos de casa).
-2. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
+1. Ya tiene la 1.0.12 (04/11). Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+   (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
+2. GPS: probar si el micro USB de su placa NEO-M8N pasa datos (en la PC: Administrador de dispositivos →
+   «u-blox GNSS receiver» o un COM nuevo). Si pasa, va por USB sin soldar; si no, por pines o con un VK-172/VK-162.
+3. Reporte de errores por internet (opcional): crear el repo privado `Betometro-reportes` y una llave que solo
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
@@ -49,12 +52,13 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
   Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
-
 - Retomar la carrera si Betómetro se reinicia en medio (hoy el vigilante lo reinicia, pero la carrera en curso
   se corta y hay que largar de nuevo; las vueltas ya marcadas quedan guardadas).
 
 ## Más adelante
 - Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).
+- Bluetooth (si el GPS va por USB queda libre): música desde el celular por los auriculares con la voz arriba;
+  pulsador Bluetooth solo como respaldo (los botones baratos se duermen y llegan tarde). Charlado, no decidido.
 - Ver las carreras en la tele por HDMI («modo tele»: informe y video en la tele, se maneja desde la pantalla de 5"). Mientras tanto: la página «Betómetro en la red» desde el navegador de la tele.
 - E6: prueba en pista y versión 1.0.0 definitiva.
 - App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).

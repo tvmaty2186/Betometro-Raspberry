@@ -4,6 +4,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 
 | Archivo | Qué tiene |
 |---|---|
+| [docs/raspios.md](docs/raspios.md) | **Cómo está hecho hoy**: Raspberry Pi OS, instalador, servicios, cómo se publica una versión, actualización, errores ya vistos |
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
@@ -20,7 +21,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 
 Betómetro para Raspberry Pi: un equipo **autónomo** para el navegante de carreras de regularidad. Hace lo mismo que la app Android Betómetro (cuenta regresiva en voz, velocidad sugerida con GPS, adelantado/atrasado, historial e informes), pero como **sistema propio**: se prende y arranca directo en Betómetro.
 
-- **Sistema:** Linux a medida con Buildroot, solo lectura, dos copias A/B para actualizar seguro.
+- **Sistema:** Raspberry Pi OS Lite 64 bits (trixie) con Betómetro instalado como programa que arranca solo (decisión de Matías del 03/11/2026; Buildroot quedó guardado sin usar). Se actualiza por wifi. Ver [docs/raspios.md](docs/raspios.md).
 - **Programa:** nativo en Qt 6 / QML, hecho de cero. El motor se pasa a C++ con la misma lógica que el `Motor` de la app.
 - **App Android:** está en otro repo, [tvmaty2186/Betometro](https://github.com/tvmaty2186/Betometro). **Prohibido tocarla desde acá**; funciona bien. Se puede leer para copiar la lógica (por ejemplo `www/index.html`, sección MOTOR).
 
@@ -35,6 +36,11 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 - **Fotos de referencia:** prestá mucha atención a posiciones y medidas.
 - **El león es suyo:** el león corriendo (melena azul, cuerpo amarillo) lo dibujó él. **No es el logo de Peugeot.** No uses la marca PEUGEOT ni logos de concesionarias.
 - **Estética:** igual a la app en todo lo posible.
+- **Si pregunta, solo contestar.** No programar ni compilar cuando hace una consulta («te dije que te haga una consulta, no que te pongas a programar»).
+- **No compilar ni publicar sin su OK.** Nunca empujar mientras compila una versión: los commits intermedios llevan `[skip ci]`.
+- **Comandos para la Raspberry:** completos, listos para pegar (se conecta con `ssh beto@<IP>` desde Windows).
+- **Tokens y claves:** nunca pedirlos ni pegarlos en el chat.
+- Las ideas que no le gustan no se anotan. Lo que ya está como en la app, se deja como en la app.
 
 ## Commits
 
@@ -52,6 +58,10 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 
 - `recursos/fuentes/`: tipografías (copiadas de la app).
 - `recursos/img/leon.png`: el león de Matías. `recursos/img/inicio.jpg`: la foto fija del inicio. `recursos/img/betometro-icono-*.png`: ícono de la app.
+
+## Versiones y publicación
+
+Última publicada: **1.0.12** (04/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
 
 ## Compilar y probar
 

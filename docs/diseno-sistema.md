@@ -1,5 +1,7 @@
 # Betómetro para Raspberry Pi — diseño del sistema
 
+> **Ojo (03/11/2026):** el sistema ya no es Buildroot sino Raspberry Pi OS Lite con Betómetro como programa. Lo de Buildroot de abajo queda como historia; lo vigente está en [raspios.md](raspios.md). El cableado, las pantallas y las decisiones siguen valiendo.
+
 Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y verticales aprobadas («están preciosas», «perfectas»). Todavía no se programó nada.**
 
 **Regla:** la app Android vive en otro repo ([tvmaty2186/Betometro](https://github.com/tvmaty2186/Betometro)) y **no se toca**. Este repo es solo la Raspberry.

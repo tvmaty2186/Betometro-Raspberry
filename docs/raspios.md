@@ -1,0 +1,80 @@
+# Betómetro en Raspberry Pi OS — cómo está hecho, cómo se publica y lo aprendido
+
+Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el instalador o las versiones.
+
+## El equipo
+- Raspberry Pi 3 B+ (1 GB) + **Touch Display 2 de 5"** (720×1280, de pie; se usa acostada: Qt gira la imagen).
+- Raspberry Pi OS Lite 64 bits (Debian **trixie**), Qt 6.8.2 de Debian, `eglfs_kms`, Mesa vc4.
+- Usuario `beto`. En casa la IP fue `192.168.1.83` (`ssh beto@192.168.1.83`; en Windows PowerShell hay que escribir `ssh`).
+- La luz de fondo es `/sys/class/backlight/panel_backlight@1`.
+
+## Qué instala `raspios/instalar.sh`
+1. Paquetes de `raspios/paquetes.txt` (antes repara dpkg con `dpkg --configure -a`; solo instala lo que falta).
+2. Guarda la versión anterior en `/var/lib/betometro-anterior` (`volver.sh` para volver a mano), copia el programa, la voz y los servicios.
+3. `config.txt`: `dtoverlay=vc4-kms-dsi-ili9881-5inch`, `enable_uart=1`, `disable-bt`, audio, watchdog, `disable_splash=1`, `ramoops` (si existe).
+   - `cmdline.txt`: sin consola serie (el puerto es del GPS), `console=tty3 quiet splash … video=Composite-1:d fsck.repair=yes`.
+4. 3c, menos escrituras: journald guarda en la tarjeta solo avisos y errores (`MaxLevelStore=warning`); sin `apt-daily` ni `man-db`; memoria de reserva en zram (sin `dphys-swapfile`).
+5. 3b, pantalla de arranque Plymouth (`raspios/arranque/`): si cambió la foto, rearma el initramfs. **Tarda varios minutos en la Pi 3 y la pantalla queda negra con un guión parpadeando: es normal, no apagar.**
+6. Servicios: `betometro`, `pulseaudio-sistema` (el Qt de Debian solo suena por PulseAudio) y `despertar-touch` (el touch aparece antes que la pantalla). `getty@tty1` apagado. Reinicia.
+
+## `betometro.service`
+- `BETO_RASPBERRY=1`, `BETO_DATOS=/var/lib/betometro`, `BETO_GPS=auto`, `BETO_VOZ=/usr/share/betometro/voz`.
+- `Restart=always`, **`WatchdogSec=30` + `NotifyAccess=main`**: el programa avisa «sigo vivo» cada 5 s (`app/salud.cpp`); si se congela, systemd lo reinicia.
+- Prioridad: `Nice=-10`. El programa baja a sus hijos: nmcli `nice 10` y cámara `nice 5`.
+- `ExecStartPre=plymouth quit --retain-splash`: la foto queda hasta que Betómetro dibuja.
+
+## Cómo se arma y se publica una versión
+- El número está en `CMakeLists.txt` (`project(betometro VERSION x.y.z)`). Las versiones son propias de este repo y empezaron en 1.0.0.
+- Push a `claude/adoring-bell-disf3a`. El workflow `.github/workflows/programa.yml` compila en un Debian trixie arm64 (QEMU), corre `raspios/probar.sh` (40 s sin pantalla, servidor web, capturas) y arma `betometro-pi-X.Y.Z.tar.gz`.
+- **Publicar:** el mensaje del commit tiene que tener `[publicar]` (los tags no se pueden empujar desde la sesión: 403). Sube el paquete al repo público `tvmaty2186/Betometro-actualizaciones` con el secreto `ACTUALIZACIONES_TOKEN`. Falla si esa versión ya existe.
+- **Commits intermedios con `[skip ci]`**, para no lanzar compilaciones. Nunca empujar mientras compila una (Matías se enojó mucho con los reinicios).
+- Tarda unos 15 minutos con caché. Para ver el estado:
+  `curl -H "User-Agent: x" https://api.github.com/repos/tvmaty2186/Betometro-Raspberry/actions/runs/<id>`.
+- Desde la sesión, el proxy no deja leer `Betometro-actualizaciones` por API. Para comprobar la publicación, bajar los primeros bytes con
+  `curl -L -r 0-10 https://github.com/tvmaty2186/Betometro-actualizaciones/releases/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz` (206 = está).
+
+## Actualización en la Raspberry (`app/actualizador.cpp`)
+- Busca a los 20 s de prender, al conectar el wifi y cada 15 min. Si falla, reintenta cada minuto.
+- Primero pregunta a la API (`…/releases/latest`). **La API deja 60 consultas por hora por casa**; pasado eso contesta 403 y antes se veía «sin internet». Ahora, si falla, lee la redirección de `https://github.com/…/releases/latest` y baja `…/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz`.
+- Instala con `systemd-run --unit=betometro-actualizar bash instalar.sh` (no se corta si se cierra Betómetro). Sin botón REINICIAR: cortaba la instalación.
+- Pantalla Actualizar: botón **BUSCAR** por internet y «Buscar en pendrive»; dice «Sin internet» o «la última publicada es la X».
+- **Instalar a mano** (si la Pi tiene una versión vieja que no encuentra la nueva):
+  ```bash
+  cd /tmp && curl -LO https://github.com/tvmaty2186/Betometro-actualizaciones/releases/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz && tar xzf betometro-pi-X.Y.Z.tar.gz && sudo bash betometro-pi-X.Y.Z/instalar.sh
+  ```
+
+## Partes del programa propias de la Raspberry
+| Archivo | Qué hace |
+|---|---|
+| `app/gps.cpp` | GPS u-blox (M8, 7 o 6; lo detecta con MON-VER). `auto`: busca por USB (`ttyACM*`, `ttyUSB*`) y si no por los pines (`ttyAMA0`); se puede enchufar con el programa andando. La hora de cada lectura sale del iTOW del GPS. Ver [gps-neo-m8n.md](gps-neo-m8n.md) |
+| `app/pulsador_gpio.cpp` | Pulsador en GPIO17 (pin 11 a GND pin 9), pull-up interna, hora del kernel en cada flanco |
+| `app/salud.cpp` | Tensión baja y calor (`get_throttled`, `thermal_zone0`), vigilante de systemd, procesador al máximo en carrera salvo con calor o tensión baja (vuelve 30 s después) |
+| `app/sistema.h` | Apagar y **brillo** (escribe la luz de fondo; 100 % = máximo de la pantalla) |
+| `app/wifi.cpp` | nmcli. Wifi propia «Betometro-<número>» (clave `betometro`) si en 90 s no hay red guardada cerca |
+| `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores. Puerto 80 en la Pi |
+| `app/reportes.cpp` | `<datos>/reportes/errores.log`. Al prender distingue «se cayó el programa» de «se cortó la corriente o se colgó», y suma errores del sistema (journal) y del pstore. Manda issues a `Betometro-reportes` si existe `/var/lib/betometro/reportes.token` |
+| `app/actualizador.cpp` | Ver arriba |
+| `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
+
+## Cosas de la pantalla y del arranque (lo que costó)
+- La pantalla es de **5"**, no de 7". Con `dtoverlay=vc4-kms-dsi-ili9881-5inch`.
+- La Pi 3 tiene además una **salida de TV (720×480)**. En Plymouth, `Window.GetWidth()` sin número da la pantalla **más chica**: la foto salía apretada en un costado. El script busca la pantalla más grande (`Window.GetWidth(i)`) y vuelve a medir mientras arranca.
+- `DeviceScale=1` en `/etc/plymouth/plymouthd.conf` (si no, la agrandaba al doble).
+- Al instalar se ve un rato la consola negra con el cursor: el instalador ya cerró Betómetro y está trabajando.
+
+## En carrera (decisiones de Matías)
+- **Nada de carteles de calor o tensión durante la carrera**: hay que aguantar. Se anotan en el reporte con la vuelta.
+- El procesador va al máximo; solo baja si hay calor o tensión baja.
+- Si el vigilante reinicia Betómetro en medio de una carrera, **la carrera en curso se corta** (las vueltas marcadas quedan). Retomarla está en pendientes.
+
+## Probar en la PC (la sesión de Claude)
+- Qt 6.8.2 con aqtinstall en `/opt/qt/6.8.2/gcc_64`; compilar el programa con `cmake --build <bq>` y el núcleo + pruebas con `ctest`.
+- Capturas: `QT_QPA_PLATFORM=offscreen QT_PLUGIN_PATH=/opt/qt/6.8.2/gcc_64/plugins betometro --datos D --muestra --pantalla X --captura f.png`.
+- Simulador de GPS: `simular_neo --enlace /tmp/betometro-gps` y `betometro --gps /tmp/betometro-gps` (con `--enlace /dev/ttyACM0` se prueba el modo USB).
+- Con `BETO_RASPBERRY=1` se activan las partes de la Raspberry (sin sensores en la PC).
+
+## Errores que ya pasaron (para no repetirlos)
+- Actualizar volvía a la 1.0.3: la instalación se cortaba (apt + initramfs tardan minutos; el botón REINICIAR la mataba). Arreglado.
+- «No encuentra la actualización» = el wifi se había desconfigurado, o la API de GitHub frenaba (60 por hora). Arreglado con el plan B.
+- El brillo solo se guardaba y no se aplicaba. Arreglado en 1.0.10.
+- Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` quedan guardados sin usar).
