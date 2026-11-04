@@ -44,6 +44,7 @@ Actualizado el 03/11/2026. Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.
 
 ## Más adelante
 - Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).
+- Ver las carreras en la tele por HDMI («modo tele»: informe y video en la tele, se maneja desde la pantalla de 5"). Mientras tanto: la página «Betómetro en la red» desde el navegador de la tele.
 - E6: prueba en pista y versión 1.0.0 definitiva.
 - App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).
 
