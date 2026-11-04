@@ -79,5 +79,9 @@ Son los que más se consiguen (placas GY-GPSV3-NEO y GY-NEO6MV2). **Sirven los d
 - La configuración es la misma (reconoce M8, 7 o 6). Por USB no se cambia la velocidad del puerto (no hace falta).
 - En el Chequeo previo, «Módulo» dice «· USB» o «· pines».
 - **La placa de Matías (04/11/2026): el micro USB solo da corriente, no pasa datos.** Va por los pines.
+- **Pines de su placa, leídos en la foto (04/11/2026), de izquierda a derecha con la antena arriba: PPS · RXD · TXD · GND · VCC**
+  (RXD y TXD al revés de lo que se suponía). Cables soldados: amarillo PPS, marrón RXD, naranja TXD, azul GND, blanco VCC.
+  Conexión: blanco → pin 17 (3,3 V) · azul → pin 14 (GND) · naranja (TXD) → pin 10 (RX) · marrón (RXD) → pin 8 (TX) ·
+  amarillo (PPS) → pin 7 (GPIO4, opcional) o aislado.
 - **Ojo con la placa NEO-M8N:** en algunas el micro USB solo da corriente. Prueba: enchufarla a la PC con un cable
   de datos; si en el Administrador de dispositivos aparece «u-blox GNSS receiver» o un puerto COM nuevo, pasa datos.
