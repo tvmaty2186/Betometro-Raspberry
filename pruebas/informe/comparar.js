@@ -56,9 +56,12 @@ const casos = [
 for (let s = 0; s < 20; s++) { const r = azar(100 + s); casos.push({ semilla: 200 + s, largo: 500 + Math.round(r() * 6000), idealMs: 30000 + Math.round(r() * 400000),
   vueltas: 1 + Math.floor(r() * 5), hz: [1, 5, 10][s % 3], mala: r() * 0.3, saltos: r() * 0.04, huecos: [[100, 100 + r() * 800]], vueltaHueco: 1 + (s % 3), corte: 1 + (s % 4) }); }
 
-const fallas = []; let numeros = 0, maxCoord = 0, maxOtro = 0;
+const fallas = []; let numeros = 0, maxCoord = 0, maxOtro = 0, hzActual = 1, acelSalteadas = 0;
 function comparar(a, b, ruta) {
   if (typeof a === 'number' && typeof b === 'number') {
+    // Diferencia a propósito (04/11/2026): con más de 1 lectura por segundo la Raspberry calcula la aceleración
+    // con las lecturas de ~1 s antes y después (la app usa las vecinas: con el celular a 1 Hz es lo mismo).
+    if (hzActual > 1 && /\.m\[\d+\]\[3\]$/.test(ruta)) { acelSalteadas++; return; }
     numeros++;
     const d = Math.abs(a - b);
     const coord = /\.pista\[|\.m\[\d+\]\[[56]\]/.test(ruta);
@@ -82,11 +85,13 @@ const umbral = 20;
 const { datosInforme } = cargarInformeApp()({ umbralPrecisionM: umbral });
 for (const o of casos) {
   const c = carrera(o);
+  hzActual = o.hz || 1;
   const app = JSON.parse(JSON.stringify(datosInforme(JSON.parse(JSON.stringify(c)))));
   const cpp = JSON.parse(execFileSync(bin, [String(umbral)], { input: JSON.stringify(c), maxBuffer: 1 << 28 }).toString());
   comparar(app, cpp, 'caso' + o.semilla);
   if (fallas.length > 20) break;
 }
+console.log(`(aceleración con ventana de 1 s, sin comparar en 5/10 Hz: ${acelSalteadas} lecturas)`);
 console.log(`Informe: ${casos.length} carreras, ${numeros} números comparados. Mayor diferencia en el dibujo: ${maxCoord.toFixed(3)} px; en lo demás: ${maxOtro}`);
 if (fallas.length) { console.log('FALLAS:\n' + fallas.slice(0, 20).join('\n')); process.exit(1); }
 console.log('IGUALES');

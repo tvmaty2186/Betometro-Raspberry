@@ -232,10 +232,17 @@ Json datosInforme(const Carrera& c, double umbralPrecisionM) {
         for (size_t k = 0; k < P.size(); ++k) {
             const auto& p = *P[k].p;
             const FilaTraza* prev = k > 0 ? P[k - 1].p : nullptr;
-            const FilaTraza* sig = k + 1 < P.size() ? P[k + 1].p : nullptr;
-            double a = 0;   // aceleración suavizada con las lecturas vecinas
-            if (prev && sig && (*sig)[0] > (*prev)[0]) a = (((*sig)[2] - (*prev)[2]) / 3.6) / ((*sig)[0] - (*prev)[0]);
-            else if (prev && p[0] > (*prev)[0]) a = ((p[2] - (*prev)[2]) / 3.6) / (p[0] - (*prev)[0]);
+            // Aceleración con las lecturas de ~1 s antes y ~1 s después (como la app con el GPS del celular a 1 Hz).
+            // Con las vecinas inmediatas a 5 Hz (0,4 s) el ruido de la velocidad daba saltos de ±4 m/s² (04/11/2026).
+            size_t ia = k, ib = k;
+            while (ia > 0 && p[0] - (*P[ia - 1].p)[0] <= 1.0) --ia;
+            if (ia > 0 && p[0] - (*P[ia].p)[0] < 1.0) --ia;
+            while (ib + 1 < P.size() && (*P[ib + 1].p)[0] - p[0] <= 1.0) ++ib;
+            if (ib + 1 < P.size() && (*P[ib].p)[0] - p[0] < 1.0) ++ib;
+            const FilaTraza& A = *P[ia].p;
+            const FilaTraza& B = *P[ib].p;
+            double a = 0;   // la primera lectura, sin anterior: 0 (como la app)
+            if (ia < k && B[0] > A[0]) a = ((B[2] - A[2]) / 3.6) / (B[0] - A[0]);
             const bool corte = prev && p[0] - (*prev)[0] > 4;   // más de 4 s sin lecturas
             const double ade = D > 0 && T > 0 ? p[1] / (D / T) - p[0] : 0;
             const auto xy = enPista(P[k].f);
