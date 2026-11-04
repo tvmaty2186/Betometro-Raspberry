@@ -23,6 +23,7 @@ Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), dat
     });
     connect(fuenteGps_, &FuenteGps::datos, this, [this](int satelites, const QDateTime& utc) {
         gpsInfo_["satelites"] = satelites;
+        gpsInfo_["ultimoDato"] = QDateTime::currentMSecsSinceEpoch();   // para saber si el módulo sigue hablando
         gpsInfo_["hora"] = utc.isValid() ? utc.toLocalTime().toString(QStringLiteral("HH:mm:ss")) : QString();
         gpsInfo_["ok"] = gpsInfo_.contains("hz");
         emit gpsChanged();
