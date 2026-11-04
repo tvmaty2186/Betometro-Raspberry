@@ -85,11 +85,12 @@ void Actualizador::buscar() {
     QNetworkReply* r = red_.get(q);
     connect(r, &QNetworkReply::finished, this, [this, r] {
         r->deleteLater();
-        if (r->error() != QNetworkReply::NoError) {   // sin internet todavía: de nuevo en un minuto
-            qWarning("Actualizar: no pude buscar (%s)", qPrintable(r->errorString()));
-            busqueda_ = QStringLiteral("sinred");
-            emit cambio();
-            reintento_.start();
+        if (r->error() != QNetworkReply::NoError) {
+            // La API de GitHub deja buscar 60 veces por hora por casa (todas las compus juntas) y después
+            // contesta «prohibido». Por eso, si falla, se pregunta a la página común de GitHub, que no tiene
+            // ese límite (04/11/2026: la Pi decía «sin internet» con el wifi andando).
+            qWarning("Actualizar: la API no contestó (%s), pruebo la página", qPrintable(r->errorString()));
+            buscarPagina();
             return;
         }
         const QJsonObject o = QJsonDocument::fromJson(r->readAll()).object();
@@ -110,6 +111,40 @@ void Actualizador::buscar() {
             emit cambio();
             return;
         }
+    });
+}
+
+// Plan B: https://github.com/<repo>/releases/latest redirige a …/releases/tag/vX.Y.Z. El paquete se baja de
+// …/releases/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz (siempre se publica con ese nombre).
+void Actualizador::buscarPagina() {
+    const QString web = QString(url_).replace(QLatin1String("https://api.github.com/repos/"), QLatin1String("https://github.com/"))
+                            .remove(QLatin1String("/latest")).remove(QRegularExpression(QStringLiteral("/releases$")));
+    QNetworkRequest q{QUrl(web + QStringLiteral("/releases/latest"))};
+    q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);
+    q.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
+    q.setTransferTimeout(15000);
+    QNetworkReply* r = red_.get(q);
+    connect(r, &QNetworkReply::finished, this, [this, r, web] {
+        r->deleteLater();
+        const QString destino = r->header(QNetworkRequest::LocationHeader).toUrl().toString();
+        const QString v = destino.section(QLatin1String("/tag/v"), 1, 1).section('/', 0, 0);
+        if (v.isEmpty() || QVersionNumber::fromString(v).isNull()) {   // ahora sí: sin internet. De nuevo en un minuto
+            qWarning("Actualizar: no pude buscar (%s)", qPrintable(r->errorString()));
+            busqueda_ = QStringLiteral("sinred");
+            emit cambio();
+            reintento_.start();
+            return;
+        }
+        ultima_ = v;
+        busqueda_ = QStringLiteral("aldia");
+        if (masNueva(v, version())) {
+            versionNueva_ = v;
+            notas_.clear();
+            origen_ = QStringLiteral("internet");
+            descarga_ = web + QStringLiteral("/releases/download/v%1/betometro-pi-%1.tar.gz").arg(v);
+            tamano_ = 0;
+        }
+        emit cambio();
     });
 }
 
