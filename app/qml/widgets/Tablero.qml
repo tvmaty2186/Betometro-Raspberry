@@ -259,9 +259,12 @@ Item {
     Component {
         id: cNecesaria
         WNumero {
+            // Si pasa el máximo del velocímetro (160), queda trabada en 160 y en rojo, sin el ■ (Matías, 04/11/2026)
+            readonly property bool pasada: raiz.est.vNecKmh > 160
             ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"
             etiqueta: "Sugerida"
-            numero: raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
+            colorNumero: pasada ? "#d23b2c" : Tema.numero
+            numero: raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : pasada ? "160" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
             extra: parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
         }
     }

@@ -39,6 +39,9 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
   cronómetro y pulsador (wifi y cámara después); el reporte suma lo último del sistema si se colgó o se cortó
   la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
 
+- Para la 1.0.13 (sin compilar): sugerida que pasa los 160 km/h → queda en 160 y en rojo, en el velocímetro y en el
+  cuadrado «Sugerida» (sin el ■).
+
 ## Ahora (Matías)
 1. Ya tiene la 1.0.12 (04/11). Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
