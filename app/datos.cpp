@@ -10,6 +10,8 @@
 #include <QLocale>
 #include <QRandomGenerator>
 #include <algorithm>
+#include <sys/resource.h>
+#include <unistd.h>
 #include <cmath>
 #include <map>
 
@@ -45,11 +47,51 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
     base_ = std::move(l.base);
     cfg_ = armarConfig(base_.config);
     if (l.habiaDanado) qWarning("La base estaba dañada: se usó %s", l.origen.c_str());
+    hilo_ = std::thread([this] { hiloGuardar(); });
+}
+
+Datos::~Datos() {
+    {
+        std::lock_guard<std::mutex> l(m_);
+        terminar_ = true;
+    }
+    cv_.notify_all();
+    if (hilo_.joinable()) hilo_.join();   // escribe lo último que quedó pendiente antes de cerrar
 }
 
 void Datos::guardar() {
-    std::string err;
-    if (!almacen_.guardar(base_, &err)) emit error(q("No se pudo guardar: " + err));
+    auto copia = std::make_shared<beto::Base>(base_);   // la copia en memoria es rápida; escribir en la SD no
+    {
+        std::lock_guard<std::mutex> l(m_);
+        pendiente_ = std::move(copia);
+    }
+    cv_.notify_all();
+}
+
+void Datos::guardarYa() {
+    std::unique_lock<std::mutex> l(m_);
+    listo_.wait(l, [this] { return !pendiente_ && !escribiendo_; });
+}
+
+void Datos::hiloGuardar() {
+    // Este hilo, con menos prioridad: primero GPS, cronómetro, pulsador y pantalla
+    setpriority(PRIO_PROCESS, static_cast<id_t>(::gettid()), 10);
+    std::unique_lock<std::mutex> l(m_);
+    for (;;) {
+        cv_.wait(l, [this] { return pendiente_ || terminar_; });
+        if (!pendiente_) break;   // terminar y no hay nada pendiente
+        auto b = std::move(pendiente_);
+        escribiendo_ = true;
+        l.unlock();
+        std::string err;
+        const bool ok = almacen_.guardar(*b, &err);
+        b.reset();
+        l.lock();
+        escribiendo_ = false;
+        if (!ok) QMetaObject::invokeMethod(this, [this, err] { emit error(q("No se pudo guardar: " + err)); }, Qt::QueuedConnection);
+        listo_.notify_all();
+    }
+    listo_.notify_all();
 }
 
 // Sin cantidad de vueltas fija (en la carrera pueden agregar vueltas): queda terminada

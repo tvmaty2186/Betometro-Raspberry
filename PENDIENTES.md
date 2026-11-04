@@ -40,7 +40,8 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
   la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
 
 - Para la 1.0.13 (sin compilar): sugerida que pasa los 160 km/h → queda en 160 y en rojo, en el velocímetro y en el
-  cuadrado «Sugerida» (sin el ■).
+  cuadrado «Sugerida» (sin el ■). **Al marcar ya no se congela**: la base se guarda por detrás en otro hilo
+  (antes guardar varios MB en la SD frenaba la pantalla medio segundo; empeoraba con cada carrera a 5 Hz).
 
 ## Ahora (Matías)
 1. Ya tiene la 1.0.12 (04/11). Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo

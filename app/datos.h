@@ -6,6 +6,11 @@
 #include <QObject>
 #include <QVariant>
 
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <thread>
+
 #include "almacen.h"
 #include "modelo.h"
 
@@ -18,6 +23,8 @@ class Datos : public QObject {
 
 public:
     explicit Datos(const QString& carpeta, QObject* padre = nullptr);
+    ~Datos() override;                     // espera a que termine de guardar
+    void guardarYa();                      // espera a que lo pendiente quede en la tarjeta (para pruebas y al cerrar)
 
     QVariantList proximas() const;
     QVariantList corridas() const;
@@ -80,4 +87,14 @@ private:
     beto::Base base_;
     beto::Json cfg_;
     bool horaValida_ = true;
+
+    // Guardado por detrás (04/11/2026): con el GPS a 5 Hz la base pesa varios MB y guardarla en la SD de la
+    // Pi 3 tardaba medio segundo: al marcar, la pantalla se congelaba. Ahora guardar() hace una copia y un
+    // hilo aparte la escribe (siempre la última; si llegan varias seguidas, se escribe solo la más nueva).
+    void hiloGuardar();
+    std::thread hilo_;
+    std::mutex m_;
+    std::condition_variable cv_, listo_;
+    std::shared_ptr<beto::Base> pendiente_;
+    bool escribiendo_ = false, terminar_ = false;
 };
