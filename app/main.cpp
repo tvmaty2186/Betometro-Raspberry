@@ -152,6 +152,13 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);
     QObject::connect(&datos, &Datos::cfgChanged, &servidor, prenderServidor);
     Sistema sistema;
+    // Brillo: al prender y cada vez que cambia en Ajustes
+    auto ponerBrillo = [&] {
+        const QVariant b = datos.cfg(QStringLiteral("brillo"));
+        sistema.brillo(b.isValid() && !b.isNull() ? b.toInt() : 100);
+    };
+    ponerBrillo();
+    QObject::connect(&datos, &Datos::cfgChanged, &sistema, ponerBrillo);
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
     if (op.isSet(oTema)) contexto.setTema(op.value(oTema));

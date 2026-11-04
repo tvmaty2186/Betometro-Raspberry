@@ -9,7 +9,7 @@ Item {
     readonly property bool h: Contexto.horizontal
     readonly property string estado: Crono.enCurso ? "carrera" : Actualizador.estado   // nada, descargando, instalando, lista, error, carrera
     readonly property real progreso: Actualizador.progreso
-    Component.onCompleted: if (!Actualizador.versionNueva) Actualizador.buscar()
+    Component.onCompleted: Actualizador.buscar()   // siempre: puede haber salido otra más nueva
 
     Fondo { anchors.fill: parent }
     CabeceraPantalla { titulo: "ACTUALIZAR"; derechaRayas: raiz.h ? 90 : 30; onVolver: Navegacion.ir("inicio") }
@@ -31,7 +31,10 @@ Item {
                          Digito { anchors.horizontalCenter: parent.horizontalCenter; text: Contexto.versionNueva || Contexto.version; tam: 100; color: Tema.acento } }
             }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
-                   text: Actualizador.versionNueva ? "Qué trae: " + (Actualizador.notas || "mejoras") : "No hay una versión nueva por internet."; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 22 } }
+                   text: Actualizador.versionNueva ? "Qué trae: " + (Actualizador.notas || "mejoras")
+                         : Actualizador.busqueda === "buscando" ? "Buscando por internet…"
+                         : Actualizador.busqueda === "sinred" ? "No hay internet: no se pudo buscar. Revisá el wifi en Ajustes → Conectividad."
+                         : Actualizador.ultima ? "La última publicada es la " + Actualizador.ultima + "." : "No hay una versión nueva por internet."; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 22 } }
             Rectangle {
                 visible: raiz.estado === "descargando" || raiz.estado === "instalando" || raiz.estado === "lista"
                 width: parent.width; height: 22; radius: 11; color: "#0a2414"; border { width: 2; color: Tema.bordeCromo }
@@ -46,7 +49,10 @@ Item {
                          : raiz.estado === "descargando" ? "Descargando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "instalando" ? "Instalando… " + Math.floor(raiz.progreso) + " %"
                          : raiz.estado === "error" ? Actualizador.mensaje
-                         : Actualizador.versionNueva ? "Versión " + Actualizador.versionNueva + (Actualizador.origen === "pendrive" ? " en el pendrive" : " disponible") : "Estás al día"
+                         : Actualizador.versionNueva ? "Versión " + Actualizador.versionNueva + (Actualizador.origen === "pendrive" ? " en el pendrive" : " disponible")
+                         : Actualizador.busqueda === "buscando" ? "Buscando…"
+                         : Actualizador.busqueda === "sinred" ? "Sin internet"
+                         : "Estás al día"
                    color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.3
                    text: raiz.estado === "lista" ? "Puede tardar hasta 10 minutos y la pantalla puede quedar negra.\nAl terminar, se reinicia sola en la versión nueva."
@@ -58,6 +64,9 @@ Item {
                                 onTocado: { Actualizador.reiniciar(); if (!Sistema.raspberry) Navegacion.avisar("En la Raspberry reinicia en la versión nueva"); } }
                 BotonAmarillo { visible: (raiz.estado === "nada" || raiz.estado === "error") && !!Actualizador.versionNueva
                                 width: 300; height: 64; texto: "ACTUALIZAR"; onTocado: Actualizador.actualizar() }
+                BotonAmarillo { visible: (raiz.estado === "nada" || raiz.estado === "error") && !Actualizador.versionNueva
+                                enabled: Actualizador.busqueda !== "buscando"; opacity: enabled ? 1 : 0.5
+                                width: 300; height: 64; texto: "BUSCAR"; onTocado: Actualizador.buscar() }
                 BotonCromo { visible: raiz.estado === "nada" || raiz.estado === "error"; width: 260; height: 64; tamTexto: 18
                              texto: "Buscar en pendrive"; onTocado: Actualizador.buscarPendrive() }
             }

@@ -80,12 +80,23 @@ void Actualizador::buscar() {
     q.setRawHeader("Accept", "application/vnd.github+json");
     q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);   // GitHub rechaza pedidos sin User-Agent
     q.setTransferTimeout(15000);
+    busqueda_ = QStringLiteral("buscando");
+    emit cambio();
     QNetworkReply* r = red_.get(q);
     connect(r, &QNetworkReply::finished, this, [this, r] {
         r->deleteLater();
-        if (r->error() != QNetworkReply::NoError) { reintento_.start(); return; }   // sin internet todavía: de nuevo en un minuto
+        if (r->error() != QNetworkReply::NoError) {   // sin internet todavía: de nuevo en un minuto
+            qWarning("Actualizar: no pude buscar (%s)", qPrintable(r->errorString()));
+            busqueda_ = QStringLiteral("sinred");
+            emit cambio();
+            reintento_.start();
+            return;
+        }
         const QJsonObject o = QJsonDocument::fromJson(r->readAll()).object();
         const QString v = o.value(QStringLiteral("tag_name")).toString().remove(QLatin1Char('v'));
+        ultima_ = v;
+        busqueda_ = QStringLiteral("aldia");
+        emit cambio();
         if (!masNueva(v, version())) return;
         for (const auto& a : o.value(QStringLiteral("assets")).toArray()) {
             const QJsonObject x = a.toObject();

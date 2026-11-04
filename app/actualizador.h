@@ -22,6 +22,8 @@ class Actualizador : public QObject {
     Q_PROPERTY(QString estado READ estado NOTIFY cambio)        // nada, buscando, descargando, instalando, lista, error
     Q_PROPERTY(int progreso READ progreso NOTIFY cambio)        // 0..100
     Q_PROPERTY(QString mensaje READ mensaje NOTIFY cambio)
+    Q_PROPERTY(QString busqueda READ busqueda NOTIFY cambio)    // cómo salió la última búsqueda por internet: buscando, aldia, sinred
+    Q_PROPERTY(QString ultima READ ultima NOTIFY cambio)        // la última versión publicada (si se pudo ver)
 
 public:
     explicit Actualizador(const QString& carpetaDatos, QObject* padre = nullptr);
@@ -33,6 +35,8 @@ public:
     QString estado() const { return estado_; }
     int progreso() const { return progreso_; }
     QString mensaje() const { return mensaje_; }
+    QString busqueda() const { return busqueda_; }
+    QString ultima() const { return ultima_; }
 
     Q_INVOKABLE void buscar();             // por internet (si hay wifi)
     Q_INVOKABLE bool buscarPendrive();     // un betometro-pi-X.Y.Z.tar.gz en un pendrive
@@ -53,6 +57,7 @@ private:
     QString url_;                          // última versión publicada (JSON de GitHub)
     QString versionNueva_, notas_, origen_, estado_ = QStringLiteral("nada"), mensaje_;
     QString descarga_, archivoPendrive_;
+    QString busqueda_, ultima_;
     int progreso_ = 0;
     qint64 tamano_ = 0;
     bool raspberry_ = false;

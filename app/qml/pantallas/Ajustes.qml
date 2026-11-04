@@ -57,7 +57,8 @@ Item {
                 Fila { etiqueta: "Brillo"
                     Deslizador { width: raiz.h ? 220 : 260; minimo: 10; valor: brillo.v
                         property QtObject brillo: QtObject { property real v: raiz.a.brillo }
-                        onMovido: x => brillo.v = x; onSoltado: x => raiz.poner("brillo", x) } }
+                        onMovido: x => { brillo.v = x; Sistema.brillo(x); }   // se ve mientras se arrastra
+                        onSoltado: x => raiz.poner("brillo", x) } }
                 Fila { etiqueta: "Tipo de vuelta"; ultima: true
                     Segmentado { opciones: [{ texto: "Fondo", valor: "fondo" }, { texto: "Marco", valor: "marco" }]
                         valor: raiz.a.indicador; onElegido: v => raiz.poner("indicador", v) } }
