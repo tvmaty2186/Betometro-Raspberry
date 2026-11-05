@@ -11,6 +11,17 @@ QtObject {
     readonly property bool hay: Qt.application.screens.length > 1 && (!Hdmi || !Hdmi.vigila || Hdmi.conectada)
     // La tele está enchufada pero Qt no la tiene (se enchufó con Betómetro abierto): hay que reiniciar
     readonly property bool hayQueReiniciar: !!Hdmi && Hdmi.vigila && Hdmi.conectada && Qt.application.screens.length < 2
+    // La pantalla de la Pi: la de 5" (DSI) aunque Qt pusiera la tele primero. La tele: la primera que no es esa.
+    readonly property var pantallaPi: {
+        const ss = Qt.application.screens;
+        for (let i = 0; i < ss.length; i++) if (ss[i].name.indexOf("DSI") === 0) return ss[i];
+        return ss.length ? ss[0] : null;
+    }
+    readonly property var pantallaTele: {
+        const ss = Qt.application.screens;
+        for (let i = 0; i < ss.length; i++) if (pantallaPi && ss[i].name !== pantallaPi.name) return ss[i];
+        return null;
+    }
     property Item reproductor: null     // el Reproductor que se ve en la tele (null: la tele en reposo)
     property Item salida: null          // el VideoOutput de la ventana de la tele
     property string carrera: ""

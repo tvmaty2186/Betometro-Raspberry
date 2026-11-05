@@ -10,16 +10,15 @@ import Betometro
 Window {
     id: win
     objectName: "tele"
-    property var principal: null    // la pantalla de la Pi: la tele nunca va ahí
-    // La primera pantalla que no es la de la Pi
-    readonly property var otra: {
-        const ss = Qt.application.screens;
-        for (let i = 0; i < ss.length; i++) if (!principal || ss[i].name !== principal.name) return ss[i];
-        return null;
-    }
-    screen: otra
-    // En eglfs, dos ventanas en la misma pantalla cierran el programa: solo se muestra si es otra
-    visibility: otra ? Window.FullScreen : Window.Hidden
+    // Sin «ventana madre»: si no, Qt la pone en la pantalla de la ventana principal
+    transientParent: null
+    screen: Tele.pantallaTele
+    // Se muestra recién cuando ya está en su pantalla, y solo si es otra: en eglfs, dos ventanas en la
+    // misma pantalla cierran el programa
+    property bool lista: false
+    visibility: lista && !!Tele.pantallaTele ? Window.FullScreen : Window.Hidden
+    Component.onCompleted: { lista = true; console.warn("TELEDBG", screen ? screen.name : "-", width, height, Tele.pantallaTele ? Tele.pantallaTele.name : "null", Qt.application.screens.length, Tele.pantallaPi ? Tele.pantallaPi.name : "-") }
+    onWidthChanged: console.warn("TELEDBG w", width, height, screen ? screen.name : "-")
     flags: Qt.FramelessWindowHint
     width: 1280; height: 720
     color: "#000000"
