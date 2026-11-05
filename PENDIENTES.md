@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 05/11/2026 (última versión: 1.0.13). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 05/11/2026 (última versión: 1.0.14). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -49,14 +49,14 @@ Actualizado el 05/11/2026 (última versión: 1.0.13). Plan: [docs/plan-ingenieri
   rayitas de la pantalla de wifi (se encimaban).
   Aceleración del informe con ventana de ~1 s (a 5 Hz saltaba ±4 m/s² por ruido; a 1 Hz igual que la app).
 
-- Para la 1.0.14 (sin compilar): sin el cartel de wifi en el inicio (no entraba; queda el abanico); el QR de
+- 05/11 (1.0.14): sin el cartel de wifi en el inicio (no entraba; queda el abanico); el QR de
   Conectividad se toca y se ve en grande. **Clima** (Open-Meteo, gratis y sin clave): botón en el inicio (Ajustes
   arriba, Clima donde estaba Ajustes); pantalla con ahora, hora por hora y 7 días; lugar del GPS o localidad
   buscada (se elige de una lista real: Open-Meteo y, si no encuentra, OpenStreetMap); campo «Localidad» en la
   carrera; en Próximas, botón con el clima del día de la carrera («desde dd/MM» si falta: hay 16 días).
 
 ## Ahora (Matías)
-1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.13. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.14. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
 2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
    RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
