@@ -81,6 +81,7 @@ private:
     Datos* datos_;
     QString carpeta_;                         // /datos/videos
     bool prueba_ = false;
+    QString formatoVideo_ = QStringLiteral("h264");   // h264 o mjpeg (webcams comunes)
     QString dispVideo_, nombre_, problema_, falla_, archivo_, pruebaMic_;
     QVariantList microfonos_;
     QProcess grab_, vistaProc_, nivelProc_, micProc_;

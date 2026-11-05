@@ -156,11 +156,15 @@ void Camara::detectar() {
         microfonos_ = {QVariantMap{{"id", "prueba"}, {"nombre", "Micrófono de prueba"}, {"dispositivo", "prueba"}}};
     } else {
         const auto cams = buscarCamaras();
-        for (const auto& d : cams) if (d.h264) { dispVideo_ = d.ruta; nombre_ = d.nombre + QStringLiteral(" · H.264 · lista"); break; }
+        // Primero una que dé H.264 (no hay que comprimir); si no, una común con MJPEG: la Raspberry la
+        // pasa a H.264 con su chip de video (05/11/2026, para la webcam genérica de Matías)
+        for (const auto& d : cams) if (d.h264) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("h264"); nombre_ = d.nombre + QStringLiteral(" · H.264 · lista"); break; }
+        if (dispVideo_.isEmpty())
+            for (const auto& d : cams) if (d.mjpeg) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("mjpeg"); nombre_ = d.nombre + QStringLiteral(" · MJPEG · lista"); break; }
         if (dispVideo_.isEmpty()) {
             nombre_.clear();
             problema_ = cams.isEmpty() ? QStringLiteral("No se encontró la cámara")
-                                       : QStringLiteral("«%1» no entrega H.264: no sirve para grabar").arg(cams.first().nombre);
+                                       : QStringLiteral("«%1» no entrega H.264 ni MJPEG: no sirve para grabar").arg(cams.first().nombre);
         }
         microfonos_ = buscarMicrofonos();
     }
@@ -229,7 +233,7 @@ bool Camara::empezar(const QString& nombreBase) {
     detenerTimer_.stop();
     archivo_ = carpeta_ + '/' + nombreBase + QStringLiteral(".mkv");
     const bool hd = datos_->config()["camaraCalidad"].aTexto("720p") == "1080p";
-    QStringList a{QStringLiteral("grabar"), QStringLiteral("--video"), dispVideo_,
+    QStringList a{QStringLiteral("grabar"), QStringLiteral("--video"), dispVideo_, QStringLiteral("--formato"), formatoVideo_,
                   QStringLiteral("--ancho"), hd ? QStringLiteral("1920") : QStringLiteral("1280"),
                   QStringLiteral("--alto"), hd ? QStringLiteral("1080") : QStringLiteral("720"),
                   QStringLiteral("--audio"), dispositivoAudio(), QStringLiteral("--salida"), archivo_};

@@ -163,6 +163,25 @@ std::string fuenteAudio(const std::string& audio, bool prueba) {
     return "alsasrc device=" + audio;
 }
 
+// Webcam común (MJPEG): se descomprime y se vuelve a comprimir en H.264 con el chip de video de la
+// Raspberry (bcm2835-codec: v4l2jpegdec y v4l2h264enc), sin cargar el procesador. Si falta alguna pieza,
+// se usa la de software para esa parte (más lenta).
+std::string compresorMjpeg() {
+    auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };
+    std::string d = hay("v4l2jpegdec") ? "v4l2jpegdec" : "jpegdec";
+    if (hay("v4l2convert")) d += " ! v4l2convert";
+    else d += " ! videoconvert";
+    d += " ! video/x-raw,format=I420";
+    if (hay("v4l2h264enc"))
+        d += " ! v4l2h264enc extra-controls=\"controls,video_bitrate=4000000,h264_i_frame_period=30\" ! video/x-h264,level=(string)4";
+    else if (hay("x264enc"))
+        d += " ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=4000 key-int-max=30";
+    else
+        d += " ! openh264enc bitrate=4000000";
+    std::fprintf(stderr, "MJPEG: %s\n", d.c_str());
+    return d;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -184,9 +203,14 @@ int main(int argc, char** argv) {
     const std::string tam = "width=" + std::to_string(ancho) + ",height=" + std::to_string(alto);
     if (modo == "grabar") {
         if (salida.empty()) return 2;
-        const std::string fuente = prueba
-            ? "videotestsrc name=fuente is-live=true pattern=ball ! video/x-raw," + tam + ",framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30"
-            : "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
+        const std::string formato = arg(argc, argv, "--formato", "h264");
+        std::string fuente;
+        if (prueba)
+            fuente = "videotestsrc name=fuente is-live=true pattern=ball ! video/x-raw," + tam + ",framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30";
+        else if (formato == "mjpeg")
+            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1 ! " + compresorMjpeg();
+        else
+            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
         desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=3000000000 ! "
                "matroskamux name=m streamable=true ! filesink location=\"" + salida + "\" sync=false";
         if (audio != "no")
