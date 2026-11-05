@@ -139,6 +139,9 @@ Item {
                 Fila { etiqueta: "Cámara y micrófono"; tocable: true; onTocada: Navegacion.ir("camara")
                     Text { text: (!raiz.a.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara") + "  ›"
                            color: raiz.a.camara && !Camara.hay ? Tema.alerta : Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
+                Fila { etiqueta: "Google Drive"; tocable: true; onTocada: Navegacion.ir("drive")
+                    Text { text: (Drive.estado === "conectado" ? (Drive.subiendo ? "Subiendo" : Drive.error ? "Con un problema" : "Conectado") : "Sin conectar") + "  ›"
+                           color: Drive.error ? Tema.alerta : Tema.tinta; font { family: Tema.fuente600; pixelSize: 20 } } }
                 Fila { etiqueta: "Versión " + Contexto.version
                     BotonAmarillo { visible: !!Contexto.versionNueva; width: 210; height: 48; tamTexto: 18; texto: "Actualizar a " + Contexto.versionNueva
                         onTocado: Navegacion.ir("actualizar") }

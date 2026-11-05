@@ -55,6 +55,7 @@ qt_add_qml_module(betometro_qml
     pantallas/Actualizar.qml
     pantallas/Ajustes.qml
     pantallas/AjustesCamara.qml
+    pantallas/AjustesDrive.qml
     pantallas/Carrera.qml
     pantallas/Carreras.qml
     pantallas/Chequeo.qml
@@ -82,6 +83,7 @@ qt_add_qml_module(betometro_qml
     tablet/TPractica.qml
     tablet/TClima.qml
     tablet/TCamara.qml
+    tablet/TDrive.qml
     tablet/TAjustes.qml
     tablet/TAjustesSeccion.qml
     tablet/TCarreras.qml

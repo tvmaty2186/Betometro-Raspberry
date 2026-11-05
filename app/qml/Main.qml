@@ -28,7 +28,7 @@ Window {
         Loader {
             anchors.fill: parent
             // En Modo Tablet, las pantallas que tienen versión grande (carpeta tablet/)
-            readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara",
+            readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara", drive: "TDrive",
                                               ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
                                               ficha: "TFicha", chequeo: "TChequeo", conectividad: "TConectividad", actualizar: "TActualizar" })
             source: {
@@ -44,6 +44,7 @@ Window {
                 case "conectividad": return "pantallas/Conectividad.qml";
                 case "clima": return "pantallas/Pronostico.qml";
                 case "camara": return "pantallas/AjustesCamara.qml";
+                case "drive": return "pantallas/AjustesDrive.qml";
                 case "wifi": return "pantallas/WifiClave.qml";
                 case "chequeo": return "pantallas/Chequeo.qml";
                 case "informe": return "pantallas/Informe.qml";

@@ -1,7 +1,7 @@
 import QtQuick
 import Betometro
 
-// Ajustes en Modo Tablet: 8 botones grandes. Muestra: docs/muestras/tablet/ajustes-h.png
+// Ajustes en Modo Tablet: 9 botones grandes (Google Drive, 05/11/2026). Muestra: docs/muestras/tablet/ajustes-h.png
 // Cada uno abre su sección (TAjustesSeccion) o su pantalla.
 TPantalla {
     id: raiz
@@ -14,10 +14,11 @@ TPantalla {
 
     Grid {
         anchors.fill: raiz.area
-        columns: raiz.h ? 4 : 2
+        columns: raiz.h ? 5 : 2
         spacing: 18
+        readonly property int filas: raiz.h ? 2 : 5
         readonly property real an: (width - (columns - 1) * spacing) / columns
-        readonly property real al: (height - ((raiz.h ? 2 : 4) - 1) * spacing) / (raiz.h ? 2 : 4)
+        readonly property real al: (height - (filas - 1) * spacing) / filas
         TBoton { width: parent.an; height: parent.al; icono: "auto"; nombre: "Mi auto"
                  dato: (raiz.a.numeroAuto || "101") + " · " + (raiz.a.nombreAuto || ""); onTocado: raiz.seccion("auto") }
         TBoton { width: parent.an; height: parent.al; icono: "tema"; nombre: "Pantalla y tema"
@@ -31,6 +32,9 @@ TPantalla {
                  dato: Wifi.propia ? Wifi.nombrePropia : (Wifi.conectada || "Sin wifi"); onTocado: Navegacion.ir("conectividad") }
         TBoton { width: parent.an; height: parent.al; icono: "camara"; nombre: "Cámara"
                  dato: !raiz.a.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara"; onTocado: Navegacion.ir("camara", { desde: "ajustes" }) }
+        TBoton { width: parent.an; height: parent.al; icono: "nube"; nombre: "Google Drive"
+                 dato: Drive.estado === "conectado" ? (Drive.subiendo ? "Subiendo" : Drive.error ? "Con un problema" : "Conectado") : "Sin conectar"
+                 onTocado: Navegacion.ir("drive") }
         TBoton { width: parent.an; height: parent.al; icono: "actualizar"; nombre: "Actualizar"
                  tipo: Contexto.versionNueva ? "acento" : ""
                  dato: Contexto.versionNueva ? "Hay " + Contexto.versionNueva : "v" + Contexto.version; onTocado: Navegacion.ir("actualizar") }

@@ -3,7 +3,7 @@ import Betometro
 
 // Íconos de línea del Modo Tablet (dibujados: se pintan del color que se pida, en cualquier tema).
 // nombre: bandera, crono, check, pantalla, camara, red, ajustes, voz, tema, auto, gps, velocidad,
-//         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar
+//         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar, nube
 Canvas {
     id: raiz
     property string nombre: ""
@@ -53,6 +53,10 @@ Canvas {
         case "lista": L([20, 18, 54, 18]); L([20, 32, 54, 32]); L([20, 46, 54, 46]); C(10, 18, 2, true); C(10, 32, 2, true); C(10, 46, 2, true); break;
         case "qr": R(8, 8, 20, 20, 3); R(36, 8, 20, 20, 3); R(8, 36, 20, 20, 3); L([38, 38, 54, 38, 54, 54]); L([38, 48, 46, 48]); break;
         case "informe": L([12, 54, 12, 10]); L([12, 54, 56, 54]); L([18, 44, 30, 30, 38, 38, 52, 20]); break;
+        case "nube":   // nube con flecha para arriba (Google Drive)
+            c.beginPath(); c.moveTo(18, 48); c.arc(18, 38, 10, Math.PI / 2, Math.PI * 1.5, false); c.arc(32, 26, 14, Math.PI * 1.1, Math.PI * 1.95, false);
+            c.arc(46, 38, 10, Math.PI * 1.5, Math.PI / 2, false); c.stroke();
+            L([32, 56, 32, 34]); L([24, 42, 32, 34, 40, 42]); break;
         case "lugar": C(32, 26, 8);
             c.beginPath(); c.moveTo(32, 58); c.bezierCurveTo(20, 44, 14, 36, 14, 26); c.arc(32, 26, 18, Math.PI, 0, false);
             c.bezierCurveTo(50, 36, 44, 44, 32, 58); c.stroke(); break;
