@@ -10,18 +10,21 @@ Rectangle {
     signal tocada()
     default property alias contenido: der.data
     width: parent ? parent.width : 600
-    height: 96
+    // Si el control no entra al lado del nombre (parada, opciones anchas), va abajo
+    readonly property bool apilada: der.width > width - 300
+    height: apilada ? 170 : 96
     radius: Math.max(12, Tema.radio * 1.3)
     border { width: 3; color: Tema.bordeCromo }
     gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(Tema.caja1, 1.15) } GradientStop { position: 1; color: Tema.caja2 } }
     Rectangle { anchors.fill: parent; radius: parent.radius; color: "#ffffff"; opacity: zona.pressed ? 0.12 : 0 }
     MouseArea { id: zona; anchors.fill: parent; enabled: raiz.tocable; onClicked: raiz.tocada() }
     Column {
-        anchors { left: parent.left; leftMargin: 26; verticalCenter: parent.verticalCenter; right: der.left; rightMargin: 16 }
+        x: 26; width: (raiz.apilada ? raiz.width : der.x) - 26 - 16
+        y: raiz.apilada ? 16 : (raiz.height - height) / 2
         Text { width: parent.width; elide: Text.ElideRight; text: raiz.etiqueta; color: Tema.tinta
                font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 29 } }
         Text { visible: raiz.detalle !== ""; width: parent.width; elide: Text.ElideRight; text: raiz.detalle; color: Tema.acento
                font { family: Tema.fuente600; pixelSize: 21 } }
     }
-    Row { id: der; anchors { right: parent.right; rightMargin: 20; verticalCenter: parent.verticalCenter } spacing: 12 }
+    Row { id: der; x: raiz.width - width - 20; y: raiz.apilada ? raiz.height - height - 16 : (raiz.height - height) / 2; spacing: 12 }
 }

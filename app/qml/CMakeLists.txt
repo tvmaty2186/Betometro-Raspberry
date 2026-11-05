@@ -72,6 +72,8 @@ qt_add_qml_module(betometro_qml
     tablet/TPractica.qml
     tablet/TClima.qml
     tablet/TCamara.qml
+    tablet/TAjustes.qml
+    tablet/TAjustesSeccion.qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml

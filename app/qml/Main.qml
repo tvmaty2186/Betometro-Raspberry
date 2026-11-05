@@ -37,6 +37,7 @@ Window {
                 case "practica": return "pantallas/Practica.qml";
                 case "carrera": return "pantallas/Carrera.qml";
                 case "ajustes": return "pantallas/Ajustes.qml";
+                case "ajustesSeccion": return "pantallas/Ajustes.qml";
                 case "conectividad": return "pantallas/Conectividad.qml";
                 case "clima": return "pantallas/Pronostico.qml";
                 case "camara": return "pantallas/AjustesCamara.qml";

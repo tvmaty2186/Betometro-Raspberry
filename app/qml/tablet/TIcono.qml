@@ -39,7 +39,7 @@ Canvas {
             c.beginPath(); c.moveTo(32, 58); c.bezierCurveTo(20, 44, 14, 36, 14, 26); c.arc(32, 26, 18, Math.PI, 0, false);
             c.bezierCurveTo(50, 36, 44, 44, 32, 58); c.stroke(); break;
         case "velocidad": A(32, 44, 22, 180, 360); L([32, 44, 44, 30]); break;
-        case "actualizar": A(32, 32, 18, -30, 250); L([50, 14, 50, 26, 38, 26]); break;
+        case "actualizar": A(32, 32, 18, 20, 330); L([50, 12, 50, 24, 38, 24]); L([32, 22, 32, 40]); L([25, 33, 32, 40, 39, 33]); break;
         case "apagar": L([32, 8, 32, 30]); A(32, 34, 20, -55, 235); break;
         case "mic": R(24, 8, 16, 30, 8); A(32, 30, 16, 0, 180); L([32, 46, 32, 56]); break;
         case "girar": A(32, 32, 18, 20, 330); L([50, 12, 50, 24, 38, 24]); break;
