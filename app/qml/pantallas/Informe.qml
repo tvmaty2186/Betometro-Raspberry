@@ -381,8 +381,8 @@ Item {
                 model: [
                     { e: "Velocidad", v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–", u: "km/h", c: Tema.numero },
                     { e: "Sugerida", v: raiz.sug > 0 ? raiz.sug.toFixed(1).replace(".", ",") : "–", u: "", c: Tema.tinta },
-                    { e: "Adelanto", v: reproductor.e.lap >= 0 && raiz.dist > 0 ? Formato.dif(-reproductor.e.ade * 1000) : "–", u: "",
-                      c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 0.2 ? Tema.bien : reproductor.e.ade < 0 ? Tema.alerta : Tema.acento }
+                    { e: "Adelanto", v: reproductor.e.lap >= 0 && raiz.dist > 0 ? Formato.dif(reproductor.e.ade * 1000) : "–", u: "",
+                      c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : "#d23b2c" }
                 ]
                 Item {
                     required property var modelData

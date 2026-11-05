@@ -264,12 +264,12 @@ Item {
     DatoVideo {
         id: dAdelanto; reproductor: rep; clave: "adelanto"; nombre: "Adelanto"
         Tira {
-            // ade > 0: llegó antes que el ideal (adelantado). Se muestra como en la tabla: + atrasado, − adelantado
+            // ade > 0: adelantado. Mismo signo y colores que la lectura del informe (+ adelantado, − atrasado; como la app)
             id: tAde
             readonly property real a: rep.e.ade
             readonly property bool enTiempo: Math.abs(a) < 0.2
-            readonly property color col: enTiempo ? Tema.bien : a < 0 ? Tema.alerta : Tema.sugerida
-            Num { visible: !tAde.enTiempo; text: Formato.dif(-tAde.a * 1000); color: tAde.col }
+            readonly property color col: Math.abs(a) < 1 ? Tema.bien : Math.abs(a) < 3 ? Tema.acento : "#d23b2c"
+            Num { visible: !tAde.enTiempo; text: Formato.dif(tAde.a * 1000); color: tAde.col }
             Etiq { text: tAde.enTiempo ? "en tiempo" : tAde.a < 0 ? "atrasado" : "adelantado"; color: tAde.col }
         }
     }

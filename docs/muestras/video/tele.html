@@ -1,0 +1,63 @@
+<!doctype html><meta charset=utf-8><style>
+@font-face{font-family:B;src:url(file:///home/user/Betometro-Raspberry/recursos/fuentes/barlow-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:B;src:url(file:///home/user/Betometro-Raspberry/recursos/fuentes/barlow-latin-800-italic.woff2);font-weight:800;font-style:italic}
+@font-face{font-family:C;src:url(file:///home/user/Betometro-Raspberry/recursos/fuentes/barlow-condensed-latin-700-normal.woff2);font-weight:700}
+*{margin:0;box-sizing:border-box}
+body{width:1600px;height:820px;background:#d9dcd6;font-family:B;position:relative;overflow:hidden}
+.tit{position:absolute;font:800 italic 26px B;color:#1b3a26;letter-spacing:1px}
+.tv{position:absolute;left:30px;top:70px;width:960px;height:560px;background:#111;border-radius:14px;padding:14px;box-shadow:0 14px 30px #0006}
+.tv img{width:932px;height:524px;border-radius:4px;display:block}
+.pata{position:absolute;left:430px;top:630px;width:160px;height:60px;background:linear-gradient(#222,#444);clip-path:polygon(30% 0,70% 0,100% 100%,0 100%)}
+.cable{position:absolute;left:990px;top:420px;width:120px;height:6px;background:#333;border-radius:3px}
+.pi{position:absolute;left:1060px;top:200px;width:520px;height:320px;background:#111;border-radius:16px;padding:12px;box-shadow:0 14px 30px #0006}
+.s{width:496px;height:296px;border-radius:6px;background:radial-gradient(circle at 30% 20%,#3d8c57,#1d5233 60%,#0d2a18);position:relative;overflow:hidden;color:#f7f7f2}
+.chip{position:absolute;border:2px solid #cfd4d8;border-radius:16px;background:#08190ecc;display:flex;align-items:center;justify-content:center}
+.e{font:800 italic 10px B;letter-spacing:1.5px;color:#d6e6d2;text-transform:uppercase}
+.n{font:700 20px C}
+.v{position:absolute;width:56px;height:38px;border-radius:12px;border:2px solid #cfd4d8;background:#08190ecc;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.v b{font:800 italic 13px B}.v i{font:700 13px C;font-style:normal;color:#d6e6d2}
+.v.y{background:#f4c531;border-color:#f4c531;color:#111}.v.y i{color:#111}
+.nota{position:absolute;font:600 18px B;color:#1b3a26;line-height:1.35}
+</style>
+<div class=tit style="left:30px;top:22px">LA TELE (HDMI): el video grande con los datos</div>
+<div class=tit style="left:1060px;top:150px">LA PANTALLA DE LA PI: el control</div>
+<div class=tv><img src="completo-andando.png"></div>
+<div class=pata></div>
+<div class=cable></div>
+<div class=pi><div class=s>
+ <div style="position:absolute;left:14px;top:10px;font:800 italic 15px B;letter-spacing:1px">📺 EN LA TELE · Santa Clara</div>
+ <div class=chip style="right:12px;top:8px;height:28px;padding:0 12px"><span class=e>Salir</span></div>
+ <!-- vueltas -->
+ <div class=e style="position:absolute;left:14px;top:48px">Ir a la vuelta</div>
+ <div class=v style="left:14px;top:66px"><b>V1</b><i>2:10,2</i></div>
+ <div class=v style="left:76px;top:66px"><b>V2</b><i>2:12,9</i></div>
+ <div class="v y" style="left:138px;top:66px"><b>V3</b><i>2:14,6</i></div>
+ <div class=v style="left:200px;top:66px"><b>V4</b><i>2:11,0</i></div>
+ <div class=v style="left:262px;top:66px"><b>V5</b><i>2:13,4</i></div>
+ <div class=v style="left:324px;top:66px"><b>V6</b><i>2:12,1</i></div>
+ <!-- controles -->
+ <div class=chip style="left:60px;top:132px;width:96px;height:72px;border-radius:24px"><span class=n>−10 s</span></div>
+ <div class=chip style="left:188px;top:120px;width:120px;height:96px;border-radius:48px;background:#f4c531;border-color:#fff6d0">
+   <div style="display:flex;gap:10px"><div style="width:14px;height:40px;background:#111;border-radius:3px"></div><div style="width:14px;height:40px;background:#111;border-radius:3px"></div></div></div>
+ <div class=chip style="left:340px;top:132px;width:96px;height:72px;border-radius:24px"><span class=n>+10 s</span></div>
+ <!-- barra -->
+ <div style="position:absolute;left:14px;right:14px;top:232px;height:8px;border-radius:4px;background:#ffffff33">
+   <div style="width:42%;height:8px;border-radius:4px;background:#f4c531"></div>
+   <div style="position:absolute;left:42%;top:-6px;width:20px;height:20px;border-radius:10px;background:#fff;margin-left:-10px"></div>
+   <div style="position:absolute;left:16%;top:-4px;width:2px;height:16px;background:#fff9"></div>
+   <div style="position:absolute;left:31%;top:-4px;width:2px;height:16px;background:#fff9"></div>
+   <div style="position:absolute;left:47%;top:-4px;width:2px;height:16px;background:#fff9"></div>
+   <div style="position:absolute;left:62%;top:-4px;width:2px;height:16px;background:#fff9"></div>
+   <div style="position:absolute;left:78%;top:-4px;width:2px;height:16px;background:#fff9"></div>
+ </div>
+ <div style="position:absolute;left:14px;top:250px;font:700 18px C">6:28 / 15:20</div>
+ <div class=chip style="right:12px;top:252px;height:32px;padding:0 12px;gap:6px"><span style="font-size:16px">⚙</span><span class=e>Datos en la tele</span></div>
+</div></div>
+<div class=nota style="left:1060px;top:550px;width:520px">
+• Enchufás el HDMI a la tele y la Pi lo detecta sola.<br>
+• En el informe aparece el botón <b>📺 Ver en la tele</b>.<br>
+• La tele muestra el video entero con los datos.<br>
+• En la Pi: pausa, ±10 s y saltar a cada vuelta.<br>
+• Con ⚙ (en pausa) prendés, apagás o movés los datos.<br>
+• Sin tele enchufada, todo sigue como siempre.
+</div>

@@ -303,9 +303,9 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
   tx('ovVel','.n',p&&q.ok?String(Math.round(p[2])):'–');
   $('ovVel').querySelector('.vbarra').classList.toggle('no',!vSug);$('ovVel').querySelector('.sug').classList.toggle('no',!vSug);
   if(vSug){tx('ovVel','.y',nf(vSug,1));$('ovVel').querySelector('.vbarra i').style.left=(p&&q.ok?Math.max(0,Math.min(1,(p[2]-vSug)/20+.5))*100:50)+'%'}
-  // adelanto: como el resto del informe, + es atrasado (rojo) y − adelantado
+  // adelanto: con el mismo signo y colores que la lectura del informe (+ adelantado, − atrasado; como la app)
   const a=$('ovAde');
-  if(p&&C.distanciaM){const tarde=-p[4],c=tarde>0.05?'#ff6b5b':'#5fe08f';tx('ovAde','.n',(tarde>0.05?'+':tarde<-0.05?'−':'±')+nf(Math.abs(tarde),1)+' s');tx('ovAde','.e',tarde>0.05?'atrasado':tarde<-0.05?'adelantado':'en tiempo');a.querySelector('.n').style.color=c;a.querySelector('.e').style.color=c}
+  if(p&&C.distanciaM){const s=p[4],c=colAde(s);tx('ovAde','.n',(s>0?'+':s<0?'−':'±')+nf(Math.abs(s),1)+' s');tx('ovAde','.e',s>=0?'adelantado':'atrasado');a.querySelector('.n').style.color=c;a.querySelector('.e').style.color=c}
   else{tx('ovAde','.n','–');tx('ovAde','.e','');a.querySelector('.n').style.color=''}
   const au=$('vAuto');if(au){au.setAttribute('cx',p?p[5]:-999);au.setAttribute('cy',p?p[6]:-999)}
  }
@@ -379,6 +379,6 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
  // ---- desde el informe: una vuelta de la tabla o un punto del mapa llevan el video ahí ----
  irVideo=(i,t)=>{const v=C.vueltas[i];if(!v||v.video==null||!VS[v.video])return;if(v.video!==cur)elegir(v.video);
   const ms=v.videoMs+(t||0)*1000;if(vv.readyState>=1)ir(ms);else vv.addEventListener('loadedmetadata',()=>ir(ms),{once:true})};
- mostrar();elegir(0);estado();setTimeout(ponerPos,0);
+ $('vEng').innerHTML=ENG;mostrar();elegir(0);estado();setTimeout(ponerPos,0);
 })();
 </script></body></html>
