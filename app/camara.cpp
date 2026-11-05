@@ -98,7 +98,7 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
         if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
         emit grabandoChanged();
-        if (s == QProcess::NotRunning) actualizarLugar();
+        if (s != QProcess::Starting) actualizarLugar();   // la lista de videos marca el que se está grabando
     });
     leer(vistaProc_, [this](const QVariantMap& m) {
         if (!m.value("foto").toBool()) return;
@@ -261,26 +261,39 @@ void Camara::hacerLugar() {
     QStorageInfo d(carpeta_);
     if (!d.isValid() || d.bytesAvailable() >= kMinimoLibre) return;
     // Del más viejo al más nuevo, hasta tener el doble del mínimo. Nunca toca los informes.
-    QFileInfoList l = QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files, QDir::Time | QDir::Reversed);
+    QFileInfoList l = QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv"), QStringLiteral("*.mp4")}, QDir::Files, QDir::Time | QDir::Reversed);
     for (const QFileInfo& f : l) {
         if (QStorageInfo(carpeta_).bytesAvailable() >= 2 * kMinimoLibre) break;
-        QFile::remove(f.absoluteFilePath());
+        // También se saca de su carrera: si no, el informe muestra «Video» de un archivo que ya no está
+        if (QFile::remove(f.absoluteFilePath())) datos_->olvidarVideo(f.fileName());
     }
 }
 
 QVariantList Camara::videos() const {
-    QVariantList r;
-    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files, QDir::Time))
-        r << QVariantMap{{"archivo", f.fileName()}, {"fecha", f.lastModified().toString(QStringLiteral("dd/MM/yy HH:mm"))},
-                         {"mb", qRound(f.size() / 1048576.0)}};
+    QVariantList r = datos_->videosGuardados();
+    const QString actual = grabando() ? QFileInfo(archivo_).fileName() : QString();
+    for (QVariant& v : r) {
+        QVariantMap m = v.toMap();
+        m["grabando"] = !actual.isEmpty() && m.value("archivo").toString() == actual;
+        v = m;
+    }
     return r;
 }
 
 bool Camara::borrarVideo(const QString& archivo) {
-    if (archivo.contains('/') || !archivo.endsWith(QLatin1String(".mkv"))) return false;
-    const bool ok = QFile::remove(carpeta_ + '/' + archivo);
+    if (grabando() || !Datos::nombreVideoValido(archivo)) return false;
+    const bool ok = datos_->borrarVideo(archivo);
     actualizarLugar();
     return ok;
+}
+
+int Camara::borrarPruebas() {
+    if (grabando()) return 0;
+    int n = 0;
+    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("prueba-*.mkv"), QStringLiteral("prueba-*.mp4")}, QDir::Files))
+        if (datos_->borrarVideo(f.fileName())) ++n;
+    actualizarLugar();
+    return n;
 }
 
 QString Camara::urlVideo(const QString& archivo) const {
@@ -292,7 +305,7 @@ QString Camara::urlVideo(const QString& archivo) const {
 void Camara::actualizarLugar() {
     qint64 usado = 0;
     int n = 0;
-    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files)) { usado += f.size(); ++n; }
+    for (const QFileInfo& f : QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv"), QStringLiteral("*.mp4")}, QDir::Files)) { usado += f.size(); ++n; }
     QStorageInfo d(carpeta_);
     const double libreMB = d.isValid() ? d.bytesAvailable() / 1048576.0 : 0;
     lugar_ = {{"usadoGB", QString::number(usado / 1073741824.0, 'f', 1).replace('.', ',')}, {"videos", n},

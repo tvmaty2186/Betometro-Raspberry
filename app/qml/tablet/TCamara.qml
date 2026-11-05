@@ -10,7 +10,11 @@ TPantalla {
     readonly property var a: Datos.ajustes
     function poner(k, v) { Datos.ponerCfg(k, v); }
     function siguiente(lista, actual) { const i = lista.indexOf(actual); return lista[(i + 1) % lista.length]; }
-    Component.onCompleted: { Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel(); }
+    Component.onCompleted: {
+        Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel();
+        if (Contexto.prueba.indexOf("tablet-videos") === 0) videos.abrir();   // capturas: tablet-videos, tablet-videos-borrar
+        if (Contexto.prueba === "tablet-videos-borrar" && Camara.videos.length) videos.tocarBorrar(Camara.videos[0].archivo);
+    }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
     // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:
     // antes quedaba en «Prendiendo la cámara…» (Matías, 05/11/2026)
@@ -93,5 +97,9 @@ TPantalla {
                  onTocado: raiz.poner("camaraGirar", !raiz.a.camaraGirar) }
         TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "espejo"; nombre: "Espejo"; dato: raiz.a.camaraEspejo ? "Activado" : ""
                  onTocado: raiz.poner("camaraEspejo", !raiz.a.camaraEspejo) }
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "tarjeta"; nombre: "Videos"
+                 dato: (Camara.lugar.videos || 0) + " · " + (Camara.lugar.usadoGB || "0") + " GB"
+                 onTocado: videos.abrir() }
     }
+    ListaVideos { id: videos; grande: true; parent: raiz }
 }

@@ -9,7 +9,11 @@ Item {
     readonly property var a: Datos.ajustes
     function poner(k, v) { Datos.ponerCfg(k, v); }
 
-    Component.onCompleted: { Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel(); }
+    Component.onCompleted: {
+        Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel();
+        if (Contexto.prueba.indexOf("videos") === 0) videos.abrir();   // capturas: videos, videos-borrar
+        if (Contexto.prueba === "videos-borrar" && Camara.videos.length) videos.tocarBorrar(Camara.videos[0].archivo);
+    }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
     // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:
     // antes quedaba en «Prendiendo la cámara…» (Matías, 05/11/2026)
@@ -143,6 +147,9 @@ Item {
                            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 20 }
                            text: "Entran " + (Camara.lugar.horas || 0) + " h más" }
                 }
+                BotonCromo { x: 20; width: parent.width - 40; height: 46; tamTexto: 16
+                             texto: "Ver videos" + (Camara.lugar.videos ? " (" + Camara.lugar.videos + ")" : "") + "  ›"
+                             onTocado: videos.abrir() }
                 Fila { altoMinimo: 58; etiqueta: "Borrar los videos más viejos si falta lugar"; ultima: true
                     Llave { prendida: raiz.a.camaraBorrarViejos !== false; onCambiada: v => raiz.poner("camaraBorrarViejos", v) } }
             }
@@ -173,4 +180,6 @@ Item {
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gLugar }
         }
     }
+
+    ListaVideos { id: videos }
 }

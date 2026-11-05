@@ -45,6 +45,16 @@ public:
     Q_INVOKABLE QVariantList videos(const QString& id) const;
     // Donde la cámara deja los videos (como Camara: <datos>/videos). La usa «Betómetro en la red».
     QString carpetaVideos() const { return carpeta_ + QStringLiteral("/videos"); }
+    // Los videos de la carpeta, del más nuevo al más viejo (Ajustes → Cámara → «Ver videos»):
+    // {archivo, bytes, tam («230 MB»), cuando (ms), hora («05/11/26 10:32»), carreraId, carrera, fecha, prueba}
+    Q_INVOKABLE QVariantList videosGuardados() const;
+    // Borra un video: el archivo y lo que dice de él en las carreras. Nunca borra informes ni carreras.
+    // No sabe si la cámara está grabando: desde la pantalla se usa Camara.borrarVideo.
+    bool borrarVideo(const QString& archivo);
+    // Saca un video de las carreras, sin tocar el archivo (cuando la cámara borra los viejos). true si había alguno.
+    bool olvidarVideo(const QString& archivo);
+    // Un nombre de video que se puede tocar: sin carpetas ni «..», termina en .mkv o .mp4
+    static bool nombreVideoValido(const QString& archivo);
     const beto::Carrera* buscar(const QString& id) const;
     const beto::Json& config() const { return cfg_; }
 

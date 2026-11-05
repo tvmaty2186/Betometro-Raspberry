@@ -34,6 +34,7 @@ qt_add_qml_module(betometro_qml
     componentes/Fondo.qml
     componentes/FotoInicio.qml
     componentes/Llave.qml
+    componentes/ListaVideos.qml
     componentes/Numero101.qml
     componentes/Rayas.qml
     componentes/Segmentado.qml

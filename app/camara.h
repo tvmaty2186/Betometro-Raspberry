@@ -26,7 +26,7 @@ class Camara : public QObject {
     Q_PROPERTY(double nivel READ nivel NOTIFY nivelChanged)             // micrófono, 0..1
     Q_PROPERTY(QString pruebaMic READ pruebaMic NOTIFY pruebaMicChanged) // "", grabando, escuchando
     Q_PROPERTY(QVariantMap lugar READ lugar NOTIFY lugarChanged)        // usadoGB, videos, horas
-    Q_PROPERTY(QVariantList videos READ videos NOTIFY lugarChanged)
+    Q_PROPERTY(QVariantList videos READ videos NOTIFY lugarChanged)   // los de Datos::videosGuardados, + «grabando»
 
 public:
     Camara(Datos* datos, const QString& carpetaDatos, QObject* padre = nullptr);
@@ -52,7 +52,9 @@ public:
     Q_INVOKABLE void pararNivel();
     Q_INVOKABLE void probarMicrofono();       // graba 5 s y los reproduce
     Q_INVOKABLE void probarGrabacion();       // 10 s de video, para ver que anda
+    // Borra un video (archivo y lo de la carrera) y actualiza el lugar. Nunca mientras graba.
     Q_INVOKABLE bool borrarVideo(const QString& archivo);
+    Q_INVOKABLE int borrarPruebas();          // borra los prueba-*; devuelve cuántos
     // Dirección (file://) de un video de la carpeta, para el reproductor del informe. Vacía si no está el archivo.
     Q_INVOKABLE QString urlVideo(const QString& archivo) const;
 
