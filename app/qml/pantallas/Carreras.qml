@@ -53,10 +53,11 @@ Item {
                         FechaRedonda { dia: tp.modelData.dia; mes: tp.modelData.mes; anchors.verticalCenter: parent.verticalCenter }
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: tp.width - 62 - 60 - (raiz.h ? 210 : 0)
+                            width: tp.width - 62 - 60 - (raiz.h ? 210 : 0) - 116
                             Text { width: parent.width; elide: Text.ElideRight; text: tp.modelData.nombre; color: Tema.tinta
                                    font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 28 } }
-                            Sub { width: parent.width; elide: Text.ElideRight; text: tp.modelData.linea }
+                            Sub { width: parent.width; elide: Text.ElideRight
+                                  text: tp.modelData.linea + (tp.modelData.lugar ? "  ·  " + tp.modelData.lugar.split(",")[0] : "") }
                         }
                     }
                     MouseArea {
@@ -64,6 +65,42 @@ Item {
                         pressAndHoldInterval: 600
                         onClicked: Navegacion.ir("ficha", { id: tp.modelData.id })
                         onPressAndHold: raiz.borrando = tp.modelData
+                    }
+                    // Clima del día de la carrera en su localidad (Matías, 05/11/2026). Tocarlo: ese día hora por hora.
+                    Rectangle {
+                        id: botonClima
+                        readonly property bool conLugar: tp.modelData.lugarLat !== undefined && tp.modelData.lugarLat !== null
+                        readonly property var d: conLugar && Clima.version >= 0 ? Clima.dia(tp.modelData.lugarLat, tp.modelData.lugarLon, tp.modelData.fecha) : null
+                        width: 104; height: raiz.h ? 58 : 62; radius: height / 2
+                        x: raiz.h ? parent.width - 20 - 170 - 14 - width : parent.width - 20 - width
+                        y: raiz.h ? (parent.height - height) / 2 : 16
+                        opacity: d && d.disponible ? 1 : 0.6
+                        border { width: 2; color: Tema.bordeCromo }
+                        gradient: Gradient { GradientStop { position: 0; color: "#2b6b43" } GradientStop { position: 1; color: "#0b2a17" } }
+                        Row {
+                            visible: !!(botonClima.d && botonClima.d.disponible)
+                            anchors.centerIn: parent; spacing: 4
+                            IconoClima { width: 32; height: 32; anchors.verticalCenter: parent.verticalCenter; codigo: botonClima.d ? botonClima.d.codigo || 0 : 0 }
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                Text { text: botonClima.d ? botonClima.d.max + "°" : ""; color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 21 } }
+                                Text { text: botonClima.d ? "lluvia " + botonClima.d.lluvia + "%" : ""; color: "#5fb4ff"; font { family: Tema.fuente600; pixelSize: 11 } }
+                            }
+                        }
+                        Column {
+                            visible: !(botonClima.d && botonClima.d.disponible)
+                            anchors.centerIn: parent
+                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Clima"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 17 } }
+                            Text { anchors.horizontalCenter: parent.horizontalCenter
+                                   text: !botonClima.conLugar ? "sin localidad" : botonClima.d && botonClima.d.desde ? "desde " + botonClima.d.desde : "cargando…"
+                                   color: Tema.tintaSuave; font { family: Tema.fuente600; italic: true; pixelSize: 11 } }
+                        }
+                        MouseArea {
+                            anchors.fill: parent; anchors.margins: -6
+                            onClicked: botonClima.conLugar
+                                       ? Navegacion.ir("clima", { nombre: tp.modelData.lugar.split(",")[0], lat: tp.modelData.lugarLat, lon: tp.modelData.lugarLon, fecha: tp.modelData.fecha })
+                                       : Navegacion.ir("ficha", { id: tp.modelData.id })
+                        }
                     }
                     BotonAmarillo {
                         x: raiz.h ? parent.width - 20 - width : 18

@@ -34,6 +34,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "audio.h"
 #include "gps.h"
 #include "salud.h"
+#include "clima.h"
 #include "qr.h"
 #include "sistema.h"
 #include "actualizador.h"
@@ -115,6 +116,11 @@ int main(int argc, char* argv[]) {
         else gps = new GpsSimulado(&app);
     }
     Crono crono(&datos, gps);
+    // Clima: pronóstico de Open-Meteo por la ubicación del GPS o por una localidad
+    Clima clima(carpeta);
+    QObject::connect(gps, &FuenteGps::muestra, &clima, [&clima](const beto::Muestra& m) {
+        if (m.lat && m.lon && m.precisionM < 50) clima.ponerPosicion(*m.lat, *m.lon);
+    });
     Camara camara(&datos, carpeta);
     crono.ponerCamara(&camara);
     Actualizador actualizador(carpeta);
@@ -190,6 +196,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
+    motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");

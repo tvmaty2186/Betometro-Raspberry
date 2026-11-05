@@ -54,6 +54,7 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 | `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores. Puerto 80 en la Pi |
 | `app/reportes.cpp` | `<datos>/reportes/errores.log`. Al prender distingue «se cayó el programa» de «se cortó la corriente o se colgó», y suma errores del sistema (journal) y del pstore. Manda issues a `Betometro-reportes` si existe `/var/lib/betometro/reportes.token` |
 | `app/actualizador.cpp` | Ver arriba |
+| `app/clima.cpp` | Pronóstico de Open-Meteo (16 días) y buscador de localidades (Open-Meteo, si no OpenStreetMap). Guarda el último en `<datos>/clima.json` para sin wifi. Pantalla `Pronostico.qml` (no se llama `Clima.qml` porque chocaba con el objeto `Clima`) |
 | `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
 
 ## Cosas de la pantalla y del arranque (lo que costó)

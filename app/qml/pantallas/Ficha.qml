@@ -13,16 +13,22 @@ Item {
     property int distanciaM: c.distanciaM
     property int tiempoIdealMs: c.tiempoIdealMs
     property string patron: c.patron
+    // Localidad para el clima: se elige de la lista del buscador (nombre + coordenadas)
+    property string lugar: c.lugar || ""
+    property var lugarLat: c.lugarLat
+    property var lugarLon: c.lugarLon
     property string campo: ""        // campo abierto en el teclado
     property string error: ""
     readonly property bool nueva: !c.id
     readonly property bool fijos: c.tieneVueltas    // con vueltas no se cambian tiempo, distancia ni patrón
     readonly property bool cambiada: nombre !== c.nombre || fecha !== c.fecha
                                      || distanciaM !== c.distanciaM || tiempoIdealMs !== c.tiempoIdealMs || patron !== c.patron
+                                     || lugar !== (c.lugar || "")
 
     function datos() {
         return { id: c.id || "", nombre: nombre, fecha: fecha,
-                 distanciaM: distanciaM, tiempoIdealMs: tiempoIdealMs, patron: patron };
+                 distanciaM: distanciaM, tiempoIdealMs: tiempoIdealMs, patron: patron,
+                 lugar: lugar, lugarLat: lugarLat === undefined ? null : lugarLat, lugarLon: lugarLon === undefined ? null : lugarLon };
     }
     function guardar() {
         const r = Datos.guardarCarrera(datos());
@@ -101,6 +107,11 @@ Item {
                 etiqueta: "Nombre"
                 Campo { anchoMinimo: 260; libre: true; texto: raiz.nombre || "–"; editando: raiz.campo === "nombre"
                         onTocado: { raiz.campo = "nombre"; teclado.abrir("texto", "Nombre de la carrera", raiz.nombre, 80); } }
+            }
+            Fila {
+                etiqueta: "Localidad"
+                Campo { anchoMinimo: 260; libre: true; texto: raiz.lugar || "Elegir…"; editando: buscador.abierto
+                        onTocado: buscador.abrir("") }
             }
             Fila {
                 etiqueta: "Fecha"
@@ -203,6 +214,10 @@ Item {
         color: Tema.tintaSuave; font { family: Tema.fuente; italic: Tema.cursiva; pixelSize: 16 }
     }
 
+    BuscadorLugar {
+        id: buscador
+        onElegido: l => { raiz.lugar = l.nombre + (l.detalle ? ", " + l.detalle.split(",")[0] : ""); raiz.lugarLat = l.lat; raiz.lugarLon = l.lon; }
+    }
     Teclado {
         id: teclado
         onAceptado: v => {
@@ -216,6 +231,7 @@ Item {
     Component.onCompleted: {   // solo para capturas
         if (Contexto.prueba === "teclado-texto") { campo = "nombre"; teclado.abrir("texto", "Nombre de la carrera", nombre, 80); }
         else if (Contexto.prueba === "teclado-tiempo") { campo = "tiempo"; teclado.abrir("tiempo", "Tiempo ideal por vuelta (minutos, segundos y décimas)", Formato.msADigitos(tiempoIdealMs), 6); }
+        else if (Contexto.prueba === "buscador-lugar") buscador.abrir("Gua");
         else if (Contexto.prueba === "teclado-fecha") { campo = "fecha"; teclado.abrir("fecha", "Fecha de la carrera", Formato.desdeIso(fecha)); }
     }
 }

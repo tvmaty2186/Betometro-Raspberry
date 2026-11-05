@@ -119,6 +119,11 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["id"] = q(c.id);
     r["nombre"] = q(c.nombre);
     r["fecha"] = q(c.fecha);
+    // Localidad (para el clima): nombre y coordenadas elegidas de la lista del buscador
+    const Json& ex = c.extra;
+    r["lugar"] = q(c.lugar);
+    r["lugarLat"] = ex["lugarLat"].esNumero() ? QVariant(ex["lugarLat"].aNumero()) : QVariant();
+    r["lugarLon"] = ex["lugarLon"].esNumero() ? QVariant(ex["lugarLon"].aNumero()) : QVariant();
     r["dia"] = f.isValid() ? QString::number(f.day()).rightJustified(2, '0') : QString("--");
     r["mes"] = f.isValid() ? QString(kMeses[f.month() - 1]) : QString();
     r["fechaCorta"] = f.isValid() ? f.toString("dd/MM") : QString();
@@ -239,6 +244,13 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
     c->nombre = s(nombre.left(Carrera::kMaxNombre));
     c->fecha = s(m.value("fecha").toString());
     c->vueltasTotal = 0;   // ya no se usa: no hay límite de vueltas
+    if (m.contains("lugar")) {
+        c->lugar = s(m.value("lugar").toString().left(120));
+        const QVariant la = m.value("lugarLat"), lo = m.value("lugarLon");
+        const bool hay = !c->lugar.empty() && la.isValid() && !la.isNull() && lo.isValid() && !lo.isNull();
+        c->extra["lugarLat"] = hay ? Json(la.toDouble()) : Json();
+        c->extra["lugarLon"] = hay ? Json(lo.toDouble()) : Json();
+    }
     if (m.contains("notas")) c->notas = s(m.value("notas").toString().left(Carrera::kMaxNotas));
     if (!c->parametrosFijos()) {   // con vueltas corridas no se cambian
         c->tiempoIdealMs = T;
@@ -477,6 +489,13 @@ void Datos::cargarMuestra() {
     };
     agregar("Gualeguaychú", h.addDays(14), 10, 240000, 3200, "alt1", {});
     agregar("Concepción del Uruguay", h.addDays(28), 8, 210000, 2800, "todas", {});
+    // Localidades de muestra (para el clima)
+    auto lugar = [&](size_t i, const char* l, double la, double lo) {
+        Carrera& c = base_.carreras[base_.carreras.size() - 2 + i];
+        c.lugar = l; c.extra["lugarLat"] = Json(la); c.extra["lugarLon"] = Json(lo);
+    };
+    lugar(0, "Gualeguaychú, Entre Ríos", -33.009, -58.517);
+    lugar(1, "Concepción del Uruguay, Entre Ríos", -32.484, -58.232);
     agregar("Santa Clara", h.addDays(-1), 6, 180000, 2500, "todas", {1500, -2100, 800, 1900, -1700, 1600});
     agregar("Paraná", h.addDays(-14), 8, 200000, 2600, "todas", {1200, -2500, 1800, -900, 2200, -1100, 1300, 1100});
     cfg_ = armarConfig(base_.config);

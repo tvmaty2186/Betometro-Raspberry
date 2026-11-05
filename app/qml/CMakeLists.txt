@@ -39,6 +39,8 @@ qt_add_qml_module(betometro_qml
     componentes/Segmentado.qml
     componentes/Senal.qml
     componentes/IconoWifi.qml
+    componentes/IconoClima.qml
+    componentes/BuscadorLugar.qml
     componentes/Sub.qml
     componentes/Swoosh.qml
     componentes/Tarjeta.qml
@@ -56,6 +58,7 @@ qt_add_qml_module(betometro_qml
     pantallas/Chequeo.qml
     pantallas/Compartir.qml
     pantallas/Conectividad.qml
+    pantallas/Pronostico.qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml
