@@ -29,3 +29,4 @@ pulseaudio
 pulseaudio-utils
 # Pantalla de arranque (foto con barra de carga, sin letras)
 plymouth
+curl

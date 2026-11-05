@@ -67,6 +67,14 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
+## 1.0.18 (preparada, sin compilar)
+- Video en el informe (Raspberry y página): Informe/Video, datos encima, pantalla completa, datos que se mueven en pausa.
+- Cámara: Espejo. Lista de videos guardados con borrar. El borrado automático también saca el video de la carrera.
+- Modo tele por HDMI (`raspios/kms.json`; DSI-1 y HDMI-A-1 confirmados en la Pi). Sin enchufe en caliente: botón Reiniciar.
+- Pulsador = play/pausa mientras se ve un video.
+- Google Drive: informes y videos (estos solo con la wifi elegida). Ver [docs/google-drive.md](docs/google-drive.md).
+- Falta probar en la Pi: video en la pantalla (velocidad de la Pi 3), la tele, Drive con Google de verdad, celular.
+
 ## 1.0.17 (05/11/2026)
 - Cámara: paquete gstreamer1.0-plugins-bad (h264parse) y v4l-utils; vista previa con cualquier tamaño chico; antes
   de grabar espera a que la vista previa y el micrófono suelten los dispositivos. **Falta el error exacto de la
