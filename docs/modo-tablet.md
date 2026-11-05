@@ -19,6 +19,14 @@ dentro), camara-h, practica-h, clima-h, carrera-h. Se arman con `gen.py` (Playwr
 **Queda como está** (ya está pensada para el copiloto). En Modo Tablet solo cambia la franja de arriba: nombre de la
 carrera más grande (24 px), GPS más grande y «Terminar» grande.
 
+## Cómo está programado (05/11/2026)
+- `Tema.tablet` (cfg `modoTablet`; `--prueba tablet` para capturas). `Main.qml` carga `tablet/T<Pantalla>.qml` si existe.
+- Piezas en `app/qml/tablet/`: `TPantalla` (fondo + `TBarra`), `TBoton`, `TFila` (si el control no entra, va abajo),
+  `TMasMenos`, `TDato`, `TLlave`, `TOpciones`, `TIcono` (íconos dibujados del color del tema).
+- Pantallas: TInicio, TPractica, TClima, TCamara, TAjustes, TAjustesSeccion (auto, pantalla, voz, velocidad; parámetro
+  `seccion`), TCarreras, TFicha, TChequeo, TConectividad, TActualizar. Carrera: solo la franja de arriba más grande.
+- Quedan como siempre (no se usan en marcha): Informe, Editor de pantalla, Clave del wifi, Compartir.
+
 ## Partes
 1. Interruptor + barra de arriba + **Inicio** + franja de la **pantalla de carrera**.
 2. **Práctica libre**, **Clima**, **Cámara**.

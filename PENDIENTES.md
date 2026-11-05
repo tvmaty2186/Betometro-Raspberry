@@ -69,7 +69,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieri
 
 ## Modo Tablet (aprobado 05/11/2026)
 Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [docs/modo-tablet.md](docs/modo-tablet.md).
-Partes: 1) interruptor + Inicio + franja de la carrera · 2) Práctica, Clima, Cámara · 3) Ajustes · 4) el resto.
+**Programado completo (sin compilar):** se prende en Ajustes → Pantalla y tema → «Modo Tablet». Va en la 1.0.16.
 
 ## Siguiente
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
