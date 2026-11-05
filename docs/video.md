@@ -33,6 +33,24 @@ Otras: cámara CSI barata OV5647 con lente de 160° (necesita libcamera y `camer
 Prueba al recibirla (USB): `v4l2-ctl --list-formats` tiene que mostrar **H264**.
 Fuentes: https://medium.com/@cmeister2/logitech-c920-c922-webcams-no-longer-provide-native-h-264-1e0e4b6a9b74 · https://www.megatone.net/producto/camara-de-seguridad-usb-elp-2mp-1080p-co_MKT0HGGNOC/
 
+## Video en el informe (aprobado por Matías, 05/11/2026)
+Muestras: [muestras/video/completo-andando.png](muestras/video/completo-andando.png), [completo-pausa.png](muestras/video/completo-pausa.png),
+[completo-editar.png](muestras/video/completo-editar.png) y la vista a medias [muestras-video-v1.png](muestras-video-v1.png).
+- **Vista a medias:** en el informe, botón Informe / Video; mitad video, mitad informe. Tocar el mapa o una vuelta lleva el video ahí.
+- **Pantalla completa:** doble toque sobre el video (otro doble toque vuelve).
+- **Datos encima, en tiras finitas de una línea:** arriba a la izquierda «V3 · MEDIDA» (chip del color de acento); arriba a la
+  derecha el adelanto («+0,4 s ATRASADO», rojo atrasado / verde en tiempo); abajo a la izquierda, apiladas: «VUELTA 2:14,6»,
+  «DIST. 1.842 / 3.200 m», «VEL. 48 km/h» con barrita contra la sugerida y «SUG. 47,5»; abajo a la derecha la **pista** con un
+  punto amarillo donde va el auto (esta caja es más grande, está bien así). Barra de abajo: play/pausa, tiempo, línea con una
+  rayita por vuelta (tocarla salta a esa vuelta).
+- **Configuración solo en pausa:** en pausa aparece el **engranaje** en la barra. Adentro: prender/apagar cada dato y **mover**
+  los datos (mantener apretado → se pone translúcido con borde punteado → arrastrar → imán con los otros datos y los bordes).
+  Lo acomodado queda guardado para todos los videos.
+- **También en la página del celular** (mismo reproductor y datos), para verlo en el celu o en la tele con Smart View /
+  Chromecast, y en el navegador de una Smart TV. Y **en la tele por HDMI** desde la Raspberry.
+- **Sincronía:** en la carrera, `videos: [{archivo, largada, desdeLargadaMs, girar}]` (crono.cpp `asociarVideo`). El momento del
+  video de un punto de la traza = `desdeLargadaMs + (suma de realMs de las vueltas anteriores de esa largada) + t·1000`.
+
 ## Ajustes → Cámara y micrófono (lista aprobada 02/11/2026)
 
 Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.html`, `#k1`). Se entra desde **Ajustes** (no va en el inicio).
