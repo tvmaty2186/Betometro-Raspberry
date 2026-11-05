@@ -71,6 +71,7 @@ Muestra: [muestras/video/tele.png](muestras/video/tele.png) (fuente `muestras/vi
   (`/sys/class/drm/card*-HDMI-A-*/status`) pero Qt no la tiene, el botón aparece igual y explica «Hay que reiniciar Betómetro
   para usar la tele» con **Reiniciar** (nunca en carrera): Betómetro se cierra y systemd lo abre de nuevo a los 2 s.
   Si se desenchufa la tele, la ventana de la tele se cierra y el video vuelve a la Pi.
+- **Confirmado en la Pi de Matías (05/11/2026):** `/sys/class/drm/` tiene `card0`, `card0-DSI-1`, `card0-HDMI-A-1` y `card0-Writeback-1`; los nombres de `kms.json` están bien.
 - **Probar en la PC:** `QT_QPA_PLATFORM=offscreen:configfile=pantallas.json` con dos pantallas (`DSI-1` y `HDMI-A-1`),
   `--prueba tele`, `tele-datos`, `tele-reiniciar`, `video-pulsador` y `--captura-tele archivo.png`.
 
