@@ -12,6 +12,10 @@ TPantalla {
     function siguiente(lista, actual) { const i = lista.indexOf(actual); return lista[(i + 1) % lista.length]; }
     Component.onCompleted: { Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel(); }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
+    // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:
+    // antes quedaba en «Prendiendo la cámara…» (Matías, 05/11/2026)
+    Connections { target: Camara; function onGrabandoChanged() { if (!Camara.grabando) reprender.restart(); } }
+    Timer { id: reprender; interval: 600; onTriggered: { Camara.empezarVista(); Camara.empezarNivel(); } }
 
     // ---- Vista previa
     Rectangle {
