@@ -15,6 +15,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/app/historial.md](docs/app/historial.md) | Versiones de la app y decisiones de Matías |
 | [pruebas/motor/INFORME.md](pruebas/motor/INFORME.md) | E1: el motor en C++ (`app/nucleo/`) y cómo se compara con la app |
 | [docs/video.md](docs/video.md) | E7 (para después de la 1.0.0): grabar la carrera con cámara y verla en el informe |
+| [docs/modo-tablet.md](docs/modo-tablet.md) | Modo Tablet: botones grandes dentro de cada tema (plan y muestras aprobadas) |
 | [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer |
 
 ## Qué es

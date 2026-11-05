@@ -67,6 +67,10 @@ Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieri
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
+## Modo Tablet (aprobado 05/11/2026)
+Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [docs/modo-tablet.md](docs/modo-tablet.md).
+Partes: 1) interruptor + Inicio + franja de la carrera · 2) Práctica, Clima, Cámara · 3) Ajustes · 4) el resto.
+
 ## Siguiente
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
