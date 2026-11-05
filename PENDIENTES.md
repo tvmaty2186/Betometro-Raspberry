@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -59,7 +59,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieri
   Falta probar con la cámara real.
 
 ## Ahora (Matías)
-1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.15. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.16. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
 2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
    RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
@@ -69,7 +69,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieri
 
 ## Modo Tablet (aprobado 05/11/2026)
 Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [docs/modo-tablet.md](docs/modo-tablet.md).
-**Programado completo (sin compilar):** se prende en Ajustes → Pantalla y tema → «Modo Tablet». Va en la 1.0.16.
+**Programado completo (1.0.16):** se prende en Ajustes → Pantalla y tema → «Modo Tablet».
 
 ## Siguiente
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
