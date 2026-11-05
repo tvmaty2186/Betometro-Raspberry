@@ -70,7 +70,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieri
 ## Para la 1.0.17 (sin compilar)
 - Cámara: paquete gstreamer1.0-plugins-bad (h264parse) y v4l-utils; vista previa con cualquier tamaño chico; antes
   de grabar espera a que la vista previa y el micrófono suelten los dispositivos. **Falta el error exacto de la
-  grabación en carrera** (comando de prueba pasado a Matías).
+  grabación**: resuelto, la cadena con `v4l2jpegdec` se trababa; ahora `jpegdec` + compresor del chip (probado en la Pi).
 - Inicio: el velocímetro muestra la velocidad real si hay GPS (lectura de menos de 3 s); si no, la animación.
 
 ## Modo Tablet (aprobado 05/11/2026)

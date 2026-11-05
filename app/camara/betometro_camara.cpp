@@ -163,17 +163,17 @@ std::string fuenteAudio(const std::string& audio, bool prueba) {
     return "alsasrc device=" + audio;
 }
 
-// Webcam común (MJPEG): se descomprime y se vuelve a comprimir en H.264 con el chip de video de la
-// Raspberry (bcm2835-codec: v4l2jpegdec y v4l2h264enc), sin cargar el procesador. Si falta alguna pieza,
-// se usa la de software para esa parte (más lenta).
+// Webcam común (MJPEG): el procesador descomprime (jpegdec) y el chip de video de la Raspberry vuelve a
+// comprimir en H.264 (v4l2h264enc). Probado en la Pi de Matías el 05/11/2026 con su webcam a 1280×720:
+//   A) v4l2jpegdec ! v4l2h264enc                → se traba después del primer cuadro (36 KB)
+//   B) jpegdec ! videoconvert ! v4l2h264enc     → anda (2,5 MB en 5 s)   ← este
+//   C) v4l2jpegdec ! v4l2convert ! v4l2h264enc  → se traba (40 KB)
+// Si no está el compresor del chip, uno de software.
 std::string compresorMjpeg() {
     auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };
-    std::string d = hay("v4l2jpegdec") ? "v4l2jpegdec" : "jpegdec";
-    if (hay("v4l2convert")) d += " ! v4l2convert";
-    else d += " ! videoconvert";
-    d += " ! video/x-raw,format=I420";
+    std::string d = "jpegdec ! videoconvert ! video/x-raw,format=I420";
     if (hay("v4l2h264enc"))
-        d += " ! v4l2h264enc extra-controls=\"controls,video_bitrate=4000000,h264_i_frame_period=30\" ! video/x-h264,level=(string)4";
+        d += " ! v4l2h264enc extra-controls=controls,video_bitrate=4000000,repeat_sequence_header=1 ! video/x-h264,level=(string)4";
     else if (hay("x264enc"))
         d += " ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=4000 key-int-max=30";
     else
