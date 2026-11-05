@@ -12,6 +12,7 @@ Rectangle {
     property string tipo: ""
     property bool activo: true
     property real tamIcono: 72
+    property real tamNombre: 29
     signal tocado()
     readonly property color tinta: tipo === "acento" ? Tema.acentoTinta : Tema.tinta
     radius: Math.max(14, Tema.radio * 1.7)
@@ -39,7 +40,7 @@ Rectangle {
                      width: raiz.tamIcono * 1.1; height: width; codigo: Math.max(0, raiz.clima) }
         Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; maximumLineCount: 2
                text: raiz.nombre; color: raiz.tinta
-               font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 29 } }
+               font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.tamNombre; letterSpacing: raiz.tamNombre > 60 ? 4 : 0 } }
         Text { visible: raiz.dato !== ""; width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
                text: raiz.dato; color: raiz.tipo === "" ? Tema.acento : raiz.tinta; opacity: raiz.tipo === "" ? 1 : 0.85
                font { family: Tema.fuente600; pixelSize: 21 } }

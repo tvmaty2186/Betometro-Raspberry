@@ -68,6 +68,10 @@ qt_add_qml_module(betometro_qml
     tablet/TOpciones.qml
     tablet/TPantalla.qml
     tablet/TInicio.qml
+    tablet/TDato.qml
+    tablet/TPractica.qml
+    tablet/TClima.qml
+    tablet/TCamara.qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml
