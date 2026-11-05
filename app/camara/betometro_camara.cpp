@@ -221,7 +221,8 @@ int main(int argc, char** argv) {
         salidaVista = salida;
         const std::string fuente = prueba
             ? "videotestsrc is-live=true pattern=smpte ! video/x-raw,width=640,height=360,framerate=5/1 ! jpegenc"
-            : "v4l2src device=" + video + " ! image/jpeg,width=640,height=360 ! videorate drop-only=true ! image/jpeg,framerate=5/1";
+            // Vista previa: cualquier tamaño chico que dé la cámara (no todas dan 640×360)
+            : "v4l2src device=" + video + " ! image/jpeg,width=[320,1280],height=[180,720] ! videorate drop-only=true ! image/jpeg,framerate=5/1";
         desc = fuente + " ! appsink name=fotos emit-signals=true max-buffers=1 drop=true sync=false";
     } else if (modo == "nivel") {
         desc = fuenteAudio(audio, prueba) + " ! audioconvert ! level interval=100000000 post-messages=true ! fakesink sync=false";
