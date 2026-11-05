@@ -345,6 +345,7 @@ bool Datos::agregarVideo(const QString& id, const QVariantMap& v) {
     j["largada"] = static_cast<int64_t>(v.value("largada").toInt());
     j["desdeLargadaMs"] = static_cast<int64_t>(v.value("desdeLargadaMs").toLongLong());
     j["girar"] = v.value("girar").toBool();
+    j["espejo"] = v.value("espejo").toBool();
     if (!c->extra["videos"].esLista()) c->extra["videos"] = Json::lista();
     c->extra["videos"].agregar(std::move(j));
     guardar();

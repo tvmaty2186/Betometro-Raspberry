@@ -274,6 +274,7 @@ Json configFabrica() {
     c["camaraCalidad"] = "720p";      // 720p, 1080p
     c["camaraSonido"] = "camara";     // camara (micrófono de la cámara), usb (micrófono USB), no
     c["camaraGirar"] = false;         // girar 180° (cámara dada vuelta en el techo)
+    c["camaraEspejo"] = false;        // espejo: dar vuelta izquierda y derecha
     c["camaraBorrarViejos"] = true;   // si falta lugar, borra los videos más viejos (nunca informes)
     return c;
 }
@@ -336,6 +337,7 @@ Json armarConfig(const Json& guardado) {
     opcionEn(c, def, "camaraCalidad", {"720p", "1080p"});
     opcionEn(c, def, "camaraSonido", {"camara", "usb", "no"});
     boolEn(c, def, "camaraGirar");
+    boolEn(c, def, "camaraEspejo");
     boolEn(c, def, "camaraBorrarViejos");
     return c;
 }

@@ -58,7 +58,8 @@ void Crono::asociarVideo() {
     videoPendiente_ = false;
     datos_->agregarVideo(carreraId_, {{"archivo", QFileInfo(camara_->archivo()).fileName()}, {"largada", largada_},
                                       {"desdeLargadaMs", qRound64(largadaT_ - camara_->primerCuadro())},
-                                      {"girar", datos_->config()["camaraGirar"].aBool(false)}});
+                                      {"girar", datos_->config()["camaraGirar"].aBool(false)},
+                                      {"espejo", datos_->config()["camaraEspejo"].aBool(false)}});
 }
 
 void Crono::grabarAMano() {
