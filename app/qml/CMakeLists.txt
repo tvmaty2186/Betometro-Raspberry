@@ -59,6 +59,9 @@ qt_add_qml_module(betometro_qml
     pantallas/Compartir.qml
     pantallas/Conectividad.qml
     pantallas/Pronostico.qml
+    video/Reproductor.qml
+    video/DatoVideo.qml
+    video/Pista.qml
     tablet/TIcono.qml
     tablet/TBarra.qml
     tablet/TBoton.qml

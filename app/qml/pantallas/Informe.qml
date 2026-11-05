@@ -11,6 +11,18 @@ Item {
     readonly property var c: { rev; return Datos.carrera(id_); }
     readonly property var inf: { rev; return Datos.informe(id_); }
     readonly property var vueltas: inf.vueltas || []
+    // Video de la carrera (E7): botón Informe / Video; a medias, y doble toque → pantalla completa
+    readonly property var videos: { rev; return Datos.videos(id_); }
+    property bool verVideo: false
+    property bool completo: false
+    readonly property bool vv: verVideo && videos.length > 0
+    onVvChanged: {
+        if (!vv) completo = false;
+        else if (reproductor.pos === 0 && reproductor.pendiente < 0) irVideo(lap, 0);
+    }
+    function irVideo(i, t) { if (vv && i >= 0) reproductor.irA(i, t); }
+    // Momento del video en que empieza cada vuelta (para la tabla)
+    function inicioVideo(i) { const m = reproductor.momento(i, 0); return m ? reproductor.reloj(m.ms) : ""; }
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
     property string modo: "vel"      // vel, acel, ade
@@ -61,6 +73,11 @@ Item {
     }
     function colorDif(ms) { const s = Math.abs(ms / 1000); return s <= 0.2 ? Tema.bien : s <= 0.5 ? Tema.acento : Tema.alerta; }
     onLapChanged: { mapa.requestPaint(); grafico.requestPaint(); }
+    // Con el video andando, la vuelta elegida sigue al video
+    Connections {
+        target: reproductor
+        function onLapAhoraChanged() { const i = reproductor.lapAhora; if (i >= 0 && raiz.vueltas[i] && raiz.vueltas[i].m && i !== raiz.lap) raiz.lap = i; }
+    }
     onModoChanged: mapa.requestPaint()
 
     Fondo { anchors.fill: parent }
@@ -79,7 +96,15 @@ Item {
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: raiz.h ? 20 : 20; spacing: 16
-        Numero101 { d: raiz.h ? 62 : 58; numero: Datos.ajustes.numeroAuto || "101"; anchors.verticalCenter: parent.verticalCenter }
+        Numero101 { visible: !raiz.videos.length; d: raiz.h ? 62 : 58; numero: Datos.ajustes.numeroAuto || "101"; anchors.verticalCenter: parent.verticalCenter }
+        Segmentado {
+            visible: raiz.videos.length > 0
+            anchors.verticalCenter: parent.verticalCenter
+            height: raiz.h ? 44 : 42
+            opciones: [{ texto: "Informe", valor: false }, { texto: "Video", valor: true }]
+            valor: raiz.verVideo
+            onElegido: (v) => raiz.verVideo = v
+        }
         BotonAmarillo { width: raiz.h ? 190 : 170; height: raiz.h ? 56 : 54; texto: "Compartir"; anchors.verticalCenter: parent.verticalCenter
                         onTocado: Navegacion.ir("compartir", { id: raiz.id_ }) }
     }
@@ -88,9 +113,11 @@ Item {
     Tarjeta {
         id: cajaMapa
         oscura: true
-        x: raiz.h ? 24 : 20; y: raiz.h ? 110 : 180
-        width: raiz.h ? 600 : parent.width - 40; height: raiz.h ? 590 : 470
-        Sub { x: 18; y: 16; text: raiz.modo === "vel" ? "Recorrido de la vuelta · color = velocidad" : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
+        x: !raiz.vv ? (raiz.h ? 24 : 20) : (raiz.h ? 648 : 20)
+        y: !raiz.vv ? (raiz.h ? 110 : 180) : (raiz.h ? 110 : 600)
+        width: !raiz.vv ? (raiz.h ? 600 : parent.width - 40) : (raiz.h ? 608 : 330)
+        height: !raiz.vv ? (raiz.h ? 590 : 470) : (raiz.h ? 230 : 280)
+        Sub { x: 18; y: 16; visible: !raiz.vv || raiz.h; text: raiz.vv ? "Dónde está · tocá y el video va ahí" : raiz.modo === "vel" ? "Recorrido de la vuelta · color = velocidad" : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
         Row {
             anchors { right: parent.right; rightMargin: 14; top: parent.top; topMargin: 10 }
             spacing: 6
@@ -111,6 +138,31 @@ Item {
             id: mapa
             anchors { fill: parent; topMargin: 44; margins: 14 }
             onWidthChanged: requestPaint()
+            onHeightChanged: requestPaint()
+            readonly property real k: Math.min(width / 364, height / 330)
+            readonly property real ox: (width - 364 * k) / 2
+            readonly property real oy: (height - 330 * k) / 2
+            // Con video: el punto amarillo es donde va el auto, y tocar el recorrido lleva el video ahí
+            Rectangle {
+                visible: raiz.vv && reproductor.e.lap >= 0
+                width: 22; height: 22; radius: 11
+                x: mapa.ox + reproductor.e.x * mapa.k - 11; y: mapa.oy + reproductor.e.y * mapa.k - 11
+                color: Tema.amarillo; border { width: 3; color: "#111111" }
+            }
+            MouseArea {
+                anchors.fill: parent
+                enabled: raiz.vv
+                onClicked: (m) => {
+                    const M = raiz.vu && raiz.vu.m ? raiz.vu.m : [];
+                    let mejor = null, dm = 1e9;
+                    for (const p of M) {
+                        if (!p[7]) continue;
+                        const dx = mapa.ox + p[5] * mapa.k - m.x, dy = mapa.oy + p[6] * mapa.k - m.y, dd = dx * dx + dy * dy;
+                        if (dd < dm) { dm = dd; mejor = p; }
+                    }
+                    if (mejor && dm < 40 * 40) raiz.irVideo(raiz.lap, mejor[0]);
+                }
+            }
             onPaint: {
                 const g = getContext("2d");
                 g.reset();
@@ -147,6 +199,7 @@ Item {
     Tarjeta {
         id: cajaVel
         oscura: true
+        visible: !raiz.vv
         x: raiz.h ? 648 : 20; y: raiz.h ? 110 : 670
         width: raiz.h ? 608 : parent.width - 40; height: raiz.h ? 230 : 210
         Sub { x: 18; y: 16; text: "Velocidad km/h" + (raiz.vu ? " · " + raiz.nombreV(raiz.vu) : "") + (raiz.sug > 0 ? " · sugerida " + raiz.sug.toFixed(1).replace(".", ",") : ""); tam: 12 }
@@ -260,7 +313,7 @@ Item {
                             onPressed: animLlenado.restart()
                             onReleased: { animLlenado.stop(); llenado.width = 0; }
                             onCanceled: { animLlenado.stop(); llenado.width = 0; }
-                            onClicked: { raiz.fila = -1; if (modelData.m) raiz.lap = index; }
+                            onClicked: { raiz.fila = -1; if (modelData.m) raiz.lap = index; raiz.irVideo(index, 0); }
                             onPressAndHold: { raiz.fila = index; if (modelData.m) raiz.lap = index; }
                         }
                         Row {
@@ -285,7 +338,10 @@ Item {
                             Text { width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
                                    color: modelData.difMs === undefined ? Tema.tintaSuave : raiz.colorDif(modelData.difMs)
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                            Text { width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                            Text { visible: raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                                   text: "▸ " + raiz.inicioVideo(index); color: index === raiz.lap ? Tema.acento : Tema.tinta
+                                   font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
+                            Text { visible: !raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
                                    text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
                                    color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                         }
@@ -304,11 +360,76 @@ Item {
             }
         }
     }
+    // Video a medias: arriba a la izquierda; abajo, «En este momento»
+    Tarjeta {
+        id: cajaVideo
+        visible: raiz.vv
+        oscura: true
+        x: raiz.h ? 24 : 20; y: raiz.h ? 110 : 180
+        width: raiz.h ? 600 : parent.width - 40; height: 400
+    }
+    Tarjeta {
+        visible: raiz.vv
+        oscura: true
+        x: raiz.h ? 24 : 370; y: raiz.h ? 530 : 600
+        width: raiz.h ? 600 : 330; height: raiz.h ? 170 : 280
+        Sub { x: 18; y: 16; text: "En este momento"; tam: 12 }
+        Grid {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 18 }
+            columns: raiz.h ? 3 : 1; rowSpacing: 4
+            Repeater {
+                model: [
+                    { e: "Velocidad", v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–", u: "km/h", c: Tema.numero },
+                    { e: "Sugerida", v: raiz.sug > 0 ? raiz.sug.toFixed(1).replace(".", ",") : "–", u: "", c: Tema.tinta },
+                    { e: "Adelanto", v: reproductor.e.lap >= 0 && raiz.dist > 0 ? Formato.dif(-reproductor.e.ade * 1000) : "–", u: "",
+                      c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 0.2 ? Tema.bien : reproductor.e.ade < 0 ? Tema.alerta : Tema.acento }
+                ]
+                Item {
+                    required property var modelData
+                    width: raiz.h ? (cajaVideo.width - 36) / 3 : 294; height: raiz.h ? 96 : 64
+                    Sub { text: modelData.e; tam: 11; anchors.top: raiz.h ? parent.top : undefined; anchors.verticalCenter: raiz.h ? undefined : parent.verticalCenter }
+                    Row {
+                        anchors { bottom: parent.bottom; right: raiz.h ? undefined : parent.right }
+                        spacing: 4
+                        Text { text: modelData.v; color: modelData.c; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 52 : 44 } }
+                        Text { anchors.baseline: parent.children[0].baseline; text: modelData.u; color: Tema.tintaSuave
+                               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
+                    }
+                }
+            }
+        }
+    }
+    Reproductor {
+        id: reproductor
+        visible: raiz.vv
+        z: raiz.completo ? 50 : 1
+        activo: raiz.vv
+        completo: raiz.completo
+        inf: raiz.inf
+        videos: raiz.videos
+        x: raiz.completo ? 0 : cajaVideo.x + 3; y: raiz.completo ? 0 : cajaVideo.y + 3
+        width: raiz.completo ? raiz.width : cajaVideo.width - 6; height: raiz.completo ? raiz.height : cajaVideo.height - 6
+        onDobleToque: raiz.completo = !raiz.completo
+    }
+
     // Menú ⋮ abierto: tocar afuera lo cierra
     MouseArea { anchors.fill: parent; visible: raiz.menuAbierto; onClicked: { raiz.menuAbierto = false; raiz.confirmarRest = false; } }
+    Timer {   // solo para capturas: «Distancia» a medio mover, pegada a «Vuelta»
+        id: tPruebaMover; interval: 400
+        onTriggered: { const d = reproductor.datos[3]; d.moviendo = true; const r = reproductor.imantar(d, 470, 92); d.x = r.x; d.y = r.y; }
+    }
     Component.onCompleted: {   // solo para capturas
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
         else if (Contexto.prueba === "menu") menuAbierto = true;
+        else if (Contexto.prueba.indexOf("video") === 0) {   // video, video-completo, video-andando, video-datos, video-mover
+            verVideo = true;
+            if (conTraza.indexOf(2) >= 0) lap = 2;
+            reproductor.irA(lap, 134.6);
+            completo = Contexto.prueba !== "video";
+            reproductor.editando = Contexto.prueba === "video-datos" || Contexto.prueba === "video-mover";
+            if (Contexto.prueba === "video-mover") tPruebaMover.start();
+            if (Contexto.prueba === "video-andando") reproductor.alternar();
+        }
     }
 }

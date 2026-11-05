@@ -8,6 +8,8 @@ qml6-module-qtqml-workerscript
 libqt6svg6
 qt6-svg-plugins
 libqt6multimedia6
+# Video en el informe (E7): el reproductor de QML (MediaPlayer y VideoOutput)
+qml6-module-qtmultimedia
 # Placa de video (Mesa: EGL y GLES con el driver vc4)
 libegl1
 libgles2

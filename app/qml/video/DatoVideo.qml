@@ -8,17 +8,17 @@ Item {
     id: d
     required property string clave
     required property string nombre     // para «se pega a «Vuelta»»
-    required property Item rep           // el Reproductor
+    required property Item reproductor   // el Reproductor
     default property alias contenido: cont.data
     property bool moviendo: false
     property real ox: 0
     property real oy: 0
     width: cont.childrenRect.width
     height: cont.childrenRect.height
-    x: rep.xDe(clave, width)
-    y: rep.yDe(clave, height)
+    x: d.reproductor.xDe(clave, width)
+    y: d.reproductor.yDe(clave, height)
     z: moviendo ? 5 : 1
-    visible: rep.completo && rep.prendido(clave) && (rep.editando || rep.e.lap >= 0 || clave === "vuelta")
+    visible: d.reproductor.completo && d.reproductor.prendido(clave) && (d.reproductor.editando || d.reproductor.e.lap >= 0 || clave === "vuelta")
     opacity: moviendo ? 0.55 : 1
 
     Item { id: cont }
@@ -40,15 +40,15 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        enabled: d.rep.editando
+        enabled: d.reproductor.editando
         pressAndHoldInterval: 350
         preventStealing: true
-        onPressed: (m) => { const p = mapToItem(d.rep, m.x, m.y); d.ox = p.x - d.x; d.oy = p.y - d.y; }
+        onPressed: (m) => { const p = mapToItem(d.reproductor, m.x, m.y); d.ox = p.x - d.x; d.oy = p.y - d.y; }
         onPressAndHold: d.moviendo = true
         onPositionChanged: (m) => {
             if (!d.moviendo) return;
-            const p = mapToItem(d.rep, m.x, m.y);
-            const r = d.rep.imantar(d, p.x - d.ox, p.y - d.oy);
+            const p = mapToItem(d.reproductor, m.x, m.y);
+            const r = d.reproductor.imantar(d, p.x - d.ox, p.y - d.oy);
             d.x = r.x; d.y = r.y;
         }
         onReleased: soltar()
@@ -56,9 +56,9 @@ Item {
         function soltar() {
             if (!d.moviendo) return;
             d.moviendo = false;
-            d.rep.guardarPos(d.clave, d.x, d.y, d.width, d.height);
-            d.x = Qt.binding(() => d.rep.xDe(d.clave, d.width));
-            d.y = Qt.binding(() => d.rep.yDe(d.clave, d.height));
+            d.reproductor.guardarPos(d.clave, d.x, d.y, d.width, d.height);
+            d.x = Qt.binding(() => d.reproductor.xDe(d.clave, d.width));
+            d.y = Qt.binding(() => d.reproductor.yDe(d.clave, d.height));
         }
     }
 }
