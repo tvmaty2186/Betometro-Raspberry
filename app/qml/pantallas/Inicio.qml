@@ -11,6 +11,7 @@ Item {
         { texto: "Práctica libre", icono: "practica", pantalla: "practica" },
         { texto: "Chequeo previo", icono: "chequeo", pantalla: "chequeo" },
         { texto: "Pantalla de carrera", icono: "pantalla", pantalla: "editor" },
+        { texto: "Clima", icono: "clima", pantalla: "clima" },   // donde estaba Ajustes (Matías, 05/11/2026)
         { texto: "Ajustes", icono: "ajustes", pantalla: "ajustes" }
     ]
 
@@ -100,10 +101,11 @@ Item {
         Disco {
             required property var modelData
             required property int index
-            readonly property real ang: (raiz.h ? 225 - index * 25 : 150 + index * 30) * Math.PI / 180
-            readonly property real cx: raiz.h ? 1090 + Math.cos(ang) * 270 : 629 + Math.cos(ang) * 397
-            readonly property real cy: raiz.h ? 440 - Math.sin(ang) * 270 : 918 + Math.sin(ang) * 397
-            d: raiz.h ? 96 : 104
+            // Seis botones repartidos en el mismo arco que antes ocupaban cinco
+            readonly property real ang: (raiz.h ? 232 - index * 23 : 150 + index * 24) * Math.PI / 180
+            readonly property real cx: raiz.h ? 1090 + Math.cos(ang) * 288 : 629 + Math.cos(ang) * 397
+            readonly property real cy: raiz.h ? 436 - Math.sin(ang) * 288 : 918 + Math.sin(ang) * 397
+            d: raiz.h ? 86 : 104
             x: cx - d / 2; y: cy - d / 2
             icono: modelData.icono
             texto: modelData.texto
