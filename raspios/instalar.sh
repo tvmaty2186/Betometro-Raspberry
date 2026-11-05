@@ -27,6 +27,10 @@ if [ -x /usr/bin/betometro ]; then
 fi
 rm -rf /usr/share/betometro/voz   # la voz vieja no queda mezclada con la nueva
 tar -C / --no-same-owner -xzf betometro.tar.gz
+# El paquete trae /usr/share/betometro/kms.json (pantallas: la de 5" manda, la tele por HDMI a 1280×720).
+# Si viniera suelto al lado del instalador, también se usa.
+[ -f kms.json ] && install -D -m 0644 kms.json /usr/share/betometro/kms.json
+[ -f /usr/share/betometro/kms.json ] || echo "OJO: falta kms.json: el modo tele no anda (lo demás sí)"
 install -m 0644 betometro.service pulseaudio-sistema.service despertar-touch.service /etc/systemd/system/
 # Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)
 usermod -aG pulse-access root

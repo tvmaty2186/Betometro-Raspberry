@@ -31,11 +31,13 @@ if(BETO_PROGRAMA)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
     qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp
-      app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp
+      app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
     target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
     add_subdirectory(app/qml)
     install(TARGETS betometro RUNTIME DESTINATION bin)
+    # Pantallas para eglfs_kms (la de 5" manda; la tele por HDMI a 1280×720): /usr/share/betometro/kms.json
+    install(FILES raspios/kms.json DESTINATION share/betometro)
     target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg Qt6::Multimedia Qt6::Network betometro_qmlplugin)
     # Ayudante de video y sonido (GStreamer, proceso aparte). Si no hay GStreamer, la cámara no anda.
     find_package(PkgConfig QUIET)
@@ -93,6 +95,11 @@ if(BETO_PRUEBAS)
     target_include_directories(prueba_crono PRIVATE app)
     target_link_libraries(prueba_crono PRIVATE nucleo Qt6::Core)
     add_test(NAME crono COMMAND prueba_crono)
+    add_executable(prueba_videos pruebas/programa/prueba_videos.cpp app/datos.cpp app/datos.h app/gps.cpp app/gps.h app/camara.cpp app/camara.h)
+    qt_add_resources(prueba_videos plantilla PREFIX "/" FILES recursos/informe-plantilla.html)
+    target_include_directories(prueba_videos PRIVATE app)
+    target_link_libraries(prueba_videos PRIVATE nucleo Qt6::Core)
+    add_test(NAME videos COMMAND prueba_videos)
   endif()
 
   find_program(NODE node)

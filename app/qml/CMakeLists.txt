@@ -1,7 +1,7 @@
 if(QT_KNOWN_POLICY_QTP0004)
   qt_policy(SET QTP0004 NEW)
 endif()
-set_source_files_properties(Tema.qml Navegacion.qml Formato.qml Armado.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(Tema.qml Navegacion.qml Formato.qml Armado.qml Tele.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_library(betometro_qml STATIC)
 qt_add_qml_module(betometro_qml
@@ -13,6 +13,7 @@ qt_add_qml_module(betometro_qml
     Navegacion.qml
     Formato.qml
     Armado.qml
+    Tele.qml
     componentes/Aviso.qml
     componentes/Banda.qml
     componentes/BandaSeccion.qml
@@ -63,6 +64,11 @@ qt_add_qml_module(betometro_qml
     video/Reproductor.qml
     video/DatoVideo.qml
     video/Pista.qml
+    video/VistaVideo.qml
+    video/ControlTele.qml
+    video/VentanaTele.qml
+    video/IconoTele.qml
+    video/Engranaje.qml
     tablet/TIcono.qml
     tablet/TBarra.qml
     tablet/TBoton.qml

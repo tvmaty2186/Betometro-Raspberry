@@ -13,6 +13,9 @@ Environment=QT_QPA_PLATFORM=eglfs
 Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms
 Environment=QT_QPA_EGLFS_ALWAYS_SET_MODE=1
 Environment=QT_QPA_EGLFS_HIDECURSOR=1
+# Pantallas: la de 5" (DSI) es la principal y lleva el tacto; la tele (HDMI) a 1280×720 para el modo tele.
+# Qt arma las pantallas solo al abrir: una tele enchufada después pide reiniciar Betómetro (docs/video.md)
+Environment=QT_QPA_EGLFS_KMS_CONFIG=/usr/share/betometro/kms.json
 Environment=XDG_RUNTIME_DIR=/run/betometro
 Environment=PULSE_SERVER=unix:/var/run/pulse/native
 Environment=BETO_RASPBERRY=1
