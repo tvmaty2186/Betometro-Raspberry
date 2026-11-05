@@ -6,6 +6,7 @@ Item {
     id: raiz
     readonly property bool h: Contexto.horizontal
     readonly property var a: Datos.ajustes
+    property bool qrGrande: false
     readonly property string url: "http://" + Wifi.direccion + (Servidor.puerto !== 80 ? ":" + Servidor.puerto : "")
 
     Fondo { anchors.fill: parent }
@@ -49,6 +50,7 @@ Item {
                     Rectangle {
                         width: 132; height: 132; radius: 14; color: "#fff"
                         Image { anchors.centerIn: parent; width: 120; height: 120; smooth: false; source: "image://qr/" + encodeURIComponent(raiz.url) }
+                        MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: raiz.qrGrande = true }   // tocarlo: QR grande
                     }
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
@@ -153,6 +155,30 @@ Item {
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gRed }
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gGuardadas }
             Loader { width: parent.width; sourceComponent: raiz.h ? null : gCerca }
+        }
+    }
+
+    // QR en grande para escanearlo fácil (Matías, 05/11/2026). Se cierra tocando en cualquier lado.
+    Rectangle {
+        anchors.fill: parent
+        visible: raiz.qrGrande
+        z: 100
+        color: Qt.rgba(0, 0, 0, 0.85)
+        MouseArea { anchors.fill: parent; onClicked: raiz.qrGrande = false }
+        Column {
+            anchors.centerIn: parent
+            spacing: 18
+            Rectangle {
+                readonly property real lado: Math.min(raiz.width, raiz.height) - 150
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: lado; height: lado; radius: 22; color: "#fff"
+                Image { anchors.centerIn: parent; width: parent.lado - 40; height: width; smooth: false
+                        source: raiz.qrGrande ? "image://qr/" + encodeURIComponent(raiz.url) : "" }
+            }
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: raiz.url.replace("http://", "")
+                   color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Tocá en cualquier lado para cerrar"
+                   color: Tema.tinta; opacity: 0.8; font { family: Tema.fuente600; pixelSize: 18 } }
         }
     }
 }

@@ -49,6 +49,9 @@ Actualizado el 05/11/2026 (última versión: 1.0.13). Plan: [docs/plan-ingenieri
   rayitas de la pantalla de wifi (se encimaban).
   Aceleración del informe con ventana de ~1 s (a 5 Hz saltaba ±4 m/s² por ruido; a 1 Hz igual que la app).
 
+- Para la 1.0.14 (sin compilar): sin el cartel de wifi en el inicio (no entraba; queda el abanico); el QR de
+  Conectividad se toca y se ve en grande.
+
 ## Ahora (Matías)
 1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.13. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
