@@ -45,7 +45,8 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
   Chequeo previo: «Módulo» en verde si está conectado y hablando («Réplica NEO-M8N…» si no es original); rojo solo
   «Sin comunicación».
   Inicio: carteles GPS y wifi más grandes (con punto verde/rojo; en horizontal al lado del nombre del auto) y
-  rayitas del wifi a la izquierda de la versión (tocarlas abre Conectividad). Arreglo de las rayitas (se encimaban).
+  ícono de wifi de abanico a la izquierda de las franjas en diagonal (tocarlo abre Conectividad). Arreglo de las
+  rayitas de la pantalla de wifi (se encimaban).
   Aceleración del informe con ventana de ~1 s (a 5 Hz saltaba ±4 m/s² por ruido; a 1 Hz igual que la app).
 
 ## Ahora (Matías)

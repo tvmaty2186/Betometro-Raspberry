@@ -38,6 +38,7 @@ qt_add_qml_module(betometro_qml
     componentes/Rayas.qml
     componentes/Segmentado.qml
     componentes/Senal.qml
+    componentes/IconoWifi.qml
     componentes/Sub.qml
     componentes/Swoosh.qml
     componentes/Tarjeta.qml

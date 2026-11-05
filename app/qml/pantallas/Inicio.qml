@@ -39,18 +39,18 @@ Item {
         text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.acento + "'>· Actualizar</font>" : "")
         color: Tema.tinta
         font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
-        x: raiz.h ? parent.width - 28 - width : 24 + senalWifi.width + 12
+        x: raiz.h ? parent.width - 28 - width : 24
         y: raiz.h ? 30 : 84
         MouseArea { anchors.fill: parent; anchors.margins: -10; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
     }
-    // Rayitas del wifi, como en los celulares, a la izquierda de la versión (Matías, 04/11/2026). Tocarlas: Conectividad.
-    Senal {
-        id: senalWifi
-        grosor: 5; paso: 4.5
+    // Ícono del wifi (abanico), a la izquierda de las franjas en diagonal, lejos de la versión y del
+    // «· Actualizar» (Matías, 04/11/2026). Tocarlo abre Conectividad.
+    IconoWifi {
+        id: iconoWifi
         nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0
-        opacity: Wifi.conectada ? 1 : 0.6
-        x: raiz.h ? version.x - width - 10 : 24
-        y: version.y + version.height - height - 3
+        width: 44; height: 34
+        x: raiz.h ? parent.width - 200 - 80 - 18 - width : parent.width - 30 - 70 - 18 - width
+        y: raiz.h ? 28 : 34
         MouseArea { anchors.fill: parent; anchors.margins: -12; onClicked: Navegacion.ir("conectividad") }
     }
 
