@@ -10,6 +10,9 @@
 //            Foto de la cámara 5 veces por segundo (MJPEG de la cámara, sin descomprimir).
 //   nivel    --audio hw:CARD=X       Nivel del micrófono: {"nivel": 0..1} 10 veces por segundo.
 //   probar   --audio hw:CARD=X --segundos 5 --salida f.wav    Graba unos segundos de sonido.
+//   mp4      --entrada f.mkv --salida f.mp4 [--sonido si|no]
+//            Pasa el video a MP4 (lo abren todos los teléfonos, también el iPhone). La imagen no se vuelve
+//            a comprimir (es rápido); el sonido pasa de Opus a AAC.
 //   --prueba: en la PC, sin cámara: imagen y sonido de prueba.
 // El archivo de video es Matroska «para transmitir»: si se corta la luz, lo grabado se puede ver igual.
 #include <glib-unix.h>
@@ -187,7 +190,7 @@ std::string compresorMjpeg() {
 int main(int argc, char** argv) {
     gst_init(&argc, &argv);
     if (argc < 2) {
-        std::fprintf(stderr, "uso: betometro-camara grabar|vista|nivel|probar [opciones]\n");
+        std::fprintf(stderr, "uso: betometro-camara grabar|vista|nivel|probar|mp4 [opciones]\n");
         return 2;
     }
     const std::string modo = argv[1];
@@ -229,6 +232,19 @@ int main(int argc, char** argv) {
     } else if (modo == "probar") {
         if (salida.empty()) return 2;
         desc = fuenteAudio(audio, prueba) + " ! audioconvert ! audioresample ! audio/x-raw,rate=48000,channels=1 ! wavenc ! filesink location=\"" + salida + "\"";
+    } else if (modo == "mp4") {
+        const std::string entrada = arg(argc, argv, "--entrada", "");
+        if (entrada.empty() || salida.empty()) return 2;
+        const bool sonido = std::strcmp(arg(argc, argv, "--sonido", "si"), "no") != 0;
+        desc = "filesrc location=\"" + entrada + "\" ! matroskademux name=d "
+               "mp4mux name=m faststart=true ! filesink location=\"" + salida + "\" "
+               "d.video_0 ! queue ! h264parse ! m.";
+        if (sonido) {
+            const auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };
+            const std::string aac = hay("avenc_aac") ? "avenc_aac bitrate=64000" : hay("fdkaacenc") ? "fdkaacenc" : hay("voaacenc") ? "voaacenc" : "";
+            if (aac.empty()) desc += " d.audio_0 ! queue ! opusparse ! m.";   // sin AAC: queda Opus (no anda en iPhone)
+            else desc += " d.audio_0 ! queue ! opusdec ! audioconvert ! audioresample ! " + aac + " ! aacparse ! m.";
+        }
     } else {
         std::fprintf(stderr, "modo desconocido: %s\n", modo.c_str());
         return 2;

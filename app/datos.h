@@ -53,6 +53,8 @@ public:
     bool borrarVideo(const QString& archivo);
     // Saca un video de las carreras, sin tocar el archivo (cuando la cámara borra los viejos). true si había alguno.
     bool olvidarVideo(const QString& archivo);
+    // El video pasó de .mkv a .mp4: cambia el nombre en las carreras (el archivo ya lo cambió la cámara)
+    bool renombrarVideo(const QString& viejo, const QString& nuevo);
     // Un nombre de video que se puede tocar: sin carpetas ni «..», termina en .mkv o .mp4
     static bool nombreVideoValido(const QString& archivo);
     const beto::Carrera* buscar(const QString& id) const;

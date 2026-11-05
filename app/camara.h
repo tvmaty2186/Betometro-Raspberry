@@ -26,7 +26,8 @@ class Camara : public QObject {
     Q_PROPERTY(double nivel READ nivel NOTIFY nivelChanged)             // micrófono, 0..1
     Q_PROPERTY(QString pruebaMic READ pruebaMic NOTIFY pruebaMicChanged) // "", grabando, escuchando
     Q_PROPERTY(QVariantMap lugar READ lugar NOTIFY lugarChanged)        // usadoGB, videos, horas
-    Q_PROPERTY(QVariantList videos READ videos NOTIFY lugarChanged)   // los de Datos::videosGuardados, + «grabando»
+    Q_PROPERTY(QVariantList videos READ videos NOTIFY lugarChanged)
+    Q_PROPERTY(bool convirtiendo READ convirtiendo NOTIFY convirtiendoChanged)   // pasando un video a MP4   // los de Datos::videosGuardados, + «grabando»
 
 public:
     Camara(Datos* datos, const QString& carpetaDatos, QObject* padre = nullptr);
@@ -37,6 +38,9 @@ public:
     QString problema() const { return problema_; }
     QVariantList microfonos() const { return microfonos_; }
     bool grabando() const { return grab_.state() != QProcess::NotRunning; }
+    bool convirtiendo() const { return mp4_.state() != QProcess::NotRunning; }
+    // En carrera no se pasa nada a MP4 (y si estaba pasando uno, se corta y se sigue después)
+    void ponerEnCarrera(bool enCarrera);
     QString falla() const { return falla_; }
     QUrl vista() const { return vista_; }
     bool viendo() const { return vistaProc_.state() != QProcess::NotRunning; }
@@ -74,11 +78,13 @@ signals:
     void nivelChanged();
     void pruebaMicChanged();
     void lugarChanged();
+    void convirtiendoChanged();
     void primerCuadroListo(double ahora);    // hora del primer cuadro, en el reloj de la carrera
 
 private:
     void leer(QProcess& p, const std::function<void(const QVariantMap&)>& f);
     void hacerLugar();
+    void revisarMp4();                       // pasa a MP4 el .mkv más viejo, si se puede ahora
     void actualizarLugar();
     QStringList base() const;                // opciones comunes (prueba en la PC)
 
@@ -88,7 +94,10 @@ private:
     QString formatoVideo_ = QStringLiteral("h264");   // h264 o mjpeg (webcams comunes)
     QString dispVideo_, nombre_, problema_, falla_, archivo_, pruebaMic_;
     QVariantList microfonos_;
-    QProcess grab_, vistaProc_, nivelProc_, micProc_;
+    QProcess grab_, vistaProc_, nivelProc_, micProc_, mp4_;
+    QString mp4Entrada_;                      // el .mkv que se está pasando
+    bool mp4Error_ = false, enCarrera_ = false;
+    QStringList mp4Fallados_;                 // no se reintentan hasta reiniciar
     QTimer detenerTimer_;
     QUrl vista_;
     int fotos_ = 0;

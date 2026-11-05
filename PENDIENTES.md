@@ -72,6 +72,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
 - Cámara: Espejo. Lista de videos guardados con borrar. El borrado automático también saca el video de la carrera.
 - Modo tele por HDMI (`raspios/kms.json`; DSI-1 y HDMI-A-1 confirmados en la Pi). Sin enchufe en caliente: botón Reiniciar.
 - Pulsador = play/pausa mientras se ve un video.
+- Video en MP4 automático al terminar de grabar (lo abre el iPhone); nunca en carrera.
 - Google Drive: informes y videos (estos solo con la wifi elegida). Ver [docs/google-drive.md](docs/google-drive.md).
 - Falta probar en la Pi: video en la pantalla (velocidad de la Pi 3), la tele, Drive con Google de verdad, celular.
 

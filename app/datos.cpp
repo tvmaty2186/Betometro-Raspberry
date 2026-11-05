@@ -409,6 +409,17 @@ bool Datos::olvidarVideo(const QString& archivo) {
     return cambio;
 }
 
+bool Datos::renombrarVideo(const QString& viejo, const QString& nuevo) {
+    bool cambio = false;
+    for (auto& c : base_.carreras) {
+        if (!c.extra["videos"].esLista()) continue;
+        for (auto& v : c.extra["videos"].elementos())
+            if (q(v["archivo"].aTexto()) == viejo) { v["archivo"] = s(nuevo); cambio = true; }
+    }
+    if (cambio) { guardar(); emit carrerasChanged(); }
+    return cambio;
+}
+
 bool Datos::borrarVideo(const QString& archivo) {
     if (!nombreVideoValido(archivo)) return false;
     const QString ruta = carpetaVideos() + '/' + archivo;

@@ -84,3 +84,11 @@ Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.htm
 ## Cuándo
 
 Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la carrera. Aceptación de E7: con la cámara grabando, la prueba de demora de voz y pulsador da igual que sin cámara, y el video queda sincronizado al décimo de segundo con las marcas.
+
+## MP4 automático (05/11/2026)
+- Se graba en `.mkv` (si se corta la luz, lo grabado se ve igual). Al terminar de grabar, y al prender por si
+  quedó alguno, `betometro-camara mp4` lo pasa a `.mp4`: la imagen no se vuelve a comprimir (rápido) y el sonido
+  pasa de Opus a AAC (`avenc_aac`, paquete `gstreamer1.0-libav`), así lo abre también el iPhone.
+- Nunca en carrera: si empieza una, se corta y se sigue después. Se escribe en `.mp4.parte`; al terminar bien se
+  renombra, se cambia el nombre en la carrera (`Datos::renombrarVideo`) y se borra el `.mkv`. Si falla, queda el `.mkv`.
+- Drive espera a que termine (no sube el `.mkv`).

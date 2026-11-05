@@ -157,11 +157,15 @@ int main(int argc, char* argv[]) {
     Drive drive(&datos, carpeta, op.value(oPrueba));
     servidor.ponerDrive(&drive);
     drive.ponerBorrador([&camara](const QString& archivo) { return camara.borrarVideo(archivo); });
-    auto condicionesDrive = [&] { drive.ponerCondiciones(wifi.conectada(), wifi.propia(), crono.enCurso() || camara.grabando()); };
+    auto condicionesDrive = [&] { drive.ponerCondiciones(wifi.conectada(), wifi.propia(), crono.enCurso() || camara.grabando() || camara.convirtiendo()); };
     condicionesDrive();
     QObject::connect(&wifi, &Wifi::cambio, &drive, condicionesDrive);
     QObject::connect(&crono, &Crono::enCursoChanged, &drive, condicionesDrive);
     QObject::connect(&camara, &Camara::grabandoChanged, &drive, condicionesDrive);
+    QObject::connect(&camara, &Camara::convirtiendoChanged, &drive, condicionesDrive);
+    // Pasar los videos a MP4: nunca en carrera
+    camara.ponerEnCarrera(crono.enCurso());
+    QObject::connect(&crono, &Crono::enCursoChanged, &camara, [&] { camara.ponerEnCarrera(crono.enCurso()); });
     // Prendido si la opción «Mostrar informes en la red» está prendida y no hay carrera
     auto prenderServidor = [&] {
         const QVariant v = datos.cfg(QStringLiteral("informesRed"));

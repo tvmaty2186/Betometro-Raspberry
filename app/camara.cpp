@@ -107,6 +107,30 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
         emit vistaChanged();
     });
     connect(&vistaProc_, &QProcess::stateChanged, this, &Camara::vistaChanged);
+    // MP4: al terminar de grabar (y al prender, por si quedó alguno) se pasa el .mkv a .mp4, que abren
+    // todos los teléfonos. Se graba en .mkv porque si se corta la luz no se pierde lo grabado.
+    mp4_.setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(15); });
+    leer(mp4_, [this](const QVariantMap& m) { if (m.contains("error")) mp4Error_ = true; });
+    connect(&mp4_, &QProcess::finished, this, [this](int codigo, QProcess::ExitStatus estado) {
+        const QString mkv = mp4Entrada_, mp4 = mkv.left(mkv.size() - 4) + QStringLiteral(".mp4"), parte = mp4 + QStringLiteral(".parte");
+        mp4Entrada_.clear();
+        if (estado == QProcess::NormalExit && codigo == 0 && !mp4Error_ && QFileInfo(parte).size() > 0) {
+            QFile::remove(mp4);
+            if (QFile::rename(parte, mp4)) {
+                datos_->renombrarVideo(QFileInfo(mkv).fileName(), QFileInfo(mp4).fileName());
+                QFile::remove(mkv);
+            }
+        } else {
+            QFile::remove(parte);
+            // Cortado por la carrera: se reintenta después. Si falló solo, no (queda el .mkv, que igual se ve)
+            if (!enCarrera_) mp4Fallados_ << mkv;
+        }
+        emit convirtiendoChanged();
+        actualizarLugar();
+        QTimer::singleShot(1000, this, &Camara::revisarMp4);
+    });
+    connect(&grab_, &QProcess::finished, this, [this] { QTimer::singleShot(3000, this, &Camara::revisarMp4); });
+    QTimer::singleShot(30000, this, &Camara::revisarMp4);
     leer(nivelProc_, [this](const QVariantMap& m) {
         if (m.contains("nivel")) { nivel_ = m.value("nivel").toDouble(); emit nivelChanged(); }
     });
@@ -280,8 +304,35 @@ QVariantList Camara::videos() const {
     return r;
 }
 
+void Camara::ponerEnCarrera(bool enCarrera) {
+    enCarrera_ = enCarrera;
+    if (enCarrera_ && convirtiendo()) mp4_.kill();   // la carrera primero
+    if (!enCarrera_) QTimer::singleShot(5000, this, &Camara::revisarMp4);
+}
+
+void Camara::revisarMp4() {
+    if (enCarrera_ || grabando() || convirtiendo()) return;
+    const QFileInfoList l = QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv")}, QDir::Files, QDir::Time | QDir::Reversed);
+    for (const QFileInfo& f : l) {
+        if (mp4Fallados_.contains(f.absoluteFilePath())) continue;
+        // ¿Tiene sonido? Los videos de Betómetro llevan Opus y el encabezado lo dice al principio
+        QFile a(f.absoluteFilePath());
+        const bool sonido = a.open(QIODevice::ReadOnly) && a.read(256 * 1024).contains("A_OPUS");
+        mp4Entrada_ = f.absoluteFilePath();
+        mp4Error_ = false;
+        const QString salida = mp4Entrada_.left(mp4Entrada_.size() - 4) + QStringLiteral(".mp4.parte");
+        mp4_.setProgram(ayudante());
+        mp4_.setArguments(QStringList{QStringLiteral("mp4"), QStringLiteral("--entrada"), mp4Entrada_, QStringLiteral("--salida"), salida,
+                                      QStringLiteral("--sonido"), sonido ? QStringLiteral("si") : QStringLiteral("no")});
+        mp4_.start();
+        emit convirtiendoChanged();
+        return;
+    }
+}
+
 bool Camara::borrarVideo(const QString& archivo) {
     if (grabando() || !Datos::nombreVideoValido(archivo)) return false;
+    if (convirtiendo() && QFileInfo(mp4Entrada_).fileName() == archivo) return false;
     const bool ok = datos_->borrarVideo(archivo);
     actualizarLugar();
     return ok;

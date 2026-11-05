@@ -3,6 +3,8 @@
 #include <QCoreApplication>
 #include <QDate>
 #include <QDir>
+#include <QElapsedTimer>
+#include <QProcess>
 #include <QFile>
 #include <QTemporaryDir>
 #include <iostream>
@@ -107,6 +109,37 @@ int main(int argc, char** argv) {
         CHEQUEAR(d.corridas().size() + d.proximas().size() == 1);
         const QString id = (d.corridas().isEmpty() ? d.proximas() : d.corridas())[0].toMap()["id"].toString();
         CHEQUEAR(d.videos(id).isEmpty());
+    }
+    // MP4: si está el ayudante (con GStreamer), un video de prueba se pasa solo de .mkv a .mp4 y la carrera
+    // queda apuntando al .mp4. En carrera no se pasa.
+    const QString ayudante = QCoreApplication::applicationDirPath() + "/betometro-camara";
+    if (QFile::exists(ayudante)) {
+        QTemporaryDir dir2;
+        Datos d(dir2.path());
+        Camara cam(&d, dir2.path());
+        const QString mkv = d.carpetaVideos() + "/carrera-mp4.mkv", mp4 = d.carpetaVideos() + "/carrera-mp4.mp4";
+        QProcess g;
+        g.start(ayudante, {"grabar", "--prueba", "--audio", "prueba", "--salida", mkv});
+        g.waitForStarted();
+        QElapsedTimer t; t.start();
+        while (t.elapsed() < 3000) QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+        g.terminate();
+        g.waitForFinished(5000);
+        CHEQUEAR(QFileInfo(mkv).size() > 1000);
+        const QString id = d.guardarCarrera({{"nombre", "Video"}, {"fecha", "2026-11-04"}, {"distanciaM", 2500},
+                                             {"tiempoIdealMs", 180000}, {"patron", "todas"}})["id"].toString();
+        CHEQUEAR(d.agregarVideo(id, {{"archivo", "carrera-mp4.mkv"}, {"largada", 1}, {"desdeLargadaMs", 5000}}));
+        cam.ponerEnCarrera(true);
+        t.restart();
+        while (t.elapsed() < 7000) QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+        CHEQUEAR(!cam.convirtiendo() && QFile::exists(mkv));   // en carrera: nada
+        cam.ponerEnCarrera(false);
+        t.restart();
+        while (t.elapsed() < 30000 && !(QFile::exists(mp4) && !cam.convirtiendo())) QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+        CHEQUEAR(QFileInfo(mp4).size() > 1000);
+        CHEQUEAR(!QFile::exists(mkv) && !QFile::exists(mp4 + ".parte"));
+        const QVariantList v = d.videos(id);
+        CHEQUEAR(v.size() == 1 && v[0].toMap()["archivo"] == "carrera-mp4.mp4");
     }
     std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
     return fallas ? 1 : 0;
