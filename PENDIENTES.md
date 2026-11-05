@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -59,7 +59,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieri
   Falta probar con la cámara real.
 
 ## Ahora (Matías)
-1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.16. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.17. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
 2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
    RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
@@ -67,7 +67,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieri
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
-## Para la 1.0.17 (sin compilar)
+## 1.0.17 (05/11/2026)
 - Cámara: paquete gstreamer1.0-plugins-bad (h264parse) y v4l-utils; vista previa con cualquier tamaño chico; antes
   de grabar espera a que la vista previa y el micrófono suelten los dispositivos. **Falta el error exacto de la
   grabación**: resuelto, la cadena con `v4l2jpegdec` se trababa; ahora `jpegdec` + compresor del chip (probado en la Pi).
