@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 05/11/2026 (última versión: 1.0.13). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -39,7 +39,7 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
   cronómetro y pulsador (wifi y cámara después); el reporte suma lo último del sistema si se colgó o se cortó
   la corriente (registros de avisos en la tarjeta y memoria de cuelgue «ramoops»); memoria de reserva en la RAM (zram).
 
-- Para la 1.0.13 (sin compilar): sugerida que pasa los 160 km/h → queda en 160 y en rojo, en el velocímetro y en el
+- 05/11 (1.0.13): sugerida que pasa los 160 km/h → queda en 160 y en rojo, en el velocímetro y en el
   cuadrado «Sugerida» (sin el ■). **Al marcar ya no se congela**: la base se guarda por detrás en otro hilo
   (antes guardar varios MB en la SD frenaba la pantalla medio segundo; empeoraba con cada carrera a 5 Hz).
   Chequeo previo: «Módulo» en verde si está conectado y hablando («Réplica NEO-M8N…» si no es original); rojo solo
@@ -50,7 +50,7 @@ Actualizado el 04/11/2026 (última versión: 1.0.12). Plan: [docs/plan-ingenieri
   Aceleración del informe con ventana de ~1 s (a 5 Hz saltaba ±4 m/s² por ruido; a 1 Hz igual que la app).
 
 ## Ahora (Matías)
-1. Ya tiene la 1.0.12 (04/11). Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.13. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
 2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
    RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
