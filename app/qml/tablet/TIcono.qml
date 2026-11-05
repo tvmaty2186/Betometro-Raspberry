@@ -3,7 +3,7 @@ import Betometro
 
 // Íconos de línea del Modo Tablet (dibujados: se pintan del color que se pida, en cualquier tema).
 // nombre: bandera, crono, check, pantalla, camara, red, ajustes, voz, tema, auto, gps, velocidad,
-//         actualizar, apagar, mic, girar, rec, atras, tarjeta, buscar, lista, qr, informe, lugar
+//         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar
 Canvas {
     id: raiz
     property string nombre: ""
@@ -43,6 +43,9 @@ Canvas {
         case "apagar": L([32, 8, 32, 30]); A(32, 34, 20, -55, 235); break;
         case "mic": R(24, 8, 16, 30, 8); A(32, 30, 16, 0, 180); L([32, 46, 32, 56]); break;
         case "girar": A(32, 32, 18, 20, 330); L([50, 12, 50, 24, 38, 24]); break;
+        case "espejo":   // dos triángulos espejados a los lados de una línea punteada
+            L([26, 16, 26, 48, 8, 48, 26, 16]); L([38, 16, 38, 48, 56, 48, 38, 16]);
+            c.lineWidth = 3; c.setLineDash([4, 4]); L([32, 6, 32, 58]); c.setLineDash([]); break;
         case "rec": c.fillStyle = "#ff3b30"; C(32, 32, 16, true); break;
         case "atras": L([38, 14, 20, 32, 38, 50]); break;
         case "tarjeta": L([14, 8, 40, 8, 50, 18, 50, 56, 14, 56, 14, 8]); L([22, 18, 22, 26]); L([30, 18, 30, 26]); L([38, 18, 38, 26]); break;

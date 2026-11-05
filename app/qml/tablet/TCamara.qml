@@ -30,6 +30,7 @@ TPantalla {
             source: Camara.vista; cache: false; asynchronous: false
             fillMode: Image.PreserveAspectCrop
             rotation: raiz.a.camaraGirar ? 180 : 0
+            transform: Scale { origin.x: width / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
             visible: Camara.viendo && Camara.vista.toString() !== ""
         }
         Column {
@@ -74,21 +75,23 @@ TPantalla {
         height: raiz.h ? raiz.area.height : raiz.area.height - y
         columns: 2; spacing: 16
         readonly property real an: (width - spacing) / 2
-        readonly property real al: (height - 2 * spacing) / 3
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "rec"; nombre: "Grabar"
+        readonly property real al: (height - 3 * spacing) / 4
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "rec"; nombre: "Grabar"
                  tipo: raiz.a.camara ? "acento" : ""; dato: raiz.a.camara ? "Prendida" : "Apagada"
                  onTocado: raiz.poner("camara", !raiz.a.camara) }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "bandera"; nombre: "Empieza"
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "bandera"; nombre: "Empieza"
                  dato: ({ abrir: "Al abrir", largada: "En la largada", mano: "A mano" })[raiz.a.camaraInicio || "abrir"]
                  onTocado: raiz.poner("camaraInicio", raiz.siguiente(["abrir", "largada", "mano"], raiz.a.camaraInicio || "abrir")) }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "pantalla"; nombre: "Calidad"; dato: raiz.a.camaraCalidad || "720p"
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "pantalla"; nombre: "Calidad"; dato: raiz.a.camaraCalidad || "720p"
                  onTocado: raiz.poner("camaraCalidad", (raiz.a.camaraCalidad || "720p") === "720p" ? "1080p" : "720p") }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "mic"; nombre: "Sonido"
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "mic"; nombre: "Sonido"
                  dato: ({ camara: "De la cámara", usb: "Micrófono USB", no: "Sin sonido" })[raiz.a.camaraSonido || "camara"]
                  onTocado: { raiz.poner("camaraSonido", raiz.siguiente(["camara", "usb", "no"], raiz.a.camaraSonido || "camara")); Camara.pararNivel(); Camara.empezarNivel(); } }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "crono"; nombre: Camara.grabando ? "Grabando…" : "Probar 10 s"
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "crono"; nombre: Camara.grabando ? "Grabando…" : "Probar 10 s"
                  activo: Camara.hay && !Camara.grabando; onTocado: Camara.probarGrabacion() }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 60; icono: "girar"; nombre: "Girar 180°"; dato: raiz.a.camaraGirar ? "Girada" : ""
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "girar"; nombre: "Girar 180°"; dato: raiz.a.camaraGirar ? "Girada" : ""
                  onTocado: raiz.poner("camaraGirar", !raiz.a.camaraGirar) }
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "espejo"; nombre: "Espejo"; dato: raiz.a.camaraEspejo ? "Activado" : ""
+                 onTocado: raiz.poner("camaraEspejo", !raiz.a.camaraEspejo) }
     }
 }

@@ -126,6 +126,8 @@ Item {
         anchors.fill: parent
         fillMode: VideoOutput.PreserveAspectFit
         orientation: rep.vid && rep.vid.girar ? 180 : 0
+        // espejo (como cámara de selfie): solo el video, los datos de encima no
+        transform: Scale { origin.x: salida.width / 2; xScale: rep.vid && rep.vid.espejo ? -1 : 1 }
     }
     Text {
         anchors.centerIn: parent

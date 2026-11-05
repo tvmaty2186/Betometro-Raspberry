@@ -42,6 +42,7 @@ Item {
                         source: Camara.vista; cache: false; asynchronous: false
                         fillMode: Image.PreserveAspectCrop
                         rotation: raiz.a.camaraGirar ? 180 : 0
+                        transform: Scale { origin.x: width / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
                         visible: Camara.viendo && Camara.vista.toString() !== ""
                     }
                     Text { anchors.centerIn: parent; visible: !Camara.viendo; color: Tema.tintaSuave
@@ -56,9 +57,11 @@ Item {
                 }
                 Row {
                     x: 20; spacing: 12
-                    readonly property real ancho: (colV.width - 40 - 24) / 3
+                    readonly property real ancho: (colV.width - 40 - 36) / 4
                     BotonCromo { width: parent.ancho; height: 46; tamTexto: 16; texto: "↻ Girar 180°"
                                  onTocado: raiz.poner("camaraGirar", !raiz.a.camaraGirar) }
+                    BotonCromo { width: parent.ancho; height: 46; tamTexto: 16; texto: "⇋ Espejo" + (raiz.a.camaraEspejo ? " ✓" : "")
+                                 onTocado: raiz.poner("camaraEspejo", !raiz.a.camaraEspejo) }
                     BotonCromo { width: parent.ancho; height: 46; tamTexto: 16; texto: Camara.grabando ? "Grabando 10 s…" : "Probar 10 s"
                                  activo: Camara.hay && !Camara.grabando; onTocado: Camara.probarGrabacion() }
                     BotonCromo { width: parent.ancho; height: 46; tamTexto: 16; texto: "Buscar"
