@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 05/11/2026 (última versión: 1.0.14). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 05/11/2026 (última versión: 1.0.15). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -55,11 +55,11 @@ Actualizado el 05/11/2026 (última versión: 1.0.14). Plan: [docs/plan-ingenieri
   buscada (se elige de una lista real: Open-Meteo y, si no encuentra, OpenStreetMap); campo «Localidad» en la
   carrera; en Próximas, botón con el clima del día de la carrera («desde dd/MM» si falta: hay 16 días).
 
-- Para la 1.0.15 (sin compilar): cámaras comunes **MJPEG** (la webcam genérica): la Pi las pasa a H.264 con su chip.
+- 05/11 (1.0.15): cámaras comunes **MJPEG** (la webcam genérica): la Pi las pasa a H.264 con su chip.
   Falta probar con la cámara real.
 
 ## Ahora (Matías)
-1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.14. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
+1. Tenía la 1.0.12 (04/11); actualizar a la 1.0.15. Probado bien: brillo, foto de arranque, Actualizar. Falta mirar el Chequeo previo
    (tarjeta «Alimentación y temperatura»), el pulsador (pin 11 y 9) y la wifi propia (lejos de casa).
 2. GPS: el micro USB de su NEO-M8N solo da corriente (probado 04/11). Va por los pines (VCC pin 17, GND, TXD → pin 10,
    RXD → pin 8) o, si prefiere USB, con un VK-162/VK-172.
