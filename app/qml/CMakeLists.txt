@@ -59,6 +59,15 @@ qt_add_qml_module(betometro_qml
     pantallas/Compartir.qml
     pantallas/Conectividad.qml
     pantallas/Pronostico.qml
+    tablet/TIcono.qml
+    tablet/TBarra.qml
+    tablet/TBoton.qml
+    tablet/TFila.qml
+    tablet/TMasMenos.qml
+    tablet/TLlave.qml
+    tablet/TOpciones.qml
+    tablet/TPantalla.qml
+    tablet/TInicio.qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Ficha.qml

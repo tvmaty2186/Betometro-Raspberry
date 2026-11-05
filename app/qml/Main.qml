@@ -24,7 +24,12 @@ Window {
 
         Loader {
             anchors.fill: parent
+            // En Modo Tablet, las pantallas que tienen versión grande (carpeta tablet/)
+            readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara",
+                                              ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
+                                              ficha: "TFicha", chequeo: "TChequeo", conectividad: "TConectividad", actualizar: "TActualizar" })
             source: {
+                if (Tema.tablet && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
                 switch (Navegacion.actual) {
                 case "inicio": return "pantallas/Inicio.qml";
                 case "carreras": return "pantallas/Carreras.qml";

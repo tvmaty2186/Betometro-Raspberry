@@ -62,14 +62,15 @@ Item {
 
     // Línea de arriba: carrera · ideal · distancia | GPS | Terminar / Salir
     Sub {
-        x: raiz.h ? 24 : 20; y: raiz.h ? 22 : 20
+        // Modo Tablet: la franja de arriba más grande (los widgets no cambian)
+        x: raiz.h ? 24 : 20; y: Tema.tablet ? 12 : (raiz.h ? 22 : 20)
         width: parent.width * (raiz.h ? 0.6 : 0.5); elide: Text.ElideRight
-        tam: raiz.h ? 15 : 13
+        tam: Tema.tablet ? (raiz.h ? 19 : 16) : (raiz.h ? 15 : 13)
         text: (info.nombre || "") + " · " + (raiz.h ? "ideal " : "") + (info.ideal || "") + (info.distanciaM > 0 ? " · " + info.distancia + " m" : "")
     }
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
-        y: 6; spacing: 10; z: 5
+        y: Tema.tablet ? 3 : 6; spacing: 10; z: 5
         // Cámara: punto rojo «REC» mientras graba; gris con «Cámara» si falló. En «a mano» se toca para grabar.
         Rectangle {
             visible: !!Datos.ajustes.camara && (Camara.grabando || !!Camara.falla || Datos.ajustes.camaraInicio === "mano")
@@ -88,19 +89,20 @@ Item {
             texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
         }
         Chip {
+            tam: Tema.tablet ? 23 : 16
             punto: Crono.gps.ok && !est.sinGps ? Tema.bien : Tema.alerta
             texto: Crono.gps.ok ? "GPS " + Crono.gps.hz + " Hz" + (raiz.h ? " · " + Math.round(Crono.gps.precision) + " m" : "") : "Sin GPS"
         }
         Rectangle {
             id: terminar
             property bool armado: false
-            height: 42; radius: 21   // un poco más grande que los chips: cuesta tocarlo en movimiento (Matías, 03/11)
+            height: Tema.tablet ? 50 : 42; radius: height / 2   // un poco más grande que los chips: cuesta tocarlo en movimiento (Matías, 03/11)
             width: tt.implicitWidth + 40
             color: armado ? Tema.acento : Qt.rgba(0, 0, 0, 0.55)
             border { width: 1.5; color: "#c9ced3" }
             Text { id: tt; anchors.centerIn: parent; color: terminar.armado ? Tema.acentoTinta : Tema.tinta
                    text: Crono.enCurso ? (terminar.armado ? "Tocá otra vez" : "Terminar") : "Salir"
-                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 16 } }
+                   font { family: Tema.tablet ? Tema.fuente800 : Tema.fuente600; italic: Tema.cursiva; pixelSize: Tema.tablet ? 25 : 16 } }
             MouseArea {
                 anchors.fill: parent; anchors.margins: -14
                 onClicked: {

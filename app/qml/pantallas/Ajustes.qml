@@ -51,6 +51,8 @@ Item {
                     Segmentado { opciones: [{ texto: "Vertical", valor: "vertical" }, { texto: "Horizontal", valor: "horizontal" }]
                         valor: Contexto.horizontal ? "horizontal" : "vertical"
                         onElegido: v => { raiz.poner("orientacion", v); Contexto.horizontal = v === "horizontal"; } } }
+                Fila { etiqueta: "Modo Tablet (botones grandes)"
+                    Llave { prendida: !!raiz.a.modoTablet; onCambiada: v => raiz.poner("modoTablet", v) } }
                 Fila { etiqueta: "Modo sol"
                     Segmentado { opciones: [{ texto: "Sí", valor: "si" }, { texto: "No", valor: "no" }]
                         valor: raiz.a.modoSol; onElegido: v => raiz.poner("modoSol", v) } }

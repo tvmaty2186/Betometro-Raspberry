@@ -10,6 +10,9 @@ QtObject {
     readonly property bool rally: nombre === "rally" && !sol
     readonly property bool sport: nombre === "sport" && !sol
     readonly property bool cabina: nombre === "cabina" && !sol
+    // Modo Tablet (05/11/2026): botones grandes, dentro de cualquier tema (Ajustes → Pantalla y tema).
+    // «--prueba tablet…» lo prende para las capturas.
+    readonly property bool tablet: !!Datos.ajustes.modoTablet || Contexto.prueba.indexOf("tablet") === 0
 
     function de(av, ra, sp, ca, so) { return sol ? so : nombre === "rally" ? ra : nombre === "sport" ? sp : nombre === "cabina" ? ca : av; }
 
