@@ -9,6 +9,7 @@
 #include <QRegularExpression>
 #include <QStorageInfo>
 #include <QTextStream>
+#include <QUrl>
 
 #include "datos.h"
 #include "gps.h"
@@ -280,6 +281,12 @@ bool Camara::borrarVideo(const QString& archivo) {
     const bool ok = QFile::remove(carpeta_ + '/' + archivo);
     actualizarLugar();
     return ok;
+}
+
+QString Camara::urlVideo(const QString& archivo) const {
+    if (archivo.isEmpty() || archivo.contains('/')) return {};
+    const QString ruta = carpeta_ + '/' + archivo;
+    return QFileInfo::exists(ruta) ? QUrl::fromLocalFile(ruta).toString() : QString();
 }
 
 void Camara::actualizarLugar() {

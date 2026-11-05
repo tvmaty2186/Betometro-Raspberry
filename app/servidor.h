@@ -1,6 +1,7 @@
 // «Betómetro en la red»: una página para el celular o la compu, en la misma wifi.
 // Lista de carreras, el informe de cada una (el mismo HTML de la app) para ver o descargar, y
-// todos juntos en un .zip. Solo lectura. Se apaga durante la carrera (no gasta nada del equipo).
+// todos juntos en un .zip, y los videos de la cámara (de a pedazos, para poder adelantar y atrasar).
+// Solo lectura. Se apaga durante la carrera (no gasta nada del equipo).
 #pragma once
 
 #include <QByteArray>
@@ -9,6 +10,7 @@
 
 class Datos;
 class Reportes;
+class QTcpSocket;
 
 class Servidor : public QObject {
     Q_OBJECT
@@ -25,12 +27,16 @@ public:
     QByteArray responder(const QByteArray& ruta) const;
     // .zip sin comprimir (los HTML ya son chicos); público para probarlo
     static QByteArray zip(const QList<QPair<QString, QByteArray>>& archivos);
+    // «Range: bytes=a-b» de un archivo de `tam` bytes → [desde, hasta] (inclusive). false si no se puede cumplir.
+    static bool rango(const QByteArray& pedido, qint64 tam, qint64& desde, qint64& hasta);
 
 signals:
     void cambio();
 
 private:
     QByteArray pagina() const;
+    // GET /video/<archivo>: manda el archivo de a pedazos (nunca entero en memoria)
+    void enviarVideo(QTcpSocket* s, const QString& nombre, const QByteArray& rangoPedido, bool descargar);
     Datos* datos_;
     Reportes* reportes_ = nullptr;
     quint16 puerto_;

@@ -197,6 +197,33 @@ Json datosInforme(const Carrera& c, double umbralPrecisionM) {
         if (v.interrumpida) j["interrumpida"] = true;   // solo Raspberry
         vs.agregar(std::move(j));
     }
+    // Solo Raspberry: los videos de la cámara y, en cada vuelta, en qué momento del video empieza.
+    // Un punto de la traza (t en segundos desde que empezó la vuelta) está en el video en videoMs + t·1000.
+    // videoMs = desdeLargadaMs + suma de realMs de las vueltas anteriores de la misma largada.
+    const Json& videos = c.extra["videos"];
+    if (videos.esLista() && videos.tamano() > 0) {
+        out["videos"] = videos;
+        std::vector<std::pair<int, int64_t>> antes;   // largada → ms corridos antes de esta vuelta
+        auto& lv = vs.elementos();
+        for (size_t i = 0; i < c.vueltas.size(); ++i) {
+            const Vuelta& v = c.vueltas[i];
+            auto it = std::find_if(antes.begin(), antes.end(), [&](const auto& a) { return a.first == v.largada; });
+            if (it == antes.end()) { antes.emplace_back(v.largada, 0); it = antes.end() - 1; }
+            // Si en una largada hay más de un video (REC a mano), va el último que empezó antes de la vuelta;
+            // si ninguno empezó antes, el que empezó primero (la vuelta arranca antes que el video).
+            int elegido = -1;
+            int64_t mejor = 0;
+            const auto& lista = videos.elementos();
+            for (size_t k = 0; k < lista.size(); ++k) {
+                if (lista[k]["largada"].aEntero(1) != v.largada) continue;
+                const int64_t ms = lista[k]["desdeLargadaMs"].aEntero(0) + it->second;
+                const bool mejora = elegido < 0 || (ms >= 0 && (mejor < 0 || ms < mejor)) || (ms < 0 && mejor < 0 && ms > mejor);
+                if (mejora) { elegido = static_cast<int>(k); mejor = ms; }
+            }
+            if (elegido >= 0) { lv[i]["video"] = elegido; lv[i]["videoMs"] = mejor; }
+            it->second += v.realMs;
+        }
+    }
     out["vueltas"] = vs;
 
     const auto R = armarRecorrido(c, umbralPrecisionM);

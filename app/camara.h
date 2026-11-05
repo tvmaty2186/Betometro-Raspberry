@@ -53,6 +53,8 @@ public:
     Q_INVOKABLE void probarMicrofono();       // graba 5 s y los reproduce
     Q_INVOKABLE void probarGrabacion();       // 10 s de video, para ver que anda
     Q_INVOKABLE bool borrarVideo(const QString& archivo);
+    // Dirección (file://) de un video de la carpeta, para el reproductor del informe. Vacía si no está el archivo.
+    Q_INVOKABLE QString urlVideo(const QString& archivo) const;
 
     // Para la carrera (Crono)
     bool empezar(const QString& nombreBase);  // false si no hay cámara o está apagada

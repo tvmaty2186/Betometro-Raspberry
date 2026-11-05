@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QStorageInfo>
 
@@ -497,7 +498,25 @@ void Datos::cargarMuestra() {
     lugar(0, "Gualeguaychú, Entre Ríos", -33.009, -58.517);
     lugar(1, "Concepción del Uruguay, Entre Ríos", -32.484, -58.232);
     agregar("Santa Clara", h.addDays(-1), 6, 180000, 2500, "todas", {1500, -2100, 800, 1900, -1700, 1600});
+    // Para probar el reproductor del informe: si hay un videos/muestra.mkv en la carpeta, va con Santa Clara
+    if (QFile::exists(carpeta_ + QStringLiteral("/videos/muestra.mkv"))) {
+        Json v = Json::objeto();
+        v["archivo"] = std::string("muestra.mkv");
+        v["largada"] = static_cast<int64_t>(1);
+        v["desdeLargadaMs"] = static_cast<int64_t>(5000);
+        v["girar"] = false;
+        base_.carreras.back().extra["videos"] = Json::lista();
+        base_.carreras.back().extra["videos"].agregar(std::move(v));
+    }
     agregar("Paraná", h.addDays(-14), 8, 200000, 2600, "todas", {1200, -2500, 1800, -900, 2200, -1100, 1300, 1100});
+    // Video de ejemplo para Santa Clara, solo si está el archivo (para probar el reproductor del informe)
+    if (QFileInfo::exists(carpetaVideos() + QStringLiteral("/muestra-santa-clara.mkv"))) {
+        Json v = Json::objeto();
+        v["archivo"] = "muestra-santa-clara.mkv"; v["largada"] = 1; v["desdeLargadaMs"] = 5000; v["girar"] = false;
+        Json l = Json::lista();
+        l.agregar(std::move(v));
+        base_.carreras[base_.carreras.size() - 2].extra["videos"] = l;
+    }
     cfg_ = armarConfig(base_.config);
     emit carrerasChanged();
 }

@@ -4,12 +4,15 @@
 #include "reportes.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QTcpSocket>
 #include <QUrl>
 
 namespace {
+constexpr qint64 kPedazo = 256 * 1024;   // de a cuánto se manda un video (y cuánto puede esperar en el socket)
+
 QByteArray respuesta(int codigo, const QByteArray& tipo, const QByteArray& cuerpo, const QByteArray& extra = {}) {
-    const QByteArray estado = codigo == 200 ? "200 OK" : codigo == 404 ? "404 Not Found" : "400 Bad Request";
+    const QByteArray estado = codigo == 200 ? "200 OK" : codigo == 404 ? "404 Not Found" : codigo == 416 ? "416 Range Not Satisfiable" : "400 Bad Request";
     return "HTTP/1.1 " + estado + "\r\nContent-Type: " + tipo + "\r\nContent-Length: " + QByteArray::number(cuerpo.size()) +
            "\r\nCache-Control: no-store\r\nConnection: close\r\n" + extra + "\r\n" + cuerpo;
 }
@@ -71,7 +74,17 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                 const QByteArray pedido = s->property("pedido").toByteArray() + s->readAll();
                 s->setProperty("pedido", pedido);
                 if (!pedido.contains("\r\n\r\n") && pedido.size() < 8192) return;   // todavía no llegó entero
+                if (s->property("atendido").toBool()) return;
+                s->setProperty("atendido", true);
                 const QList<QByteArray> linea = pedido.left(pedido.indexOf("\r\n")).split(' ');
+                if (linea.size() >= 2 && linea[0] == "GET" && linea[1].startsWith("/video/")) {
+                    const QUrl url(QString::fromUtf8(linea[1]));
+                    QByteArray rangoPedido;   // la cabecera «Range:» (el navegador la manda para adelantar el video)
+                    for (const QByteArray& c : pedido.left(pedido.indexOf("\r\n\r\n")).split('\n'))
+                        if (c.trimmed().toLower().startsWith("range:")) rangoPedido = c.trimmed().mid(6).trimmed();
+                    enviarVideo(s, url.path(QUrl::FullyDecoded).mid(7), rangoPedido, url.query().contains(QLatin1String("descargar")));
+                    return;
+                }
                 s->write(linea.size() >= 2 && linea[0] == "GET" ? responder(linea[1]) : respuesta(400, "text/plain", "Solo se puede mirar"));
                 s->disconnectFromHost();
             });
@@ -86,6 +99,8 @@ void Servidor::prender(bool si) {
         if (!tcp_.listen(QHostAddress::Any, puerto_)) qWarning("Betómetro en la red: no pude abrir el puerto %d", puerto_);
     } else {
         tcp_.close();
+        // Para la carrera: se corta también lo que se estaba mandando (un video ocupa la tarjeta y la wifi)
+        for (QTcpSocket* s : tcp_.findChildren<QTcpSocket*>()) s->abort();
     }
     emit cambio();
 }
@@ -125,6 +140,69 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
         return respuesta(200, "application/zip", zip(archivos), adjunto(QStringLiteral("Betometro informes.zip")));
     }
     return respuesta(404, "text/plain; charset=utf-8", "No está");
+}
+
+bool Servidor::rango(const QByteArray& pedido, qint64 tam, qint64& desde, qint64& hasta) {
+    // Solo un tramo: «bytes=a-b», «bytes=a-» o «bytes=-n» (los últimos n). Con varios tramos se toma el primero.
+    QByteArray r = pedido.trimmed();
+    if (!r.toLower().startsWith("bytes=") || tam <= 0) return false;
+    r = r.mid(6);
+    if (r.contains(',')) r = r.left(r.indexOf(','));
+    const int guion = r.indexOf('-');
+    if (guion < 0) return false;
+    const QByteArray a = r.left(guion).trimmed(), b = r.mid(guion + 1).trimmed();
+    bool okA = true, okB = true;
+    if (a.isEmpty()) {
+        const qint64 n = b.toLongLong(&okB);
+        if (!okB || n <= 0) return false;
+        desde = qMax<qint64>(0, tam - n);
+        hasta = tam - 1;
+        return true;
+    }
+    desde = a.toLongLong(&okA);
+    hasta = b.isEmpty() ? tam - 1 : b.toLongLong(&okB);
+    if (!okA || !okB || desde < 0 || desde >= tam || hasta < desde) return false;
+    hasta = qMin(hasta, tam - 1);
+    return true;
+}
+
+void Servidor::enviarVideo(QTcpSocket* s, const QString& nombre, const QByteArray& rangoPedido, bool descargar) {
+    const auto chau = [s](const QByteArray& r) { s->write(r); s->disconnectFromHost(); };
+    // Solo un nombre de archivo de la carpeta de videos: nada de «..» ni carpetas
+    const bool mkv = nombre.endsWith(QLatin1String(".mkv"), Qt::CaseInsensitive), mp4 = nombre.endsWith(QLatin1String(".mp4"), Qt::CaseInsensitive);
+    if (nombre.isEmpty() || nombre.contains(QLatin1String("..")) || nombre.contains('/') || nombre.contains('\\') || (!mkv && !mp4))
+        return chau(respuesta(404, "text/plain; charset=utf-8", "No está ese video"));
+    auto* f = new QFile(datos_->carpetaVideos() + '/' + nombre, s);   // se borra con el socket
+    if (!QFileInfo(f->fileName()).isFile() || !f->open(QIODevice::ReadOnly))
+        return chau(respuesta(404, "text/plain; charset=utf-8", "No está ese video"));
+    const qint64 tam = f->size();
+    qint64 desde = 0, hasta = tam - 1;
+    const bool parcial = !rangoPedido.isEmpty();
+    if (parcial && !rango(rangoPedido, tam, desde, hasta))
+        return chau(respuesta(416, "text/plain", "", "Content-Range: bytes */" + QByteArray::number(tam) + "\r\n"));
+    QByteArray cab = parcial ? "HTTP/1.1 206 Partial Content\r\n" : "HTTP/1.1 200 OK\r\n";
+    cab += "Content-Type: " + QByteArray(mkv ? "video/x-matroska" : "video/mp4") + "\r\nContent-Length: " +
+           QByteArray::number(qMax<qint64>(0, hasta - desde + 1)) + "\r\nAccept-Ranges: bytes\r\nCache-Control: no-store\r\nConnection: close\r\n";
+    if (parcial) cab += "Content-Range: bytes " + QByteArray::number(desde) + '-' + QByteArray::number(hasta) + '/' + QByteArray::number(tam) + "\r\n";
+    if (descargar) cab += adjunto(nombre);
+    s->write(cab + "\r\n");
+    if (tam == 0) return s->disconnectFromHost();
+    f->seek(desde);
+    s->setProperty("falta", hasta - desde + 1);
+    // De a pedazos: cuando el socket ya mandó casi todo, se lee el siguiente. Así en memoria hay a lo sumo ~2 pedazos.
+    const auto seguir = [s, f] {
+        qint64 falta = s->property("falta").toLongLong();
+        while (falta > 0 && s->bytesToWrite() < kPedazo && s->state() == QAbstractSocket::ConnectedState) {
+            const QByteArray b = f->read(qMin(kPedazo, falta));
+            if (b.isEmpty()) { falta = 0; s->abort(); return; }   // el archivo se achicó: se corta
+            s->write(b);
+            falta -= b.size();
+        }
+        s->setProperty("falta", falta);
+        if (falta == 0 && !s->property("cerrando").toBool()) { s->setProperty("cerrando", true); s->disconnectFromHost(); }
+    };
+    connect(s, &QTcpSocket::bytesWritten, s, seguir);
+    seguir();
 }
 
 QByteArray Servidor::pagina() const {

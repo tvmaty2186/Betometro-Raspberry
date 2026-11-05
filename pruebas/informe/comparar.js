@@ -37,7 +37,9 @@ function carrera(o) {
     if (!o.sinTraza || n > 1) vu.traza = o.cortaTraza && n === 2 ? traza.slice(0, 3) : traza;
     vueltas.push(vu);
   }
-  return { id: 'c' + o.semilla, nombre: o.nombre || 'Prueba <"&> ' + o.semilla, fecha: '2026-11-01', tiempoIdealMs: T, distanciaM: o.sinDist ? 0 : L,
+  const extra = o.videos ? { videos: [{ archivo: 'carrera-a.mkv', largada: 1, desdeLargadaMs: 3500, girar: false },
+                                      { archivo: 'carrera-b.mkv', largada: 2, desdeLargadaMs: -1200, girar: true }] } : {};
+  return { ...extra, id: 'c' + o.semilla, nombre: o.nombre || 'Prueba <"&> ' + o.semilla, fecha: '2026-11-01', tiempoIdealMs: T, distanciaM: o.sinDist ? 0 : L,
            patron: 'alt1', practica: false, creada: '', vueltasTotal: o.vueltas, vueltas };
 }
 
@@ -52,10 +54,12 @@ const casos = [
   { semilla: 8, largo: 30000, idealMs: 1200000, vueltas: 2 },
   { semilla: 9, largo: 200, idealMs: 30000, vueltas: 3, hz: 5 },
   { semilla: 10, largo: 3200, idealMs: 240000, vueltas: 3, sinTraza: true, cortaTraza: true },
+  { semilla: 11, largo: 1500, idealMs: 90000, vueltas: 5, corte: 2, videos: true },
 ];
 for (let s = 0; s < 20; s++) { const r = azar(100 + s); casos.push({ semilla: 200 + s, largo: 500 + Math.round(r() * 6000), idealMs: 30000 + Math.round(r() * 400000),
   vueltas: 1 + Math.floor(r() * 5), hz: [1, 5, 10][s % 3], mala: r() * 0.3, saltos: r() * 0.04, huecos: [[100, 100 + r() * 800]], vueltaHueco: 1 + (s % 3), corte: 1 + (s % 4) }); }
 
+const SOLO_RASPBERRY = ['videos', 'video', 'videoMs'];
 const fallas = []; let numeros = 0, maxCoord = 0, maxOtro = 0, hzActual = 1, acelSalteadas = 0;
 function comparar(a, b, ruta) {
   if (typeof a === 'number' && typeof b === 'number') {
@@ -75,7 +79,8 @@ function comparar(a, b, ruta) {
   }
   if (a && b && typeof a === 'object' && typeof b === 'object') {
     for (const k of Object.keys(a)) comparar(a[k], b[k], `${ruta}.${k}`);
-    for (const k of Object.keys(b)) if (!(k in a)) fallas.push(`${ruta}.${k}: sobra en C++`);
+    // Solo Raspberry (no están en la app): los videos de la cámara y en qué momento del video empieza cada vuelta
+    for (const k of Object.keys(b)) if (!(k in a) && !SOLO_RASPBERRY.includes(k)) fallas.push(`${ruta}.${k}: sobra en C++`);
     return;
   }
   if (a !== b) fallas.push(`${ruta}: app=${JSON.stringify(a)} C++=${JSON.stringify(b)}`);
@@ -89,6 +94,15 @@ for (const o of casos) {
   const app = JSON.parse(JSON.stringify(datosInforme(JSON.parse(JSON.stringify(c)))));
   const cpp = JSON.parse(execFileSync(bin, [String(umbral)], { input: JSON.stringify(c), maxBuffer: 1 << 28 }).toString());
   comparar(app, cpp, 'caso' + o.semilla);
+  if (c.videos) {   // videoMs = desdeLargadaMs + realMs de las vueltas anteriores de la misma largada
+    if (JSON.stringify(cpp.videos) !== JSON.stringify(c.videos)) fallas.push(`caso${o.semilla}.videos distintos`);
+    const antes = {};
+    c.vueltas.forEach((v, i) => {
+      const k = c.videos.findIndex(x => x.largada === v.largada), esp = c.videos[k].desdeLargadaMs + (antes[v.largada] || 0);
+      antes[v.largada] = (antes[v.largada] || 0) + v.realMs;
+      if (cpp.vueltas[i].video !== k || cpp.vueltas[i].videoMs !== esp) fallas.push(`caso${o.semilla}.vueltas[${i}].videoMs: esperado ${esp} (video ${k}) C++=${cpp.vueltas[i].videoMs} (video ${cpp.vueltas[i].video})`);
+    });
+  } else if (cpp.videos || cpp.vueltas.some(v => 'videoMs' in v)) fallas.push(`caso${o.semilla}: videos sin tener`);
   if (fallas.length > 20) break;
 }
 console.log(`(aceleración con ventana de 1 s, sin comparar en 5/10 Hz: ${acelSalteadas} lecturas)`);

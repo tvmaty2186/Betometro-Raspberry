@@ -43,6 +43,8 @@ public:
     // Video de una largada: {archivo, largada, desdeLargadaMs, girar}. Va en «videos» de la carrera.
     bool agregarVideo(const QString& id, const QVariantMap& video);
     Q_INVOKABLE QVariantList videos(const QString& id) const;
+    // Donde la cámara deja los videos (como Camara: <datos>/videos). La usa «Betómetro en la red».
+    QString carpetaVideos() const { return carpeta_ + QStringLiteral("/videos"); }
     const beto::Carrera* buscar(const QString& id) const;
     const beto::Json& config() const { return cfg_; }
 
