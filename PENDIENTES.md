@@ -67,6 +67,12 @@ Actualizado el 05/11/2026 (última versión: 1.0.16). Plan: [docs/plan-ingenieri
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
+## Para la 1.0.17 (sin compilar)
+- Cámara: paquete gstreamer1.0-plugins-bad (h264parse) y v4l-utils; vista previa con cualquier tamaño chico; antes
+  de grabar espera a que la vista previa y el micrófono suelten los dispositivos. **Falta el error exacto de la
+  grabación en carrera** (comando de prueba pasado a Matías).
+- Inicio: el velocímetro muestra la velocidad real si hay GPS (lectura de menos de 3 s); si no, la animación.
+
 ## Modo Tablet (aprobado 05/11/2026)
 Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [docs/modo-tablet.md](docs/modo-tablet.md).
 **Programado completo (1.0.16):** se prende en Ajustes → Pantalla y tema → «Modo Tablet».

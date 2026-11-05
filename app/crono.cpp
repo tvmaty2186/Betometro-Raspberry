@@ -216,6 +216,8 @@ void Crono::alMuestra(const Muestra& m) {
     gpsInfo_["hz"] = static_cast<int>(tiemposGps_.size());
     gpsInfo_["precision"] = m.precisionM;
     gpsInfo_["ok"] = true;
+    gpsInfo_["kmh"] = m.velMs * 3.6;                                  // velocidad de ahora (para el inicio)
+    gpsInfo_["kmhCuando"] = QDateTime::currentMSecsSinceEpoch();
     emit gpsChanged();
 
     ultimaMuestra_ = m;
