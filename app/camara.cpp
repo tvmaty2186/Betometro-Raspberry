@@ -227,6 +227,10 @@ bool Camara::empezar(const QString& nombreBase) {
     if (!hay() || grabando()) return false;
     pararVista();
     pararNivel();
+    // La vista previa y la barra del micrófono tienen tomados la cámara y el micrófono: hay que esperar a
+    // que los suelten, si no la grabación arranca con «dispositivo ocupado» y falla enseguida (05/11/2026)
+    if (vistaProc_.state() != QProcess::NotRunning && !vistaProc_.waitForFinished(2000)) vistaProc_.kill();
+    if (nivelProc_.state() != QProcess::NotRunning && !nivelProc_.waitForFinished(2000)) nivelProc_.kill();
     hacerLugar();
     falla_.clear();
     primerCuadro_ = 0;
