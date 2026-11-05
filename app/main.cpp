@@ -9,6 +9,7 @@
 //   --datos CARPETA          dónde está la base (en la Raspberry: /datos)
 //   --muestra                carga carreras de ejemplo (no toca la base guardada hasta que se cambie algo)
 //   --carrera NOMBRE         abre la ficha de esa carrera
+//   --captura-tele ARCHIVO   con --captura (o sola): también saca la ventana de la tele (modo tele)
 #include <QCommandLineParser>
 #include <QDirIterator>
 #include <QFontDatabase>
@@ -43,6 +44,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "reportes.h"
 #include "servidor.h"
 #include "wifi.h"
+#include "hdmi.h"
 
 #include <QStandardPaths>
 
@@ -80,7 +82,8 @@ int main(int argc, char* argv[]) {
     QCommandLineOption oGps(QStringLiteral("gps"), QStringLiteral("Puerto del GPS («auto»: USB y si no los pines; o una ruta como /dev/ttyAMA0 o /tmp/betometro-gps)"), QStringLiteral("puerto"));
     QCommandLineOption oEspera(QStringLiteral("espera"), QStringLiteral("ms antes de la captura"), QStringLiteral("ms"), QStringLiteral("1200"));
     QCommandLineOption oCarrera(QStringLiteral("carrera"), QStringLiteral("Carrera a abrir"), QStringLiteral("nombre"));
-    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps, oEspera});
+    QCommandLineOption oCapturaTele(QStringLiteral("captura-tele"), QStringLiteral("Guardar captura de la ventana de la tele y salir"), QStringLiteral("archivo"));
+    op.addOptions({oPantalla, oOrient, oTema, oFisica, oCaptura, oCapturaTele, oDatos, oMuestra, oCarrera, oPrueba, oSinGps, oGps, oEspera});
     op.process(app);
 
     cargarFuentes();
@@ -159,6 +162,9 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);
     QObject::connect(&datos, &Datos::cfgChanged, &servidor, prenderServidor);
     Sistema sistema;
+    // Modo tele: si hay una tele en el HDMI (docs/video.md). --prueba tele-reiniciar: como si estuviera
+    // enchufada pero Qt no la viera
+    Hdmi hdmi(op.value(oPrueba) == QStringLiteral("tele-reiniciar"));
     // Salud del equipo: tensión baja, calor, vigilante y procesador al máximo en carrera
     Salud salud;
     QObject::connect(&salud, &Salud::aviso, &app, [&](const QString& texto) {
@@ -197,18 +203,30 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
     motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
+    motor.rootContext()->setContextProperty(QStringLiteral("Hdmi"), &hdmi);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");
     if (motor.rootObjects().isEmpty()) return 1;
     salud.listo();
 
-    if (op.isSet(oCaptura)) {
+    if (op.isSet(oCaptura) || op.isSet(oCapturaTele)) {
         auto* ventana = qobject_cast<QQuickWindow*>(motor.rootObjects().first());
-        const QString archivo = op.value(oCaptura);
-        QTimer::singleShot(op.value(oEspera).toInt(), &app, [ventana, archivo] {
-            const bool ok = ventana && ventana->grabWindow().save(archivo);
-            if (!ok) qWarning("No pude guardar la captura en %s", qPrintable(archivo));
+        const QString archivo = op.value(oCaptura), archivoTele = op.value(oCapturaTele);
+        QTimer::singleShot(op.value(oEspera).toInt(), &app, [ventana, archivo, archivoTele] {
+            bool ok = true;
+            if (!archivo.isEmpty()) {
+                ok = ventana && ventana->grabWindow().save(archivo);
+                if (!ok) qWarning("No pude guardar la captura en %s", qPrintable(archivo));
+            }
+            if (!archivoTele.isEmpty()) {
+                QQuickWindow* tele = nullptr;
+                for (QWindow* w : QGuiApplication::topLevelWindows())
+                    if (w->objectName() == QLatin1String("tele")) tele = qobject_cast<QQuickWindow*>(w);
+                const bool okTele = tele && tele->isVisible() && tele->grabWindow().save(archivoTele);
+                if (!okTele) qWarning("No pude guardar la captura de la tele en %s (¿hay una segunda pantalla?)", qPrintable(archivoTele));
+                ok = ok && okTele;
+            }
             QCoreApplication::exit(ok ? 0 : 2);
         });
     }

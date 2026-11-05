@@ -13,6 +13,13 @@ Window {
     visible: true
     color: Tema.fondo3
     title: "Betómetro"
+    // Con una tele en el HDMI, la interfaz se queda siempre en la pantalla de 5" (DSI), aunque Qt
+    // pusiera la tele primero
+    screen: {
+        const ss = Qt.application.screens;
+        for (let i = 0; i < ss.length; i++) if (ss[i].name.indexOf("DSI") === 0) return ss[i];
+        return ss[0];
+    }
 
     Item {
         id: interfaz
@@ -54,5 +61,11 @@ Window {
         }
         Aviso { id: aviso }
         Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
+    }
+
+    // Modo tele: la ventana de la tele (HDMI) solo si hay una segunda pantalla (docs/video.md)
+    Loader {
+        active: Tele.hay
+        sourceComponent: VentanaTele { principal: ventana.screen }
     }
 }

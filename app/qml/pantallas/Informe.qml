@@ -21,6 +21,18 @@ Item {
         else if (reproductor.pos === 0 && reproductor.pendiente < 0) irVideo(lap, 0);
     }
     function irVideo(i, t) { if (vv && i >= 0) reproductor.irA(i, t); }
+    // Modo tele (docs/video.md): con una tele en el HDMI, el video va a la tele y esta pantalla es el control.
+    // Si la tele se enchufó con Betómetro abierto, Qt no la ve: se ofrece reiniciar (nunca en carrera).
+    readonly property bool enTele: Tele.reproductor === reproductor && !!reproductor
+    readonly property bool botonTele: videos.length > 0 && (Tele.hay || (Tele.hayQueReiniciar && !Crono.enCurso))
+    property bool pedirReinicio: false
+    function verEnTele() {
+        if (!Tele.hay) { pedirReinicio = true; return; }
+        verVideo = true;
+        completo = false;
+        Tele.empezar(reproductor, c.nombre || "");
+    }
+    Component.onDestruction: if (enTele) Tele.terminar()
     // Momento del video en que empieza cada vuelta (para la tabla)
     function inicioVideo(i) { const m = reproductor.momento(i, 0); return m ? reproductor.reloj(m.ms) : ""; }
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
@@ -96,6 +108,19 @@ Item {
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: raiz.h ? 20 : 20; spacing: 16
+        Rectangle {   // 📺 Ver en la tele
+            visible: raiz.botonTele
+            anchors.verticalCenter: parent.verticalCenter
+            height: raiz.h ? 44 : 42; width: filaTele.implicitWidth + 32; radius: height / 2
+            color: Qt.rgba(0, 0, 0, 0.55); border { width: 1.5; color: Tema.bordeCromo }
+            Row {
+                id: filaTele; anchors.centerIn: parent; spacing: 10
+                IconoTele { width: 26; height: 23; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Ver en la tele"; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter
+                       font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 18 } }
+            }
+            MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: raiz.verEnTele() }
+        }
         Numero101 { visible: !raiz.videos.length; d: raiz.h ? 62 : 58; numero: Datos.ajustes.numeroAuto || "101"; anchors.verticalCenter: parent.verticalCenter }
         Segmentado {
             visible: raiz.videos.length > 0
@@ -412,24 +437,75 @@ Item {
         onDobleToque: raiz.completo = !raiz.completo
     }
 
+    // Modo tele: esta pantalla es el control remoto
+    ControlTele {
+        id: control
+        visible: raiz.enTele
+        anchors.fill: parent
+        z: 70
+        rep: reproductor
+        titulo: raiz.c.nombre || ""
+        onSalir: Tele.terminar()
+    }
+    // La tele está enchufada pero Betómetro la tiene que volver a buscar
+    MouseArea {
+        visible: raiz.pedirReinicio
+        anchors.fill: parent
+        z: 80
+        onClicked: raiz.pedirReinicio = false
+        Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.6) }
+        Tarjeta {
+            oscura: true
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 40, 640); height: 230
+            MouseArea { anchors.fill: parent }
+            Row {
+                x: 30; y: 34; spacing: 14
+                IconoTele { width: 34; height: 30; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter }
+                Text { width: 640 - 110; wrapMode: Text.WordWrap; anchors.verticalCenter: parent.verticalCenter
+                       text: "Hay que reiniciar Betómetro para usar la tele"; color: Tema.tinta
+                       font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 26 } }
+            }
+            Row {
+                anchors { right: parent.right; rightMargin: 30; bottom: parent.bottom; bottomMargin: 30 }
+                spacing: 16
+                BotonCromo { width: 170; height: 60; texto: "Cancelar"; tamTexto: 20; onTocado: raiz.pedirReinicio = false }
+                BotonAmarillo { width: 220; height: 60; texto: "Reiniciar"; tamTexto: 22
+                                activo: !Crono.enCurso; onTocado: Hdmi.reiniciar() }
+            }
+        }
+    }
+
     // Menú ⋮ abierto: tocar afuera lo cierra
     MouseArea { anchors.fill: parent; visible: raiz.menuAbierto; onClicked: { raiz.menuAbierto = false; raiz.confirmarRest = false; } }
     Timer {   // solo para capturas: «Distancia» a medio mover, pegada a «Vuelta»
         id: tPruebaMover; interval: 400
         onTriggered: { const d = reproductor.datos[3]; d.moviendo = true; const r = reproductor.imantar(d, 470, 92); d.x = r.x; d.y = r.y; }
     }
+    Timer {   // solo para capturas: lo mismo que el pulsador por cable (dos apretones juntos cuentan uno)
+        id: tPruebaPulsador; interval: 600
+        onTriggered: { reproductor.pulsador(); reproductor.pulsador(); }
+    }
     Component.onCompleted: {   // solo para capturas
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
         else if (Contexto.prueba === "menu") menuAbierto = true;
+        else if (Contexto.prueba === "tele-reiniciar") verEnTele();
+        else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos (con dos pantallas)
+            if (conTraza.indexOf(2) >= 0) lap = 2;
+            verEnTele();
+            reproductor.irA(lap, 134.6);
+            control.verDatos = Contexto.prueba === "tele-datos";
+        }
         else if (Contexto.prueba.indexOf("video") === 0) {   // video, video-completo, video-andando, video-datos, video-mover
             verVideo = true;
             if (conTraza.indexOf(2) >= 0) lap = 2;
             reproductor.irA(lap, 134.6);
-            completo = Contexto.prueba !== "video";
+            completo = Contexto.prueba !== "video" && Contexto.prueba !== "video-pulsador";
             reproductor.editando = Contexto.prueba === "video-datos" || Contexto.prueba === "video-mover";
             if (Contexto.prueba === "video-mover") tPruebaMover.start();
             if (Contexto.prueba === "video-andando") reproductor.alternar();
+            if (Contexto.prueba === "video-pulsador") tPruebaPulsador.start();
         }
     }
 }

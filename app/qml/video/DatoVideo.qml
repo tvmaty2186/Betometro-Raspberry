@@ -8,7 +8,7 @@ Item {
     id: d
     required property string clave
     required property string nombre     // para «se pega a «Vuelta»»
-    required property Item reproductor   // el Reproductor
+    required property Item reproductor   // la VistaVideo (la de la Pi o la de la tele)
     default property alias contenido: cont.data
     property bool moviendo: false
     property real ox: 0

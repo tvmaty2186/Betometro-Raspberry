@@ -38,7 +38,13 @@ Rectangle {
         height: parent.height - (raiz.h ? 40 : 120)
         MouseArea { anchors.fill: parent }   // que tocar adentro no cierre
 
-        TituloTarjeta { id: titulo; texto: "Videos guardados" }
+        Row {   // como TituloTarjeta, más grande en el Modo Tablet
+            id: titulo
+            leftPadding: 22; topPadding: 16 * raiz.k; bottomPadding: 6; spacing: 12
+            Banda { width: 30 * raiz.k; height: 14 * raiz.k; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: "Videos guardados"; color: Tema.tinta
+                   font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 24 * raiz.k } }
+        }
         BotonCromo {
             anchors { right: parent.right; rightMargin: 20; top: parent.top; topMargin: 14 }
             width: 130 * raiz.k; height: 46 * raiz.k; tamTexto: 18 * raiz.k; texto: "Cerrar"
