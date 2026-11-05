@@ -9,6 +9,7 @@
 #include <QTcpServer>
 
 class Datos;
+class Drive;
 class Reportes;
 class QTcpSocket;
 
@@ -22,6 +23,10 @@ public:
     int puerto() const { return puerto_; }
     void prender(bool si);
     void ponerReportes(Reportes* r) { reportes_ = r; }
+    void ponerDrive(Drive* d) { drive_ = d; }
+
+    // POST /drive: el JSON del cliente de Google (desde la página /drive). Devuelve la página de respuesta.
+    QByteArray recibirDrive(const QByteArray& cuerpo);
 
     // Para probar sin red: arma la respuesta HTTP completa de un pedido «GET ruta»
     QByteArray responder(const QByteArray& ruta) const;
@@ -35,10 +40,12 @@ signals:
 
 private:
     QByteArray pagina() const;
+    QByteArray paginaDrive(const QString& aviso = {}, bool bien = false) const;
     // GET /video/<archivo>: manda el archivo de a pedazos (nunca entero en memoria)
     void enviarVideo(QTcpSocket* s, const QString& nombre, const QByteArray& rangoPedido, bool descargar);
     Datos* datos_;
     Reportes* reportes_ = nullptr;
+    Drive* drive_ = nullptr;
     quint16 puerto_;
     QTcpServer tcp_;
 };

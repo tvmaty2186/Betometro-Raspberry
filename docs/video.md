@@ -51,6 +51,29 @@ Muestras: [muestras/video/completo-andando.png](muestras/video/completo-andando.
 - **Sincronía:** en la carrera, `videos: [{archivo, largada, desdeLargadaMs, girar}]` (crono.cpp `asociarVideo`). El momento del
   video de un punto de la traza = `desdeLargadaMs + (suma de realMs de las vueltas anteriores de esa largada) + t·1000`.
 
+## Modo tele (HDMI, aprobado por Matías el 05/11/2026)
+Muestra: [muestras/video/tele.png](muestras/video/tele.png) (fuente `muestras/video/tele.html`).
+- **Botón «Ver en la tele»** en la cabecera del informe: solo si la carrera tiene video y hay tele enchufada.
+  Sin tele, todo sigue como siempre.
+- **La tele:** el video entero, con los mismos datos y la barra que la pantalla completa. Los datos van en el mismo lugar
+  que en la Pi (mismas fracciones guardadas, `videoDatos`); la tele se arma en 1280×720.
+- **La Pi es el control:** «EN LA TELE · carrera» y **Salir**; «Ir a la vuelta» (V1…Vn con su tiempo, la actual en amarillo);
+  −10 s / play-pausa grande / +10 s; la línea de tiempo con una rayita por vuelta (se arrastra) y «6:28 / 15:20»;
+  **«Datos en la tele»**: prender y apagar cada dato. Moverlos se hace en la pantalla completa de la Pi.
+- **Tele enchufada sin modo tele:** fondo verde oscuro, el león y «BETÓMETRO» (nunca la marca del auto).
+- **Pulsador por cable:** con el video a la vista (a medias, pantalla completa o en la tele) anda / pausa, y se ve un ratito el
+  botón grande. Dos apretones a menos de 300 ms cuentan como uno. Sin video a la vista (o en otra pantalla) no hace nada.
+- **Técnico:** un solo reproductor (el del informe). En modo tele su salida de video pasa a la ventana de la tele: el video se
+  decodifica una sola vez (Pi 3). Archivos: `app/qml/Tele.qml`, `video/VistaVideo.qml` (lo que se ve, en la Pi y en la tele),
+  `video/ControlTele.qml`, `video/VentanaTele.qml`, `app/hdmi.cpp`. Pantallas: `raspios/kms.json` (la de 5" es la principal y lleva
+  el tacto; HDMI a 1280×720), con `QT_QPA_EGLFS_KMS_CONFIG` en `betometro.service`.
+- **Enchufar con Betómetro abierto:** Qt 6.8 (eglfs_kms) arma las pantallas solo al abrir. Si el sistema dice que hay tele
+  (`/sys/class/drm/card*-HDMI-A-*/status`) pero Qt no la tiene, el botón aparece igual y explica «Hay que reiniciar Betómetro
+  para usar la tele» con **Reiniciar** (nunca en carrera): Betómetro se cierra y systemd lo abre de nuevo a los 2 s.
+  Si se desenchufa la tele, la ventana de la tele se cierra y el video vuelve a la Pi.
+- **Probar en la PC:** `QT_QPA_PLATFORM=offscreen:configfile=pantallas.json` con dos pantallas (`DSI-1` y `HDMI-A-1`),
+  `--prueba tele`, `tele-datos`, `tele-reiniciar`, `video-pulsador` y `--captura-tele archivo.png`.
+
 ## Ajustes → Cámara y micrófono (lista aprobada 02/11/2026)
 
 Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.html`, `#k1`). Se entra desde **Ajustes** (no va en el inicio).

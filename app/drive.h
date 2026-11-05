@@ -93,6 +93,7 @@ private:
     void mandarPedazo(qint64 desde);
     void alimentar();   // le pasa a curl el pedazo, de a 256 KB
     void terminoArchivo(const QByteArray& cuerpo);
+    void olvidarCarpeta();   // la carpeta de la carrera de la tarea (la borraron en Drive)
     void fallar(const QString& texto);
     void parar();
     void actualizarTexto();

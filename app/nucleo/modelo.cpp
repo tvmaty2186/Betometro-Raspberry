@@ -276,6 +276,11 @@ Json configFabrica() {
     c["camaraGirar"] = false;         // girar 180° (cámara dada vuelta en el techo)
     c["camaraEspejo"] = false;        // espejo: dar vuelta izquierda y derecha
     c["camaraBorrarViejos"] = true;   // si falta lugar, borra los videos más viejos (nunca informes)
+    // Google Drive (docs/google-drive.md)
+    c["driveInformes"] = true;        // subir los informes
+    c["driveVideos"] = true;          // subir los videos…
+    c["driveWifis"] = Json::lista();  // …solo con estas wifi (ninguna elegida: nunca; el celu se quedaría sin datos)
+    c["driveBorrarSubidos"] = false;  // borrar del equipo los videos ya subidos
     return c;
 }
 
@@ -339,6 +344,21 @@ Json armarConfig(const Json& guardado) {
     boolEn(c, def, "camaraGirar");
     boolEn(c, def, "camaraEspejo");
     boolEn(c, def, "camaraBorrarViejos");
+    boolEn(c, def, "driveInformes");
+    boolEn(c, def, "driveVideos");
+    boolEn(c, def, "driveBorrarSubidos");
+    {   // lista de nombres de wifi (textos no vacíos, sin repetir)
+        Json l = Json::lista();
+        std::vector<std::string> vistos;
+        if (c["driveWifis"].esLista())
+            for (const auto& w : c["driveWifis"].elementos()) {
+                const std::string n = w.aTexto();
+                if (n.empty() || std::find(vistos.begin(), vistos.end(), n) != vistos.end()) continue;
+                vistos.push_back(n);
+                l.agregar(n);
+            }
+        c["driveWifis"] = std::move(l);
+    }
     return c;
 }
 

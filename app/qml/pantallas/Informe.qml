@@ -457,7 +457,7 @@ Item {
         Tarjeta {
             oscura: true
             anchors.centerIn: parent
-            width: Math.min(parent.width - 40, 640); height: 230
+            width: Math.min(parent.width - 40, 640); height: 200
             MouseArea { anchors.fill: parent }
             Row {
                 x: 30; y: 34; spacing: 14

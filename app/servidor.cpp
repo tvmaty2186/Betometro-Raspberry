@@ -1,6 +1,7 @@
 #include "servidor.h"
 
 #include "datos.h"
+#include "drive.h"
 #include "reportes.h"
 
 #include <QFile>
@@ -75,8 +76,26 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                 s->setProperty("pedido", pedido);
                 if (!pedido.contains("\r\n\r\n") && pedido.size() < 8192) return;   // todavía no llegó entero
                 if (s->property("atendido").toBool()) return;
-                s->setProperty("atendido", true);
                 const QList<QByteArray> linea = pedido.left(pedido.indexOf("\r\n")).split(' ');
+                // POST /drive: el archivo del cliente de Google (chico: hasta 64 KB). Se espera a que llegue entero.
+                if (linea.size() >= 2 && linea[0] == "POST" && QUrl(QString::fromUtf8(linea[1])).path() == QLatin1String("/drive")) {
+                    const int fin = pedido.indexOf("\r\n\r\n");
+                    qint64 largo = -1;
+                    for (const QByteArray& c : pedido.left(fin).split('\n'))
+                        if (c.trimmed().toLower().startsWith("content-length:")) largo = c.trimmed().mid(15).trimmed().toLongLong();
+                    if (largo < 0 || largo > 65536) {
+                        s->setProperty("atendido", true);
+                        s->write(respuesta(400, "text/plain; charset=utf-8", "Archivo muy grande"));
+                        s->disconnectFromHost();
+                        return;
+                    }
+                    if (pedido.size() - fin - 4 < largo) return;   // falta el resto del archivo
+                    s->setProperty("atendido", true);
+                    s->write(respuesta(200, "text/html; charset=utf-8", recibirDrive(pedido.mid(fin + 4, largo))));
+                    s->disconnectFromHost();
+                    return;
+                }
+                s->setProperty("atendido", true);
                 if (linea.size() >= 2 && linea[0] == "GET" && linea[1].startsWith("/video/")) {
                     const QUrl url(QString::fromUtf8(linea[1]));
                     QByteArray rangoPedido;   // la cabecera «Range:» (el navegador la manda para adelantar el video)
@@ -125,6 +144,7 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
         if (!f.open(QIODevice::ReadOnly)) return respuesta(404, "text/plain", "No está");
         return respuesta(200, n.endsWith(QLatin1String(".png")) ? "image/png" : "font/woff2", f.readAll(), "Cache-Control: max-age=86400\r\n");
     }
+    if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
     if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
         const QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
         return respuesta(200, "text/plain; charset=utf-8", t.isEmpty() ? QByteArray("Sin errores anotados.\n") : t,
@@ -256,8 +276,64 @@ QByteArray Servidor::pagina() const {
         "<div class=cab><img alt=\"\" src=\"/r/leon.png\"><div class=bar></div><div class=marca><b>BETÓMETRO</b><span>REGULARIDAD PARA EL NAVEGANTE</span></div><div class=rayas></div></div>"
         "<h2>CARRERAS · %1</h2>%2%3"
         "<p class=\"v pie\">Tocá una carrera para ver el informe. «Descargar» lo guarda en el teléfono; desde ahí se puede mandar a Drive o por WhatsApp.</p>"
-        "<p class=\"v pie\"><a href=\"/reportes?descargar=1\">Reporte de errores</a> · Avispón Verde #101</p></main></body></html>")
+        "<p class=\"v pie\"><a href=\"/drive\">Google Drive</a> · <a href=\"/reportes?descargar=1\">Reporte de errores</a> · Avispón Verde #101</p></main></body></html>")
                              .arg(n)
                              .arg(filas, n ? QStringLiteral("<a class=z href=\"/todos.zip\">Descargar todos (.zip)</a>") : QString());
+    return html.toUtf8();
+}
+
+// ---------- Google Drive (docs/google-drive.md) ----------
+// Página para subir el JSON del cliente de Google desde la compu o el celu. Nunca muestra lo que hay adentro.
+
+QByteArray Servidor::recibirDrive(const QByteArray& cuerpo) {
+    if (!drive_) return paginaDrive(QStringLiteral("Google Drive no está en este equipo"));
+    // Llega como formulario (multipart) o el archivo solo: el JSON va de la primera «{» a la última «}»
+    const int a = cuerpo.indexOf('{'), b = cuerpo.lastIndexOf('}');
+    if (a < 0 || b < a) return paginaDrive(QStringLiteral("No llegó ningún archivo. Elegí el JSON y tocá «Subir»."));
+    const QString problema = drive_->guardarCliente(cuerpo.mid(a, b - a + 1));
+    if (!problema.isEmpty()) return paginaDrive(problema);
+    return paginaDrive(QStringLiteral("¡Listo! Ahora en el Betómetro: Ajustes → Google Drive → Conectar."), true);
+}
+
+QByteArray Servidor::paginaDrive(const QString& aviso, bool bien) const {
+    QString estado;
+    if (!drive_) estado = QStringLiteral("No disponible.");
+    else if (drive_->estado() == QLatin1String("conectado"))
+        estado = QStringLiteral("Conectado") + (drive_->cuenta().isEmpty() ? QString() : QStringLiteral(" como <b>%1</b>").arg(esc(drive_->cuenta()))) +
+                 (drive_->texto().isEmpty() ? QString() : QStringLiteral(" · ") + esc(drive_->texto()));
+    else if (drive_->tieneCliente()) estado = QStringLiteral("El cliente de Google ya está cargado ✓. Falta tocar «Conectar» en el Betómetro.");
+    else estado = QStringLiteral("Falta el cliente de Google (paso 4 de la guía).");
+    const QString html = QStringLiteral(
+        "<!doctype html><html lang=es><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\">"
+        "<title>Betómetro · Google Drive</title><style>"
+        "@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}"
+        "@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}"
+        "*{box-sizing:border-box}body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;"
+        "background:radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}"
+        "main{max-width:620px;margin:auto;padding:0 16px 40px}"
+        ".cab{display:flex;align-items:center;gap:10px;padding:16px 0 12px;border-bottom:3px solid #f4c531}.cab img{height:50px}"
+        ".cab b{font:800 italic 28px/1 Barlow}h2{font:800 italic 13px Barlow;letter-spacing:.18em;color:#b9cdb8;margin:18px 2px 6px}"
+        ".c{margin-top:12px;border-radius:18px;padding:16px;background:radial-gradient(120% 90% at 50% 0%,#1f4a2f,#08190e);"
+        "box-shadow:0 0 0 2px #cfd4d8,0 0 0 3px #4b5258,0 10px 18px #0008}"
+        "ol{padding-left:22px;line-height:1.5}a{color:#f4c531}input[type=file]{width:100%;margin:10px 0;font:600 16px Barlow;color:#f7f7f2}"
+        "button{width:100%;border:0;border-radius:14px;padding:14px;font:800 italic 18px Barlow;color:#14240f;"
+        "background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f)}"
+        ".aviso{border-radius:14px;padding:12px 14px;margin-top:12px;font-size:17px}.bien{background:#1f7a3a}.mal{background:#8f130b}"
+        ".v{color:#b9cdb8;font-size:14px}</style></head><body><main>"
+        "<div class=cab><img alt=\"\" src=\"/r/leon.png\"><b>GOOGLE DRIVE</b></div>%1"
+        "<h2>ESTADO</h2><div class=c>%2</div>"
+        "<h2>SUBIR EL CLIENTE DE GOOGLE</h2><div class=c>"
+        "<p>Elegí el archivo <b>.json</b> que bajaste de Google Cloud (cliente «TVs y dispositivos de entrada limitada»).</p>"
+        "<form method=post action=/drive enctype=multipart/form-data>"
+        "<input type=file name=cliente accept=\".json,application/json\" required><button>Subir</button></form>"
+        "<p class=v>Queda guardado solo en el Betómetro. Nunca lo mandes por chat ni lo subas a otro lado.</p></div>"
+        "<h2>LOS PASOS</h2><div class=c><ol>"
+        "<li>Crear el proyecto: <a href=\"https://console.cloud.google.com/projectcreate\">console.cloud.google.com/projectcreate</a></li>"
+        "<li>Activar la API de Drive: <a href=\"https://console.cloud.google.com/apis/library/drive.googleapis.com\">abrir</a> → «Habilitar»</li>"
+        "<li>Pantalla de consentimiento: <a href=\"https://console.cloud.google.com/auth/overview\">abrir</a> (nombre Betómetro, tu mail, «Externo») y después «Publicar app»</li>"
+        "<li>Cliente: <a href=\"https://console.cloud.google.com/auth/clients/create\">abrir</a> → «TVs y dispositivos de entrada limitada» → bajar el JSON</li>"
+        "<li>Subirlo acá arriba</li><li>En el Betómetro: Ajustes → Google Drive → Conectar</li></ol></div>"
+        "<p class=v><a href=\"/\">‹ Volver a las carreras</a></p></main></body></html>")
+                             .arg(aviso.isEmpty() ? QString() : QStringLiteral("<div class=\"aviso %1\">%2</div>").arg(bien ? "bien" : "mal", esc(aviso)), estado);
     return html.toUtf8();
 }

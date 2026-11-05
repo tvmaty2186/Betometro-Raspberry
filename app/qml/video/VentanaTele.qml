@@ -17,9 +17,11 @@ Window {
     // misma pantalla cierran el programa
     property bool lista: false
     visibility: lista && !!Tele.pantallaTele ? Window.FullScreen : Window.Hidden
-    Component.onCompleted: { lista = true; console.warn("TELEDBG", screen ? screen.name : "-", width, height, Tele.pantallaTele ? Tele.pantallaTele.name : "null", Qt.application.screens.length, Tele.pantallaPi ? Tele.pantallaPi.name : "-") }
-    onWidthChanged: console.warn("TELEDBG w", width, height, screen ? screen.name : "-")
+    Component.onCompleted: lista = true
     flags: Qt.FramelessWindowHint
+    // En su lugar del escritorio (si no, Qt la cambia a la pantalla que esté en 0,0: la de la Pi)
+    x: Tele.pantallaTele ? Tele.pantallaTele.virtualX : 0
+    y: Tele.pantallaTele ? Tele.pantallaTele.virtualY : 0
     width: 1280; height: 720
     color: "#000000"
     title: "Betómetro en la tele"

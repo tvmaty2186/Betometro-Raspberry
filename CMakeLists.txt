@@ -32,6 +32,7 @@ if(BETO_PROGRAMA)
     qt_standard_project_setup(REQUIRES 6.5)
     qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp
       app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp
+      app/drive.h app/drive.cpp app/drive_logica.h app/drive_logica.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
     target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
     add_subdirectory(app/qml)
@@ -100,6 +101,10 @@ if(BETO_PRUEBAS)
     target_include_directories(prueba_videos PRIVATE app)
     target_link_libraries(prueba_videos PRIVATE nucleo Qt6::Core)
     add_test(NAME videos COMMAND prueba_videos)
+    add_executable(prueba_drive pruebas/programa/prueba_drive.cpp app/drive_logica.cpp app/drive_logica.h)
+    target_include_directories(prueba_drive PRIVATE app)
+    target_link_libraries(prueba_drive PRIVATE Qt6::Core)
+    add_test(NAME drive COMMAND prueba_drive)
   endif()
 
   find_program(NODE node)

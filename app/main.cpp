@@ -45,6 +45,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "servidor.h"
 #include "wifi.h"
 #include "hdmi.h"
+#include "drive.h"
 
 #include <QStandardPaths>
 
@@ -152,6 +153,15 @@ int main(int argc, char* argv[]) {
     // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
     Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
     servidor.ponerReportes(&reportes);
+    // Google Drive: sube informes y videos solo, con wifi, sin carrera y sin la cámara grabando (docs/google-drive.md)
+    Drive drive(&datos, carpeta, op.value(oPrueba));
+    servidor.ponerDrive(&drive);
+    drive.ponerBorrador([&camara](const QString& archivo) { return camara.borrarVideo(archivo); });
+    auto condicionesDrive = [&] { drive.ponerCondiciones(wifi.conectada(), wifi.propia(), crono.enCurso() || camara.grabando()); };
+    condicionesDrive();
+    QObject::connect(&wifi, &Wifi::cambio, &drive, condicionesDrive);
+    QObject::connect(&crono, &Crono::enCursoChanged, &drive, condicionesDrive);
+    QObject::connect(&camara, &Camara::grabandoChanged, &drive, condicionesDrive);
     // Prendido si la opción «Mostrar informes en la red» está prendida y no hay carrera
     auto prenderServidor = [&] {
         const QVariant v = datos.cfg(QStringLiteral("informesRed"));
@@ -204,6 +214,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
     motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
     motor.rootContext()->setContextProperty(QStringLiteral("Hdmi"), &hdmi);
+    motor.rootContext()->setContextProperty(QStringLiteral("Drive"), &drive);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
     motor.loadFromModule("Betometro", "Main");
