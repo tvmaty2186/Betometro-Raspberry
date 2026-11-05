@@ -43,8 +43,9 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         Text { width: parent.width; wrapMode: Text.WordWrap; text: "Falta un paso: desde la compu abrí"
                                color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 24 } }
-                        Text { width: parent.width; wrapMode: Text.WrapAnywhere; text: raiz.urlPagina || "Conectá el Betómetro a la wifi"
-                               color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
+                        Text { width: parent.width; text: raiz.urlPagina || "Conectá el Betómetro a la wifi"
+                               fontSizeMode: Text.HorizontalFit; minimumPixelSize: 16   // la dirección entera, en una línea
+                               color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
                         Text { width: parent.width; wrapMode: Text.WordWrap; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 17 }
                                text: "y subí el archivo de Google (los pasos están ahí y en la guía)" }
                     }

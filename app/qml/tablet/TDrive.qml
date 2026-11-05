@@ -32,7 +32,8 @@ TPantalla {
             anchors.centerIn: parent; width: parent.width - 48; spacing: 16
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; text: "Falta un paso: desde la compu abrí"
                    color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 32 } }
-            Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WrapAnywhere; text: raiz.urlPagina || "Conectá el Betómetro a la wifi"
+            Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 18
+                   text: raiz.urlPagina || "Conectá el Betómetro a la wifi"
                    color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 36 } }
             Rectangle {
                 visible: raiz.urlPagina !== ""
@@ -99,7 +100,7 @@ TPantalla {
             }
             Row {
                 spacing: 16
-                TBoton { width: (cuenta.width - 48 - 16) / 2; height: 96; tamNombre: 26; tamIcono: 40; icono: "actualizar"; nombre: "Subir ahora"
+                TBoton { width: (cuenta.width - 48 - 16) / 2; height: 96; tamNombre: 26; tamIcono: 40; icono: "nube"; nombre: "Subir ahora"
                          activo: !Drive.subiendo; onTocado: Drive.revisar() }
                 TBoton { id: desc; width: (cuenta.width - 48 - 16) / 2; height: 96; tamNombre: 26; tipo: "peligro"
                          property bool armado: false

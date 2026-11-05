@@ -77,6 +77,8 @@ Drive::Drive(Datos* datos, const QString& carpetaDatos, const QString& prueba, Q
     // Capturas en la PC: «--prueba drive-codigo», «drive-subiendo», «drive-listo», «drive-esperando», «drive-error»
     QString p = prueba;
     if (p.startsWith(QLatin1String("tablet-"))) p = p.mid(7);
+    // Prueba con el Google de mentira (BETO_DRIVE_SERVIDOR): «--prueba drive-conectar» toca «Conectar» solo
+    if (!base_.isEmpty() && p == QLatin1String("drive-conectar")) QTimer::singleShot(300, this, &Drive::conectar);
     if (!real_ && p.startsWith(QLatin1String("drive-"))) {
         pruebaFija_ = true;
         const QString q = p.mid(6);

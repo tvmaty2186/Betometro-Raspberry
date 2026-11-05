@@ -51,10 +51,11 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 | `app/salud.cpp` | Tensión baja y calor (`get_throttled`, `thermal_zone0`), vigilante de systemd, procesador al máximo en carrera salvo con calor o tensión baja (vuelve 30 s después) |
 | `app/sistema.h` | Apagar y **brillo** (escribe la luz de fondo; 100 % = máximo de la pantalla) |
 | `app/wifi.cpp` | nmcli. Wifi propia «Betometro-<número>» (clave `betometro`) si en 90 s no hay red guardada cerca |
-| `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores. Puerto 80 en la Pi |
+| `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores, `/drive` (subir el cliente de Google). Puerto 80 en la Pi |
 | `app/reportes.cpp` | `<datos>/reportes/errores.log`. Al prender distingue «se cayó el programa» de «se cortó la corriente o se colgó», y suma errores del sistema (journal) y del pstore. Manda issues a `Betometro-reportes` si existe `/var/lib/betometro/reportes.token` |
 | `app/actualizador.cpp` | Ver arriba |
 | `app/clima.cpp` | Pronóstico de Open-Meteo (16 días) y buscador de localidades (Open-Meteo, si no OpenStreetMap). Guarda el último en `<datos>/clima.json` para sin wifi. Pantalla `Pronostico.qml` (no se llama `Clima.qml` porque chocaba con el objeto `Clima`) |
+| `app/drive.cpp` | **Google Drive**: sube solo informes (HTML) y videos a «Betómetro/AAAA-MM-DD Nombre», con wifi, sin carrera y sin la cámara grabando. Videos solo con las wifi elegidas. Subida de a 4 MB con `curl` en prioridad baja; si se corta sigue. Se conecta con un código (google.com/device); el cliente de Google se sube en `http://IP/drive`. Usa `curl` (viene en Raspberry Pi OS). Ver [google-drive.md](google-drive.md) |
 | `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
 
 ## Cosas de la pantalla y del arranque (lo que costó)
