@@ -81,8 +81,6 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
   Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
-- Retomar la carrera si Betómetro se reinicia en medio (hoy el vigilante lo reinicia, pero la carrera en curso
-  se corta y hay que largar de nuevo; las vueltas ya marcadas quedan guardadas).
 
 ## Más adelante
 - Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).

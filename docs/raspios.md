@@ -66,7 +66,7 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 ## En carrera (decisiones de Matías)
 - **Nada de carteles de calor o tensión durante la carrera**: hay que aguantar. Se anotan en el reporte con la vuelta.
 - El procesador va al máximo; solo baja si hay calor o tensión baja.
-- Si el vigilante reinicia Betómetro en medio de una carrera, **la carrera en curso se corta** (las vueltas marcadas quedan). Retomarla está en pendientes.
+- Si el vigilante reinicia Betómetro en medio de una carrera, **la carrera en curso se corta** (las vueltas marcadas quedan). No se retoma: Betómetro tarda casi 2 min en volver y en regularidad ya no sirve (decisión de Matías, 05/11/2026).
 
 ## Probar en la PC (la sesión de Claude)
 - Qt 6.8.2 con aqtinstall en `/opt/qt/6.8.2/gcc_64`; compilar el programa con `cmake --build <bq>` y el núcleo + pruebas con `ctest`.

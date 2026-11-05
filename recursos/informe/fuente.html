@@ -69,9 +69,9 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .aviso{color:var(--sub);font-size:13px;text-align:center;padding:16px 6px}
 .pie{text-align:center;color:var(--sub);font-size:11px;margin-top:14px;font-style:italic}
 /* Video de la cámara (solo Raspberry): se ve cuando la página la sirve Betómetro en la red.
-   Medidas en «u»: 1 u = 1 px con el video a 1280 de ancho (como las muestras aprobadas); en chico no baja de 0,62 px. */
+   Medidas en «u»: 1 u = 1 px con el video a 1280 de ancho (como las muestras aprobadas); en chico no baja de 0,55 px. */
 .vw{container-type:inline-size;margin-top:2px}
-.vid{--u:max(.62px,calc(100cqw / 1280));position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;
+.vid{--u:max(.55px,calc(100cqw / 1280));position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;color:#f4f1e6;box-shadow:0 0 0 1.5px #cfd4d855}
 .vw:fullscreen{background:#000;display:flex;align-items:center}
 .vw.fs{position:fixed;inset:0;z-index:50;margin:0;background:#000;display:flex;align-items:center}
@@ -93,6 +93,7 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 #ovVel{left:calc(22*var(--u));bottom:calc(84*var(--u))}
 #ovPista{right:calc(22*var(--u));bottom:calc(84*var(--u));height:auto;border-radius:calc(18*var(--u));padding:calc(8*var(--u))}
 #ovPista svg{width:calc(230*var(--u));height:calc(150*var(--u))}
+@container (max-width:700px){#ovPista svg{width:calc(150*var(--u));height:calc(100*var(--u))}}
 .vbarra{position:relative;width:calc(90*var(--u));height:calc(7*var(--u));border-radius:calc(4*var(--u));background:linear-gradient(90deg,#3d8bfd,#7fd3ff,#2fd162,#f4c531,#d23b2c)}
 .vbarra i{position:absolute;left:50%;top:calc(-5*var(--u));width:calc(4*var(--u));height:calc(17*var(--u));margin-left:calc(-2*var(--u));background:#fff;border-radius:calc(2*var(--u));box-shadow:0 0 calc(3*var(--u)) #000}
 .vgrande{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:calc(120*var(--u));height:calc(120*var(--u));border-radius:50%;
@@ -111,7 +112,7 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .vbar .eng{width:calc(42*var(--u));height:calc(42*var(--u));border-radius:50%;background:var(--ama);color:#111}
 .vbar .eng svg{width:calc(28*var(--u));height:calc(28*var(--u))}
 .vbar .eng.abierto{width:auto;border-radius:calc(21*var(--u));padding:0 calc(16*var(--u));font:800 italic calc(18*var(--u)) var(--ui)}
-.vpanel{position:absolute;z-index:5;left:50%;bottom:calc(8*var(--u));transform:translateX(-50%);width:min(calc(620*var(--u)),calc(100% - 16px));max-height:calc(100% - 16px);overflow:auto;
+.vpanel{position:absolute;z-index:5;left:50%;bottom:calc(78*var(--u));transform:translateX(-50%);width:min(calc(620*var(--u)),calc(100% - 16px));max-height:calc(100% - 78*var(--u) - 8px);overflow:auto;
   background:#0c2415f2;border:calc(2*var(--u)) solid #cfd4d8;border-radius:calc(18*var(--u));padding:calc(16*var(--u)) calc(22*var(--u));box-shadow:0 10px 24px #000a}
 .vpanel h3{margin:0 0 calc(6*var(--u));font:800 italic calc(24*var(--u)) var(--ui)}
 .vpanel label{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(6*var(--u)) 0;border-bottom:1px solid #ffffff1f;font:800 italic calc(22*var(--u)) var(--ui);cursor:pointer}
