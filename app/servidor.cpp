@@ -138,11 +138,25 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
     if (ruta.startsWith(QLatin1String("/r/"))) {   // león y tipografías para la página (de los recursos del programa)
         const QString n = ruta.mid(3);
         const QString archivo = n == QLatin1String("leon.png") ? QStringLiteral(":/recursos/img/leon.png")
+                                : n == QLatin1String("icono.png") ? QStringLiteral(":/recursos/img/betometro-icono-512.png")
+                                : n == QLatin1String("icono-redondo.png") ? QStringLiteral(":/recursos/img/betometro-icono-redondo-512.png")
                                 : QStringLiteral(":/recursos/fuentes/") + n;
         if (n.contains(QLatin1String("..")) || n.contains('/')) return respuesta(404, "text/plain", "No está");
         QFile f(archivo);
         if (!f.open(QIODevice::ReadOnly)) return respuesta(404, "text/plain", "No está");
         return respuesta(200, n.endsWith(QLatin1String(".png")) ? "image/png" : "font/woff2", f.readAll(), "Cache-Control: max-age=86400\r\n");
+    }
+    // Para el acceso directo del celu: nombre, ícono (el de la app) y colores. Chrome no deja «instalar»
+    // una página sin https; el acceso directo sí, y con esto queda con el ícono de Betómetro.
+    if (ruta == QLatin1String("/manifest.webmanifest"))
+        return respuesta(200, "application/manifest+json",
+                         "{\"name\":\"Betómetro\",\"short_name\":\"Betómetro\",\"start_url\":\"/\",\"display\":\"standalone\","
+                         "\"background_color\":\"#0d2a18\",\"theme_color\":\"#0d2a18\",\"icons\":["
+                         "{\"src\":\"/r/icono.png\",\"sizes\":\"512x512\",\"type\":\"image/png\",\"purpose\":\"any\"},"
+                         "{\"src\":\"/r/icono-redondo.png\",\"sizes\":\"512x512\",\"type\":\"image/png\",\"purpose\":\"maskable\"}]}");
+    if (ruta == QLatin1String("/favicon.ico")) {
+        QFile f(QStringLiteral(":/recursos/img/betometro-icono-512.png"));
+        if (f.open(QIODevice::ReadOnly)) return respuesta(200, "image/png", f.readAll(), "Cache-Control: max-age=86400\r\n");
     }
     if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
     if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
@@ -244,7 +258,9 @@ QByteArray Servidor::pagina() const {
     if (!n) filas = QStringLiteral("<p class=v>Todavía no hay carreras corridas.</p>");
     const QString html = QStringLiteral(
         "<!doctype html><html lang=es><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\">"
-        "<title>Betómetro · Avispón Verde</title><style>"
+        "<title>Betómetro · Avispón Verde</title>"
+        "<link rel=manifest href=/manifest.webmanifest><link rel=icon href=/r/icono.png><link rel=apple-touch-icon href=/r/icono.png>"
+        "<meta name=theme-color content=\"#0d2a18\"><meta name=apple-mobile-web-app-title content=\"Betómetro\"><style>"
         "@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}"
         "@font-face{font-family:Barlow;font-weight:600;font-style:italic;src:url(/r/barlow-latin-600-italic.woff2)}"
         "@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}"

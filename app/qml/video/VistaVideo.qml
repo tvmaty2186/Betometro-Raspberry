@@ -265,9 +265,40 @@ Item {
         }
         Text {
             id: tTotal
-            anchors { right: bDatos.visible ? bDatos.left : parent.right; rightMargin: bDatos.visible ? 12 * barra.b : 20 * barra.b; verticalCenter: parent.verticalCenter }
+            anchors { right: bPantalla.visible ? bPantalla.left : bDatos.visible ? bDatos.left : parent.right
+                      rightMargin: bPantalla.visible || bDatos.visible ? 12 * barra.b : 20 * barra.b; verticalCenter: parent.verticalCenter }
             text: vista.rep.reloj(vista.rep.total)
             color: "#ffffff"; opacity: 0.8; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 * barra.b }
+        }
+        // Pantalla completa / achicar, a la derecha del tiempo (Matías, 06/11/2026: el doble toque a veces no
+        // entraba). Las cuatro esquinas hacia afuera para agrandar, hacia adentro para achicar.
+        Item {
+            id: bPantalla
+            visible: vista.tocable && !vista.editando
+            anchors { right: bDatos.visible ? bDatos.left : parent.right; rightMargin: bDatos.visible ? 12 * barra.b : 16 * barra.b
+                      verticalCenter: parent.verticalCenter }
+            width: 42 * barra.b; height: width
+            Canvas {
+                id: iconoPantalla
+                anchors.centerIn: parent; width: 28 * barra.b; height: width
+                property bool adentro: vista.completo
+                onAdentroChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onPaint: {
+                    const c = getContext("2d"), w = width, k = w * 0.36, g = Math.max(2, w * 0.11);
+                    c.reset(); c.strokeStyle = "#ffffff"; c.lineWidth = g; c.lineCap = "round"; c.lineJoin = "round";
+                    const p = g / 2, q = w - g / 2;
+                    // [esquina x, esquina y, dirección x, dirección y]
+                    for (const e of [[p, p, 1, 1], [q, p, -1, 1], [p, q, 1, -1], [q, q, -1, -1]]) {
+                        // agrandar: el codo en la esquina; achicar: el codo hacia el centro
+                        const m = adentro ? w * 0.28 : k;   // achicar: codos más separados del centro
+                        const x = adentro ? e[0] + e[2] * m : e[0], y = adentro ? e[1] + e[3] * m : e[1];
+                        const sx = adentro ? -e[2] : e[2], sy = adentro ? -e[3] : e[3];
+                        c.beginPath(); c.moveTo(x + sx * m, y); c.lineTo(x, y); c.lineTo(x, y + sy * m); c.stroke();
+                    }
+                }
+            }
+            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: vista.rep.dobleToque() }
         }
         // Engranaje en pausa (pantalla completa); con «Datos» abierto, el botón que lo cierra
         Rectangle {

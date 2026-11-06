@@ -76,7 +76,8 @@ if(BETO_PROGRAMA)
     file(GLOB BETO_FUENTES RELATIVE ${CMAKE_SOURCE_DIR} recursos/fuentes/*)
     qt_add_resources(betometro recursos
       PREFIX "/"
-      FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg recursos/informe-plantilla.html)
+      FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg recursos/informe-plantilla.html
+            recursos/img/betometro-icono-512.png recursos/img/betometro-icono-redondo-512.png)
   else()
     message(STATUS "Sin Qt 6: no se compila el programa, solo el núcleo")
   endif()
