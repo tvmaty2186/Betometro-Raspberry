@@ -131,7 +131,13 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .vmsj{position:absolute;inset:0;z-index:3;display:grid;place-items:center;text-align:center;padding:20px;font:600 italic 14px var(--ui);color:var(--sub);background:#000c}
 .vbajar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .vbajar a{flex:1;min-width:150px;text-align:center;text-decoration:none;padding:10px;border-radius:12px;border:2px solid var(--ama);color:var(--ama);font:800 italic 14px var(--ui)}
+.sinjs{margin:10px 0 0;padding:14px 16px;border-radius:14px;border:2px solid #f4c531;background:#08190e;color:#f4f1e6;font-size:17px;line-height:1.35}
+.sinjs b{color:#f4c531}
 </style></head><body><main>
+<!-- Si la página no puede hacer funcionar el informe (por ejemplo la vista previa de Google Drive), queda este aviso;
+     si funciona, el informe lo saca enseguida (Matías, 06/11/2026) -->
+<div class=sinjs id=sinjs><b>Para ver los gráficos y el mapa:</b> tocá los tres puntos <b>⋮</b> → <b>Abrir con</b> → <b>Chrome</b>
+(o <b>Descargar</b> y abrilo). Esta vista no deja funcionar el informe.</div>
 <div class="cab"><img alt="" src="data:image/png;base64,__LEON__"><div class="bar"></div>
   <div class="marca"><b>BETÓMETRO</b><span>REGULARIDAD PARA EL NAVEGANTE</span></div><div class="rayas"></div></div>
 <h1 id="tit"></h1><div class="fecha" id="fecha"></div>
@@ -151,6 +157,7 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 <div class="pie">Generado con Betómetro · Avispón Verde #101</div>
 </main>
 <div class="barra" id="barra"><i></i></div>
+<script>document.getElementById('sinjs').remove();</script>
 <script>
 const C=__DATOS__;
 const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id);
