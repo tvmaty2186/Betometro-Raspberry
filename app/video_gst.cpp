@@ -186,7 +186,7 @@ void VideoGst::abrir() {
 void VideoGst::ponerDescompresor(const QString& nombre) {
     if (descompresor_ == nombre) return;
     descompresor_ = nombre;
-    qInfo("Video: descompresor %s", qPrintable(nombre));
+    qWarning("Video: descompresor %s", qPrintable(nombre));   // warning: así queda en el registro de la Pi
     emit descompresorChanged();
 }
 

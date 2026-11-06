@@ -464,7 +464,7 @@ int ImagenVideo::decidirModo() {
         }
     }
 #endif
-    qInfo("Video: colores por el %s", por);
+    qWarning("Video: colores por el %s", por);   // warning: así queda en el registro de la Pi
     std::lock_guard<std::mutex> l(mutex_);
     modo_ = m;
     // Los que llegaron antes de saber: al camino que corresponde
