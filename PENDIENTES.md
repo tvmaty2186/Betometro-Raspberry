@@ -90,9 +90,10 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 ## Siguiente
 - Hecho hasta la 1.0.22 (06/11/2026): video en el informe (Pi, celu, tele), modo tele con el celu de control y
   carreras como capítulos, Drive, MP4, 480p, GPS quieto, todas las pantallas grandes.
-- La Pi marcó falta de corriente y freno por calor (throttled=0xd0000, 06/11): fuente oficial 5,1 V 2,5 A con cable
-  corto y un disipador o ventilador. En el auto, el convertidor 12 → 5 V de la lista de compras.
-- Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
+- Probado por Matías (06/11/2026), todo bien: corriente y calor (convertidor y disipador), pulsador real,
+  GPS en el auto, letras en movimiento y voz.
+- **Falta solo:** una carrera larga con la cámara grabando (temperatura y rendimiento de la Pi 3). Después,
+  mirar el «Reporte de errores» y `vcgencmd get_throttled` (tiene que dar 0x0).
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
   Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
 
