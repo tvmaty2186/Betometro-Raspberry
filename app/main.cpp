@@ -132,6 +132,7 @@ int main(int argc, char* argv[]) {
     Actualizador actualizador(carpeta);
     contexto.setVersionNueva(actualizador.versionNueva());
     QObject::connect(&actualizador, &Actualizador::cambio, &contexto, [&] { contexto.setVersionNueva(actualizador.versionNueva()); });
+    if (op.value(oPrueba).contains(QStringLiteral("nueva"))) contexto.setVersionNueva(QStringLiteral("1.0.21"));   // muestra «Actualizar»
 
     Audio audio;
     audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());

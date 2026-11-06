@@ -30,6 +30,22 @@ Rectangle {
             color: Tema.tinta
             font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.titulo !== "" ? 34 : 32; letterSpacing: 1 }
         }
+        // En el inicio, al lado de BETÓMETRO: la versión; si hay una nueva, «Actualizar» en amarillo (se toca)
+        Rectangle {
+            visible: raiz.titulo === ""
+            anchors.verticalCenter: parent.verticalCenter
+            height: 40; radius: 20; width: verFila.implicitWidth + 28
+            color: Contexto.versionNueva ? Tema.acento : Qt.rgba(0, 0, 0, 0.35)
+            border { width: 2; color: Contexto.versionNueva ? Tema.acentoBorde : Tema.bordeCromo }
+            Text {
+                id: verFila
+                anchors.centerIn: parent
+                text: Contexto.versionNueva ? "Actualizar a " + Contexto.versionNueva : "v" + Contexto.version
+                color: Contexto.versionNueva ? Tema.acentoTinta : Tema.tintaSuave
+                font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 20 }
+            }
+            MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
+        }
     }
     Row {
         anchors { right: parent.right; rightMargin: 20; verticalCenter: parent.verticalCenter; verticalCenterOffset: -2 }
