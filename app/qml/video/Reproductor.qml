@@ -138,9 +138,22 @@ Item {
     // al empezar esa vuelta
     function msEn(mx, ancho) {
         const ms = Math.max(0, Math.min(1, mx / ancho)) * total;
-        for (const tr of tramosVideo)
-            if (Math.abs((tr.desde - ms) / total * ancho) < 14) return Math.max(0, tr.desde);
-        return ms;
+        let cerca = null, d = 14;
+        for (const tr of rayitas(ancho)) {
+            const dx = Math.abs((tr.desde - ms) / total * ancho);
+            if (dx < d) { d = dx; cerca = tr; }
+        }
+        return cerca ? Math.max(0, cerca.desde) : ms;
+    }
+    // Las rayitas que se dibujan en una línea de `ancho` px: con muchas vueltas, una cada 2, 5 o 10,
+    // así no se pegan (separadas por lo menos `minimo` px)
+    function rayitas(ancho, minimo) {
+        const n = tramosVideo.length;
+        if (n < 2 || !(ancho > 0)) return tramosVideo;
+        const sep = ancho * (tramosVideo[n - 1].desde - tramosVideo[0].desde) / (n - 1) / total;
+        const m = minimo || 36;
+        const paso = [1, 2, 5, 10, 20].find(p => sep * p >= m) || Math.ceil(m / Math.max(sep, 0.01));
+        return paso === 1 ? tramosVideo : tramosVideo.filter((t, i) => i % paso === 0);
     }
     // Otra carrera en el mismo reproductor (modo tele, «Carreras»): de cero y en pausa
     function deNuevo() {

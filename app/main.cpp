@@ -7,7 +7,9 @@
 //   --fisica                 simula la pantalla real (720×1280 de pie) y gira la interfaz
 //   --captura ARCHIVO.png    saca una captura y sale
 //   --datos CARPETA          dónde está la base (en la Raspberry: /datos)
-//   --muestra                carga carreras de ejemplo (no toca la base guardada hasta que se cambie algo)
+//   --muestra                carga carreras de ejemplo (no toca la base guardada hasta que se cambie algo);
+//                            con BETO_MUESTRA_LARGA=1 suma una de 60 vueltas y una práctica de 40
+//                            (--prueba largar-60 en la pantalla carrera: va por la vuelta 60)
 //   --carrera NOMBRE         abre la ficha de esa carrera
 //   --captura-tele ARCHIVO   con --captura (o sola): también saca la ventana de la tele (modo tele)
 //   --prueba tele-qr | tele-carreras | tele-remoto   modo tele con el código del celu, con la lista de carreras,

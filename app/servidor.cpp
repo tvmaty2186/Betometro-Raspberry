@@ -384,7 +384,8 @@ QByteArray Servidor::paginaControl() const {
 @font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}
 @font-face{font-family:'Barlow Condensed';font-weight:700;src:url(/r/barlow-condensed-latin-700-normal.woff2)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;user-select:none;-webkit-user-select:none;
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;user-select:none;-webkit-user-select:none;overflow-x:hidden;
 background:linear-gradient(180deg,rgba(11,42,23,0) 0,#0b2a17 260px),repeating-conic-gradient(#ffffff09 0 25%,transparent 0 50%) 0 0/22px 22px,
 radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}
 main{max-width:620px;margin:auto;padding:0 16px 30px}
@@ -397,14 +398,14 @@ text-transform:uppercase;padding:12px 16px;cursor:pointer;transition:transform .
 .f:active{transform:scale(.95)}.f:disabled{opacity:.35}.f.am{background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);border-color:#f4c531;color:#14240f}
 .arriba{display:flex;gap:10px;margin-top:14px}.arriba .f{flex:1}
 h2{font:800 italic 13px Barlow;letter-spacing:.18em;color:#b9cdb8;margin:18px 2px 8px}
-#vueltas{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
-#vueltas .f{flex:none;width:92px;padding:8px 0;letter-spacing:0;text-transform:none;text-align:center;border-radius:20px}
+#vueltas{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none;overscroll-behavior-x:contain}
+#vueltas .f{flex:none;min-width:92px;padding:8px 10px;letter-spacing:0;text-transform:none;text-align:center;border-radius:20px}
 #vueltas b{display:block;font:800 italic 22px Barlow}#vueltas span{display:block;font:700 20px 'Barlow Condensed';color:#b9cdb8}
 #vueltas .am span{color:#14240f}
-.bot{display:flex;align-items:center;justify-content:center;gap:16px;margin:26px 0 22px}
-.salto{width:96px;height:80px;border-radius:30px;font:700 26px 'Barlow Condensed';letter-spacing:0}
-#play{width:132px;height:132px;border-radius:50%;padding:0;border-color:#fff6d0;display:flex;align-items:center;justify-content:center}
-#play svg{width:56px;height:56px}
+.bot{display:flex;align-items:center;justify-content:center;gap:min(16px,3vw);margin:26px 0 22px}
+.salto{flex:none;width:min(96px,24vw);height:min(80px,20vw);padding:0;border-radius:30px;font:700 26px 'Barlow Condensed';letter-spacing:0}
+#play{flex:none;width:min(132px,34vw);height:min(132px,34vw);border-radius:50%;padding:0;border-color:#fff6d0;display:flex;align-items:center;justify-content:center}
+#play svg{width:42%;height:42%}
 #linea{position:relative;height:52px;touch-action:none;margin:0 8px}
 #linea .r{position:absolute;left:0;right:0;top:16px;height:20px;border-radius:10px;background:#ffffff33}
 #linea .l{position:absolute;left:0;top:16px;height:20px;border-radius:10px;background:#f4c531}
@@ -447,7 +448,7 @@ background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;font:800 i
 <div id=aviso hidden></div>
 <script>
 const $=i=>document.getElementById(i);
-let E={activa:false,carreras:[]},arr=-1,claveV='',claveL='',tAviso=0;
+let E={activa:false,carreras:[]},arr=-1,claveV='',claveL='',tAviso=0,tocaV=0,R=[];
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function reloj(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s/60)%60,ss=String(s%60).padStart(2,'0');
 return h>0?h+':'+String(m).padStart(2,'0')+':'+ss:m+':'+ss}
@@ -473,14 +474,14 @@ function pintar(){
   const vs=E.vueltas||[],k=E.carreraId+'|'+vs.map(v=>v.nombre+v.tiempo+v.video).join(',')+'|'+E.vuelta;
   if(k!==claveV){claveV=k;
     $('vueltas').innerHTML=vs.map((v,i)=>'<button class="f'+(i===E.vuelta?' am':'')+'" data-i="'+i+'"'+(v.video?'':' disabled')+'><b>'+esc(v.nombre)+'</b><span>'+esc(v.tiempo)+'</span></button>').join('');
-    const a=$('vueltas').querySelector('.am');if(a)a.scrollIntoView({block:'nearest',inline:'nearest'});
+    centrarV();
   }
   $('play').innerHTML=E.andando?PAUSA:PLAY;
   const t=E.total||1,ms=arr>=0?arr:E.pos,f=Math.max(0,Math.min(1,ms/t));
   document.querySelector('#linea .l').style.width=(f*100)+'%';
   document.querySelector('#linea .p').style.left=(f*100)+'%';
-  const km=(E.marcas||[]).join(',')+'|'+t;
-  if(km!==claveL){claveL=km;$('marcas').innerHTML=(E.marcas||[]).filter(m=>m>0&&m<=t).map(m=>'<div class=m style="left:'+(m/t*100)+'%"></div>').join('')}
+  const km=(E.marcas||[]).join(',')+'|'+t+'|'+L.clientWidth;
+  if(km!==claveL){claveL=km;R=rayitas();$('marcas').innerHTML=R.filter(m=>m>0&&m<=t).map(m=>'<div class=m style="left:'+(m/t*100)+'%"></div>').join('')}
   $('tiempo').textContent=reloj(ms)+' / '+reloj(t);
   if(!$('capa').hidden)lista();
 }
@@ -489,6 +490,10 @@ function lista(){
     '<span class=x><b>'+esc(c.nombre)+'</b><span>'+esc(c.fecha)+' · '+c.vueltas+' vueltas'+(c.videos>1?' · '+c.videos+' videos':'')+'</span></span>'+
     (c.id===E.carreraId?'<span class=ya>EN LA TELE</span>':'')+'</button>').join('')||'<p class=v>No hay carreras con video.</p>';
 }
+// La vuelta de ahora a la vista (solo la fila, no la página); si recién la deslizaron, no
+function centrarV(){const V=$('vueltas'),a=V.querySelector('.am');if(!a||Date.now()-tocaV<4000)return;
+  V.scrollLeft=a.offsetLeft-V.offsetLeft-(V.clientWidth-a.offsetWidth)/2}
+['touchstart','wheel','pointerdown'].forEach(n=>$('vueltas').addEventListener(n,()=>tocaV=Date.now(),{passive:true}));
 $('vueltas').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)hacer('vuelta',b.dataset.i)};
 $('bMenos').onclick=()=>hacer('saltar',-10000);$('bMas').onclick=()=>hacer('saltar',10000);
 $('play').onclick=()=>hacer('alternar');$('bSalir').onclick=()=>hacer('salir');
@@ -497,8 +502,12 @@ $('capa').onclick=e=>{if(e.target.id==='capa')$('capa').hidden=true};
 $('lista').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('capa').hidden=true;if(b.dataset.id!==E.carreraId)hacer('carrera',b.dataset.id)};
 // Línea de tiempo: se arrastra; cerca de una rayita salta justo al empezar esa vuelta
 const L=$('linea');
-function msEn(x){const r=L.getBoundingClientRect(),t=E.total||1;let ms=Math.max(0,Math.min(1,(x-r.left)/r.width))*t;
-  for(const m of E.marcas||[])if(Math.abs((m-ms)/t*r.width)<14)return Math.max(0,m);return ms}
+// Con muchas vueltas, una rayita cada 2, 5 o 10 vueltas, así no se pegan (y se puede arrastrar entre ellas)
+function rayitas(){const ms=E.marcas||[],t=E.total||1,n=ms.length;if(n<2)return ms.slice();
+  const sep=L.clientWidth*(ms[n-1]-ms[0])/(n-1)/t,paso=[1,2,5,10,20].find(p=>sep*p>=36)||Math.ceil(36/Math.max(sep,.01));
+  return ms.filter((m,i)=>i%paso===0)}
+function msEn(x){const r=L.getBoundingClientRect(),t=E.total||1;let ms=Math.max(0,Math.min(1,(x-r.left)/r.width))*t,c=null,d=14;
+  for(const m of R){const dx=Math.abs((m-ms)/t*r.width);if(dx<d){d=dx;c=m}}return c===null?ms:Math.max(0,c)}
 L.onpointerdown=e=>{L.setPointerCapture(e.pointerId);arr=msEn(e.clientX);pintar()};
 L.onpointermove=e=>{if(arr>=0){arr=msEn(e.clientX);pintar()}};
 L.onpointerup=()=>{if(arr<0)return;const ms=Math.round(arr);arr=-1;hacer('ir',ms)};

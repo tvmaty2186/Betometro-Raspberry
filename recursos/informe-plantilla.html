@@ -33,6 +33,9 @@ h1{font:800 italic 30px/1.05 var(--ui);margin:4px 0 0;letter-spacing:.01em;
 .fecha{color:var(--sub);font-size:13px;margin:4px 0 14px;font-style:italic}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .chip{cursor:pointer;padding:7px 12px;border-radius:99px;font:800 italic 14px var(--ui);background:#0f3b20;color:var(--crema);border:1.5px solid #cfd4d855;box-shadow:0 2px 4px #0006}
+/* Muchas vueltas: una sola fila que se desliza (si no, es una pared de chips) */
+.chips.una{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin-left:-2px;margin-right:-2px;overscroll-behavior-x:contain}
+.chips.una::-webkit-scrollbar{display:none}.chips.una .chip{flex:none}
 .chip.on{background:linear-gradient(#ffe07a,var(--ama) 50%,#d9a20f);color:#14240f;border-color:#fff}.chip small{opacity:.75;font-weight:600;font-style:normal;margin-left:4px}
 .modo{padding:4px 10px;font-size:12px}
 /* Tarjetas: cara de instrumento (fondo radial, borde cromado, reflejo arriba) */
@@ -191,12 +194,18 @@ let irVideo=null;   // lo pone el reproductor de video (si la carrera tiene vide
 if(lap<0){$('conRecorrido').innerHTML='<div class="card aviso">Esta carrera no tiene el recorrido grabado. Se graba con el GPS en las carreras corridas desde la versión 1.8 de Betómetro.</div>';}
 else{
 conT.forEach(i=>{const v=C.vueltas[i],b=document.createElement('button');b.className='chip';b.dataset.i=i;b.innerHTML=nombreV(v)+'<small>'+(v.interrumpida?'interrumpida':v.medida?'medida':'libre')+'</small>';b.onclick=()=>{lap=i;sel=null;dibujar()};$('vueltas').append(b)});
+if(conT.length>12)$('vueltas').classList.add('una');
 for(const k in MODOS){if(k==='ade'&&!C.distanciaM)continue;const b=document.createElement('button');b.className='chip modo';b.dataset.m=k;b.textContent=MODOS[k];b.onclick=()=>{modo=k;dibujar()};$('modos').append(b)}
 dibujar();}
+// En la fila que se desliza, la vuelta elegida queda a la vista (solo cuando cambia de vuelta)
+var lapVisto=-1;   // var: dibujar() se llama antes de esta línea
+function verChip(){const F=$('vueltas'),b=F.querySelector('.chip.on');if(!F.classList.contains('una')||!b||lapVisto===lap)return;
+  lapVisto=lap;F.scrollLeft=b.offsetLeft-F.offsetLeft-(F.clientWidth-b.offsetWidth)/2}
 function X(d,W){return 30+(W-36)*d/C.vueltas[lap].L}
 function dibujar(){
   const V=C.vueltas[lap],M=V.m,err=V.difMs;
   document.querySelectorAll('#vueltas .chip').forEach(b=>b.classList.toggle('on',+b.dataset.i===lap));
+  verChip();
   document.querySelectorAll('#modos .chip').forEach(b=>b.classList.toggle('on',b.dataset.m===modo));
   document.querySelectorAll('#tabla tr[data-i]').forEach(r=>r.classList.toggle('sel',+r.dataset.i===lap));
   const ok=M.filter(p=>p[7]),vs=ok.map(p=>p[2]),as=ok.map(p=>p[3]);
@@ -326,9 +335,13 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
  const hms=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
  const duracion=()=>{if(isFinite(vv.duration)&&vv.duration>0)return vv.duration*1000;const l=lps[lps.length-1];return l===undefined?0:C.vueltas[l].videoMs+C.vueltas[l].realMs};
  // ---- rayitas de las vueltas en la línea ----
+ // con muchas vueltas, una rayita cada 2, 5 o 10 (que no se peguen ni tapen la línea)
  function rayas(){const L=$('vLinea'),d=duracion();L.querySelectorAll('.raya').forEach(e=>e.remove());if(!d)return;
-  lps.forEach(i=>{const ms=C.vueltas[i].videoMs;if(ms<0||ms>d)return;const e=document.createElement('div');e.className='raya';e.style.left=ms/d*100+'%';e.title=nombreV(C.vueltas[i]);
+  const n=lps.length,sep=n>1?L.clientWidth*(C.vueltas[lps[n-1]].videoMs-C.vueltas[lps[0]].videoMs)/(n-1)/d:1e9,
+   paso=[1,2,5,10,20].find(p=>sep*p>=30)||Math.ceil(30/Math.max(sep,.01));
+  lps.forEach((i,k)=>{if(k%paso)return;const ms=C.vueltas[i].videoMs;if(ms<0||ms>d)return;const e=document.createElement('div');e.className='raya';e.style.left=ms/d*100+'%';e.title=nombreV(C.vueltas[i]);
    e.addEventListener('pointerdown',ev=>{ev.stopPropagation();ir(ms)});L.append(e)});$('vTot').textContent=hms(d)}
+ if(window.ResizeObserver){let anchoL=0;new ResizeObserver(()=>{const w=$('vLinea').clientWidth;if(w&&Math.abs(w-anchoL)>2){anchoL=w;rayas()}}).observe($('vLinea'))}
  const ir=ms=>{const d=duracion();vv.currentTime=Math.max(0,Math.min(d?d/1000-0.05:1e9,ms/1000));actualizar()};
  (()=>{const L=$('vLinea');let tomado=false;const a=ev=>{const r=L.getBoundingClientRect();ir(Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width))*duracion())};
   L.addEventListener('pointerdown',ev=>{tomado=true;L.setPointerCapture(ev.pointerId);a(ev)});L.addEventListener('pointermove',ev=>{if(tomado)a(ev)});

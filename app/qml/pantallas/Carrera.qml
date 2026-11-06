@@ -28,6 +28,8 @@ Item {
     Component.onCompleted: {
         if (!Crono.enCurso) Crono.preparar(Navegacion.parametros.practica ? "" : (Navegacion.parametros.id || ""));
         if (Contexto.prueba === "largar") Crono.marcar("pantalla");
+        if (Contexto.prueba === "largar-60")   // solo para capturas: 59 vueltas cerradas, va por la 60
+            for (let i = 60; i > 0; i--) Crono.marcar("pantalla", i * 4000);
         forceActiveFocus();
     }
     Keys.onPressed: e => {   // teclado USB: Enter, espacio o F9 (como la app)

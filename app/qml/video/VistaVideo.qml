@@ -321,7 +321,7 @@ Item {
             Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 8 * barra.b; radius: height / 2; color: Qt.rgba(1, 1, 1, 0.2) }
             Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * linea.f; height: 8 * barra.b; radius: height / 2; color: Tema.acento }
             Repeater {
-                model: vista.rep.tramosVideo
+                model: vista.rep.rayitas(linea.width)
                 Rectangle {
                     required property var modelData
                     visible: modelData.desde >= 0 && modelData.desde <= vista.rep.total

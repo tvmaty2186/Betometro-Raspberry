@@ -354,6 +354,14 @@ Item {
             id: tabla
             anchors { fill: parent; topMargin: barraUnir.visible ? 90 : 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
             contentHeight: colT.height; clip: true; boundsBehavior: Flickable.StopAtBounds
+            // Con muchas vueltas, la vuelta elegida (o la del video) queda a la vista
+            function verFila(i) {
+                if (i < 0 || moving) return;
+                if (i * 40 < contentY) contentY = i * 40;
+                else if (i * 40 + 40 > contentY + height) contentY = Math.min(contentHeight - height, i * 40 + 40 - height);
+            }
+            onContentHeightChanged: verFila(raiz.lap)
+            Connections { target: raiz; function onLapChanged() { tabla.verFila(raiz.lap); } }
             Column {
                 id: colT; width: tabla.width
                 Repeater {
@@ -522,23 +530,30 @@ Item {
         id: tPruebaPulsador; interval: 600
         onTriggered: { reproductor.pulsador(); reproductor.pulsador(); }
     }
+    Timer {   // solo para capturas: en la tele el video carga después; se vuelve a pedir la vuelta
+        id: tPruebaTele; interval: 1500
+        onTriggered: reproductor.irA(raiz.lap, raiz.vueltas.length > 20 ? 5 : 134.6)
+    }
     Component.onCompleted: {   // solo para capturas
+        // con muchas vueltas (BETO_MUESTRA_LARGA), una de las últimas
+        const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
         else if (Contexto.prueba === "menu") menuAbierto = true;
         else if (Contexto.prueba === "tele-reiniciar") verEnTele();
         else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos, tele-qr, tele-carreras, tele-remoto (con dos pantallas)
-            if (conTraza.indexOf(2) >= 0) lap = 2;
+            if (conTraza.indexOf(lapP) >= 0) lap = lapP;
             verEnTele();
-            reproductor.irA(lap, 134.6);
+            reproductor.irA(lap, tP);
             control.verDatos = Contexto.prueba === "tele-datos";
             control.verCelu = Contexto.prueba === "tele-qr";
             control.verCarreras = Contexto.prueba === "tele-carreras";
+            if (vueltas.length > 20) tPruebaTele.start();
         }
         else if (Contexto.prueba.indexOf("video") === 0) {   // video, video-completo, video-andando, video-datos, video-mover
             verVideo = true;
-            if (conTraza.indexOf(2) >= 0) lap = 2;
-            reproductor.irA(lap, 134.6);
+            if (conTraza.indexOf(lapP) >= 0) lap = lapP;
+            reproductor.irA(lap, tP);
             completo = Contexto.prueba !== "video" && Contexto.prueba !== "video-pulsador";
             reproductor.editando = Contexto.prueba === "video-datos" || Contexto.prueba === "video-mover";
             if (Contexto.prueba === "video-mover") tPruebaMover.start();

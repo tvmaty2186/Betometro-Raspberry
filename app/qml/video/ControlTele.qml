@@ -86,6 +86,15 @@ Item {
         x: c.m; y: eVuelta.y + 36; width: c.width - 2 * c.m; height: 104
         contentWidth: filaV.width; clip: true; boundsBehavior: Flickable.StopAtBounds
         flickableDirection: Flickable.HorizontalFlick
+        // Con muchas vueltas, la de ahora queda a la vista (salvo que recién la hayan deslizado)
+        property real tocada: 0
+        onMovementEnded: tocada = Date.now()
+        function centrar() {
+            if (!c.rep || c.rep.lapAhora < 0 || moving || Date.now() - tocada < 4000) return;
+            contentX = Math.max(0, Math.min(contentWidth - width, c.rep.lapAhora * 158 + 71 - width / 2));
+        }
+        onContentWidthChanged: centrar()
+        Connections { target: c.rep; function onLapAhoraChanged() { fVueltas.centrar(); } }
         Row {
             id: filaV
             spacing: 16; y: 2
@@ -161,7 +170,7 @@ Item {
         Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 20; radius: 10; color: Qt.rgba(1, 1, 1, 0.2) }
         Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * linea.f; height: 20; radius: 10; color: Tema.acento }
         Repeater {
-            model: c.rep ? c.rep.tramosVideo : []
+            model: c.rep ? c.rep.rayitas(linea.width) : []
             Rectangle {
                 required property var modelData
                 visible: modelData.desde > 0 && modelData.desde <= c.rep.total
@@ -345,10 +354,15 @@ Item {
                     Text { width: parent.width; elide: Text.ElideRight; text: fc.modelData.nombre
                            color: fc.yo ? Tema.acentoTinta : Tema.tinta
                            font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 30 } }
-                    Text { width: parent.width; elide: Text.ElideRight
-                           text: fc.modelData.fecha + " · " + fc.modelData.vueltas + " vueltas" + (fc.modelData.videos > 1 ? " · " + fc.modelData.videos + " videos" : "")
-                           color: fc.yo ? Tema.acentoTinta : Tema.tintaSuave
-                           font { family: Tema.fuente600; pixelSize: 21 } }
+                    Row {   // si no entra, se acorta la fecha: las vueltas siempre a la vista
+                        width: parent.width
+                        Text { width: Math.min(implicitWidth, parent.width - tCant.implicitWidth); elide: Text.ElideRight
+                               text: fc.modelData.fecha; color: tCant.color; font: tCant.font }
+                        Text { id: tCant
+                               text: " · " + fc.modelData.vueltas + " vueltas" + (fc.modelData.videos > 1 ? " · " + fc.modelData.videos + " videos" : "")
+                               color: fc.yo ? Tema.acentoTinta : Tema.tintaSuave
+                               font { family: Tema.fuente600; pixelSize: 21 } }
+                    }
                 }
                 Etiq { id: tYa; visible: fc.yo; anchors { right: parent.right; rightMargin: 24; verticalCenter: parent.verticalCenter }
                        text: "En la tele"; color: Tema.acentoTinta; font.pixelSize: 18 }

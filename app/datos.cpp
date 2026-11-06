@@ -588,6 +588,28 @@ void Datos::cargarMuestra() {
         l.agregar(std::move(v));
         base_.carreras[base_.carreras.size() - 2].extra["videos"] = l;
     }
+    // Solo para probar pantallas con muchas vueltas (BETO_MUESTRA_LARGA=1): una carrera de 60 vueltas
+    // y una práctica de 40, cortitas para que el video de muestra alcance a todas
+    if (qEnvironmentVariableIntValue("BETO_MUESTRA_LARGA") == 1) {
+        std::vector<int> e60, e40;
+        for (int i = 0; i < 60; ++i) e60.push_back(((i * 37) % 23 - 11) * 130);
+        for (int i = 0; i < 40; ++i) e40.push_back(((i * 53) % 19 - 9) * 210);
+        const bool hayVideo = QFile::exists(carpeta_ + QStringLiteral("/videos/muestra.mkv"));
+        auto conVideo = [&](int64_t desde) {
+            if (!hayVideo) return;
+            Json v = Json::objeto();
+            v["archivo"] = std::string("muestra.mkv");
+            v["largada"] = static_cast<int64_t>(1);
+            v["desdeLargadaMs"] = desde;
+            v["girar"] = false;
+            base_.carreras.back().extra["videos"] = Json::lista();
+            base_.carreras.back().extra["videos"].agregar(std::move(v));
+        };
+        agregar("Rosario Nocturno", h.addDays(-3), 60, 17000, 400, "alt1", e60);
+        conVideo(3000);
+        agregar("Práctica larga", h.addDays(-2), 40, 25000, 600, "todas", e40, true);
+        conVideo(3590000);   // el video empezó una hora antes: horas en «▸ 1:00:10»
+    }
     cfg_ = armarConfig(base_.config);
     emit carrerasChanged();
 }
