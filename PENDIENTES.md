@@ -91,8 +91,9 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
   en la Pi): busca redes de nuevo antes de decidir, botón «Armar la red propia ahora», el motivo si falla
   (en Conectividad), paquetes `dnsmasq-base` e `iw`, chip amarillo en la barra con los celus conectados.
-- **Video de 20 min con la imagen rota:** falta saber si es la grabación (cuadros JPEG cortados de la webcam) o la
-  Pi al mostrarlo. Prueba: verlo en el celu.
+- **Video con la imagen rota (resuelto):** era 1080p a 30 cuadros, la Pi 3 no llegaba. En 720p y 480p salió
+  limpio (Matías, 06/11). Desde la 1.0.23: 1080p a 15 cuadros, cuadros cortados salteados y contados en el
+  reporte. Recomendado para carrera: 720p.
 - Hecho hasta la 1.0.22 (06/11/2026): video en el informe (Pi, celu, tele), modo tele con el celu de control y
   carreras como capítulos, Drive, MP4, 480p, GPS quieto, todas las pantallas grandes.
 - Probado por Matías (06/11/2026), todo bien: corriente y calor (convertidor y disipador), pulsador real,
