@@ -5,7 +5,6 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | Archivo | Qué tiene |
 |---|---|
 | [docs/raspios.md](docs/raspios.md) | **Cómo está hecho hoy**: Raspberry Pi OS, instalador, servicios, cómo se publica una versión, actualización, errores ya vistos |
-| [docs/raspios.md](docs/raspios.md) | **Leer primero:** cómo está hecho hoy (Raspberry Pi OS), cómo se publica una versión, cómo probar y errores que ya pasaron |
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
@@ -70,7 +69,7 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 
 ## Versiones y publicación
 
-Última publicada: **1.0.23** (06/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
+Última publicada: **1.0.24** (06/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
 
 ## Compilar y probar
 

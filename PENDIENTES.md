@@ -94,6 +94,7 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 - **Video con la imagen rota (resuelto):** era 1080p a 30 cuadros, la Pi 3 no llegaba. En 720p y 480p salió
   limpio (Matías, 06/11). Desde la 1.0.24 **no hay 1080p** (Matías: rompía muchas imágenes): solo 480p y 720p.
   Si estaba en 1080p pasa solo a 720p.
+- **1.0.24 publicada (06/11/2026).** Falta que Matías la pruebe en la Pi.
 - **Menú del engranaje del video (1.0.24, sin probar en la Pi):** las llaves no cambiaban y los datos volvían a
   su lugar al soltarlos. Causa: una versión anterior había guardado «videoDatos» como el texto «[object Object]»
   y quedaba así. Ahora si no es un objeto se arranca de cero (probado acá con ese dato roto: anda).
