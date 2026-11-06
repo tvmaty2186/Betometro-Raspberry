@@ -46,10 +46,7 @@ Item {
         width: raiz.h ? 770 - x : 330
         spacing: 10
         layoutDirection: raiz.h ? Qt.LeftToRight : Qt.RightToLeft
-        // Más grande, con el punto verde si anda y rojo si no (Matías, 04/11/2026: no se llegaba a leer).
-        // El de wifi se sacó (05/11): con nombres largos no entraba, y ya está el ícono de abanico arriba.
-        Chip { tam: 20; punto: Crono.gps.ok ? Tema.bien : Tema.alerta
-               texto: !Crono.gps.ok ? "Sin GPS" : Crono.gps.satelites ? "GPS " + Crono.gps.satelites + " satélites" : "GPS " + Crono.gps.hz + " Hz" }
+        // El del GPS se sacó (06/11/2026): ya está en la barra de arriba. Queda solo el aviso de tensión o calor.
         Chip {   // tensión baja o calor (Salud): solo si pasa
             tam: 20
             visible: Salud.tensionBaja || Salud.calor
