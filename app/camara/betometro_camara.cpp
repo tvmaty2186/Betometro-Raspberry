@@ -33,6 +33,10 @@ namespace {
 GMainLoop* bucle = nullptr;
 GstElement* tubo = nullptr;
 bool primerVisto = false;
+// Cuadros de la webcam (MJPEG): cuántos llegaron y cuántos llegaron cortados (se saltean, no se graban rotos)
+long cuadrosTotal = 0, cuadrosMalos = 0, avisosJpeg = 0;
+std::string formatoGrabar;
+gboolean alContar(gpointer);   // más abajo
 std::string salidaVista;
 int segundosProbar = 0;
 
@@ -66,6 +70,7 @@ gboolean alSenal(gpointer) {
 gboolean alBus(GstBus*, GstMessage* m, gpointer) {
     switch (GST_MESSAGE_TYPE(m)) {
         case GST_MESSAGE_EOS:
+            if (cuadrosTotal) alContar(nullptr);
             decir("{\"fin\":true}");
             g_main_loop_quit(bucle);
             break;
@@ -75,6 +80,11 @@ gboolean alBus(GstBus*, GstMessage* m, gpointer) {
             decir(std::string("{\"error\":\"") + escapar(e ? e->message : "?") + "\"}");
             if (e) g_error_free(e);
             g_main_loop_quit(bucle);
+            break;
+        }
+        case GST_MESSAGE_WARNING: {
+            // jpegdec avisa cuando una foto viene dañada por dentro (aunque tenga principio y fin)
+            ++avisosJpeg;
             break;
         }
         case GST_MESSAGE_ELEMENT: {
@@ -122,6 +132,35 @@ GstPadProbeReturn alCuadro(GstPad*, GstPadProbeInfo* info, gpointer) {
     std::snprintf(t, sizeof t, "{\"primerCuadro\":%.1f}", ms);
     decir(t);
     return GST_PAD_PROBE_REMOVE;
+}
+
+// Webcam MJPEG: cada foto tiene que empezar con FFD8 y terminar con FFD9 (a veces con ceros después).
+// Si llegó cortada se saltea: queda un cuadro menos en vez de una imagen rota (Matías, 06/11/2026: «la
+// imagen se rompe» al grabar). Se cuenta para el reporte.
+GstPadProbeReturn alFotoCamara(GstPad*, GstPadProbeInfo* info, gpointer) {
+    GstBuffer* b = GST_PAD_PROBE_INFO_BUFFER(info);
+    if (!b) return GST_PAD_PROBE_OK;
+    ++cuadrosTotal;
+    GstMapInfo m;
+    if (!gst_buffer_map(b, &m, GST_MAP_READ)) return GST_PAD_PROBE_OK;
+    bool bien = m.size > 4 && m.data[0] == 0xFF && m.data[1] == 0xD8;
+    if (bien) {
+        bien = false;
+        const gsize desde = m.size > 512 ? m.size - 512 : 0;
+        for (gsize i = m.size - 1; i > desde; --i)
+            if (m.data[i - 1] == 0xFF && m.data[i] == 0xD9) { bien = true; break; }
+    }
+    gst_buffer_unmap(b, &m);
+    if (bien) return GST_PAD_PROBE_OK;
+    ++cuadrosMalos;
+    return GST_PAD_PROBE_DROP;
+}
+
+gboolean alContar(gpointer) {
+    char t[160];
+    std::snprintf(t, sizeof t, "{\"cuadros\":%ld,\"cortados\":%ld,\"avisosJpeg\":%ld}", cuadrosTotal, cuadrosMalos, avisosJpeg);
+    decir(t);
+    return G_SOURCE_CONTINUE;
 }
 
 // Vista: cada foto se escribe aparte y se renombra (la pantalla nunca lee una a medias)
@@ -215,6 +254,7 @@ int main(int argc, char** argv) {
     if (modo == "grabar") {
         if (salida.empty()) return 2;
         const std::string formato = arg(argc, argv, "--formato", "h264");
+        formatoGrabar = formato;
         const std::string escala = arg(argc, argv, "--escala", "");
         std::string fuente;
         if (prueba)
@@ -222,7 +262,11 @@ int main(int argc, char** argv) {
                      + (escala.find('x') != std::string::npos ? " ! videoscale ! video/x-raw,width=" + escala.substr(0, escala.find('x')) + ",height=" + escala.substr(escala.find('x') + 1) : std::string())
                      + " ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30";
         else if (formato == "mjpeg")
-            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1 ! " + compresorMjpeg(escala, alto);
+            // 1080p: la Pi 3 no llega a descomprimir y comprimir 30 por segundo y el video salía con cuadros
+            // dañados; se graban 15 (se tiran antes de descomprimir). 720p y menos: 30.
+            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1"
+                     + (alto > 720 && escala.empty() ? " ! videorate drop-only=true ! image/jpeg,framerate=15/1" : "")
+                     + " ! " + compresorMjpeg(escala, alto);
         else
             fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
         desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=3000000000 ! "
@@ -278,9 +322,11 @@ int main(int argc, char** argv) {
         if (GstElement* c = gst_bin_get_by_name(GST_BIN(tubo), "fuente")) {
             GstPad* p = gst_element_get_static_pad(c, "src");
             gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alCuadro, nullptr, nullptr);
+            if (formatoGrabar == "mjpeg" && !prueba) gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alFotoCamara, nullptr, nullptr);
             gst_object_unref(p);
             gst_object_unref(c);
         }
+        g_timeout_add_seconds(30, alContar, nullptr);
     } else if (modo == "vista") {
         if (GstElement* s = gst_bin_get_by_name(GST_BIN(tubo), "fotos")) {
             g_signal_connect(s, "new-sample", G_CALLBACK(alFoto), nullptr);

@@ -105,4 +105,5 @@ private:
     int fotos_ = 0;
     double nivel_ = 0, primerCuadro_ = 0;
     QVariantMap lugar_;
+    QVariantMap cuadros_;                     // conteo de cuadros de la grabación (cortados, dañados)
 };

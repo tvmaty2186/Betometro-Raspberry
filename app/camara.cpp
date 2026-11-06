@@ -100,6 +100,15 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
             emit primerCuadroListo(primerCuadro_);
         }
         if (m.contains("error")) { falla_ = m.value("error").toString(); emit grabandoChanged(); }
+        if (m.contains("cuadros")) cuadros_ = m;   // el último conteo (cada 30 s y al terminar)
+    });
+    // Al terminar de grabar: si la webcam mandó cuadros cortados o dañados, queda en el reporte
+    connect(&grab_, &QProcess::finished, this, [this] {
+        const qlonglong n = cuadros_.value("cuadros").toLongLong(), malos = cuadros_.value("cortados").toLongLong(),
+                        danados = cuadros_.value("avisosJpeg").toLongLong();
+        if (n > 0 && (malos > 0 || danados > 0))
+            qWarning("Cámara: de %lld cuadros, %lld llegaron cortados (salteados) y %lld con daños", n, malos, danados);
+        cuadros_.clear();
     });
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
         if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
