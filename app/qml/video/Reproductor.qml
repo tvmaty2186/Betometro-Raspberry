@@ -114,6 +114,7 @@ Item {
         id: player
         source: rep.activo ? rep.url : ""
         videoOutput: rep.enTele ? Tele.salida : vista.salida
+        sonidoTele: rep.enTele   // en la tele, el sonido también por el HDMI
         onMediaStatusChanged: {
             if ((mediaStatus === MediaPlayer.LoadedMedia || mediaStatus === MediaPlayer.BufferedMedia) && rep.pendiente >= 0) {
                 if (playbackState === MediaPlayer.StoppedState) pause();   // muestra el cuadro aunque no ande

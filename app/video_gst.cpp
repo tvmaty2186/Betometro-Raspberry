@@ -114,6 +114,51 @@ GstPadProbeReturn alCaps(GstPad*, GstPadProbeInfo* info, gpointer yo) {
 }
 }  // namespace
 
+namespace {
+// La salida de sonido del HDMI (la tele), si el sistema la tiene: en la Pi 3 la placa «vc4hdmi»
+// (por PulseAudio o directo). Si no hay, nullptr (queda la de siempre).
+GstElement* salidaHdmi() {
+    GstDeviceMonitor* m = gst_device_monitor_new();
+    gst_device_monitor_add_filter(m, "Audio/Sink", nullptr);
+    GstElement* r = nullptr;
+    if (gst_device_monitor_start(m)) {
+        GList* lista = gst_device_monitor_get_devices(m);
+        for (GList* l = lista; l && !r; l = l->next) {
+            GstDevice* d = GST_DEVICE(l->data);
+            gchar* nombre = gst_device_get_display_name(d);
+            GstStructure* p = gst_device_get_properties(d);
+            gchar* props = p ? gst_structure_to_string(p) : nullptr;
+            const QString texto = (QString::fromUtf8(nombre ? nombre : "") + QLatin1Char(' ') + QString::fromUtf8(props ? props : "")).toLower();
+            g_free(props);
+            if (texto.contains(QLatin1String("hdmi"))) {
+                r = gst_device_create_element(d, nullptr);
+                qWarning("Video: sonido por %s", nombre ? nombre : "HDMI");
+            }
+            if (p) gst_structure_free(p);
+            g_free(nombre);
+        }
+        g_list_free_full(lista, gst_object_unref);
+        gst_device_monitor_stop(m);
+    }
+    gst_object_unref(m);
+    return r;
+}
+}  // namespace
+
+void VideoGst::setSonidoTele(bool si) {
+    if (si == sonidoTele_) return;
+    sonidoTele_ = si;
+    emit sonidoTeleChanged();
+    if (!tubo_) return;
+    // Cambiar la salida: se vuelve a abrir en el mismo lugar (un instante)
+    const qint64 pos = posicion_;
+    const bool andaba = estado_ == Andando;
+    cerrar();
+    abrir();
+    setPosition(pos);
+    if (andaba) play(); else pause();
+}
+
 void VideoGst::abrir() {
     const QString ruta = source_.toLocalFile();
     QFile a(ruta);
@@ -141,7 +186,8 @@ void VideoGst::abrir() {
     QString desc = QStringLiteral("filesrc name=archivo ! %1 name=d d.video_0 ! queue ! h264parse name=parser ! %2 ! videoconvert ! "
                                   "appsink name=imagen")
                        .arg(mp4 ? QStringLiteral("qtdemux") : QStringLiteral("matroskademux"), dec);
-    if (sonido) desc += QStringLiteral(" d.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink");
+    // La salida de sonido se agrega después (la de la Pi o, en modo tele, la del HDMI)
+    if (sonido) desc += QStringLiteral(" d.audio_0 ! queue ! decodebin ! audioconvert ! audioresample name=antesSonido");
     GError* e = nullptr;
     tubo_ = gst_parse_launch(desc.toUtf8().constData(), &e);
     if (!tubo_ || e) {
@@ -151,6 +197,12 @@ void VideoGst::abrir() {
         emit errorOccurred(1, QStringLiteral("Video: ") + texto);
         ponerMedio(Invalido);
         return;
+    }
+    if (GstElement* antes = gst_bin_get_by_name(GST_BIN(tubo_), "antesSonido")) {
+        GstElement* salida = sonidoTele_ ? salidaHdmi() : nullptr;
+        if (!salida) salida = gst_element_factory_make("autoaudiosink", nullptr);
+        if (salida) { gst_bin_add(GST_BIN(tubo_), salida); gst_element_link(antes, salida); }
+        gst_object_unref(antes);
     }
     if (GstElement* f = gst_bin_get_by_name(GST_BIN(tubo_), "archivo")) {
         g_object_set(f, "location", QFile::encodeName(ruta).constData(), nullptr);

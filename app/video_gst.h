@@ -31,6 +31,8 @@ class VideoGst : public QObject {
     Q_PROPERTY(int playbackState READ playbackState NOTIFY playbackStateChanged)   // 0 parado, 1 andando, 2 en pausa
     Q_PROPERTY(int mediaStatus READ mediaStatus NOTIFY mediaStatusChanged)         // los de MediaPlayer
     Q_PROPERTY(QString descompresor READ descompresor NOTIFY descompresorChanged)   // «v4l2h264dec» = el chip
+    // Modo tele: el sonido por el HDMI (la tele) en vez de la salida de la Pi
+    Q_PROPERTY(bool sonidoTele READ sonidoTele WRITE setSonidoTele NOTIFY sonidoTeleChanged)
 
 public:
     // Los mismos números que MediaPlayer (así el QML compara con MediaPlayer.LoadedMedia, etc.)
@@ -44,6 +46,8 @@ public:
     void setSource(const QUrl& url);
     QObject* videoOutput() const { return salida_; }
     void setVideoOutput(QObject* o);
+    bool sonidoTele() const { return sonidoTele_; }
+    void setSonidoTele(bool si);
     qint64 position() const { return posicion_; }
     void setPosition(qint64 ms);
     qint64 duration() const { return duracion_; }
@@ -71,6 +75,7 @@ signals:
     void playbackStateChanged();
     void mediaStatusChanged();
     void descompresorChanged();
+    void sonidoTeleChanged();
     void errorOccurred(int error, const QString& errorString);
 
 private:
@@ -91,7 +96,7 @@ private:
     QTimer bus_, reloj_;
     qint64 posicion_ = 0, duracion_ = 0, buscando_ = -1;
     int estado_ = Parado, medio_ = SinMedio;
-    bool listo_ = false, quiereAndar_ = false;
+    bool listo_ = false, quiereAndar_ = false, sonidoTele_ = false;
     QString descompresor_;
     std::atomic<bool> rangoCompleto_{false};
 };
