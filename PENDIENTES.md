@@ -88,15 +88,17 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 **Programado completo (1.0.16):** se prende en Ajustes → Pantalla y tema → «Modo Tablet».
 
 ## Siguiente
+- Hecho hasta la 1.0.22 (06/11/2026): video en el informe (Pi, celu, tele), modo tele con el celu de control y
+  carreras como capítulos, Drive, MP4, 480p, GPS quieto, todas las pantallas grandes.
+- La Pi marcó falta de corriente y freno por calor (throttled=0xd0000, 06/11): fuente oficial 5,1 V 2,5 A con cable
+  corto y un disipador o ventilador. En el auto, el convertidor 12 → 5 V de la lista de compras.
 - Probar en el auto: GPS, pulsador, letras en movimiento, rendimiento y temperatura de la Pi 3.
 - Solo lectura total (overlay): necesita regrabar la tarjeta con una partición aparte para las carreras.
   Por ahora: casi nada se escribe en la tarjeta, las carreras se guardan de forma segura y se repara sola al prender.
 
 ## Más adelante
-- Video: informe con video, webcam MJPEG ([docs/video.md](docs/video.md)).
 - Bluetooth (si el GPS va por USB queda libre): música desde el celular por los auriculares con la voz arriba;
   pulsador Bluetooth solo como respaldo (los botones baratos se duermen y llegan tarde). Charlado, no decidido.
-- Ver las carreras en la tele por HDMI («modo tele»: informe y video en la tele, se maneja desde la pantalla de 5"). Mientras tanto: la página «Betómetro en la red» desde el navegador de la tele.
 - E6: prueba en pista y versión 1.0.0 definitiva.
 - App del celular: el prompt está en [docs/prompt-app.md](docs/prompt-app.md) (se hace en otra sesión).
 
