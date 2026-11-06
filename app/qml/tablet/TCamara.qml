@@ -87,7 +87,7 @@ TPantalla {
                  dato: ({ abrir: "Al abrir", largada: "En la largada", mano: "A mano" })[raiz.a.camaraInicio || "abrir"]
                  onTocado: raiz.poner("camaraInicio", raiz.siguiente(["abrir", "largada", "mano"], raiz.a.camaraInicio || "abrir")) }
         TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "pantalla"; nombre: "Calidad"; dato: raiz.a.camaraCalidad || "720p"
-                 onTocado: raiz.poner("camaraCalidad", (raiz.a.camaraCalidad || "720p") === "720p" ? "1080p" : "720p") }
+                 onTocado: { const c = raiz.a.camaraCalidad || "720p"; raiz.poner("camaraCalidad", c === "480p" ? "720p" : c === "720p" ? "1080p" : "480p"); } }
         TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "mic"; nombre: "Sonido"
                  dato: ({ camara: "De la cámara", usb: "Micrófono USB", no: "Sin sonido" })[raiz.a.camaraSonido || "camara"]
                  onTocado: { raiz.poner("camaraSonido", raiz.siguiente(["camara", "usb", "no"], raiz.a.camaraSonido || "camara")); Camara.pararNivel(); Camara.empezarNivel(); } }

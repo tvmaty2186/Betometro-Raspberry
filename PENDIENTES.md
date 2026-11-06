@@ -73,6 +73,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
 - Modo tele por HDMI (`raspios/kms.json`; DSI-1 y HDMI-A-1 confirmados en la Pi). Sin enchufe en caliente: botón Reiniciar.
 - Pulsador = play/pausa mientras se ve un video.
 - Video en MP4 automático al terminar de grabar (lo abre el iPhone); nunca en carrera.
+- Calidad de grabación: 480p, 720p o 1080p. En 480p, si la cámara no lo da, se toma en 720p y se achica (solo webcams MJPEG).
 - Google Drive: informes y videos (estos solo con la wifi elegida). Ver [docs/google-drive.md](docs/google-drive.md).
 - Falta probar en la Pi: video en la pantalla (velocidad de la Pi 3), la tele, Drive con Google de verdad, celular.
 

@@ -271,7 +271,7 @@ Json configFabrica() {
     c["camara"] = false;              // de fábrica apagada: se prende al instalarla
     c["camaraInicio"] = "abrir";      // abrir (al abrir la pantalla de carrera), largada, mano (botón REC)
     c["camaraFinS"] = 10;             // segundos de más después de «Terminar»
-    c["camaraCalidad"] = "720p";      // 720p, 1080p
+    c["camaraCalidad"] = "720p";      // 480p, 720p, 1080p
     c["camaraSonido"] = "camara";     // camara (micrófono de la cámara), usb (micrófono USB), no
     c["camaraGirar"] = false;         // girar 180° (cámara dada vuelta en el techo)
     c["camaraEspejo"] = false;        // espejo: dar vuelta izquierda y derecha
@@ -339,7 +339,7 @@ Json armarConfig(const Json& guardado) {
     boolEn(c, def, "camara");
     opcionEn(c, def, "camaraInicio", {"abrir", "largada", "mano"});
     numeroEn(c, def, "camaraFinS", 0, 120);
-    opcionEn(c, def, "camaraCalidad", {"720p", "1080p"});
+    opcionEn(c, def, "camaraCalidad", {"480p", "720p", "1080p"});
     opcionEn(c, def, "camaraSonido", {"camara", "usb", "no"});
     boolEn(c, def, "camaraGirar");
     boolEn(c, def, "camaraEspejo");

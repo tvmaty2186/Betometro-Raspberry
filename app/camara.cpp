@@ -22,10 +22,10 @@
 #endif
 
 namespace {
-constexpr double kMBporHora = 2048;   // 720p H.264 + sonido: unos 2 GB por hora
+constexpr double kMBporHora = 2048;   // 720p H.264 + sonido: unos 2 GB por hora (480p la mitad)
 constexpr qint64 kMinimoLibre = 2LL * 1024 * 1024 * 1024;   // con menos de 2 GB libres se hace lugar
 
-struct Dispositivo { QString ruta, nombre; bool h264 = false, mjpeg = false; };
+struct Dispositivo { QString ruta, nombre; bool h264 = false, mjpeg = false; QList<QSize> tamH264, tamMjpeg; };
 
 QList<Dispositivo> buscarCamaras() {
     QList<Dispositivo> r;
@@ -46,6 +46,12 @@ QList<Dispositivo> buscarCamaras() {
                 for (f.index = 0; ::ioctl(fd, VIDIOC_ENUM_FMT, &f) == 0; ++f.index) {
                     if (f.pixelformat == V4L2_PIX_FMT_H264) d.h264 = true;
                     if (f.pixelformat == V4L2_PIX_FMT_MJPEG) d.mjpeg = true;
+                    if (f.pixelformat != V4L2_PIX_FMT_H264 && f.pixelformat != V4L2_PIX_FMT_MJPEG) continue;
+                    // Tamaños que da en ese formato (para 480p: no todas lo tienen)
+                    v4l2_frmsizeenum t{};
+                    t.pixel_format = f.pixelformat;
+                    for (t.index = 0; ::ioctl(fd, VIDIOC_ENUM_FRAMESIZES, &t) == 0 && t.type == V4L2_FRMSIZE_TYPE_DISCRETE; ++t.index)
+                        (f.pixelformat == V4L2_PIX_FMT_H264 ? d.tamH264 : d.tamMjpeg) << QSize(int(t.discrete.width), int(t.discrete.height));
                 }
                 r << d;
             }
@@ -183,9 +189,9 @@ void Camara::detectar() {
         const auto cams = buscarCamaras();
         // Primero una que dé H.264 (no hay que comprimir); si no, una común con MJPEG: la Raspberry la
         // pasa a H.264 con su chip de video (05/11/2026, para la webcam genérica de Matías)
-        for (const auto& d : cams) if (d.h264) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("h264"); nombre_ = d.nombre + QStringLiteral(" · H.264 · lista"); break; }
+        for (const auto& d : cams) if (d.h264) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("h264"); tamanos_ = d.tamH264; nombre_ = d.nombre + QStringLiteral(" · H.264 · lista"); break; }
         if (dispVideo_.isEmpty())
-            for (const auto& d : cams) if (d.mjpeg) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("mjpeg"); nombre_ = d.nombre + QStringLiteral(" · MJPEG · lista"); break; }
+            for (const auto& d : cams) if (d.mjpeg) { dispVideo_ = d.ruta; formatoVideo_ = QStringLiteral("mjpeg"); tamanos_ = d.tamMjpeg; nombre_ = d.nombre + QStringLiteral(" · MJPEG · lista"); break; }
         if (dispVideo_.isEmpty()) {
             nombre_.clear();
             problema_ = cams.isEmpty() ? QStringLiteral("No se encontró la cámara")
@@ -261,11 +267,21 @@ bool Camara::empezar(const QString& nombreBase) {
     primerCuadro_ = 0;
     detenerTimer_.stop();
     archivo_ = carpeta_ + '/' + nombreBase + QStringLiteral(".mkv");
-    const bool hd = datos_->config()["camaraCalidad"].aTexto("720p") == "1080p";
+    const QString calidad = QString::fromStdString(datos_->config()["camaraCalidad"].aTexto("720p"));
+    QSize tam = calidad == QLatin1String("1080p") ? QSize(1920, 1080) : QSize(1280, 720);
+    QString escala;
+    if (calidad == QLatin1String("480p")) {
+        // 480p: si la cámara lo da, directo (16:9 primero, si no 4:3). Si no, una común (MJPEG) se toma en 720p y
+        // se achica antes de comprimir; una H.264 sin 480p graba en 720p (achicarla costaría mucho a la Pi).
+        tam = QSize(1280, 720);
+        for (const QSize& s : {QSize(848, 480), QSize(854, 480), QSize(640, 480)})
+            if (tamanos_.contains(s)) { tam = s; break; }
+        if (tam.height() != 480 && (formatoVideo_ == QLatin1String("mjpeg") || prueba_)) escala = QStringLiteral("848x480");
+    }
     QStringList a{QStringLiteral("grabar"), QStringLiteral("--video"), dispVideo_, QStringLiteral("--formato"), formatoVideo_,
-                  QStringLiteral("--ancho"), hd ? QStringLiteral("1920") : QStringLiteral("1280"),
-                  QStringLiteral("--alto"), hd ? QStringLiteral("1080") : QStringLiteral("720"),
+                  QStringLiteral("--ancho"), QString::number(tam.width()), QStringLiteral("--alto"), QString::number(tam.height()),
                   QStringLiteral("--audio"), dispositivoAudio(), QStringLiteral("--salida"), archivo_};
+    if (!escala.isEmpty()) a << QStringLiteral("--escala") << escala;
     // Prioridad baja de procesador y de disco: la carrera primero
     grab_.setProgram(QStringLiteral("nice"));
     grab_.setArguments(QStringList{QStringLiteral("-n"), QStringLiteral("15"), ayudante()} + a + base());
@@ -360,7 +376,7 @@ void Camara::actualizarLugar() {
     QStorageInfo d(carpeta_);
     const double libreMB = d.isValid() ? d.bytesAvailable() / 1048576.0 : 0;
     lugar_ = {{"usadoGB", QString::number(usado / 1073741824.0, 'f', 1).replace('.', ',')}, {"videos", n},
-              {"horas", qMax(0, qRound(libreMB / kMBporHora))},
+              {"horas", qMax(0, qRound(libreMB / (kMBporHora * (datos_->config()["camaraCalidad"].aTexto("720p") == "480p" ? 0.5 : 1.0))))},
               {"porcentaje", d.isValid() && d.bytesTotal() > 0 ? double(usado) / d.bytesTotal() : 0.0}};
     emit lugarChanged();
 }

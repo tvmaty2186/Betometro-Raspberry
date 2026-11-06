@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QProcess>
+#include <QSize>
 #include <QStringList>
 #include <QTimer>
 #include <QUrl>
@@ -92,6 +93,7 @@ private:
     QString carpeta_;                         // /datos/videos
     bool prueba_ = false;
     QString formatoVideo_ = QStringLiteral("h264");   // h264 o mjpeg (webcams comunes)
+    QList<QSize> tamanos_;                    // tamaños que da la cámara en ese formato
     QString dispVideo_, nombre_, problema_, falla_, archivo_, pruebaMic_;
     QVariantList microfonos_;
     QProcess grab_, vistaProc_, nivelProc_, micProc_, mp4_;

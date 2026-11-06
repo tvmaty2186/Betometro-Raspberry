@@ -2,7 +2,7 @@
 // Corre aparte y con prioridad baja: si algo se traba acá, la carrera sigue igual.
 // Habla con Betómetro por la salida estándar, una línea JSON por evento.
 //
-//   grabar   --video /dev/video0 --ancho 1280 --alto 720 [--audio hw:CARD=X|no] --salida f.mkv
+//   grabar   --video /dev/video0 --ancho 1280 --alto 720 [--escala 848x480] [--audio hw:CARD=X|no] --salida f.mkv
 //            La cámara ya entrega H.264: se guarda tal cual (no se vuelve a comprimir).
 //            Avisa {"primerCuadro": ms} con la hora monotónica del primer cuadro (para sincronizar).
 //            Termina ordenado con SIGINT/SIGTERM (cierra el archivo).
@@ -172,15 +172,23 @@ std::string fuenteAudio(const std::string& audio, bool prueba) {
 //   B) jpegdec ! videoconvert ! v4l2h264enc     → anda (2,5 MB en 5 s)   ← este
 //   C) v4l2jpegdec ! v4l2convert ! v4l2h264enc  → se traba (40 KB)
 // Si no está el compresor del chip, uno de software.
-std::string compresorMjpeg() {
+// `escala` ("848x480"): achicar antes de comprimir (480p con una cámara que no lo da). En 480p, menos bitrate.
+std::string compresorMjpeg(const std::string& escala, int alto) {
     auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };
-    std::string d = "jpegdec ! videoconvert ! video/x-raw,format=I420";
+    std::string d = "jpegdec ! videoconvert";
+    const auto x = escala.find('x');
+    if (x != std::string::npos) {
+        d += " ! videoscale ! video/x-raw,width=" + escala.substr(0, x) + ",height=" + escala.substr(x + 1);
+        alto = std::atoi(escala.substr(x + 1).c_str());
+    }
+    d += " ! video/x-raw,format=I420";
+    const int kbps = alto <= 480 ? 2000 : 4000;
     if (hay("v4l2h264enc"))
-        d += " ! v4l2h264enc extra-controls=controls,video_bitrate=4000000,repeat_sequence_header=1 ! video/x-h264,level=(string)4";
+        d += " ! v4l2h264enc extra-controls=controls,video_bitrate=" + std::to_string(kbps * 1000) + ",repeat_sequence_header=1 ! video/x-h264,level=(string)4";
     else if (hay("x264enc"))
-        d += " ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=4000 key-int-max=30";
+        d += " ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + std::to_string(kbps) + " key-int-max=30";
     else
-        d += " ! openh264enc bitrate=4000000";
+        d += " ! openh264enc bitrate=" + std::to_string(kbps * 1000);
     std::fprintf(stderr, "MJPEG: %s\n", d.c_str());
     return d;
 }
@@ -207,11 +215,14 @@ int main(int argc, char** argv) {
     if (modo == "grabar") {
         if (salida.empty()) return 2;
         const std::string formato = arg(argc, argv, "--formato", "h264");
+        const std::string escala = arg(argc, argv, "--escala", "");
         std::string fuente;
         if (prueba)
-            fuente = "videotestsrc name=fuente is-live=true pattern=ball ! video/x-raw," + tam + ",framerate=30/1 ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30";
+            fuente = "videotestsrc name=fuente is-live=true pattern=ball ! video/x-raw," + tam + ",framerate=30/1"
+                     + (escala.find('x') != std::string::npos ? " ! videoscale ! video/x-raw,width=" + escala.substr(0, escala.find('x')) + ",height=" + escala.substr(escala.find('x') + 1) : std::string())
+                     + " ! x264enc tune=zerolatency speed-preset=ultrafast key-int-max=30";
         else if (formato == "mjpeg")
-            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1 ! " + compresorMjpeg();
+            fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1 ! " + compresorMjpeg(escala, alto);
         else
             fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
         desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=3000000000 ! "
