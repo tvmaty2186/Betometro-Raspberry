@@ -131,6 +131,7 @@ public:
     QSize textureSize() const override { return tam_; }
     bool hasAlphaChannel() const override { return false; }
     bool hasMipmaps() const override { return false; }
+    bool sucio() const { return sucio_; }
 
     // Los datos tienen que seguir vivos hasta que se dibuje (los guarda el nodo, en `actual`)
     void poner(const uchar* datos, int ancho, int alto, int paso) {
@@ -249,6 +250,10 @@ public:
         actual_ = std::move(c);   // suelta el anterior: ya se dibujó (estamos en la sincronización siguiente)
         markDirty(QSGNode::DirtyMaterial);
     }
+    // Cuando ya subió, devuelve el cuadro al descompresor (en pausa no hace falta tenerlo: está en las texturas)
+    void soltarSiSubio() {
+        if (!mat_.plano[0].sucio() && !mat_.plano[1].sucio() && !mat_.plano[2].sucio()) actual_.reset();
+    }
     void ponerRect(const QRectF& r) {
         if (r == rect_) return;
         rect_ = r;
@@ -334,6 +339,9 @@ ImagenVideo::ImagenVideo(QQuickItem* padre) : QQuickItem(padre), sink_(new QVide
     setFlag(ItemHasContents, true);
     // El cuadro llega en el hilo del video: se guarda y listo (no traba ni al video ni a la pantalla)
     connect(sink_, &QVideoSink::videoFrameChanged, this, &ImagenVideo::alCuadro, Qt::DirectConnection);
+    soltar_.setSingleShot(true);
+    soltar_.setInterval(250);
+    connect(&soltar_, &QTimer::timeout, this, &QQuickItem::update);
     obrero_ = std::thread([this] { trabajar(); });
 }
 
@@ -407,6 +415,7 @@ void ImagenVideo::avisar() {
         avisando_ = false;
         if (!hayImagen_) { hayImagen_ = true; emit hayImagenChanged(); }
         update();
+        soltar_.start();   // si no llega otro (pausa), una vuelta más para devolver el cuadro
     }, Qt::QueuedConnection);
 }
 
@@ -494,6 +503,8 @@ QSGNode* ImagenVideo::updatePaintNode(QSGNode* viejo, UpdatePaintNodeData*) {
         tamVideo_ = QSizeF(chip->ancho, chip->alto);
         n->poner(std::move(chip));
         nodo = n;
+    } else if (auto* n = dynamic_cast<NodoYuv*>(viejo)) {
+        n->soltarSiSubio();   // ya se dibujó en la vuelta anterior
     }
 #endif
     if (!img.isNull()) {

@@ -96,11 +96,28 @@ Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la ca
 ## Reproducir con el chip de la Raspberry (06/11/2026)
 - El MediaPlayer de Qt (FFmpeg) descomprime con el procesador en la Pi. `app/video_gst.*` (QML `VideoGst`) usa
   GStreamer `playbin`, que elige `v4l2h264dec` (el descompresor de video de la Pi; se le sube la prioridad).
-- Mismos nombres y estados que MediaPlayer. La imagen va al `videoSink` de `ImagenVideo` (YUV → RGB en el procesador,
-  a la mitad si sobra tamaño). El sonido por PulseAudio (`gstreamer1.0-pulseaudio`).
+- Mismos nombres y estados que MediaPlayer. La imagen va directo a `ImagenVideo` (ver abajo). El sonido por
+  PulseAudio (`gstreamer1.0-pulseaudio`).
 - Si no está el chip (PC), GStreamer usa otro descompresor (`avdec_h264` o `openh264dec`).
 - **Probado en la Pi de Matías (06/11/2026):** el chip (`bcm2835-codec-decode`, /dev/video10) descomprimió 20 s de
   video en menos de 4 s, casi sin procesador. Pero no acepta la etiqueta de color de las webcams MJPEG
   (`colorimetry=1:4:0:0`, rango completo como JPEG): se queda esperando sin error. Por eso el tubo es
   `qtdemux ! h264parse ! capssetter colorimetry=bt601 ! v4l2h264dec ! appsink`, y ImagenVideo usa rango completo
   si la etiqueta original lo decía. `BETO_VIDEO_DEC=avdec_h264` para probar otro descompresor.
+
+## Colores del video por el chip gráfico (06/11/2026)
+- Antes: `ImagenVideo` pasaba cada cuadro YUV → RGB con el procesador, en el hilo del video (el tubo esperaba).
+  En la Pi, 720p a 30 cuadros: betometro al 133 % y trabas de 1 s.
+- Ahora (`app/imagen_video.*`, `app/shaders/yuv.*`):
+  - `VideoGst` le da el cuadro a `ImagenVideo::recibir()` sin copiar (el GstBuffer abierto). Se guarda solo el
+    último; el tubo nunca espera.
+  - Los tres planos (Y, U, V) suben como texturas de un canal (`RED_OR_ALPHA8` = `GL_ALPHA` en GLES 2, que la
+    Pi 3 tiene). NV12 se separa en U y V (dos canales no es seguro en GLES 2); el chip de la Pi da I420.
+  - Un programa propio pasa a colores (BT.601, rango de video o completo). Se arma con `qsb` en GLSL ES 100
+    (más 120/150, HLSL, MSL) y en variante «batchable» (sin esa, Qt Quick no arma el programa).
+  - Al arrancar se prueba armar el programa en el chip. Si falla, o con dibujo por software, o con
+    `BETO_VIDEO_CPU=1`: por el procesador, en un hilo aparte (como antes).
+  - El aviso «Video: colores por el chip gráfico / por el procesador» queda en el registro.
+- Compilar necesita `qt6-shadertools-dev` y `qt6-base-private-dev` (QRhi); el equipo no. Sin eso compila igual,
+  solo por el procesador.
+- Probar en la PC como en la Pi 3: `BETO_GLES2=1 QT_XCB_GL_INTEGRATION=xcb_egl MESA_GLES_VERSION_OVERRIDE=2.0`.

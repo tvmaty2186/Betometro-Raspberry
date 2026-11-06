@@ -14,6 +14,7 @@
 #include <QImage>
 #include <QMutex>
 #include <QQuickItem>
+#include <QTimer>
 #include <QVideoFrame>
 #include <QVideoSink>
 
@@ -89,6 +90,7 @@ private:
     std::atomic<int> maxTextura_{2048};
     std::atomic<bool> avisando_{false};
     bool hayImagen_ = false;
+    QTimer soltar_;
     std::atomic<int> anchoLugar_{1280};  // ancho del lugar en la pantalla (en píxeles), para decidir si se achica
     // Del hilo que dibuja (render)
     quint64 numeroMostrado_ = 0;
