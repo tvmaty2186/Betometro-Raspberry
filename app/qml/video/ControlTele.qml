@@ -3,13 +3,19 @@ import Betometro
 
 // Modo tele: la pantalla de la Pi es el control remoto (muestra docs/muestras/video/tele.png).
 // Ir a la vuelta, −10 s / play-pausa / +10 s, la línea de tiempo (se arrastra) y «Datos en la tele»
-// (prender y apagar). Los datos no se mueven desde acá: se mueven en la pantalla completa de la Pi y
+// (prender y apagar), «Carreras» (cambiar de carrera como capítulos) y «Celu» (el código para que el celu
+// también sea control: /control en «Betómetro en la red»). Los datos no se mueven desde acá: se mueven en la pantalla completa de la Pi y
 // la tele usa los mismos lugares.
 Item {
     id: c
     property Item rep: null
     property string titulo: ""
     property bool verDatos: false
+    property bool verCelu: false       // el código para el celu, grande
+    property bool verCarreras: false   // la lista de carreras con video
+    // La dirección de la página del celu. Sin wifi (ni la propia de la Pi), no hay.
+    readonly property bool hayRed: Wifi.conectada !== "" || Wifi.propia
+    readonly property string urlCelu: "http://" + Wifi.direccion + (Servidor.puerto !== 80 ? ":" + Servidor.puerto : "") + "/control"
     signal salir()
     readonly property bool h: width > height
     readonly property real m: h ? 36 : 28
@@ -43,7 +49,7 @@ Item {
         x: c.m; y: c.h ? 30 : 44; spacing: 14
         IconoTele { width: 38; height: 33; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta }
         Texto { anchors.verticalCenter: parent.verticalCenter; text: "EN LA TELE · " + c.titulo; font.letterSpacing: 2
-                width: Math.min(implicitWidth, c.width - 2 * c.m - 52 - bSalir.width - 20); elide: Text.ElideRight }
+                width: Math.min(implicitWidth, c.width - 2 * c.m - 52 - bSalir.width - 20 - (c.h ? filaB.width + 14 : 0)); elide: Text.ElideRight }
     }
     Ficha {
         id: bSalir
@@ -52,9 +58,29 @@ Item {
         Etiq { id: tSalir; anchors.centerIn: parent; text: "Salir"; color: Tema.tinta; font.pixelSize: 22 }
         onTocado: c.salir()
     }
+    // «Carreras» y «Celu»: en horizontal al lado de Salir; en vertical, abajo del título
+    component FichaChica: Ficha {
+        id: fch
+        property string icono: ""
+        property string texto: ""
+        height: 62; width: filaF.implicitWidth + 48; radius: 31
+        Row {
+            id: filaF; anchors.centerIn: parent; spacing: 10
+            TIcono { width: 34; height: 34; nombre: fch.icono; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter }
+            Etiq { text: fch.texto; color: Tema.tinta; font.pixelSize: 22; anchors.verticalCenter: parent.verticalCenter }
+        }
+    }
+    Row {
+        id: filaB
+        spacing: 14
+        x: c.h ? bSalir.x - width - 14 : c.m
+        y: c.h ? bSalir.y : 120
+        FichaChica { icono: "lista"; texto: "Carreras"; onTocado: c.verCarreras = true }
+        FichaChica { icono: "qr"; texto: "Celu"; onTocado: c.verCelu = true }
+    }
 
     // ---------- Ir a la vuelta ----------
-    Etiq { id: eVuelta; x: c.m; y: c.h ? 112 : 150; text: "Ir a la vuelta" }
+    Etiq { id: eVuelta; x: c.m; y: c.h ? 112 : 214; text: "Ir a la vuelta" }
     Flickable {
         id: fVueltas
         x: c.m; y: eVuelta.y + 36; width: c.width - 2 * c.m; height: 104
@@ -223,5 +249,112 @@ Item {
                 color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 19 }
             }
         }
+    }
+
+    // ---------- Ventanas de arriba: tocar afuera las cierra ----------
+    MouseArea {
+        anchors.fill: parent
+        visible: c.verCelu || c.verCarreras
+        onClicked: { c.verCelu = false; c.verCarreras = false; }
+        Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.55) }
+    }
+    component Hoja: Rectangle {
+        default property alias contenido: interior.data
+        property string titulo: ""
+        signal listo()
+        anchors.centerIn: parent
+        radius: 24
+        color: Qt.rgba(Tema.caja2.r, Tema.caja2.g, Tema.caja2.b, 0.97); border { width: 2; color: Tema.bordeCromo }
+        MouseArea { anchors.fill: parent }
+        Texto { x: 30; y: 24; height: 60; verticalAlignment: Text.AlignVCenter; text: parent.titulo }
+        Ficha {
+            x: parent.width - width - 30; y: 28
+            height: 52; width: tL.implicitWidth + 44; radius: 26; amarilla: true
+            Etiq { id: tL; anchors.centerIn: parent; text: "Listo"; color: Tema.acentoTinta; font.pixelSize: 20 }
+            onTocado: parent.listo()
+        }
+        Item { id: interior; x: 30; y: 96; width: parent.width - 60; height: parent.height - 96 - 24 }
+    }
+
+    // ---------- «Celu»: el código para que el celu también sea control ----------
+    Hoja {
+        visible: c.verCelu
+        titulo: "El celu como control"
+        width: Math.min(c.width - 2 * c.m, c.h ? 900 : 640)
+        height: c.h ? Math.min(c.height - 60, 560) : 900
+        onListo: c.verCelu = false
+        Grid {
+            anchors.centerIn: parent
+            columns: c.h ? 2 : 1
+            spacing: c.h ? 40 : 30
+            horizontalItemAlignment: Grid.AlignHCenter
+            verticalItemAlignment: Grid.AlignVCenter
+            Rectangle {
+                width: c.h ? 400 : 460; height: width; radius: 20; color: "#ffffff"
+                Image { visible: c.hayRed; anchors.centerIn: parent; width: parent.width - 32; height: width; smooth: false
+                        source: c.verCelu && c.hayRed ? "image://qr/" + encodeURIComponent(c.urlCelu) : "" }
+                Text { visible: !c.hayRed; anchors.fill: parent; anchors.margins: 30; wrapMode: Text.WordWrap
+                       horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                       text: "Conectá la wifi para usar el celu"; color: "#14240f"
+                       font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 34 } }
+            }
+            Column {
+                width: c.h ? 360 : 460
+                spacing: 18
+                Texto { width: parent.width; wrapMode: Text.WordWrap; text: "Escaneá con el celu: el celu también es control" }
+                Text { width: parent.width; wrapMode: Text.WordWrap; visible: c.hayRed; text: c.urlCelu
+                       color: Tema.acento; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 28 } }
+                Text { width: parent.width; wrapMode: Text.WordWrap
+                       text: !Servidor.activo ? "Prendé «Mostrar informes en la red» en Ajustes → Conectividad"
+                                              : "El celu tiene que estar en la misma wifi que el Betómetro"
+                       color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 } }
+            }
+        }
+    }
+
+    // ---------- «Carreras»: cambiar de carrera como capítulos ----------
+    Hoja {
+        visible: c.verCarreras
+        titulo: "Carreras"
+        width: Math.min(c.width - 2 * c.m, 760)
+        height: c.h ? c.height - 60 : Math.min(c.height - 200, 140 + Math.max(1, Tele.carreras.length) * 112)
+        onListo: c.verCarreras = false
+        ListView {
+            id: lista
+            anchors.fill: parent
+            clip: true; spacing: 12
+            boundsBehavior: Flickable.StopAtBounds
+            model: c.verCarreras ? Tele.carreras : []
+            delegate: Ficha {
+                id: fc
+                required property var modelData
+                readonly property bool yo: modelData.id === Tele.carreraId
+                width: lista.width; height: 100; radius: 24
+                amarilla: yo
+                onTocado: { c.verCarreras = false; Tele.elegirCarrera(modelData.id); }
+                Rectangle {
+                    x: 18; anchors.verticalCenter: parent.verticalCenter
+                    width: 64; height: 64; radius: 32
+                    color: fc.yo ? "#14240f" : Tema.acento
+                    Text { anchors.centerIn: parent; text: fc.modelData.dia; color: fc.yo ? Tema.acento : "#14240f"
+                           font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 32 } }
+                }
+                Column {
+                    x: 100; anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width - x - (fc.yo ? tYa.implicitWidth + 40 : 24)
+                    Text { width: parent.width; elide: Text.ElideRight; text: fc.modelData.nombre
+                           color: fc.yo ? Tema.acentoTinta : Tema.tinta
+                           font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 30 } }
+                    Text { width: parent.width; elide: Text.ElideRight
+                           text: fc.modelData.fecha + " · " + fc.modelData.vueltas + " vueltas" + (fc.modelData.videos > 1 ? " · " + fc.modelData.videos + " videos" : "")
+                           color: fc.yo ? Tema.acentoTinta : Tema.tintaSuave
+                           font { family: Tema.fuente600; pixelSize: 21 } }
+                }
+                Etiq { id: tYa; visible: fc.yo; anchors { right: parent.right; rightMargin: 24; verticalCenter: parent.verticalCenter }
+                       text: "En la tele"; color: Tema.acentoTinta; font.pixelSize: 18 }
+            }
+        }
+        Text { visible: !Tele.carreras.length; anchors.centerIn: parent; text: "No hay carreras con video"
+               color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 24 } }
     }
 }

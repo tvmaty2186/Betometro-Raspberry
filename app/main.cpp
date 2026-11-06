@@ -10,8 +10,11 @@
 //   --muestra                carga carreras de ejemplo (no toca la base guardada hasta que se cambie algo)
 //   --carrera NOMBRE         abre la ficha de esa carrera
 //   --captura-tele ARCHIVO   con --captura (o sola): también saca la ventana de la tele (modo tele)
+//   --prueba tele-qr | tele-carreras | tele-remoto   modo tele con el código del celu, con la lista de carreras,
+//                            o listo para probar el celu como control (las dos últimas: Paraná también con video)
 #include <QCommandLineParser>
 #include <QDirIterator>
+#include <QFile>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -43,6 +46,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "pulsador_gpio.h"
 #include "reportes.h"
 #include "servidor.h"
+#include "control_remoto.h"
 #include "wifi.h"
 #include "hdmi.h"
 #include "drive.h"
@@ -106,6 +110,16 @@ int main(int argc, char* argv[]) {
     Reportes reportes(carpeta);
     if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) reportes.instalar();
     if (op.isSet(oMuestra)) datos.cargarMuestra();
+    // --prueba tele-carreras / tele-remoto: una segunda carrera con video (Paraná, con el mismo
+    // videos/muestra.mkv), para probar «Carreras». Ojo: queda guardado en la carpeta de --datos.
+    if (op.isSet(oMuestra) && (op.value(oPrueba) == QStringLiteral("tele-carreras") || op.value(oPrueba) == QStringLiteral("tele-remoto"))
+        && QFile::exists(datos.carpetaVideos() + QStringLiteral("/muestra.mkv"))) {
+        for (const auto& c : datos.base().carreras)
+            if (c.nombre == "Paraná" && datos.videos(QString::fromStdString(c.id)).isEmpty()) {
+                datos.agregarVideo(QString::fromStdString(c.id), {{"archivo", "muestra.mkv"}, {"largada", 1}, {"desdeLargadaMs", 3000}});
+                break;
+            }
+    }
     if (op.isSet(oCarrera)) {
         for (const auto& c : datos.base().carreras)
             if (QString::fromStdString(c.nombre) == op.value(oCarrera)) contexto.setIdInicial(QString::fromStdString(c.id));
@@ -156,6 +170,9 @@ int main(int argc, char* argv[]) {
     // «Betómetro en la red»: en la Raspberry en el puerto 80 (http://IP); en la PC en el 8080
     Servidor servidor(&datos, qEnvironmentVariableIsSet("BETO_RASPBERRY") ? 80 : 8080);
     servidor.ponerReportes(&reportes);
+    // El celu como control remoto del modo tele (/control, docs/video.md)
+    ControlRemoto controlRemoto;
+    servidor.ponerControl(&controlRemoto);
     // Google Drive: sube informes y videos solo, con wifi, sin carrera y sin la cámara grabando (docs/google-drive.md)
     Drive drive(&datos, carpeta, op.value(oPrueba));
     servidor.ponerDrive(&drive);
@@ -214,6 +231,7 @@ int main(int argc, char* argv[]) {
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
     motor.rootContext()->setContextProperty(QStringLiteral("Servidor"), &servidor);
+    motor.rootContext()->setContextProperty(QStringLiteral("ControlRemoto"), &controlRemoto);
     motor.rootContext()->setContextProperty(QStringLiteral("Pulsador"), pulsador);   // null en la PC
     motor.rootContext()->setContextProperty(QStringLiteral("Audio"), &audio);
     motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);

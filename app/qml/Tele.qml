@@ -30,12 +30,14 @@ QtObject {
     property Item reproductor: null     // el Reproductor que se ve en la tele (null: la tele en reposo)
     property Item salida: null          // el VideoOutput de la ventana de la tele
     property string carrera: ""
+    property string carreraId: ""
     readonly property bool activa: !!reproductor
 
-    function empezar(rep, nombre) {
+    function empezar(rep, nombre, id) {
         if (!hay || !rep) return;
         if (reproductor && reproductor !== rep) terminar();
         carrera = nombre || "";
+        carreraId = id || "";
         reproductor = rep;
         rep.editando = false;
         rep.tele = true;
@@ -46,4 +48,59 @@ QtObject {
         reproductor = null;
     }
     onHayChanged: if (!hay) terminar()
+
+    // ---------- «Carreras»: cambiar de carrera como capítulos (en la Pi y en el celu) ----------
+    // Las carreras que tienen video: {id, nombre, fecha, dia, vueltas, videos}. Solo con la tele en uso.
+    readonly property var carreras: {
+        if (!activa) return [];
+        const r = [];
+        for (const c of Datos.corridas.concat(Datos.proximas)) {
+            if (!c.tieneVueltas) continue;
+            const vs = Datos.videos(c.id);
+            if (!vs.length) continue;
+            r.push({ id: c.id, nombre: c.nombre, fecha: c.fechaLarga, dia: c.dia, vueltas: (Datos.informe(c.id).vueltas || []).length, videos: vs.length });
+        }
+        return r;
+    }
+    // Cambia la tele a otra carrera: el informe de abajo pasa a esa carrera (Informe.qml se encarga del resto)
+    function elegirCarrera(id) {
+        if (!activa || !id || id === carreraId || Crono.enCurso) return;
+        if (!carreras.some(c => c.id === id)) return;
+        Navegacion.ir("informe", { id: id });
+    }
+
+    // ---------- El celu como control remoto (/control en «Betómetro en la red») ----------
+    // Cómo está la tele, para la página del celu
+    readonly property var estado: {
+        const r = reproductor;
+        if (!r) return { activa: false };
+        const v = r.vueltas.map((x, i) => {
+            const m = r.momento(i, 0);
+            return { nombre: r.nombreV(x), tiempo: Formato.tiempo(x.realMs || 0), desdeMs: m && m.v === r.videoActual ? Math.round(m.ms) : -1, video: !!m };
+        });
+        return { activa: true, carrera: carrera, carreraId: carreraId, vueltas: v, vuelta: r.lapAhora,
+                 pos: Math.round(r.arrastre >= 0 ? r.arrastre : r.pos), total: Math.round(r.total), andando: r.andando,
+                 marcas: r.tramosVideo.map(t => Math.round(t.desde)) };
+    }
+    onEstadoChanged: ControlRemoto.ponerEstado(estado)
+    onCarrerasChanged: ControlRemoto.ponerCarreras(carreras)
+    // Lo que se tocó en el celu (ControlRemoto ya revisó que tenga sentido). Nunca en carrera.
+    function hacer(tipo, valor) {
+        const r = reproductor;
+        if (!r || Crono.enCurso) return;
+        switch (tipo) {
+        case "play": if (!r.andando) r.alternar(); break;
+        case "pausa": if (r.andando) r.alternar(); break;
+        case "alternar": r.alternar(); break;
+        case "saltar": r.saltar(valor); break;
+        case "ir": r.irMs(r.videoActual, valor); break;
+        case "vuelta": r.irA(valor, 0); break;
+        case "carrera": elegirCarrera(valor); break;
+        case "salir": terminar(); break;
+        }
+    }
+    property Connections celu: Connections {
+        target: ControlRemoto
+        function onAccion(tipo, valor) { tele.hacer(tipo, valor); }
+    }
 }

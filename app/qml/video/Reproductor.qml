@@ -142,6 +142,11 @@ Item {
             if (Math.abs((tr.desde - ms) / total * ancho) < 14) return Math.max(0, tr.desde);
         return ms;
     }
+    // Otra carrera en el mismo reproductor (modo tele, «Carreras»): de cero y en pausa
+    function deNuevo() {
+        if (andando) player.pause();
+        arrastre = -1; pendiente = -1; pos = 0; videoActual = 0; editando = false;
+    }
     function soltarArrastre() { const ms = arrastre; arrastre = -1; if (ms >= 0) irMs(videoActual, ms); }
 
     // Pulsador por cable: con el video a la vista (a medias, pantalla completa o en la tele) anda / pausa.

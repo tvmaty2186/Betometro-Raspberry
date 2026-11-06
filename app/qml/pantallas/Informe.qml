@@ -30,9 +30,25 @@ Item {
         if (!Tele.hay) { pedirReinicio = true; return; }
         verVideo = true;
         completo = false;
-        Tele.empezar(reproductor, c.nombre || "");
+        Tele.empezar(reproductor, c.nombre || "", id_);
     }
     Component.onDestruction: if (enTele) Tele.terminar()
+    // «Carreras» en modo tele (Tele.elegirCarrera): cambia la carrera de este informe sin salir de la tele.
+    // Se espera a que todo lo que depende de la carrera se vuelva a leer.
+    onId_Changed: if (enTele) Qt.callLater(cambiarCarreraTele)
+    function cambiarCarreraTele() {
+        if (!enTele) return;
+        if (!videos.length) { Tele.terminar(); return; }
+        fila = -1; confirmarUnir = false; menuAbierto = false; confirmarRest = false; completo = false;
+        Tele.carrera = c.nombre || "";
+        Tele.carreraId = id_;
+        lap = conTraza.length ? conTraza[0] : -1;
+        mapa.requestPaint(); grafico.requestPaint();
+        reproductor.deNuevo();
+        // A la primera vuelta que tiene video
+        for (let i = 0; i < vueltas.length; i++) if (reproductor.irA(i, 0)) return;
+        reproductor.irMs(0, 0);
+    }
     // Momento del video en que empieza cada vuelta (para la tabla)
     function inicioVideo(i) { const m = reproductor.momento(i, 0); return m ? reproductor.reloj(m.ms) : ""; }
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
@@ -511,11 +527,13 @@ Item {
         else if (Contexto.prueba === "unir") fila = 3;
         else if (Contexto.prueba === "menu") menuAbierto = true;
         else if (Contexto.prueba === "tele-reiniciar") verEnTele();
-        else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos (con dos pantallas)
+        else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos, tele-qr, tele-carreras, tele-remoto (con dos pantallas)
             if (conTraza.indexOf(2) >= 0) lap = 2;
             verEnTele();
             reproductor.irA(lap, 134.6);
             control.verDatos = Contexto.prueba === "tele-datos";
+            control.verCelu = Contexto.prueba === "tele-qr";
+            control.verCarreras = Contexto.prueba === "tele-carreras";
         }
         else if (Contexto.prueba.indexOf("video") === 0) {   // video, video-completo, video-andando, video-datos, video-mover
             verVideo = true;

@@ -1,13 +1,14 @@
 // «Betómetro en la red»: una página para el celular o la compu, en la misma wifi.
 // Lista de carreras, el informe de cada una (el mismo HTML de la app) para ver o descargar, y
 // todos juntos en un .zip, y los videos de la cámara (de a pedazos, para poder adelantar y atrasar).
-// Solo lectura. Se apaga durante la carrera (no gasta nada del equipo).
+// Solo lectura, salvo /control: el celu como control remoto del modo tele (docs/video.md). Se apaga durante la carrera (no gasta nada del equipo).
 #pragma once
 
 #include <QByteArray>
 #include <QObject>
 #include <QTcpServer>
 
+class ControlRemoto;
 class Datos;
 class Drive;
 class Reportes;
@@ -24,6 +25,7 @@ public:
     void prender(bool si);
     void ponerReportes(Reportes* r) { reportes_ = r; }
     void ponerDrive(Drive* d) { drive_ = d; }
+    void ponerControl(ControlRemoto* c) { control_ = c; }   // el celu como control de la tele (/control)
 
     // POST /drive: el JSON del cliente de Google (desde la página /drive). Devuelve la página de respuesta.
     QByteArray recibirDrive(const QByteArray& cuerpo);
@@ -41,11 +43,13 @@ signals:
 private:
     QByteArray pagina() const;
     QByteArray paginaDrive(const QString& aviso = {}, bool bien = false) const;
+    QByteArray paginaControl() const;
     // GET /video/<archivo>: manda el archivo de a pedazos (nunca entero en memoria)
     void enviarVideo(QTcpSocket* s, const QString& nombre, const QByteArray& rangoPedido, bool descargar);
     Datos* datos_;
     Reportes* reportes_ = nullptr;
     Drive* drive_ = nullptr;
+    ControlRemoto* control_ = nullptr;
     quint16 puerto_;
     QTcpServer tcp_;
 };
