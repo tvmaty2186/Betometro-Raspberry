@@ -14,9 +14,9 @@ TPantalla {
     property var lugar: deCarrera ? { nombre: par.nombre, lat: par.lat, lon: par.lon } : (Datos.ajustes.climaLugar || null)
     property string diaElegido: par.fecha || ""
     readonly property bool hayLugar: usarGps ? Clima.hayGps : !!(lugar && lugar.lat !== undefined)
-    readonly property real lat: usarGps ? Clima.gpsLat : (lugar ? lugar.lat : 0)
-    readonly property real lon: usarGps ? Clima.gpsLon : (lugar ? lugar.lon : 0)
-    readonly property string nombre: usarGps ? (Clima.nombreGps || "Tu ubicación") : (lugar ? lugar.nombre : "")
+    readonly property real lat: usarGps ? Clima.gpsLat : (lugar && lugar.lat !== undefined ? lugar.lat : 0)
+    readonly property real lon: usarGps ? Clima.gpsLon : (lugar && lugar.lon !== undefined ? lugar.lon : 0)
+    readonly property string nombre: usarGps ? (Clima.nombreGps || "Tu ubicación") : (lugar && lugar.nombre ? lugar.nombre : "")
     readonly property var p: Clima.version >= 0 && hayLugar ? Clima.pronostico(lat, lon) : ({})
     readonly property var d: diaElegido && hayLugar && Clima.version >= 0 ? Clima.dia(lat, lon, diaElegido) : null
     readonly property var fechasCarrera: { const l = []; for (const c of Datos.proximas) l.push(c.fecha); return l; }
@@ -90,7 +90,7 @@ TPantalla {
             }
             Opcion { texto: "GPS"; icono: "gps"; prendida: raiz.usarGps
                      onTocada: { Datos.ponerCfg("climaModo", "gps"); raiz.usarGps = true; raiz.diaElegido = ""; } }
-            Opcion { texto: !raiz.usarGps && raiz.lugar ? raiz.lugar.nombre : "Buscar"; icono: "buscar"; prendida: !raiz.usarGps
+            Opcion { texto: !raiz.usarGps && raiz.lugar && raiz.lugar.nombre ? raiz.lugar.nombre : "Buscar"; icono: "buscar"; prendida: !raiz.usarGps
                      onTocada: buscador.abrir("") }
         }
     }

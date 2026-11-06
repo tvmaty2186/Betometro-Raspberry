@@ -12,7 +12,7 @@ Row {
         source: "qrc:/recursos/img/leon.png"
         height: raiz.alto; fillMode: Image.PreserveAspectFit
         anchors.verticalCenter: parent.verticalCenter
-        smooth: true; mipmap: true
+        smooth: true; sourceSize.height: Math.round(raiz.alto * 2)
     }
     Canvas {
         visible: Tema.avispon

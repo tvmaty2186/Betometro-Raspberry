@@ -45,7 +45,7 @@ Window {
                 spacing: 26
                 Image {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:/recursos/img/leon.png"; height: 300; fillMode: Image.PreserveAspectFit; mipmap: true
+                    source: "qrc:/recursos/img/leon.png"; height: 300; fillMode: Image.PreserveAspectFit; sourceSize.height: 600; smooth: true
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter

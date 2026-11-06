@@ -11,7 +11,7 @@ TPantalla {
     readonly property var lugar: Datos.ajustes.climaLugar || null
     readonly property bool hayLugar: climaGps ? Clima.hayGps : !!(lugar && lugar.lat !== undefined)
     readonly property var p: hayLugar && Clima.version >= 0 ? Clima.pronostico(climaGps ? Clima.gpsLat : lugar.lat, climaGps ? Clima.gpsLon : lugar.lon) : ({})
-    readonly property string nombreLugar: climaGps ? (Clima.nombreGps || "GPS") : (lugar ? lugar.nombre : "")
+    readonly property string nombreLugar: climaGps ? (Clima.nombreGps || "GPS") : (lugar && lugar.nombre ? lugar.nombre : "")
 
     Grid {
         anchors.fill: raiz.area

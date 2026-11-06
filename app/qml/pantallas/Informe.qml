@@ -114,7 +114,7 @@ Item {
     Volver { x: raiz.h ? 24 : 20; y: raiz.h ? 30 : 26; onTocado: Navegacion.ir("ficha", { id: raiz.id_ }) }
     Row {
         x: raiz.h ? 80 : 24; y: raiz.h ? 14 : 96; spacing: 14
-        Image { source: "qrc:/recursos/img/leon.png"; height: raiz.h ? 46 : 50; fillMode: Image.PreserveAspectFit; anchors.verticalCenter: parent.verticalCenter; mipmap: true }
+        Image { source: "qrc:/recursos/img/leon.png"; height: raiz.h ? 46 : 50; fillMode: Image.PreserveAspectFit; anchors.verticalCenter: parent.verticalCenter; sourceSize.height: 100; smooth: true }
         Column {
             anchors.verticalCenter: parent.verticalCenter
             TextoCromo { texto: (raiz.c.nombre || "").toUpperCase(); tam: raiz.h ? 36 : 38 }

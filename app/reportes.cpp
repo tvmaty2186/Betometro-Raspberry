@@ -30,7 +30,14 @@ void manejador(QtMsgType tipo, const QMessageLogContext& ctx, const QString& msg
 bool Reportes::esRuido(const QString& m) {
     static const QStringList ruido = {
         QStringLiteral("pipewire"), QStringLiteral("PulseAudioService: pa_context_connect"), QStringLiteral("Failed to update audio output"),
-        QStringLiteral("UTF-8 locale"), QStringLiteral("No QtMultimedia backends"), QStringLiteral("qt.multimedia.ffmpeg")};
+        QStringLiteral("UTF-8 locale"), QStringLiteral("No QtMultimedia backends"), QStringLiteral("qt.multimedia.ffmpeg"),
+        // Normales, no son fallas (06/11/2026): quedan en el registro del sistema, no en el reporte
+        QStringLiteral("Video: descompresor"), QStringLiteral("Video: colores por"), QStringLiteral("Video: sonido por"),
+        QStringLiteral("Corrupt JPEG data"),   // la webcam manda algún cuadro cortado: se saltea
+        QStringLiteral("QSGPlainTexture: Mipmap"),
+        // Del sistema en cada arranque (sonido y wifi de la Pi)
+        QStringLiteral("alsa-restore.rules"), QStringLiteral("bgscan simple"), QStringLiteral("brcmf_p2p_send_action_frame"),
+        QStringLiteral("Registration to specific type not supported")};
     for (const auto& r : ruido) if (m.contains(r, Qt::CaseInsensitive)) return true;
     return false;
 }
@@ -81,8 +88,20 @@ void Reportes::juntarSistema(bool arranqueAnterior) {
                                             QStringLiteral("-n"), QStringLiteral("20"), QStringLiteral("--no-pager"), QStringLiteral("-o"), QStringLiteral("short")});
     if (j.waitForFinished(4000)) {
         const QStringList lineas = QString::fromUtf8(j.readAllStandardOutput()).split('\n', Qt::SkipEmptyParts);
-        for (const QString& l : lineas)
-            if (!l.startsWith(QLatin1String("--")) && !esRuido(l)) anotar(QStringLiteral("sistema"), l.trimmed());
+        // Lo que ya se anotó no se repite: si Betómetro se cae varias veces en el mismo arranque, el sistema
+        // devuelve las mismas líneas cada vez
+        const QString archivoVisto = carpeta_ + QStringLiteral("/sistema-visto");
+        QStringList visto;
+        QFile fv(archivoVisto);
+        if (fv.open(QIODevice::ReadOnly)) { visto = QString::fromUtf8(fv.readAll()).split('\n', Qt::SkipEmptyParts); fv.close(); }
+        for (const QString& l : lineas) {
+            const QString t = l.trimmed();
+            if (t.startsWith(QLatin1String("--")) || esRuido(t) || visto.contains(t)) continue;
+            anotar(QStringLiteral("sistema"), t);
+            visto << t;
+        }
+        while (visto.size() > 300) visto.removeFirst();
+        if (fv.open(QIODevice::WriteOnly | QIODevice::Truncate)) fv.write(visto.join('\n').toUtf8() + '\n');
     }
     const QDir pstore(QStringLiteral("/sys/fs/pstore"));
     for (const QString& n : pstore.entryList(QDir::Files)) {
