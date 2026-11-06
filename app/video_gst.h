@@ -15,6 +15,8 @@
 #include <QUrl>
 #include <QVideoSink>
 
+#include <atomic>
+
 typedef struct _GstElement GstElement;
 typedef struct _GstAppSink GstAppSink;
 typedef struct _GstSample GstSample;
@@ -58,6 +60,7 @@ public:
     // Para los avisos de GStreamer (otros hilos)
     void entregar(GstSample* muestra);               // un cuadro: al videoSink
     void ponerDescompresor(const QString& nombre);   // en el hilo de la pantalla
+    void ponerRangoCompleto(bool si) { rangoCompleto_ = si; }   // la etiqueta de color original del video
 
 signals:
     void sourceChanged();
@@ -87,4 +90,5 @@ private:
     int estado_ = Parado, medio_ = SinMedio;
     bool listo_ = false, quiereAndar_ = false;
     QString descompresor_;
+    std::atomic<bool> rangoCompleto_{false};
 };

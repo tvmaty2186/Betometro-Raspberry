@@ -121,7 +121,7 @@ Item {
                 rep.pendiente = -1;
             }
         }
-        onPositionChanged: if (!rep.andando) rep.pos = position
+        onPositionChanged: if (!rep.andando) rep.pos = player.position
         onErrorOccurred: (codigo, texto) => console.warn("Video:", texto)
     }
     onActivoChanged: if (!activo) { player.pause(); editando = false; }

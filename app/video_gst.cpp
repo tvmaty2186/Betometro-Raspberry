@@ -4,6 +4,7 @@
 #include <gst/gst.h>
 #include <gst/video/video.h>
 
+#include <QFile>
 #include <QVariant>
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
@@ -19,16 +20,6 @@ GstFlowReturn alPreroll(GstAppSink* s, gpointer yo) {
     // El cuadro de cuando está en pausa (al abrir o al saltar a una vuelta)
     if (GstSample* m = gst_app_sink_pull_preroll(s)) { static_cast<VideoGst*>(yo)->entregar(m); gst_sample_unref(m); }
     return GST_FLOW_OK;
-}
-void alElemento(GstElement*, GstElement* e, gpointer yo) {
-    // Qué descompresor eligió (para saber si usa el chip). Llega en otro hilo.
-    GstElementFactory* f = gst_element_get_factory(e);
-    if (!f) return;
-    const char* clase = gst_element_factory_get_metadata(f, GST_ELEMENT_METADATA_KLASS);
-    if (!clase || !strstr(clase, "Decoder") || !strstr(clase, "Video")) return;
-    const QString nombre = QString::fromUtf8(gst_plugin_feature_get_name(GST_PLUGIN_FEATURE(f)));
-    auto* v = static_cast<VideoGst*>(yo);
-    QMetaObject::invokeMethod(v, [v, nombre] { v->ponerDescompresor(nombre); }, Qt::QueuedConnection);
 }
 }  // namespace
 
@@ -92,27 +83,86 @@ void VideoGst::cerrar() {
     ponerMedio(SinMedio);
 }
 
+namespace {
+bool hay(const char* e) {
+    GstElementFactory* f = gst_element_factory_find(e);
+    if (f) gst_object_unref(f);
+    return f != nullptr;
+}
+// La etiqueta de color que trae el video (antes de cambiarla): «1:...» es rango completo (como las fotos JPEG)
+GstPadProbeReturn alCaps(GstPad*, GstPadProbeInfo* info, gpointer yo) {
+    GstEvent* e = GST_PAD_PROBE_INFO_EVENT(info);
+    if (e && GST_EVENT_TYPE(e) == GST_EVENT_CAPS) {
+        GstCaps* c = nullptr;
+        gst_event_parse_caps(e, &c);
+        const GstStructure* s = c ? gst_caps_get_structure(c, 0) : nullptr;
+        const char* col = s ? gst_structure_get_string(s, "colorimetry") : nullptr;
+        static_cast<VideoGst*>(yo)->ponerRangoCompleto(col && (col[0] == '1' && col[1] == ':'));
+    }
+    return GST_PAD_PROBE_OK;
+}
+}  // namespace
+
 void VideoGst::abrir() {
-    tubo_ = gst_element_factory_make("playbin", nullptr);
-    GstElement* imagen = gst_element_factory_make("appsink", "imagen");
-    if (!tubo_ || !imagen) {
-        if (imagen) gst_object_unref(imagen);
-        emit errorOccurred(1, QStringLiteral("Falta GStreamer (playbin o appsink)"));
+    const QString ruta = source_.toLocalFile();
+    QFile a(ruta);
+    if (ruta.isEmpty() || !a.open(QIODevice::ReadOnly)) {
+        emit errorOccurred(1, QStringLiteral("No está el archivo del video"));
         ponerMedio(Invalido);
         return;
     }
-    // La imagen en YUV (lo que da el chip); se pasa a colores en ImagenVideo
-    GstCaps* caps = gst_caps_from_string("video/x-raw,format=(string){I420,NV12}");
-    g_object_set(imagen, "caps", caps, "max-buffers", 2, "drop", TRUE, "sync", TRUE, nullptr);
-    gst_caps_unref(caps);
-    GstAppSinkCallbacks cb{};
-    cb.new_sample = alMuestra;
-    cb.new_preroll = alPreroll;
-    gst_app_sink_set_callbacks(GST_APP_SINK(imagen), &cb, this, nullptr);
-    g_object_set(tubo_, "uri", source_.toString(QUrl::FullyEncoded).toUtf8().constData(), "video-sink", imagen, nullptr);
-    // Sin subtítulos ni visualizaciones
-    g_object_set(tubo_, "flags", 0x1 | 0x2 | 0x10, nullptr);   // video | audio | soft-volume
-    g_signal_connect(tubo_, "element-setup", G_CALLBACK(alElemento), this);
+    // ¿Tiene sonido? (sin sonido, una rama de audio vacía no dejaría arrancar). El índice está al principio.
+    const QByteArray cabeza = a.read(1024 * 1024);
+    a.close();
+    const bool sonido = cabeza.contains("mp4a") || cabeza.contains("A_OPUS") || cabeza.contains("A_AAC") || cabeza.contains("Opus");
+    // MP4 o Matroska: por lo que tiene adentro (no por el nombre)
+    const bool mp4 = cabeza.mid(4, 4) == "ftyp" || (!cabeza.startsWith("\x1a\x45\xdf\xa3") && ruta.endsWith(QLatin1String(".mp4"), Qt::CaseInsensitive));
+    // Descompresor: el chip de la Raspberry si está; si no, el que haya.
+    // La etiqueta de color: las webcams MJPEG graban con la de las fotos (rango completo, «1:4:0:0») y el chip
+    // no la acepta: se queda esperando sin decir nada (probado en la Pi de Matías, 06/11/2026). Se le pone
+    // «bt601» antes del chip; los colores se arreglan después en ImagenVideo (rango completo).
+    // BETO_VIDEO_DEC: otro descompresor, para probar (por ejemplo «avdec_h264», el del procesador)
+    const QString pedido = qEnvironmentVariable("BETO_VIDEO_DEC");
+    const QString chip = !pedido.isEmpty() ? pedido : hay("v4l2h264dec") ? QStringLiteral("v4l2h264dec") : QString();
+    const QString dec = !chip.isEmpty()
+        ? QStringLiteral("capssetter caps=\"video/x-h264,colorimetry=(string)bt601\" ! ") + chip
+        : QStringLiteral("decodebin");
+    QString desc = QStringLiteral("filesrc name=archivo ! %1 name=d d.video_0 ! queue ! h264parse name=parser ! %2 ! videoconvert ! "
+                                  "appsink name=imagen")
+                       .arg(mp4 ? QStringLiteral("qtdemux") : QStringLiteral("matroskademux"), dec);
+    if (sonido) desc += QStringLiteral(" d.audio_0 ! queue ! decodebin ! audioconvert ! audioresample ! autoaudiosink");
+    GError* e = nullptr;
+    tubo_ = gst_parse_launch(desc.toUtf8().constData(), &e);
+    if (!tubo_ || e) {
+        const QString texto = QString::fromUtf8(e ? e->message : "no se pudo armar");
+        if (e) g_error_free(e);
+        if (tubo_) { gst_object_unref(tubo_); tubo_ = nullptr; }
+        emit errorOccurred(1, QStringLiteral("Video: ") + texto);
+        ponerMedio(Invalido);
+        return;
+    }
+    if (GstElement* f = gst_bin_get_by_name(GST_BIN(tubo_), "archivo")) {
+        g_object_set(f, "location", QFile::encodeName(ruta).constData(), nullptr);
+        gst_object_unref(f);
+    }
+    if (GstElement* p = gst_bin_get_by_name(GST_BIN(tubo_), "parser")) {
+        GstPad* sal = gst_element_get_static_pad(p, "src");
+        gst_pad_add_probe(sal, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, alCaps, this, nullptr);
+        gst_object_unref(sal);
+        gst_object_unref(p);
+    }
+    if (GstElement* imagen = gst_bin_get_by_name(GST_BIN(tubo_), "imagen")) {
+        // La imagen en YUV (lo que da el chip); se pasa a colores en ImagenVideo
+        GstCaps* caps = gst_caps_from_string("video/x-raw,format=(string){I420,NV12}");
+        g_object_set(imagen, "caps", caps, "max-buffers", 2, "drop", TRUE, "sync", TRUE, nullptr);
+        gst_caps_unref(caps);
+        GstAppSinkCallbacks cb{};
+        cb.new_sample = alMuestra;
+        cb.new_preroll = alPreroll;
+        gst_app_sink_set_callbacks(GST_APP_SINK(imagen), &cb, this, nullptr);
+        gst_object_unref(imagen);
+    }
+    ponerDescompresor(chip.isEmpty() ? QStringLiteral("procesador") : chip);
     ponerMedio(Cargando);
     bus_.start();
     if (gst_element_set_state(tubo_, GST_STATE_PAUSED) == GST_STATE_CHANGE_FAILURE) {
@@ -251,7 +301,9 @@ void VideoGst::entregar(GstSample* muestra) {
     GstVideoFrame g;
     if (!gst_video_frame_map(&g, &info, gst_sample_get_buffer(muestra), GST_MAP_READ)) return;
     const int w = GST_VIDEO_INFO_WIDTH(&info), h = GST_VIDEO_INFO_HEIGHT(&info);
-    QVideoFrame cuadro(QVideoFrameFormat(QSize(w, h), nv12 ? QVideoFrameFormat::Format_NV12 : QVideoFrameFormat::Format_YUV420P));
+    QVideoFrameFormat formato(QSize(w, h), nv12 ? QVideoFrameFormat::Format_NV12 : QVideoFrameFormat::Format_YUV420P);
+    formato.setColorRange(rangoCompleto_ ? QVideoFrameFormat::ColorRange_Full : QVideoFrameFormat::ColorRange_Video);
+    QVideoFrame cuadro(formato);
     if (cuadro.map(QVideoFrame::WriteOnly)) {
         const int planos = nv12 ? 2 : 3;
         for (int p = 0; p < planos && p < cuadro.planeCount(); ++p) {

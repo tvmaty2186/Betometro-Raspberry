@@ -93,9 +93,14 @@ Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la ca
   renombra, se cambia el nombre en la carrera (`Datos::renombrarVideo`) y se borra el `.mkv`. Si falla, queda el `.mkv`.
 - Drive espera a que termine (no sube el `.mkv`).
 
-## Reproducir con el chip de la Raspberry (06/11/2026, sin publicar todavía)
+## Reproducir con el chip de la Raspberry (06/11/2026)
 - El MediaPlayer de Qt (FFmpeg) descomprime con el procesador en la Pi. `app/video_gst.*` (QML `VideoGst`) usa
   GStreamer `playbin`, que elige `v4l2h264dec` (el descompresor de video de la Pi; se le sube la prioridad).
 - Mismos nombres y estados que MediaPlayer. La imagen va al `videoSink` de `ImagenVideo` (YUV → RGB en el procesador,
   a la mitad si sobra tamaño). El sonido por PulseAudio (`gstreamer1.0-pulseaudio`).
 - Si no está el chip (PC), GStreamer usa otro descompresor (`avdec_h264` o `openh264dec`).
+- **Probado en la Pi de Matías (06/11/2026):** el chip (`bcm2835-codec-decode`, /dev/video10) descomprimió 20 s de
+  video en menos de 4 s, casi sin procesador. Pero no acepta la etiqueta de color de las webcams MJPEG
+  (`colorimetry=1:4:0:0`, rango completo como JPEG): se queda esperando sin error. Por eso el tubo es
+  `qtdemux ! h264parse ! capssetter colorimetry=bt601 ! v4l2h264dec ! appsink`, y ImagenVideo usa rango completo
+  si la etiqueta original lo decía. `BETO_VIDEO_DEC=avdec_h264` para probar otro descompresor.
