@@ -45,10 +45,18 @@ jobs:
           restore-keys: programa-
 
       - name: Voz (Elena y Tomás)
+        # Normalmente menos de 1 minuto. El 06/11/2026 apt se quedó colgado 17 min sin decir nada:
+        # ahora cada parte tiene tiempo límite, se reintenta y se ve lo que hace.
+        timeout-minutes: 15
         run: |
-          sudo apt-get install -y -qq ffmpeg >/dev/null
-          pip install --break-system-packages edge-tts
-          python3 voz/grabar.py salida-pi/voz
+          for i in 1 2 3; do
+            sudo timeout 240 apt-get -o Acquire::Retries=3 -o DPkg::Lock::Timeout=60 install -y -q --no-install-recommends ffmpeg && break
+            echo "apt no anduvo (intento $i), actualizo la lista y reintento"
+            sudo timeout 180 apt-get update -q || true
+          done
+          command -v ffmpeg
+          timeout 180 pip install --break-system-packages edge-tts
+          timeout 600 python3 voz/grabar.py salida-pi/voz
 
       - name: Simulador de ARM (la Raspberry es arm64)
         uses: docker/setup-qemu-action@v3

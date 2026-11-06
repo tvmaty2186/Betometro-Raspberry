@@ -36,7 +36,7 @@ async def bajar(voz, nombre, texto):
     if not os.path.exists(ruta) or os.path.getsize(ruta) == 0:
         for intento in range(4):
             try:
-                await edge_tts.Communicate(texto, VOCES[voz], rate=VELOCIDAD).save(ruta + ".parte")
+                await asyncio.wait_for(edge_tts.Communicate(texto, VOCES[voz], rate=VELOCIDAD).save(ruta + ".parte"), 60)
                 os.replace(ruta + ".parte", ruta)
                 break
             except Exception as e:
