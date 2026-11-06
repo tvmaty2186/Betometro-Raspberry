@@ -13,6 +13,7 @@ Item {
         Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel();
         if (Contexto.prueba.indexOf("videos") === 0) videos.abrir();   // capturas: videos, videos-borrar
         if (Contexto.prueba === "videos-borrar" && Camara.videos.length) videos.tocarBorrar(Camara.videos[0].archivo);
+        if (Contexto.prueba === "videos-ver") videos.verPrimero();
     }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
     // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:

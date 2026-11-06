@@ -12,9 +12,10 @@ TPantalla {
     function siguiente(lista, actual) { const i = lista.indexOf(actual); return lista[(i + 1) % lista.length]; }
     Component.onCompleted: {
         Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel();
-        if (Contexto.prueba.indexOf("tablet-videos") === 0) videos.abrir();   // capturas: tablet-videos, tablet-videos-borrar
+        if (Contexto.prueba.indexOf("tablet-videos") === 0 || Contexto.prueba === "videos") videos.abrir();   // capturas: tablet-videos, tablet-videos-borrar
         if (Contexto.prueba === "tablet-videos-borrar" && Camara.videos.length) videos.tocarBorrar(Camara.videos[0].archivo);
         if (Contexto.prueba === "tablet-espejo") raiz.poner("camaraEspejo", true);   // captura del espejo
+        if (Contexto.prueba === "videos-ver") { videos.abrir(); videos.verPrimero(); }   // captura: mirar un video
     }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
     // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:

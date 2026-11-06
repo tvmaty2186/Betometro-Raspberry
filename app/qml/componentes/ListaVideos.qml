@@ -1,5 +1,6 @@
 import QtQuick
 import Betometro
+import Betometro.Video
 
 // Lista de los videos guardados (Ajustes → Cámara → «Ver videos»), del más nuevo al más viejo.
 // Cada uno: carrera y fecha (o «Prueba» / «Sin carrera»), tamaño y «Borrar».
@@ -15,7 +16,8 @@ Rectangle {
     readonly property int pruebas: lista.filter(v => v.prueba).length
     readonly property real k: grande ? 1.45 : 1   // escala de letras y alturas
     function abrir() { confirmando = ""; visible = true; }
-    function cerrar() { confirmando = ""; visible = false; }
+    function cerrar() { confirmando = ""; if (ver.visible) ver.cerrar(); visible = false; }
+    function verPrimero() { if (lista.length) ver.abrir(lista[0]); }   // capturas
     function tocarBorrar(archivo) {
         if (Camara.grabando) return;
         if (confirmando !== archivo) { confirmando = archivo; vuelve.restart(); return; }
@@ -80,7 +82,7 @@ Rectangle {
                         color: Qt.rgba(1, 1, 1, 0.06)
                         border { width: 1.5; color: Tema.bordeCromoOscuro }
                         Column {
-                            anchors { left: parent.left; leftMargin: 16; right: boton.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
+                            anchors { left: parent.left; leftMargin: 16; right: botonVer.left; rightMargin: 12; verticalCenter: parent.verticalCenter }
                             spacing: 2
                             Text {
                                 width: parent.width; elide: Text.ElideRight; color: Tema.tinta
@@ -94,6 +96,15 @@ Rectangle {
                                 font { family: Tema.fuente600; pixelSize: 16 * raiz.k }
                                 text: (fila.modelData.grabando ? "● Grabando ahora · " : "Grabado " + fila.modelData.hora + " · ") + fila.modelData.tam
                             }
+                        }
+                        // ▶ Ver: para mirar cómo quedó (por ejemplo los «Probar 10 s»). Matías, 06/11/2026
+                        BotonBorrar {
+                            id: botonVer
+                            anchors { right: boton.left; rightMargin: 10; verticalCenter: parent.verticalCenter }
+                            width: (raiz.grande ? 150 : 110)
+                            texto: "▶ Ver"
+                            activo: !fila.modelData.grabando
+                            onTocado: { raiz.confirmando = ""; ver.abrir(fila.modelData); }
                         }
                         BotonBorrar {
                             id: boton
@@ -121,6 +132,86 @@ Rectangle {
                 pide: raiz.confirmando === "__pruebas__"
                 activo: !Camara.grabando
                 onTocado: raiz.tocarBorrar("__pruebas__")
+            }
+        }
+    }
+
+    // Mirar un video: a pantalla completa, tocar = pausa/sigue, barra para ir a cualquier parte
+    Rectangle {
+        id: ver
+        property var video: null
+        function abrir(v) {
+            video = v;
+            // Girar y espejo: los que se guardaron con el video de la carrera; si no (pruebas), los de ahora
+            let g = !!Datos.ajustes.camaraGirar, e = !!Datos.ajustes.camaraEspejo;
+            if (v.carreraId) for (const x of Datos.videos(v.carreraId)) if (x.archivo === v.archivo) { g = !!x.girar; e = !!x.espejo; }
+            girar = g; espejo = e;
+            visible = true;
+            reproductor.play();
+        }
+        function cerrar() { reproductor.stop(); visible = false; video = null; }
+        property bool girar: false
+        property bool espejo: false
+        visible: false
+        anchors.fill: parent; z: 10
+        color: "#000000"
+        VideoGst {
+            id: reproductor
+            source: ver.video ? Camara.urlVideo(ver.video.archivo) : ""
+            videoOutput: imagen
+        }
+        ImagenVideo {
+            id: imagen
+            anchors.fill: parent
+            rotation: ver.girar ? 180 : 0
+            transform: Scale { origin.x: imagen.width / 2; xScale: ver.espejo ? -1 : 1 }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: reproductor.playbackState === 1 ? reproductor.pause() : reproductor.play()
+        }
+        // Arriba: qué video y Cerrar
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; top: parent.top }
+            height: 76; color: Qt.rgba(0, 0, 0, 0.55)
+            Text {
+                anchors { left: parent.left; leftMargin: 24; verticalCenter: parent.verticalCenter; right: cerrarVer.left; rightMargin: 12 }
+                elide: Text.ElideRight; color: Tema.tinta
+                font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 28 }
+                text: !ver.video ? "" : (ver.video.carrera || (ver.video.prueba ? "Prueba" : "Sin carrera")) + " · " + ver.video.hora
+            }
+            BotonBorrar { id: cerrarVer; anchors { right: parent.right; rightMargin: 16; verticalCenter: parent.verticalCenter }
+                          texto: "Cerrar"; onTocado: ver.cerrar() }
+        }
+        // Abajo: play/pausa, tiempo y barra
+        Rectangle {
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+            height: 84; color: Qt.rgba(0, 0, 0, 0.55)
+            Text {
+                id: icono; x: 24; anchors.verticalCenter: parent.verticalCenter
+                text: reproductor.playbackState === 1 ? "❚❚" : "▶"; color: Tema.tinta
+                font { family: Tema.fuente800; pixelSize: 34 }
+                MouseArea { anchors.fill: parent; anchors.margins: -16; onClicked: reproductor.playbackState === 1 ? reproductor.pause() : reproductor.play() }
+            }
+            Text {
+                id: tiempo; anchors { left: icono.right; leftMargin: 20; verticalCenter: parent.verticalCenter }
+                color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 }
+                function mmss(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+                text: mmss(reproductor.position) + " / " + mmss(reproductor.duration)
+            }
+            Item {
+                id: linea
+                anchors { left: tiempo.right; leftMargin: 24; right: parent.right; rightMargin: 28; verticalCenter: parent.verticalCenter }
+                height: 44
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 8; radius: 4; color: Qt.rgba(1, 1, 1, 0.25) }
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; height: 8; radius: 4; color: Tema.acento
+                            width: reproductor.duration > 0 ? parent.width * reproductor.position / reproductor.duration : 0 }
+                MouseArea {
+                    anchors.fill: parent
+                    function ir(mx) { if (reproductor.duration > 0) reproductor.position = Math.max(0, Math.min(1, mx / width)) * reproductor.duration; }
+                    onPressed: m => ir(m.x)
+                    onPositionChanged: m => ir(m.x)
+                }
             }
         }
     }
