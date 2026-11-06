@@ -47,6 +47,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "hdmi.h"
 #include "drive.h"
 #include "imagen_video.h"
+#include "video_gst.h"
 
 #include <QStandardPaths>
 
@@ -206,6 +207,8 @@ int main(int argc, char* argv[]) {
 
     // El video se dibuja como imagen: el VideoOutput de Qt queda negro en la Pi 3 (app/imagen_video.h)
     qmlRegisterType<ImagenVideo>("Betometro.Video", 1, 0, "ImagenVideo");
+    // Y se reproduce con GStreamer, que usa el descompresor de video de la Raspberry (app/video_gst.h)
+    qmlRegisterType<VideoGst>("Betometro.Video", 1, 0, "VideoGst");
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);

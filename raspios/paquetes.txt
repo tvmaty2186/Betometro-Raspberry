@@ -21,6 +21,8 @@ gstreamer1.0-plugins-good
 # h264parse (para grabar en .mkv) está en «bad» (05/11/2026: la webcam daba «no element h264parse»)
 gstreamer1.0-plugins-bad
 gstreamer1.0-alsa
+# El reproductor del informe (GStreamer) saca el sonido por PulseAudio
+gstreamer1.0-pulseaudio
 # v4l2-ctl: para ver qué formatos da una cámara si algo falla
 v4l-utils
 alsa-utils

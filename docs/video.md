@@ -92,3 +92,10 @@ Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la ca
 - Nunca en carrera: si empieza una, se corta y se sigue después. Se escribe en `.mp4.parte`; al terminar bien se
   renombra, se cambia el nombre en la carrera (`Datos::renombrarVideo`) y se borra el `.mkv`. Si falla, queda el `.mkv`.
 - Drive espera a que termine (no sube el `.mkv`).
+
+## Reproducir con el chip de la Raspberry (06/11/2026, sin publicar todavía)
+- El MediaPlayer de Qt (FFmpeg) descomprime con el procesador en la Pi. `app/video_gst.*` (QML `VideoGst`) usa
+  GStreamer `playbin`, que elige `v4l2h264dec` (el descompresor de video de la Pi; se le sube la prioridad).
+- Mismos nombres y estados que MediaPlayer. La imagen va al `videoSink` de `ImagenVideo` (YUV → RGB en el procesador,
+  a la mitad si sobra tamaño). El sonido por PulseAudio (`gstreamer1.0-pulseaudio`).
+- Si no está el chip (PC), GStreamer usa otro descompresor (`avdec_h264` o `openh264dec`).

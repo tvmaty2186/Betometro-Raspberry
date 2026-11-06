@@ -31,7 +31,7 @@ if(BETO_PROGRAMA)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
     qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp
-      app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp app/imagen_video.h app/imagen_video.cpp
+      app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp app/imagen_video.h app/imagen_video.cpp app/video_gst.h app/video_gst.cpp
       app/drive.h app/drive.cpp app/drive_logica.h app/drive_logica.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
     target_compile_definitions(betometro PRIVATE BETO_VERSION="${PROJECT_VERSION}")
@@ -43,11 +43,13 @@ if(BETO_PROGRAMA)
     # Ayudante de video y sonido (GStreamer, proceso aparte). Si no hay GStreamer, la cámara no anda.
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)
-      pkg_check_modules(GST QUIET IMPORTED_TARGET gstreamer-1.0 gstreamer-app-1.0)
+      pkg_check_modules(GST QUIET IMPORTED_TARGET gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0)
     endif()
     if(GST_FOUND)
       add_executable(betometro-camara app/camara/betometro_camara.cpp)
       target_link_libraries(betometro-camara PRIVATE PkgConfig::GST)
+      # El reproductor del informe también usa GStreamer (para el descompresor de video de la Raspberry)
+      target_link_libraries(betometro PRIVATE PkgConfig::GST)
       install(TARGETS betometro-camara RUNTIME DESTINATION bin)
     else()
       message(STATUS "Sin GStreamer: no se arma betometro-camara")

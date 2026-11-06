@@ -1,6 +1,7 @@
 import QtQuick
 import QtMultimedia
 import Betometro
+import Betometro.Video
 
 // Reproductor del video de la carrera (E7, aprobado por Matías el 05/11/2026: docs/video.md y docs/muestras/video/).
 // A medias (dentro del informe) o en pantalla completa (doble toque) con los datos encima en tiras finitas.
@@ -107,11 +108,12 @@ Item {
     // el video se decodifica una sola vez.
     property bool tele: false
     readonly property bool enTele: tele && !!Tele.salida
-    MediaPlayer {
+    // GStreamer (no el MediaPlayer de Qt): usa el descompresor de video de la Raspberry. Mismos nombres
+    // y estados que MediaPlayer (app/video_gst.h)
+    VideoGst {
         id: player
         source: rep.activo ? rep.url : ""
         videoOutput: rep.enTele ? Tele.salida : vista.salida
-        audioOutput: AudioOutput {}
         onMediaStatusChanged: {
             if ((mediaStatus === MediaPlayer.LoadedMedia || mediaStatus === MediaPlayer.BufferedMedia) && rep.pendiente >= 0) {
                 if (playbackState === MediaPlayer.StoppedState) pause();   // muestra el cuadro aunque no ande
