@@ -1,5 +1,10 @@
 #include "datos.h"
 
+#if __has_include(<QJSValue>)   // en el programa (las pruebas no tienen QML)
+#include <QJSValue>
+#define BETO_CON_QJS 1
+#endif
+
 #include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
@@ -495,7 +500,14 @@ QVariantMap Datos::ajustes() const {
     return m;
 }
 
-void Datos::ponerCfg(const QString& clave, const QVariant& valor) {
+void Datos::ponerCfg(const QString& clave, const QVariant& valorQml) {
+    // Un objeto de JavaScript puede llegar como QJSValue: se pasa a mapa/lista (si no, se guardaba como
+    // el texto «[object Object]» y no andaban las llaves de «Datos sobre el video»)
+#ifdef BETO_CON_QJS
+    const QVariant valor = valorQml.typeId() == qMetaTypeId<QJSValue>() ? valorQml.value<QJSValue>().toVariant() : valorQml;
+#else
+    const QVariant& valor = valorQml;
+#endif
     Json v;
     switch (valor.typeId()) {
         case QMetaType::Bool: v = valor.toBool(); break;

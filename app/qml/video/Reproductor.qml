@@ -13,7 +13,8 @@ Item {
     property var videos: []         // Datos.videos(id): [{archivo, largada, desdeLargadaMs, girar}]
     property bool activo: false     // con el botón en «Video»; si no, no se carga nada
     property bool completo: false   // pantalla completa
-    property bool editando: false   // «Datos»: prender, apagar y mover los datos (solo en pausa)
+    property bool editando: false   // moviendo los datos en la pantalla (hasta «Guardar»)
+    property bool menuDatos: false  // el menú del engranaje (solo en pausa): prender y apagar los datos
     signal dobleToque()
     clip: true
 
@@ -71,7 +72,7 @@ Item {
     }
     function alternar() {
         if (falta) return;
-        if (andando) player.pause(); else { editando = false; player.play(); }
+        if (andando) player.pause(); else { editando = false; menuDatos = false; player.play(); }
     }
     // Fila de la traza en el segundo t (interpolada entre las dos lecturas vecinas)
     function filaEn(M, t) {
@@ -125,7 +126,7 @@ Item {
         onPositionChanged: if (!rep.andando) rep.pos = player.position
         onErrorOccurred: (codigo, texto) => console.warn("Video:", texto)
     }
-    onActivoChanged: if (!activo) { player.pause(); editando = false; }
+    onActivoChanged: if (!activo) { player.pause(); editando = false; menuDatos = false; }
     Timer { interval: 100; repeat: true; running: rep.andando; onTriggered: rep.pos = player.position }
 
     // ±10 s (control de la tele), sin salirse del video
@@ -158,7 +159,7 @@ Item {
     // Otra carrera en el mismo reproductor (modo tele, «Carreras»): de cero y en pausa
     function deNuevo() {
         if (andando) player.pause();
-        arrastre = -1; pendiente = -1; pos = 0; videoActual = 0; editando = false;
+        arrastre = -1; pendiente = -1; pos = 0; videoActual = 0; editando = false; menuDatos = false;
     }
     function soltarArrastre() { const ms = arrastre; arrastre = -1; if (ms >= 0) irMs(videoActual, ms); }
 

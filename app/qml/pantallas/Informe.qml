@@ -555,7 +555,13 @@ Item {
             if (conTraza.indexOf(lapP) >= 0) lap = lapP;
             reproductor.irA(lap, tP);
             completo = Contexto.prueba !== "video" && Contexto.prueba !== "video-pulsador";
-            reproductor.editando = Contexto.prueba === "video-datos" || Contexto.prueba === "video-mover";
+            reproductor.menuDatos = Contexto.prueba === "video-datos";
+            if (Contexto.prueba === "video-apagar") {   // prueba: apagar un dato desde el menú y ver que se guarde
+                reproductor.menuDatos = true;
+                reproductor.guardar("velocidad", { on: false });
+                console.warn("videoDatos:", JSON.stringify(Datos.ajustes.videoDatos), "velocidad:", reproductor.prendido("velocidad"));
+            }
+            reproductor.editando = Contexto.prueba === "video-mover";
             if (Contexto.prueba === "video-mover") tPruebaMover.start();
             if (Contexto.prueba === "video-andando") reproductor.alternar();
             if (Contexto.prueba === "video-pulsador") tPruebaPulsador.start();

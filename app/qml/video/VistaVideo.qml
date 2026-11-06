@@ -15,6 +15,7 @@ Item {
     readonly property alias salida: salida
     readonly property var e: rep.e
     readonly property bool editando: tocable && rep.editando
+    readonly property bool menu: tocable && rep.menuDatos
     function prendido(clave) { return rep.prendido(clave); }
     clip: true
 
@@ -38,7 +39,7 @@ Item {
     // Un toque: anda / pausa. Doble toque: pantalla completa (otro doble toque vuelve).
     Timer { id: unToque; interval: 280; onTriggered: vista.rep.alternar() }
     TapHandler {
-        enabled: vista.tocable && !vista.editando
+        enabled: vista.tocable && !vista.editando && !vista.menu
         onTapped: (punto, boton) => { if (tapCount === 1) unToque.restart(); }
         onDoubleTapped: { unToque.stop(); vista.rep.dobleToque(); }
     }
@@ -300,17 +301,15 @@ Item {
             }
             MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: vista.rep.dobleToque() }
         }
-        // Engranaje en pausa (pantalla completa); con «Datos» abierto, el botón que lo cierra
+        // Engranaje en pausa (pantalla completa): abre el menú de los datos
         Rectangle {
             id: bDatos
-            visible: vista.tocable && vista.completo && (!vista.rep.andando || vista.editando)
+            visible: vista.tocable && vista.completo && !vista.rep.andando && !vista.editando
             anchors { right: parent.right; rightMargin: 18 * barra.b; verticalCenter: parent.verticalCenter }
-            height: 42 * barra.b; width: vista.editando ? tDatos.implicitWidth + 36 * barra.b : height; radius: height / 2
+            height: 42 * barra.b; width: height; radius: height / 2
             color: Tema.acento
-            Text { id: tDatos; visible: vista.editando; anchors.centerIn: parent; text: "✎ Datos"; color: Tema.acentoTinta
-                   font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 18 * barra.b } }
-            Engranaje { visible: !vista.editando; anchors.centerIn: parent; width: 28 * barra.b; height: width; color: Tema.acentoTinta }
-            MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: vista.rep.editando = !vista.rep.editando }
+            Engranaje { anchors.centerIn: parent; width: 28 * barra.b; height: width; color: Tema.acentoTinta }
+            MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: vista.rep.menuDatos = !vista.rep.menuDatos }
         }
         // Línea de tiempo
         Item {
@@ -340,15 +339,21 @@ Item {
         }
     }
 
-    // ---------- «Datos sobre el video»: prender y apagar cada uno ----------
+    // ---------- Menú del engranaje (Matías, 06/11/2026): prender y apagar cada dato; «Mover los datos» deja
+    // moverlos en la pantalla hasta «Guardar». Tocar afuera del menú lo cierra. ----------
+    MouseArea {   // afuera del menú: lo cierra
+        anchors.fill: parent; z: 19
+        visible: vista.menu && vista.completo
+        onClicked: vista.rep.menuDatos = false
+    }
     Rectangle {
-        visible: vista.editando && vista.completo
-        z: 4
+        visible: vista.menu && vista.completo
+        z: 20
         width: Math.min(vista.width - 40, 616 * vista.s); height: colDatos.height + 36 * vista.s
         anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 8 * vista.s }
         radius: 18 * vista.s
-        color: Qt.rgba(Tema.caja2.r, Tema.caja2.g, Tema.caja2.b, 0.95); border { width: 2; color: Tema.bordeCromo }
-        MouseArea { anchors.fill: parent }   // que los toques no lleguen al video
+        color: Qt.rgba(Tema.caja2.r, Tema.caja2.g, Tema.caja2.b, 0.97); border { width: 2; color: Tema.bordeCromo }
+        MouseArea { anchors.fill: parent }   // los toques en el menú no lo cierran ni llegan al video
         Column {
             id: colDatos
             x: 24 * vista.s; y: 18 * vista.s; width: parent.width - 48 * vista.s
@@ -357,8 +362,10 @@ Item {
             Repeater {
                 model: vista.rep.lista
                 Item {
+                    id: filaDato
                     required property var modelData
                     required property int index
+                    readonly property bool sePuede: !(modelData.clave === "adelanto" && !(vista.rep.distancia > 0))
                     width: colDatos.width; height: 54 * vista.s
                     Rectangle { width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.12); visible: index > 0 }
                     Text { anchors.verticalCenter: parent.verticalCenter; text: modelData.nombre; color: Tema.tinta
@@ -366,16 +373,49 @@ Item {
                     Llave {
                         anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                         scale: 1.4 * vista.s; transformOrigin: Item.Right
-                        prendida: vista.rep.prendido(modelData.clave)
-                        opacity: modelData.clave === "adelanto" && !(vista.rep.distancia > 0) ? 0.4 : 1
-                        onCambiada: (v) => vista.rep.guardar(modelData.clave, { on: v })
+                        prendida: vista.rep.prendido(filaDato.modelData.clave)
+                        opacity: filaDato.sePuede ? 1 : 0.4
+                        enabled: false   // la fila entera es el botón (más fácil de tocar)
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: filaDato.sePuede
+                        onClicked: vista.rep.guardar(filaDato.modelData.clave, { on: !vista.rep.prendido(filaDato.modelData.clave) })
                     }
                 }
             }
+            Item { width: 1; height: 10 * vista.s }
+            Rectangle {   // mover los datos
+                width: parent.width; height: 56 * vista.s; radius: height / 2
+                color: zonaMover.pressed ? Qt.lighter(Tema.acento, 1.2) : Tema.acento
+                Text { anchors.centerIn: parent; text: "✎  Mover los datos en la pantalla"; color: Tema.acentoTinta
+                       font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 21 * vista.s } }
+                MouseArea { id: zonaMover; anchors.fill: parent; onClicked: { vista.rep.menuDatos = false; vista.rep.editando = true; } }
+            }
             Text {
                 width: parent.width; wrapMode: Text.WordWrap; topPadding: 8 * vista.s
-                text: "Mantené apretado un dato para moverlo · se pega a los otros y a los bordes"
+                text: "Tocá afuera para cerrar"
                 color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 17 * vista.s }
+            }
+        }
+    }
+    // Moviendo los datos: aviso arriba y «Guardar»
+    Rectangle {
+        visible: vista.editando && vista.completo
+        z: 20
+        anchors { horizontalCenter: parent.horizontalCenter; top: parent.top; topMargin: 12 * vista.s }
+        height: 60 * vista.s; width: filaGuardar.implicitWidth + 30 * vista.s; radius: height / 2
+        color: Qt.rgba(Tema.caja2.r, Tema.caja2.g, Tema.caja2.b, 0.95); border { width: 2; color: Tema.bordeCromo }
+        Row {
+            id: filaGuardar; anchors.centerIn: parent; spacing: 16 * vista.s
+            Text { anchors.verticalCenter: parent.verticalCenter; text: "Mantené apretado un dato y arrastralo"; color: Tema.tinta
+                   font { family: Tema.fuente600; pixelSize: 19 * vista.s } }
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                height: 44 * vista.s; width: tGuardar.implicitWidth + 36 * vista.s; radius: height / 2; color: Tema.acento
+                Text { id: tGuardar; anchors.centerIn: parent; text: "✓ Guardar"; color: Tema.acentoTinta
+                       font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 20 * vista.s } }
+                MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: vista.rep.editando = false }
             }
         }
     }
