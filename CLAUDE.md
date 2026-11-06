@@ -5,6 +5,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | Archivo | Qué tiene |
 |---|---|
 | [docs/raspios.md](docs/raspios.md) | **Cómo está hecho hoy**: Raspberry Pi OS, instalador, servicios, cómo se publica una versión, actualización, errores ya vistos |
+| [docs/raspios.md](docs/raspios.md) | **Leer primero:** cómo está hecho hoy (Raspberry Pi OS), cómo se publica una versión, cómo probar y errores que ya pasaron |
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
@@ -42,6 +43,13 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 - **Comandos para la Raspberry:** completos, listos para pegar (se conecta con `ssh beto@<IP>` desde Windows).
 - **Tokens y claves:** nunca pedirlos ni pegarlos en el chat.
 - Las ideas que no le gustan no se anotan. Lo que ya está como en la app, se deja como en la app.
+
+## Ramas y versiones
+
+- Todas las ramas están unidas (06/11/2026): `main`, `claude/adoring-bell-disf3a` y las `ccr-*` apuntan a lo mismo. Trabajá sobre la rama que te asignen, partiendo de lo último.
+- **Publicar** (llega sola a la Raspberry): subir la versión en `CMakeLists.txt` y poner `[publicar]` en el mensaje, o correr `programa.yml` con «publicar». Detalle en `docs/raspios.md`.
+- Commits intermedios con `[skip ci]`. **Nunca empujar mientras compila una versión.**
+- Última publicada: ver «Siguiente» en `PENDIENTES.md`.
 
 ## Commits
 
