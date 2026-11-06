@@ -75,6 +75,23 @@ Muestra: [muestras/video/tele.png](muestras/video/tele.png) (fuente `muestras/vi
 - **Probar en la PC:** `QT_QPA_PLATFORM=offscreen:configfile=pantallas.json` con dos pantallas (`DSI-1` y `HDMI-A-1`),
   `--prueba tele`, `tele-datos`, `tele-reiniciar`, `video-pulsador` y `--captura-tele archivo.png`.
 
+## Modo tele: el celu como control y «Carreras» (06/11/2026)
+- **Celu:** en el control de la Pi, el botón **Celu** abre un código QR grande: «Escaneá con el celu: el celu también es
+  control». Lleva a `http://IP/control` (en la PC, `:8080`). Sin wifi dice «Conectá la wifi para usar el celu».
+- **La página del celu** (`/control`) es igual al control de la Pi: vueltas, −10 s / play-pausa / +10 s, la línea de tiempo,
+  **Carreras** y **Salir**. Pregunta cada medio segundo cómo está la tele. Sin modo tele dice «La tele no está en uso: en la
+  Pi, abrí un informe con video y tocá «Ver en la tele»». Desde el celu no se puede empezar el modo tele.
+- **Carreras (como capítulos):** en la Pi y en el celu, la lista de carreras con video (nombre, fecha, vueltas); la que está en
+  la tele va en amarillo. Al elegir otra, el informe de abajo pasa a esa carrera y la tele la muestra en pausa desde su
+  primera vuelta, con sus datos y su pista. «Salir» deja el informe en la carrera elegida.
+- **Nunca en carrera:** «Betómetro en la red» está apagado en carrera, y además las pantallas no hacen caso.
+- **Técnico:** `app/control_remoto.*` (`ControlRemoto`) es el puente: `Tele.qml` le pasa cómo está la tele y la lista de
+  carreras; el servidor le pasa lo que se tocó (`/control/estado`, `/control/accion?tipo=..&valor=..`, GET o POST). Revisa
+  todo (números en rango, la vuelta tiene que tener video, la carrera tiene que estar en la lista) y avisa con `accion`.
+  Cambiar de carrera: `Tele.elegirCarrera(id)` → `Navegacion.ir("informe", {id})`; el mismo reproductor sigue en la tele.
+- **Probar en la PC:** `--prueba tele-qr` (el QR), `tele-carreras` (la lista) y `tele-remoto` (para probar el celu).
+  Las dos últimas, con `--muestra`, le ponen también `videos/muestra.mkv` a Paraná (queda guardado en `--datos`: usar una copia).
+
 ## Ajustes → Cámara y micrófono (lista aprobada 02/11/2026)
 
 Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.html`, `#k1`). Se entra desde **Ajustes** (no va en el inicio).

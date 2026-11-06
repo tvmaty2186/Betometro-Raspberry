@@ -317,7 +317,7 @@ Item {
         visible: c.verCarreras
         titulo: "Carreras"
         width: Math.min(c.width - 2 * c.m, 760)
-        height: c.h ? c.height - 60 : Math.min(c.height - 200, 140 + Math.max(1, Tele.carreras.length) * 112)
+        height: Math.min(c.height - (c.h ? 60 : 200), 140 + Math.max(1, Tele.carreras.length) * 112)
         onListo: c.verCarreras = false
         ListView {
             id: lista
