@@ -46,7 +46,7 @@ if(BETO_PROGRAMA)
     find_package(Qt6 QUIET COMPONENTS ShaderTools)
     if(Qt6ShaderTools_FOUND AND EXISTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_HEADERS}/QtGui/${Qt6Gui_VERSION}/QtGui/rhi/qrhi.h")
       qt_add_shaders(betometro "video_shaders"
-        PREFIX "/shaders" BASE app/shaders
+        PREFIX "/shaders" BASE app/shaders BATCHABLE
         GLSL "100es,120,150" HLSL 50 MSL 12
         FILES app/shaders/yuv.vert app/shaders/yuv.frag)
       target_link_libraries(betometro PRIVATE Qt6::GuiPrivate)

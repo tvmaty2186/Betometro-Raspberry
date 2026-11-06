@@ -1,6 +1,8 @@
 #include "imagen_video.h"
 
+#include <QCoreApplication>
 #include <QFile>
+#include <QSurfaceFormat>
 #include <QQuickWindow>
 #include <QSGGeometryNode>
 #include <QSGMaterial>
@@ -202,8 +204,11 @@ public:
         std::memcpy(b->data() + 72, &m->rojo, 4);
         return true;
     }
-    void updateSampledImage(RenderState&, int binding, QSGTexture** t, QSGMaterial* nuevo, QSGMaterial*) override {
-        if (binding >= 1 && binding <= 3) *t = &static_cast<MaterialYuv*>(nuevo)->plano[binding - 1];
+    void updateSampledImage(RenderState& estado, int binding, QSGTexture** t, QSGMaterial* nuevo, QSGMaterial*) override {
+        if (binding < 1 || binding > 3) return;
+        TexturaPlano* p = &static_cast<MaterialYuv*>(nuevo)->plano[binding - 1];
+        p->commitTextureOperations(estado.rhi(), estado.resourceUpdateBatch());   // sube el cuadro nuevo
+        *t = p;
     }
 };
 
@@ -292,18 +297,36 @@ bool probarPrograma(QRhi* rhi) {
                       QRhiShaderResourceBinding::sampledTexture(2, QRhiShaderResourceBinding::FragmentStage, t[1].get(), smp.get()),
                       QRhiShaderResourceBinding::sampledTexture(3, QRhiShaderResourceBinding::FragmentStage, t[2].get(), smp.get())});
     if (!srb->create()) return false;
-    std::unique_ptr<QRhiGraphicsPipeline> ps(rhi->newGraphicsPipeline());
-    ps->setShaderStages({{QRhiShaderStage::Vertex, vs}, {QRhiShaderStage::Fragment, fs}});
-    QRhiVertexInputLayout capas;
-    capas.setBindings({{4 * sizeof(float)}});
-    capas.setAttributes({{0, 0, QRhiVertexInputAttribute::Float2, 0}, {0, 1, QRhiVertexInputAttribute::Float2, 2 * sizeof(float)}});
-    ps->setVertexInputLayout(capas);
-    ps->setTopology(QRhiGraphicsPipeline::TriangleStrip);
-    ps->setShaderResourceBindings(srb.get());
-    ps->setRenderPassDescriptor(rp.get());
-    return ps->create();
+    // Las dos variantes que usa Qt Quick: la común y la «batchable» (la que agrupa nodos; trae _qt_order)
+    for (const auto variante : {QShader::StandardShader, QShader::BatchableVertexShader}) {
+        std::unique_ptr<QRhiGraphicsPipeline> ps(rhi->newGraphicsPipeline());
+        ps->setShaderStages({{QRhiShaderStage::Vertex, vs, variante}, {QRhiShaderStage::Fragment, fs}});
+        QRhiVertexInputLayout capas;
+        capas.setBindings({{4 * sizeof(float)}, {sizeof(float)}});
+        QList<QRhiVertexInputAttribute> atributos{{0, 0, QRhiVertexInputAttribute::Float2, 0},
+                                                  {0, 1, QRhiVertexInputAttribute::Float2, 2 * sizeof(float)}};
+        if (variante == QShader::BatchableVertexShader) atributos.append({1, 7, QRhiVertexInputAttribute::Float, 0});
+        capas.setAttributes(atributos.cbegin(), atributos.cend());
+        ps->setVertexInputLayout(capas);
+        ps->setTopology(QRhiGraphicsPipeline::TriangleStrip);
+        ps->setShaderResourceBindings(srb.get());
+        ps->setRenderPassDescriptor(rp.get());
+        if (!ps->create()) return false;
+    }
+    return true;
 }
 #endif  // BETO_VIDEO_CHIP
+
+// Para probar en la PC como en la Pi 3: BETO_GLES2=1 pide OpenGL ES 2.0 (con QT_XCB_GL_INTEGRATION=xcb_egl
+// y MESA_GLES_VERSION_OVERRIDE=2.0). En el equipo no se usa.
+void pedirGles2() {
+    if (qEnvironmentVariableIntValue("BETO_GLES2") != 1) return;
+    QSurfaceFormat f = QSurfaceFormat::defaultFormat();
+    f.setRenderableType(QSurfaceFormat::OpenGLES);
+    f.setVersion(2, 0);
+    QSurfaceFormat::setDefaultFormat(f);
+}
+Q_COREAPP_STARTUP_FUNCTION(pedirGles2)
 
 }  // namespace
 
