@@ -119,7 +119,7 @@ Item {
                             onTocado: raiz.poner("camaraFinS", Math.min(120, raiz.a.camaraFinS + 5)) }
                         Sub { anchors.verticalCenter: parent.verticalCenter; text: "después de «Terminar»"; tam: 13 } } }
                 Fila { altoMinimo: 58; etiqueta: "Calidad"
-                    Segmentado { opciones: [{ texto: "480p", valor: "480p" }, { texto: "720p", valor: "720p" }, { texto: "1080p", valor: "1080p" }]
+                    Segmentado { opciones: [{ texto: "480p", valor: "480p" }, { texto: "720p", valor: "720p" }]
                         valor: raiz.a.camaraCalidad || "720p"; onElegido: v => raiz.poner("camaraCalidad", v) } }
                 Fila { altoMinimo: 58; etiqueta: "Sonido"; ultima: true
                     Segmentado { opciones: [{ texto: "De la cámara", valor: "camara" }, { texto: "Micrófono USB", valor: "usb" }, { texto: "Sin sonido", valor: "no" }]

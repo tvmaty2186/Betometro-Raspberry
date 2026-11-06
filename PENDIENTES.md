@@ -92,8 +92,11 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   en la Pi): busca redes de nuevo antes de decidir, botón «Armar la red propia ahora», el motivo si falla
   (en Conectividad), paquetes `dnsmasq-base` e `iw`, chip amarillo en la barra con los celus conectados.
 - **Video con la imagen rota (resuelto):** era 1080p a 30 cuadros, la Pi 3 no llegaba. En 720p y 480p salió
-  limpio (Matías, 06/11). Desde la 1.0.23: 1080p a 15 cuadros, cuadros cortados salteados y contados en el
-  reporte. Recomendado para carrera: 720p.
+  limpio (Matías, 06/11). Desde la 1.0.24 **no hay 1080p** (Matías: rompía muchas imágenes): solo 480p y 720p.
+  Si estaba en 1080p pasa solo a 720p.
+- **Menú del engranaje del video (1.0.24, sin probar en la Pi):** las llaves no cambiaban y los datos volvían a
+  su lugar al soltarlos. Causa: una versión anterior había guardado «videoDatos» como el texto «[object Object]»
+  y quedaba así. Ahora si no es un objeto se arranca de cero (probado acá con ese dato roto: anda).
 - Hecho hasta la 1.0.22 (06/11/2026): video en el informe (Pi, celu, tele), modo tele con el celu de control y
   carreras como capítulos, Drive, MP4, 480p, GPS quieto, todas las pantallas grandes.
 - Probado por Matías (06/11/2026), todo bien: corriente y calor (convertidor y disipador), pulsador real,

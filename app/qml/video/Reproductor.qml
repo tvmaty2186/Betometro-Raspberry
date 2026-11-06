@@ -183,7 +183,8 @@ Item {
     }
 
     // ---------- Datos encima: dónde va cada uno (fracciones guardadas, las mismas en la Pi y en la tele) ----------
-    readonly property var cfgDatos: Datos.ajustes.videoDatos || ({})
+    // Solo si es un objeto (antes de la 1.0.23 podía haber quedado el texto «[object Object]»)
+    readonly property var cfgDatos: { const v = Datos.ajustes.videoDatos; return v && typeof v === "object" && !Array.isArray(v) ? v : ({}); }
     readonly property var fabrica: ({
         vuelta: { x: 0, y: 0 }, adelanto: { x: 1, y: 0 }, tiempo: { x: 0, y: 0.781 },
         distancia: { x: 0, y: 0.89 }, velocidad: { x: 0, y: 1 }, pista: { x: 1, y: 1 }

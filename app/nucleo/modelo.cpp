@@ -271,7 +271,7 @@ Json configFabrica() {
     c["camara"] = false;              // de fábrica apagada: se prende al instalarla
     c["camaraInicio"] = "abrir";      // abrir (al abrir la pantalla de carrera), largada, mano (botón REC)
     c["camaraFinS"] = 10;             // segundos de más después de «Terminar»
-    c["camaraCalidad"] = "720p";      // 480p, 720p, 1080p
+    c["camaraCalidad"] = "720p";      // 480p o 720p (1080p sacado: rompía la imagen en la Pi 3)
     c["camaraSonido"] = "camara";     // camara (micrófono de la cámara), usb (micrófono USB), no
     c["camaraGirar"] = false;         // girar 180° (cámara dada vuelta en el techo)
     c["camaraEspejo"] = false;        // espejo: dar vuelta izquierda y derecha
@@ -339,7 +339,7 @@ Json armarConfig(const Json& guardado) {
     boolEn(c, def, "camara");
     opcionEn(c, def, "camaraInicio", {"abrir", "largada", "mano"});
     numeroEn(c, def, "camaraFinS", 0, 120);
-    opcionEn(c, def, "camaraCalidad", {"480p", "720p", "1080p"});
+    opcionEn(c, def, "camaraCalidad", {"480p", "720p"});   // un 1080p viejo pasa a 720p
     opcionEn(c, def, "camaraSonido", {"camara", "usb", "no"});
     boolEn(c, def, "camaraGirar");
     boolEn(c, def, "camaraEspejo");
@@ -347,6 +347,10 @@ Json armarConfig(const Json& guardado) {
     boolEn(c, def, "driveInformes");
     boolEn(c, def, "driveVideos");
     boolEn(c, def, "driveBorrarSubidos");
+    // Datos sobre el video (lugar y prendido de cada uno): tiene que ser un objeto. Antes de la 1.0.23 se
+    // guardaba como el texto «[object Object]» y así las llaves no cambiaban y los datos volvían a su
+    // lugar al soltarlos (Matías, 06/11/2026): si no es objeto, se arranca de cero.
+    if (c.tiene("videoDatos") && !c["videoDatos"].esObjeto()) c["videoDatos"] = Json::objeto();
     {   // lista de nombres de wifi (textos no vacíos, sin repetir)
         Json l = Json::lista();
         std::vector<std::string> vistos;

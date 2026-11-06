@@ -277,7 +277,7 @@ bool Camara::empezar(const QString& nombreBase) {
     detenerTimer_.stop();
     archivo_ = carpeta_ + '/' + nombreBase + QStringLiteral(".mkv");
     const QString calidad = QString::fromStdString(datos_->config()["camaraCalidad"].aTexto("720p"));
-    QSize tam = calidad == QLatin1String("1080p") ? QSize(1920, 1080) : QSize(1280, 720);
+    QSize tam(1280, 720);   // 720p o 480p (sin 1080p)
     QString escala;
     if (calidad == QLatin1String("480p")) {
         // 480p: si la cámara lo da, directo (16:9 primero, si no 4:3). Si no, una común (MJPEG) se toma en 720p y

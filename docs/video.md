@@ -96,7 +96,7 @@ Muestra: [muestras/video/tele.png](muestras/video/tele.png) (fuente `muestras/vi
 
 Muestra: [muestras-camara.png](muestras-camara.png) (fuente `muestras/camara.html`, `#k1`). Se entra desde **Ajustes** (no va en el inicio).
 
-1. Cámara sí / no. 2. Estado («ELP 1080p · H.264 · lista»; también en el Chequeo previo). 3. Vista previa para apuntarla (nunca en carrera). 4. Girar 180°. 5. Empieza: al abrir la carrera (de fábrica) / en la largada / a mano (REC). 6. Termina: N s después de «Terminar» (10 s). 7. Calidad 720p / 1080p. 8. Sonido: de la cámara / **micrófono USB** / sin sonido. 9. Probar: grabación de 10 s; micrófono con barra de nivel y «Grabar 5 s y escuchar». 10. Lugar: horas que entran. 11. Borrar lo más viejo si falta lugar (nunca informes). 12. Videos guardados (borrar por carrera).
+1. Cámara sí / no. 2. Estado («ELP 1080p · H.264 · lista»; también en el Chequeo previo). 3. Vista previa para apuntarla (nunca en carrera). 4. Girar 180°. 5. Empieza: al abrir la carrera (de fábrica) / en la largada / a mano (REC). 6. Termina: N s después de «Terminar» (10 s). 7. Calidad 480p / 720p (sin 1080p desde la 1.0.24: rompía la imagen en la Pi 3). 8. Sonido: de la cámara / **micrófono USB** / sin sonido. 9. Probar: grabación de 10 s; micrófono con barra de nivel y «Grabar 5 s y escuchar». 10. Lugar: horas que entran. 11. Borrar lo más viejo si falta lugar (nunca informes). 12. Videos guardados (borrar por carrera).
 
 ## Cuándo
 
