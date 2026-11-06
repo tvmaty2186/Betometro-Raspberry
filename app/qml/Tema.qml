@@ -13,6 +13,8 @@ QtObject {
     // Modo Tablet (05/11/2026): botones grandes, dentro de cualquier tema (Ajustes → Pantalla y tema).
     // «--prueba tablet…» lo prende para las capturas.
     readonly property bool tablet: !!Datos.ajustes.modoTablet || Contexto.prueba.indexOf("tablet") === 0
+    // Todas las pantallas (menos el inicio) van grandes, como en el Modo Tablet (Matías, 06/11/2026)
+    readonly property bool grandes: true
 
     function de(av, ra, sp, ca, so) { return sol ? so : nombre === "rally" ? ra : nombre === "sport" ? sp : nombre === "cabina" ? ca : av; }
 

@@ -31,7 +31,7 @@ TPantalla {
                 TIcono { width: 44; height: 44; nombre: "auto" } }
 
             // ---- Pantalla y tema
-            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Modo Tablet"; detalle: "Botones grandes"
+            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Inicio con botones"; detalle: "Apagado: el inicio con la foto del auto"
                 TLlave { prendida: !!raiz.a.modoTablet; onCambiada: v => raiz.poner("modoTablet", v) } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Tema"
                 TOpciones { opciones: [{ texto: "Avispón", valor: "avispon" }, { texto: "Rally", valor: "rally" }, { texto: "Deportivo", valor: "sport" }, { texto: "Cabina", valor: "cabina" }]

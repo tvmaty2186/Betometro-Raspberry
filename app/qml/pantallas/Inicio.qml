@@ -18,42 +18,16 @@ Item {
     Fondo { anchors.fill: parent }
 
     FotoInicio {
-        x: 0; y: raiz.h ? 100 : 116
+        x: 0; y: raiz.h ? 80 : 80
         width: raiz.h ? 860 : 720; height: raiz.h ? 470 : 370
         focoY: raiz.h ? 0.18 : 0.15
         fundeDerecha: raiz.h ? 0.75 : 1
         fundeAbajo: raiz.h ? 0.70 : 0.80
     }
 
-    // Cabecera verde con filete amarillo
-    Rectangle {
-        x: 0; y: 0; width: parent.width; height: raiz.h ? 96 : 112
-        gradient: Gradient { GradientStop { position: 0; color: Tema.avispon ? "#123d24" : Tema.caja1 } GradientStop { position: 1; color: Tema.avispon ? "#081a0f" : Tema.caja2 } }
-        Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 4; color: Tema.acento }
-    }
-    Rayas { visible: Tema.avispon; x: raiz.h ? parent.width - 200 - 80 : parent.width - 30 - 70; y: -30; width: raiz.h ? 80 : 70; height: raiz.h ? 130 : 150 }
-    Cabecera { x: raiz.h ? 28 : 22; y: raiz.h ? 17 : 15; alto: raiz.h ? 62 : 56; tamTitulo: raiz.h ? 44 : 40 }
-
-    Text {
-        id: version
-        textFormat: Text.StyledText
-        text: "v" + Contexto.version + (Contexto.versionNueva ? " <font color='" + Tema.acento + "'>· Actualizar</font>" : "")
-        color: Tema.tinta
-        font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 18 : 16 }
-        x: raiz.h ? parent.width - 28 - width : 24
-        y: raiz.h ? 30 : 84
-        MouseArea { anchors.fill: parent; anchors.margins: -10; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
-    }
-    // Ícono del wifi (abanico), a la izquierda de las franjas en diagonal, lejos de la versión y del
-    // «· Actualizar» (Matías, 04/11/2026). Tocarlo abre Conectividad.
-    IconoWifi {
-        id: iconoWifi
-        nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0
-        width: 44; height: 34
-        x: raiz.h ? parent.width - 200 - 80 - 18 - width : parent.width - 30 - 70 - 18 - width
-        y: raiz.h ? 28 : 34
-        MouseArea { anchors.fill: parent; anchors.margins: -12; onClicked: Navegacion.ir("conectividad") }
-    }
+    // Arriba, la misma barra del Modo Tablet: león, BETÓMETRO y la versión («Actualizar» en amarillo),
+    // GPS, wifi y la hora (Matías, 06/11/2026: «me encanta, que quede en el modo normal»)
+    TBarra { }
 
     Banda { visible: Tema.avispon; x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
     Numero101 { visible: Tema.avispon; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }

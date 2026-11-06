@@ -26,6 +26,8 @@ Rectangle {
         Image { visible: raiz.titulo === ""; source: "qrc:/recursos/img/leon.png"; height: 52; fillMode: Image.PreserveAspectFit; anchors.verticalCenter: parent.verticalCenter }
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            // De pie, en el inicio no entra todo: queda el león y la versión
+            visible: raiz.titulo !== "" || Contexto.horizontal
             text: raiz.titulo !== "" ? raiz.titulo.toUpperCase() : "BETÓMETRO"
             color: Tema.tinta
             font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.titulo !== "" ? 34 : 32; letterSpacing: 1 }

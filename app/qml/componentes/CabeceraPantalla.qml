@@ -8,8 +8,8 @@ Item {
     property real derechaRayas: Contexto.horizontal ? 90 : 150
     signal volver()
     anchors.fill: parent
-    // Muestra (06/11/2026): la barra del Modo Tablet también en el modo normal
-    readonly property bool barra: Contexto.prueba.indexOf("barra") >= 0
+    // La barra del Modo Tablet en todas las pantallas (Matías, 06/11/2026)
+    readonly property bool barra: Tema.grandes
     TBarra { visible: raiz.barra; titulo: raiz.titulo; onVolver: raiz.volver() }
     Rayas { visible: Tema.avispon && !raiz.barra; x: parent.width - raiz.derechaRayas - width; y: -30 }
     Row {

@@ -27,12 +27,13 @@ Window {
 
         Loader {
             anchors.fill: parent
-            // En Modo Tablet, las pantallas que tienen versión grande (carpeta tablet/)
+            // Las pantallas que tienen versión grande (carpeta tablet/) van siempre así. El Modo Tablet solo
+            // cambia el inicio (Matías, 06/11/2026: «lo único que cambia entre normal y tablet es el inicio»)
             readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara", drive: "TDrive",
                                               ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
                                               ficha: "TFicha", chequeo: "TChequeo", conectividad: "TConectividad", actualizar: "TActualizar" })
             source: {
-                if (Tema.tablet && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
+                if ((Navegacion.actual !== "inicio" || Tema.tablet) && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
                 switch (Navegacion.actual) {
                 case "inicio": return "pantallas/Inicio.qml";
                 case "carreras": return "pantallas/Carreras.qml";
