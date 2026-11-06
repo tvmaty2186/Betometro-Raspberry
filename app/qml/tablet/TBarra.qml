@@ -60,11 +60,17 @@ Rectangle {
                 Text { text: Crono.gps.ok ? "GPS " + (Crono.gps.satelites || Crono.gps.hz) : "Sin GPS"; color: Tema.tinta
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 23 } } }
         }
-        Rectangle {   // wifi
+        Rectangle {   // wifi; con la red propia armada: en color, con cuántos celus hay conectados
             visible: Contexto.horizontal || raiz.titulo === ""
-            height: 50; width: 72; radius: 25
-            color: Qt.rgba(0, 0, 0, 0.35); border { width: 2; color: Tema.bordeCromo }
-            IconoWifi { anchors.centerIn: parent; width: 38; height: 30; nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0 }
+            height: 50; width: Wifi.propia ? filaPropia.implicitWidth + 30 : 72; radius: 25
+            color: Wifi.propia ? Tema.acento : Qt.rgba(0, 0, 0, 0.35); border { width: 2; color: Wifi.propia ? Tema.acentoBorde : Tema.bordeCromo }
+            IconoWifi { visible: !Wifi.propia; anchors.centerIn: parent; width: 38; height: 30; nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0 }
+            Row {
+                id: filaPropia; visible: Wifi.propia; anchors.centerIn: parent; spacing: 6
+                TIcono { width: 32; height: 32; nombre: "red"; color: Tema.acentoTinta; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: Wifi.conectadosPropia; anchors.verticalCenter: parent.verticalCenter; color: Tema.acentoTinta
+                       font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 } }
+            }
             MouseArea { anchors.fill: parent; onClicked: Navegacion.ir("conectividad") }
         }
         Text { text: raiz.hora; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta

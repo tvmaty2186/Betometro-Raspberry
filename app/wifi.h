@@ -24,6 +24,9 @@ class Wifi : public QObject {
     Q_PROPERTY(bool propia READ propia NOTIFY cambio)
     Q_PROPERTY(QString nombrePropia READ nombrePropia NOTIFY cambio)
     Q_PROPERTY(QString clavePropia READ clavePropia CONSTANT)
+    Q_PROPERTY(int conectadosPropia READ conectadosPropia NOTIFY cambio)   // celus conectados a la wifi propia
+    Q_PROPERTY(QString errorPropia READ errorPropia NOTIFY cambio)         // por qué no se pudo armar (en palabras)
+    Q_PROPERTY(bool armandoPropia READ armandoPropia NOTIFY cambio)
 
 public:
     explicit Wifi(QObject* padre = nullptr);
@@ -38,6 +41,10 @@ public:
     QString nombrePropia() const { return QStringLiteral("Betometro-") + numero_; }
     QString clavePropia() const { return QStringLiteral("betometro"); }
     void ponerPropia(bool permitida, const QString& numeroAuto);   // desde Ajustes → Conectividad
+    int conectadosPropia() const { return conectadosPropia_; }
+    QString errorPropia() const { return errorPropia_; }
+    bool armandoPropia() const { return armandoPropia_; }
+    Q_INVOKABLE void armarPropia();   // ya, sin esperar (botón en Conectividad)
     QString direccion() const;
     QString error() const { return error_; }
 
@@ -59,6 +66,7 @@ private:
     void refrescar();             // red conectada, señal y redes guardadas
     void revisarPropia();         // ¿hay que armar la wifi propia?
     void apagarPropia();
+    void contarConectados();
 
     bool real_ = false;
     QList<Red> redes_;            // las que se ven
@@ -70,5 +78,8 @@ private:
     bool propia_ = false, propiaPermitida_ = true;
     QString numero_ = QStringLiteral("101");
     qint64 sinRedDesde_ = 0;      // ms desde que no hay red (para esperar antes de armar la propia)
+    int conectadosPropia_ = 0;
+    QString errorPropia_;
+    bool armandoPropia_ = false;
     QTimer cada_;
 };

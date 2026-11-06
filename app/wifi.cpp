@@ -71,19 +71,64 @@ void Wifi::apagarPropia() {
 
 // Si en 90 s no hay ninguna red guardada (casa, celular), se arma la wifi propia para entrar desde el
 // celular a los informes. Se apaga sola al tocar «Buscar redes» o al apagar la opción.
+// 06/11/2026 (Matías: «la red propia no funciona»): antes decidía con la lista de redes del arranque, que
+// podía quedar vieja; ahora busca de nuevo justo antes. Y si falla, lo dice en Conectividad.
 void Wifi::revisarPropia() {
-    if (!real_ || propia_ || conectando_) return;
+    if (!real_ || propia_ || conectando_ || armandoPropia_) return;
     const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
     if (!conectada_.isEmpty()) { sinRedDesde_ = 0; return; }
     if (sinRedDesde_ == 0) { sinRedDesde_ = ahora; return; }
     if (!propiaPermitida_ || ahora - sinRedDesde_ < 90000) return;
-    for (const auto& r : redes_) if (guardadas_.contains(r.nombre)) return;   // hay una guardada cerca: se conecta sola
-    nmcli({"dev", "wifi", "hotspot", "ifname", "wlan0", "con-name", kConPropia, "ssid", nombrePropia(), "password", clavePropia()},
-          [this](int codigo, const QString&, const QString& err) {
-              if (codigo != 0) { qWarning("Wifi propia: no se pudo armar (%s)", qPrintable(err)); sinRedDesde_ = 0; return; }
-              propia_ = true;
-              emit cambio();
-          });
+    armandoPropia_ = true;
+    emit cambio();
+    // Las redes de ahora (no las del arranque)
+    nmcli({"-t", "-f", "SSID", "dev", "wifi", "list", "--rescan", "yes"}, [this](int, const QString& out, const QString&) {
+        armandoPropia_ = false;
+        for (const auto& l : out.split('\n', Qt::SkipEmptyParts)) {
+            const QString ssid = campos(l).value(0);
+            if (!ssid.isEmpty() && guardadas_.contains(ssid)) { sinRedDesde_ = QDateTime::currentMSecsSinceEpoch(); emit cambio(); return; }   // se conecta sola
+        }
+        armarPropia();
+    });
+}
+
+void Wifi::armarPropia() {
+    if (!real_) { propia_ = true; conectadosPropia_ = 1; errorPropia_.clear(); emit cambio(); return; }
+    if (propia_) return;
+    armandoPropia_ = true;
+    errorPropia_.clear();
+    emit cambio();
+    // 2,4 GHz (la Pi 3 y todos los celus la ven); la conexión vieja se borra antes por si quedó mal guardada
+    nmcli({"connection", "delete", kConPropia}, [this](int, const QString&, const QString&) {
+        nmcli({"dev", "wifi", "hotspot", "ifname", "wlan0", "con-name", kConPropia, "ssid", nombrePropia(), "band", "bg", "password", clavePropia()},
+              [this](int codigo, const QString&, const QString& err) {
+                  armandoPropia_ = false;
+                  if (codigo != 0) {
+                      qWarning("Wifi propia: no se pudo armar (%s)", qPrintable(err));
+                      errorPropia_ = err.contains(QLatin1String("dnsmasq"), Qt::CaseInsensitive) ? QStringLiteral("Falta un programa del sistema (dnsmasq): actualizá Betómetro con wifi")
+                                   : err.isEmpty() ? QStringLiteral("No se pudo armar la red propia") : QStringLiteral("No se pudo armar: ") + err;
+                      sinRedDesde_ = 0;
+                      emit cambio();
+                      return;
+                  }
+                  propia_ = true;
+                  emit cambio();
+                  contarConectados();
+              });
+    });
+}
+
+// Cuántos celus están conectados a la wifi propia (iw: las «estaciones» del punto de acceso)
+void Wifi::contarConectados() {
+    if (!real_ || !propia_) { if (conectadosPropia_ && !propia_) { conectadosPropia_ = 0; emit cambio(); } return; }
+    auto* p = new QProcess(this);
+    connect(p, &QProcess::finished, this, [this, p](int, QProcess::ExitStatus) {
+        const int n = QString::fromUtf8(p->readAllStandardOutput()).count(QLatin1String("Station "));
+        p->deleteLater();
+        if (n != conectadosPropia_) { conectadosPropia_ = n; emit cambio(); }
+    });
+    connect(p, &QProcess::errorOccurred, p, &QObject::deleteLater);
+    p->start(QStringLiteral("iw"), {QStringLiteral("dev"), QStringLiteral("wlan0"), QStringLiteral("station"), QStringLiteral("dump")});
 }
 
 void Wifi::refrescar() {
@@ -91,6 +136,7 @@ void Wifi::refrescar() {
     nmcli({"-t", "-f", "NAME", "connection", "show", "--active"}, [this](int, const QString& out, const QString&) {
         const bool p = out.split('\n').contains(kConPropia);
         if (p != propia_) { propia_ = p; emit cambio(); }
+        contarConectados();
     });
     // Red conectada y su señal
     nmcli({"-t", "-f", "ACTIVE,SIGNAL,SSID", "dev", "wifi", "list", "--rescan", "no"}, [this](int, const QString& out, const QString&) {

@@ -33,3 +33,5 @@ pulseaudio-utils
 plymouth
 curl
 gstreamer1.0-libav
+dnsmasq-base
+iw

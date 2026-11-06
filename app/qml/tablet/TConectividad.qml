@@ -8,15 +8,24 @@ TPantalla {
     titulo: "Wifi e informes"
     readonly property var a: Datos.ajustes
     property bool qrGrande: false
+    Component.onCompleted: if (Contexto.prueba === "red-propia") Wifi.armarPropia()   // captura
+    // Con la red propia: primero el QR que conecta el celu a esa wifi, después el de los informes
+    property bool paso1: true
+    readonly property string qrWifi: "WIFI:T:WPA;S:" + Wifi.nombrePropia + ";P:" + Wifi.clavePropia + ";;"
     readonly property string url: "http://" + Wifi.direccion + (Servidor.puerto !== 80 ? ":" + Servidor.puerto : "")
 
     Column {
         id: izq
         width: raiz.h ? 560 : raiz.area.width
         spacing: 14
-        TFila { height: 110; etiqueta: Wifi.conectando ? "Conectando…" : Wifi.propia ? "Wifi propia" : Wifi.conectada ? Wifi.conectada : "Sin conexión"
-                detalle: Wifi.propia ? "«" + Wifi.nombrePropia + "» · clave " + Wifi.clavePropia : Wifi.conectada ? ["Sin señal", "Débil", "Regular", "Buena", "Excelente"][Wifi.senal] : ""
-            IconoWifi { width: 60; height: 46; nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0 } }
+        TFila { height: 110; etiqueta: Wifi.conectando ? "Conectando…" : Wifi.propia ? "Red propia · " + Wifi.conectadosPropia + (Wifi.conectadosPropia === 1 ? " celu" : " celus") : Wifi.armandoPropia ? "Armando la red propia…" : Wifi.conectada ? Wifi.conectada : "Sin conexión"
+                detalle: Wifi.propia ? "«" + Wifi.nombrePropia + "» · clave " + Wifi.clavePropia
+                         : Wifi.errorPropia ? Wifi.errorPropia : Wifi.conectada ? ["Sin señal", "Débil", "Regular", "Buena", "Excelente"][Wifi.senal] : ""
+            IconoWifi { visible: !Wifi.propia; width: 60; height: 46; nivel: Wifi.conectada ? Math.max(1, Wifi.senal) : 0 }
+            TIcono { visible: Wifi.propia; width: 52; height: 52; nombre: "red"; color: Tema.acento } }
+        // Sin wifi: armar la red propia ya, sin esperar los 90 s
+        TBoton { visible: !Wifi.propia && !Wifi.conectada && !Wifi.conectando; width: parent.width; height: 84; tipo: "acento"; tamNombre: 26
+                 nombre: Wifi.armandoPropia ? "Armando la red propia…" : "Armar la red propia ahora"; activo: !Wifi.armandoPropia; onTocado: Wifi.armarPropia() }
         Rectangle {   // QR para el celular
             width: parent.width; height: raiz.h ? 230 : 250
             radius: Math.max(14, Tema.radio * 1.5)
@@ -25,16 +34,18 @@ TPantalla {
             Rectangle {
                 x: 20; anchors.verticalCenter: parent.verticalCenter
                 width: parent.height - 40; height: width; radius: 16; color: "#fff"
-                Image { anchors.centerIn: parent; width: parent.width - 20; height: width; smooth: false; source: "image://qr/" + encodeURIComponent(raiz.url) }
+                Image { anchors.centerIn: parent; width: parent.width - 20; height: width; smooth: false
+                        source: "image://qr/" + encodeURIComponent(raiz.paso1 ? raiz.qrWifi : raiz.url) }
             }
             Column {
                 x: parent.height; anchors.verticalCenter: parent.verticalCenter; width: parent.width - x - 16; spacing: 8
-                Text { text: "Informes en el celu"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
-                Text { width: parent.width; elide: Text.ElideRight; text: raiz.url.replace("http://", ""); color: Tema.acento
+                Text { text: raiz.paso1 ? "1 · Conectá el celu" : (Wifi.propia ? "2 · " : "") + "Informes en el celu"; color: Tema.tinta
+                       font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
+                Text { width: parent.width; elide: Text.ElideRight; text: raiz.paso1 ? Wifi.nombrePropia + " · " + Wifi.clavePropia : raiz.url.replace("http://", ""); color: Tema.acento
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
-                Text { text: "Tocá para agrandar"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 } }
+                Text { text: Wifi.propia ? (raiz.paso1 ? "Tocá: QR de los informes" : "Tocá: QR de la wifi") : "Tocá para agrandar"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 } }
             }
-            MouseArea { anchors.fill: parent; onClicked: raiz.qrGrande = true }
+            MouseArea { anchors.fill: parent; onClicked: { if (Wifi.propia) raiz.paso1 = !raiz.paso1; else raiz.qrGrande = true; } }
         }
         TFila { etiqueta: "Informes en la red"
             TLlave { prendida: raiz.a.informesRed !== false; onCambiada: v => Datos.ponerCfg("informesRed", v) } }
