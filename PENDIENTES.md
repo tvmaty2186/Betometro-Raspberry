@@ -67,7 +67,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
    pueda crear issues ahí; se copia a la Raspberry en `/var/lib/betometro/reportes.token`. Sin eso, los
    errores igual quedan en la página «Betómetro en la red» → «Reporte de errores».
 
-## 1.0.18 (preparada, sin compilar)
+## 1.0.18 (publicada 06/11/2026)
 - Video en el informe (Raspberry y página): Informe/Video, datos encima, pantalla completa, datos que se mueven en pausa.
 - Cámara: Espejo. Lista de videos guardados con borrar. El borrado automático también saca el video de la carrera.
 - Modo tele por HDMI (`raspios/kms.json`; DSI-1 y HDMI-A-1 confirmados en la Pi). Sin enchufe en caliente: botón Reiniciar.

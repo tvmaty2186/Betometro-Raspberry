@@ -79,4 +79,5 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 - Actualizar volvía a la 1.0.3: la instalación se cortaba (apt + initramfs tardan minutos; el botón REINICIAR la mataba). Arreglado.
 - «No encuentra la actualización» = el wifi se había desconfigurado, o la API de GitHub frenaba (60 por hora). Arreglado con el plan B.
 - El brillo solo se guardaba y no se aplicaba. Arreglado en 1.0.10.
+- 06/11/2026: la compilación se colgó 17 min en «apt-get install ffmpeg» (paso Voz) sin decir nada. Ahora ese paso tiene tiempo límite y reintentos.
 - Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` quedan guardados sin usar).
