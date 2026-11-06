@@ -108,18 +108,38 @@ Item {
     Row {
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: raiz.h ? 20 : 20; spacing: 16
-        Rectangle {   // 📺 Ver en la tele
+        // 📺 Ver en la tele: con la tele enchufada tiene que notarse (Matías, 06/11/2026). Botón del tema (cromo,
+        // como Compartir pero oscuro), ícono de línea del tema en el color de acento y el borde que «late» suave.
+        Item {
+            id: botonTele
             visible: raiz.botonTele
             anchors.verticalCenter: parent.verticalCenter
-            height: raiz.h ? 44 : 42; width: filaTele.implicitWidth + 32; radius: height / 2
-            color: Qt.rgba(0, 0, 0, 0.55); border { width: 1.5; color: Tema.bordeCromo }
-            Row {
-                id: filaTele; anchors.centerIn: parent; spacing: 10
-                IconoTele { width: 26; height: 23; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: "Ver en la tele"; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter
-                       font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 18 } }
+            height: raiz.h ? 56 : 54; width: filaTele.implicitWidth + 40
+            readonly property real radio: Math.max(6, Tema.radio)
+            Rectangle {   // el aura que late
+                anchors.fill: parent; anchors.margins: -5; radius: botonTele.radio + 5
+                color: "transparent"; border { width: 3; color: Tema.acento }
+                SequentialAnimation on opacity {
+                    running: botonTele.visible; loops: Animation.Infinite
+                    NumberAnimation { from: 0.15; to: 0.9; duration: 900; easing.type: Easing.InOutSine }
+                    NumberAnimation { from: 0.9; to: 0.15; duration: 900; easing.type: Easing.InOutSine }
+                }
             }
-            MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: raiz.verEnTele() }
+            Rectangle { anchors.fill: parent; anchors.margins: -2; radius: botonTele.radio + 2; color: Tema.bordeCromo }
+            Rectangle {
+                anchors.fill: parent; radius: botonTele.radio
+                gradient: Gradient {
+                    GradientStop { position: 0; color: zonaTele.pressed ? Qt.lighter(Tema.caja1, 1.4) : Qt.lighter(Tema.caja1, 1.15) }
+                    GradientStop { position: 1; color: Tema.caja2 }
+                }
+            }
+            Row {
+                id: filaTele; anchors.centerIn: parent; spacing: 12
+                TIcono { width: 36; height: 36; nombre: "tele"; color: Tema.acento; anchors.verticalCenter: parent.verticalCenter }
+                Text { text: "Ver en la tele"; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter
+                       font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.h ? 22 : 20 } }
+            }
+            MouseArea { id: zonaTele; anchors.fill: parent; anchors.margins: -6; onClicked: raiz.verEnTele() }
         }
         Numero101 { visible: !raiz.videos.length; d: raiz.h ? 62 : 58; numero: Datos.ajustes.numeroAuto || "101"; anchors.verticalCenter: parent.verticalCenter }
         Segmentado {

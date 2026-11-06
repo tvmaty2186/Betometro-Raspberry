@@ -57,6 +57,7 @@ Canvas {
             c.beginPath(); c.moveTo(18, 48); c.arc(18, 38, 10, Math.PI / 2, Math.PI * 1.5, false); c.arc(32, 26, 14, Math.PI * 1.1, Math.PI * 1.95, false);
             c.arc(46, 38, 10, Math.PI * 1.5, Math.PI / 2, false); c.stroke();
             L([32, 56, 32, 34]); L([24, 42, 32, 34, 40, 42]); break;
+        case "tele": L([22, 6, 32, 15, 42, 6]); R(6, 15, 52, 36, 7); L([20, 58, 44, 58]); L([32, 51, 32, 58]); break;
         case "lugar": C(32, 26, 8);
             c.beginPath(); c.moveTo(32, 58); c.bezierCurveTo(20, 44, 14, 36, 14, 26); c.arc(32, 26, 18, Math.PI, 0, false);
             c.bezierCurveTo(50, 36, 44, 44, 32, 58); c.stroke(); break;
