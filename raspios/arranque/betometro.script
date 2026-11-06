@@ -25,7 +25,11 @@ fun medir() {
         a = Window.GetWidth(i);
         b = Window.GetHeight(i);
         if (a && b) {
-            if (a * b > w * h) { w = a; h = b; x = Window.GetX(i); y = Window.GetY(i); }
+            # La más grande; si empatan (la tele por HDMI de 1280×720 y la de 5" de 720×1280), la de pie
+            mejor = 0;
+            if (a * b > w * h) mejor = 1;
+            if (a * b == w * h) { if (b > a) mejor = 1; }
+            if (mejor) { w = a; h = b; x = Window.GetX(i); y = Window.GetY(i); }
         }
         i = i + 1;
     }
