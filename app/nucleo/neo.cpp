@@ -298,10 +298,15 @@ std::vector<std::vector<uint8_t>> configuracionNeo(bool soloGps, FamiliaNeo fami
     std::vector<uint8_t> rate(6, 0);
     pon2(rate, 0, static_cast<uint16_t>(1000 / hzDe(soloGps, familia))); pon2(rate, 2, 1); pon2(rate, 4, 1);
     r.push_back(marco(0x06, 0x08, rate));
-    // CFG-NAV5: modelo dinámico «automotor» (4)
+    // CFG-NAV5: modelo dinámico «automotor» (4) y «quieto» (static hold): por debajo de 1 m/s (3,6 km/h) el
+    // módulo da velocidad 0 y deja la posición fija. Sin esto, con el auto parado el ruido del GPS daba
+    // 0,5 a 3 km/h y aceleraciones y frenadas falsas en el informe (Matías, 06/11/2026). Sale de «quieto»
+    // al pasar esa velocidad o al moverse más de 5 m.
     std::vector<uint8_t> nav5(36, 0);
-    pon2(nav5, 0, 0x0001);
+    pon2(nav5, 0, 0x0001 | 0x0040);   // máscara: dinámica y static hold
     nav5[2] = 4;
+    nav5[22] = 100;                    // staticHoldThresh, cm/s
+    pon2(nav5, 28, 5);                 // staticHoldMaxDist, m (M8; en los viejos es reservado)
     r.push_back(marco(0x06, 0x24, nav5));
     // CFG-MSG: NAV-PVT en cada lectura; las frases NMEA de fábrica, apagadas (GGA GLL GSA GSV RMC VTG)
     if (u6) {   // NEO-6M: sin NAV-PVT. Quedan GGA, RMC y GST; el resto de NMEA, apagado

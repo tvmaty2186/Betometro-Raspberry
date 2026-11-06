@@ -85,3 +85,6 @@ Son los que más se consiguen (placas GY-GPSV3-NEO y GY-NEO6MV2). **Sirven los d
   amarillo (PPS) → pin 7 (GPIO4, opcional) o aislado.
 - **Ojo con la placa NEO-M8N:** en algunas el micro USB solo da corriente. Prueba: enchufarla a la PC con un cable
   de datos; si en el Administrador de dispositivos aparece «u-blox GNSS receiver» o un puerto COM nuevo, pasa datos.
+
+## Quieto (static hold), 06/11/2026
+Con el auto parado, el ruido del GPS daba 0,5 a 3 km/h y el informe mostraba aceleraciones y frenadas falsas. CFG-NAV5 ahora prende *static hold*: por debajo de 1 m/s (3,6 km/h) el módulo da velocidad 0 y deja la posición fija; sale al pasar esa velocidad o al moverse más de 5 m.
