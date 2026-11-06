@@ -16,6 +16,9 @@ Window {
     // Con una tele en el HDMI, la interfaz se queda siempre en la pantalla de 5" (DSI), aunque Qt
     // pusiera la tele primero
     screen: Tele.pantallaPi
+    // y en su lugar del escritorio (si no, Qt la puede llevar a la pantalla que está en 0,0)
+    x: Tele.pantallaPi ? Tele.pantallaPi.virtualX : 0
+    y: Tele.pantallaPi ? Tele.pantallaPi.virtualY : 0
 
     Item {
         id: interfaz
@@ -64,7 +67,7 @@ Window {
     // Modo tele: la ventana de la tele (HDMI) solo si hay una segunda pantalla (docs/video.md)
     // (Instantiator y no Loader: un Window adentro de un Item queda metido en la ventana principal)
     Instantiator {
-        active: Tele.hay
+        active: Tele.hay && !!ventana.screen && ventana.screen.name === Tele.pantallaPi.name
         delegate: VentanaTele {}
     }
 }

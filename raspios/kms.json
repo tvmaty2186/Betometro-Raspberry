@@ -2,8 +2,9 @@
   "hwcursor": false,
   "separateScreens": false,
   "outputs": [
-    { "name": "DSI-1", "primary": true, "virtualIndex": 0 },
-    { "name": "DSI-2", "primary": true, "virtualIndex": 0 },
-    { "name": "HDMI-A-1", "mode": "1280x720", "virtualIndex": 1 }
+    { "name": "DSI1", "primary": true, "virtualIndex": 0 },
+    { "name": "DSI2", "primary": true, "virtualIndex": 0 },
+    { "name": "HDMI1", "mode": "1280x720", "virtualIndex": 1 },
+    { "name": "HDMI2", "mode": "1280x720", "virtualIndex": 2 }
   ]
 }

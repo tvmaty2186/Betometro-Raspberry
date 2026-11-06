@@ -30,6 +30,9 @@ StateDirectory=betometro
 ExecStartPre=-/usr/bin/plymouth quit --retain-splash
 ExecStart=/usr/bin/betometro --fisica
 Restart=always
+# Lo que Betómetro escribe (los errores de Qt van por ahí) queda en el registro: sin esto, journald lo
+# guardaba como «info» y lo descartaba (MaxLevelStore=warning), y no se veía por qué se cerraba
+SyslogLevel=warning
 RestartSec=2
 # Vigilante: Betómetro avisa «sigo vivo» cada 5 s; si se congela 30 s, se reinicia solo
 WatchdogSec=30

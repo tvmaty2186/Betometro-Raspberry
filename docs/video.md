@@ -121,3 +121,11 @@ Etapa nueva **E7**, después de la 1.0.0. Primero tiene que andar perfecto la ca
 - Compilar necesita `qt6-shadertools-dev` y `qt6-base-private-dev` (QRhi); el equipo no. Sin eso compila igual,
   solo por el procesador.
 - Probar en la PC como en la Pi 3: `BETO_GLES2=1 QT_XCB_GL_INTEGRATION=xcb_egl MESA_GLES_VERSION_OVERRIDE=2.0`.
+
+## Modo tele: lo que pasó en la Pi (06/11/2026)
+- Con la tele enchufada al prender, Betómetro se cerraba cada 4 s: «EGLFS: OpenGL windows cannot be mixed with
+  others» (dos ventanas en la misma pantalla). En `kms.json` los nombres eran los del sistema (`DSI-1`,
+  `HDMI-A-1`), pero Qt los llama `DSI1` y `HDMI1`: no coincidían, la tele quedó de principal (y a 1920×1080).
+- Arreglo: nombres de Qt en `kms.json`; la ventana principal en la DSI también por posición (x, y); y la ventana
+  de la tele solo se abre si se sabe cuál es la DSI y la principal ya está ahí (`Tele.sePuede`). Si no, sin modo tele.
+- El servicio tiene `SyslogLevel=warning`: los errores de Qt quedan en `journalctl -u betometro`.
