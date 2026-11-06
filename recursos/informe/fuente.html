@@ -296,6 +296,10 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
   const ms=vv.currentTime*1000,dur=duracion(),r=enVideo(ms);
   $('vHora').textContent=hms(ms);$('vAvance').style.width=(dur?Math.min(100,ms/dur*100):0)+'%';
   const v=r&&C.vueltas[r.i],q=r&&!r.fin?punto(r.i,r.t):null,p=q&&q.p;
+  // El mapa y los gráficos del informe siguen al video: la vuelta que se ve y la raya en el punto exacto (Matías, 06/11/2026)
+  if(r&&!r.fin&&C.vueltas[r.i].m&&C.vueltas[r.i].m.length){if(lap!==r.i){lap=r.i;sel=null;dibujar()}
+   const M=C.vueltas[lap].m;let a=0,b=M.length-1;while(b-a>1){const c=(a+b)>>1;if(M[c][0]<=r.t)a=c;else b=c}
+   const k=Math.abs(M[b][0]-r.t)<Math.abs(M[a][0]-r.t)?b:a;if(k!==sel)marcar(k)}
   $('ovChip').textContent=!r?'ANTES DE LARGAR':r.fin&&r.i===lps[lps.length-1]?'FIN':nombreV(v)+' · '+(v.interrumpida?'INTERR.':v.medida?'MEDIDA':'LIBRE');
   tx('ovTiempo','.n',r?tfmt(r.t*1000):'–');
   const tot=C.distanciaM||(v&&v.L)||0;
