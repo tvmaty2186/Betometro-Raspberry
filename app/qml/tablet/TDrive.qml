@@ -144,4 +144,41 @@ TPantalla {
             }
         }
     }
+
+    // Al pedir el código: el QR y el código a pantalla completa, bien grandes para el celu (Matías, 06/11/2026)
+    Rectangle {
+        parent: raiz; anchors.fill: parent; z: 200
+        visible: Drive.estado === "codigo"
+        color: Tema.fondo3
+        MouseArea { anchors.fill: parent }   // que no se toque lo de atrás
+        Flow {
+            anchors.centerIn: parent
+            width: raiz.h ? qr.width + 60 + datos.width : Math.max(qr.width, datos.width)
+            spacing: raiz.h ? 60 : 40
+            Rectangle {
+                id: qr
+                width: raiz.h ? 470 : 520; height: width; radius: 24; color: "#ffffff"
+                Image { anchors.centerIn: parent; width: parent.width - 36; height: width; smooth: false
+                        source: Drive.estado === "codigo" ? "image://qr/" + encodeURIComponent(Drive.enlace) : "" }
+            }
+            Column {
+                id: datos
+                width: raiz.h ? 640 : 640; spacing: 18
+                Text { text: "Escaneá el QR con el celu, o abrí"; color: Tema.tintaSuave; width: parent.width; wrapMode: Text.WordWrap
+                       font { family: Tema.fuente600; pixelSize: 30 } }
+                Text { text: Drive.enlace.replace("https://", "").replace("www.", ""); color: Tema.acento
+                       font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 48 } }
+                Text { text: "y escribí este código:"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 30 } }
+                Rectangle {
+                    width: parent.width; height: 150; radius: 24
+                    color: Qt.rgba(0, 0, 0, 0.35); border { width: 4; color: Tema.acento }
+                    Text { anchors.centerIn: parent; text: Drive.codigo; color: Tema.tinta
+                           font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 104; letterSpacing: 10 } }
+                }
+                Text { text: "Elegí tu cuenta y tocá «Continuar». Esta pantalla se cierra sola."; color: Tema.tintaSuave
+                       width: parent.width; wrapMode: Text.WordWrap; font { family: Tema.fuente600; pixelSize: 24 } }
+                TBoton { width: parent.width; height: 84; tamNombre: 28; nombre: "Cancelar"; onTocado: Drive.cancelar() }
+            }
+        }
+    }
 }
