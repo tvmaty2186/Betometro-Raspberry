@@ -40,6 +40,20 @@ if(BETO_PROGRAMA)
     # Pantallas para eglfs_kms (la de 5" manda; la tele por HDMI a 1280×720): /usr/share/betometro/kms.json
     install(FILES raspios/kms.json DESTINATION share/betometro)
     target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg Qt6::Multimedia Qt6::Network betometro_qmlplugin)
+    # Colores del video por el chip gráfico (app/shaders, ImagenVideo). Para compilar hace falta Qt Shader
+    # Tools (qsb; en Debian qt6-shadertools-dev) y las cabeceras de QRhi (qt6-base-private-dev); al equipo no.
+    # Los programas llevan variante GLSL ES 100: la Pi 3 solo tiene OpenGL ES 2. Sin eso: por el procesador.
+    find_package(Qt6 QUIET COMPONENTS ShaderTools)
+    if(Qt6ShaderTools_FOUND AND EXISTS "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_HEADERS}/QtGui/${Qt6Gui_VERSION}/QtGui/rhi/qrhi.h")
+      qt_add_shaders(betometro "video_shaders"
+        PREFIX "/shaders" BASE app/shaders
+        GLSL "100es,120,150" HLSL 50 MSL 12
+        FILES app/shaders/yuv.vert app/shaders/yuv.frag)
+      target_link_libraries(betometro PRIVATE Qt6::GuiPrivate)
+      target_compile_definitions(betometro PRIVATE BETO_VIDEO_CHIP)
+    else()
+      message(STATUS "Sin Qt Shader Tools o sin QRhi: el video pasa a colores por el procesador")
+    endif()
     # Ayudante de video y sonido (GStreamer, proceso aparte). Si no hay GStreamer, la cámara no anda.
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)

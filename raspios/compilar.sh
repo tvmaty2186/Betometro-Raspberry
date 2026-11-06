@@ -8,7 +8,7 @@ apt-get update -qq
 apt-get install -y -qq --no-install-recommends \
   ca-certificates cmake ninja-build g++ ccache pkg-config file \
   qt6-base-dev qt6-base-dev-tools qt6-declarative-dev qt6-declarative-dev-tools \
-  qt6-svg-dev qt6-multimedia-dev \
+  qt6-svg-dev qt6-multimedia-dev qt6-shadertools-dev qt6-base-private-dev \
   libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev >/dev/null
 export CCACHE_DIR="$PWD/.ccache"
 cmake -S . -B build-pi -G Ninja -DCMAKE_BUILD_TYPE=Release \

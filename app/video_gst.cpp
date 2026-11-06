@@ -1,5 +1,7 @@
 #include "video_gst.h"
 
+#include "imagen_video.h"
+
 #include <gst/app/gstappsink.h>
 #include <gst/gst.h>
 #include <gst/video/video.h>
@@ -58,10 +60,19 @@ void VideoGst::setVideoOutput(QObject* o) {
     salida_ = o;
     QVideoSink* s = qobject_cast<QVideoSink*>(o);
     if (!s && o) s = o->property("videoSink").value<QVideoSink*>();
+    auto* imagen = qobject_cast<ImagenVideo*>(o);
+    disconnect(seVa_);
     {
         QMutexLocker l(&mutexSink_);
         sink_ = s;
+        imagen_ = imagen;
     }
+    // Si la imagen se borra, que el hilo del video deje de mandarle (espera a que termine de entregar)
+    if (imagen) seVa_ = connect(imagen, &ImagenVideo::seVa, this, [this] {
+        QMutexLocker l(&mutexSink_);
+        imagen_ = nullptr;
+        sink_ = nullptr;
+    }, Qt::DirectConnection);
     emit videoOutputChanged();
     // En pausa: que la salida nueva (por ejemplo la tele) muestre el cuadro de ahora
     if (tubo_ && listo_ && estado_ != Andando) setPosition(posicion_);
@@ -154,7 +165,8 @@ void VideoGst::abrir() {
     if (GstElement* imagen = gst_bin_get_by_name(GST_BIN(tubo_), "imagen")) {
         // La imagen en YUV (lo que da el chip); se pasa a colores en ImagenVideo
         GstCaps* caps = gst_caps_from_string("video/x-raw,format=(string){I420,NV12}");
-        g_object_set(imagen, "caps", caps, "max-buffers", 2, "drop", TRUE, "sync", TRUE, nullptr);
+        // Sin «last-sample»: el cuadro mostrado ya lo guarda ImagenVideo (uno menos retenido del chip)
+        g_object_set(imagen, "caps", caps, "max-buffers", 2, "drop", TRUE, "sync", TRUE, "enable-last-sample", FALSE, nullptr);
         gst_caps_unref(caps);
         GstAppSinkCallbacks cb{};
         cb.new_sample = alMuestra;
@@ -288,19 +300,33 @@ void VideoGst::ponerMedio(int m) {
 }
 
 void VideoGst::entregar(GstSample* muestra) {
-    QVideoSink* sink;
-    {
-        QMutexLocker l(&mutexSink_);
-        sink = sink_;
-    }
-    if (!sink) return;
+    QMutexLocker l(&mutexSink_);
+    if (!imagen_ && !sink_) return;
     GstVideoInfo info;
     if (!gst_video_info_from_caps(&info, gst_sample_get_caps(muestra))) return;
     const bool nv12 = GST_VIDEO_INFO_FORMAT(&info) == GST_VIDEO_FORMAT_NV12;
     if (!nv12 && GST_VIDEO_INFO_FORMAT(&info) != GST_VIDEO_FORMAT_I420) return;
+    const int w = GST_VIDEO_INFO_WIDTH(&info), h = GST_VIDEO_INFO_HEIGHT(&info);
+    if (imagen_) {
+        // Directo, sin copiar: el cuadro queda abierto (y con su referencia) hasta que ImagenVideo lo suelta
+        auto* g = new GstVideoFrame;
+        if (!gst_video_frame_map(g, &info, gst_sample_get_buffer(muestra), GST_MAP_READ)) { delete g; return; }
+        auto c = std::make_shared<CuadroYuv>();
+        c->ancho = w;
+        c->alto = h;
+        c->formato = nv12 ? CuadroYuv::NV12 : CuadroYuv::I420;
+        c->completo = rangoCompleto_;
+        for (int p = 0; p < (nv12 ? 2 : 3); ++p) {
+            c->plano[p] = static_cast<const uchar*>(GST_VIDEO_FRAME_PLANE_DATA(g, p));
+            c->paso[p] = GST_VIDEO_FRAME_PLANE_STRIDE(g, p);
+        }
+        c->soltar = [g] { gst_video_frame_unmap(g); delete g; };
+        imagen_->recibir(std::move(c));
+        return;
+    }
+    // Otra salida (un VideoOutput, por ejemplo): copia a un QVideoFrame
     GstVideoFrame g;
     if (!gst_video_frame_map(&g, &info, gst_sample_get_buffer(muestra), GST_MAP_READ)) return;
-    const int w = GST_VIDEO_INFO_WIDTH(&info), h = GST_VIDEO_INFO_HEIGHT(&info);
     QVideoFrameFormat formato(QSize(w, h), nv12 ? QVideoFrameFormat::Format_NV12 : QVideoFrameFormat::Format_YUV420P);
     formato.setColorRange(rangoCompleto_ ? QVideoFrameFormat::ColorRange_Full : QVideoFrameFormat::ColorRange_Video);
     QVideoFrame cuadro(formato);
@@ -318,7 +344,7 @@ void VideoGst::entregar(GstSample* muestra) {
         cuadro.unmap();
         const GstClockTime t = GST_BUFFER_PTS(gst_sample_get_buffer(muestra));
         if (GST_CLOCK_TIME_IS_VALID(t)) cuadro.setStartTime(qint64(t / 1000));
-        sink->setVideoFrame(cuadro);
+        sink_->setVideoFrame(cuadro);
     }
     gst_video_frame_unmap(&g);
 }

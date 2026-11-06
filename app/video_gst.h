@@ -4,7 +4,7 @@
 //
 // Se usa en QML igual que MediaPlayer (mismos nombres y mismos números de estado):
 //   VideoGst { source: url; videoOutput: imagen; position; duration; playbackState; mediaStatus; play(); pause() }
-// La imagen sale por el videoSink del videoOutput (ImagenVideo), así se dibuja como en la 1.0.19.
+// La imagen va directo a ImagenVideo (recibir(), sin copiar el cuadro). Otra salida: por su videoSink.
 // El sonido va por el sistema (PulseAudio). Si no está el chip (en la PC), GStreamer usa otro descompresor.
 #pragma once
 
@@ -20,6 +20,7 @@
 typedef struct _GstElement GstElement;
 typedef struct _GstAppSink GstAppSink;
 typedef struct _GstSample GstSample;
+class ImagenVideo;
 
 class VideoGst : public QObject {
     Q_OBJECT
@@ -82,8 +83,10 @@ private:
 
     QUrl source_;
     QPointer<QObject> salida_;
-    QMutex mutexSink_;
+    QMutex mutexSink_;                 // cuida sink_ e imagen_ (el hilo del video los usa)
     QPointer<QVideoSink> sink_;
+    ImagenVideo* imagen_ = nullptr;    // se borra al irse la ImagenVideo (seVa)
+    QMetaObject::Connection seVa_;
     GstElement* tubo_ = nullptr;
     QTimer bus_, reloj_;
     qint64 posicion_ = 0, duracion_ = 0, buscando_ = -1;
