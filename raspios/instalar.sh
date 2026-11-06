@@ -110,6 +110,9 @@ if command -v plymouth-set-default-theme >/dev/null; then
 fi
 
 echo "== 4/5 Arranque directo en Betómetro"
+# Ajuste de prueba del video (06/11/2026, mandaba los mensajes a /tmp): ya no hace falta
+rm -f /etc/systemd/system/betometro.service.d/video.conf
+rmdir /etc/systemd/system/betometro.service.d 2>/dev/null || true
 systemctl daemon-reload
 systemctl enable pulseaudio-sistema despertar-touch betometro
 systemctl disable getty@tty1 2>/dev/null || true

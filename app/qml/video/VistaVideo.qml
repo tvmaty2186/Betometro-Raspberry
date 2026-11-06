@@ -1,6 +1,7 @@
 import QtQuick
 import QtMultimedia
 import Betometro
+import Betometro.Video
 
 // Lo que se ve del video: la imagen, los datos encima, los chips a medias y la barra de abajo.
 // El estado (reproductor, sincronía, ajustes de los datos) está en el Reproductor (`rep`). Hay una vista
@@ -18,11 +19,11 @@ Item {
     clip: true
 
     Rectangle { anchors.fill: parent; color: "#000000" }
-    VideoOutput {
+    // No VideoOutput: en la Pi 3 queda negro (el chip gráfico no puede con su programa). Ver app/imagen_video.h
+    ImagenVideo {
         id: salida
         anchors.fill: parent
-        fillMode: VideoOutput.PreserveAspectFit
-        orientation: vista.rep.vid && vista.rep.vid.girar ? 180 : 0
+        rotation: vista.rep.vid && vista.rep.vid.girar ? 180 : 0
         // espejo (como cámara de selfie): solo el video, los datos de encima no
         transform: Scale { origin.x: salida.width / 2; xScale: vista.rep.vid && vista.rep.vid.espejo ? -1 : 1 }
     }

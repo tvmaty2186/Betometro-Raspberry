@@ -46,6 +46,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "wifi.h"
 #include "hdmi.h"
 #include "drive.h"
+#include "imagen_video.h"
 
 #include <QStandardPaths>
 
@@ -203,6 +204,8 @@ int main(int argc, char* argv[]) {
         contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
     });
 
+    // El video se dibuja como imagen: el VideoOutput de Qt queda negro en la Pi 3 (app/imagen_video.h)
+    qmlRegisterType<ImagenVideo>("Betometro.Video", 1, 0, "ImagenVideo");
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);

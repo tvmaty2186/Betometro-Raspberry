@@ -22,6 +22,8 @@ Environment=BETO_RASPBERRY=1
 Environment=BETO_DATOS=/var/lib/betometro
 Environment=BETO_GPS=auto
 Environment=BETO_VOZ=/usr/share/betometro/voz
+# Video: decodificar con el procesador (los cuadros del chip no se pueden leer para dibujarlos; app/imagen_video.h)
+Environment=QT_FFMPEG_DECODING_HW_DEVICE_TYPES=,
 RuntimeDirectory=betometro
 StateDirectory=betometro
 # La foto de arranque queda en pantalla hasta que Betómetro dibuja (sin parpadeo negro)
