@@ -14,6 +14,7 @@ TPantalla {
         Camara.detectar(); Camara.empezarVista(); Camara.empezarNivel();
         if (Contexto.prueba.indexOf("tablet-videos") === 0) videos.abrir();   // capturas: tablet-videos, tablet-videos-borrar
         if (Contexto.prueba === "tablet-videos-borrar" && Camara.videos.length) videos.tocarBorrar(Camara.videos[0].archivo);
+        if (Contexto.prueba === "tablet-espejo") raiz.poner("camaraEspejo", true);   // captura del espejo
     }
     Component.onDestruction: { Camara.pararVista(); Camara.pararNivel(); }
     // Al terminar una grabación (Probar 10 s) se vuelve a prender la vista previa y la barra del micrófono:
@@ -30,11 +31,12 @@ TPantalla {
         color: "#05110a"; clip: true
         border { width: 3; color: Tema.bordeCromo }
         Image {
+            id: imgVista
             anchors { fill: parent; margins: 3 }
             source: Camara.vista; cache: false; asynchronous: false
             fillMode: Image.PreserveAspectCrop
             rotation: raiz.a.camaraGirar ? 180 : 0
-            transform: Scale { origin.x: width / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
+            transform: Scale { origin.x: imgVista.width / 2; origin.y: imgVista.height / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
             visible: Camara.viendo && Camara.vista.toString() !== ""
         }
         Column {

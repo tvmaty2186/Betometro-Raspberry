@@ -42,11 +42,12 @@ Item {
                     color: "#05110a"; clip: true
                     border { width: 2; color: Tema.bordeCromo }
                     Image {
+                        id: imgVista
                         anchors { fill: parent; margins: 2 }
                         source: Camara.vista; cache: false; asynchronous: false
                         fillMode: Image.PreserveAspectCrop
                         rotation: raiz.a.camaraGirar ? 180 : 0
-                        transform: Scale { origin.x: width / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
+                        transform: Scale { origin.x: imgVista.width / 2; origin.y: imgVista.height / 2; xScale: raiz.a.camaraEspejo ? -1 : 1 }   // espejo, como cámara de selfie
                         visible: Camara.viendo && Camara.vista.toString() !== ""
                     }
                     Text { anchors.centerIn: parent; visible: !Camara.viendo; color: Tema.tintaSuave
