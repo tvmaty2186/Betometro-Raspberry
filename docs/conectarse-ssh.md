@@ -38,3 +38,18 @@ ssh beto
 ## Para salir
 
 Escribir `exit` y Enter.
+
+## Copia de las carreras (antes de una actualización grande)
+
+En PowerShell, en la compu (no en la Pi):
+
+```
+scp beto@betometro.local:/var/lib/betometro/betometro.json "$HOME\Desktop\betometro-copia.json"
+```
+
+Desde la 1.0.29 la base está en una carpeta (`/var/lib/betometro/carreras/`); la copia completa se baja desde el
+celu en «Betómetro en la red» → «Copia de la base», o con:
+
+```
+scp -r beto@betometro.local:/var/lib/betometro/carreras "$HOME\Desktop\carreras-copia"
+```

@@ -18,7 +18,8 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/video.md](docs/video.md) | E7 (para después de la 1.0.0): grabar la carrera con cámara y verla en el informe |
 | [docs/modo-tablet.md](docs/modo-tablet.md) | Modo Tablet: botones grandes dentro de cada tema (plan y muestras aprobadas) |
 | [docs/auditorias/README.md](docs/auditorias/README.md) | Las 10 auditorías del proyecto (lista, modelo y prompt de cada una) |
-| [docs/plan-1.0.28.md](docs/plan-1.0.28.md) | **Lo próximo:** la lista de la 1.0.28 con las decisiones de Matías |
+| [docs/plan-1.0.30.md](docs/plan-1.0.30.md) | **Lo próximo:** la lista de la 1.0.30 (lo que quedó) |
+| [docs/plan-1.0.28.md](docs/plan-1.0.28.md) | Plan de las 1.0.28 y 1.0.29 con las decisiones de Matías |
 | [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer |
 
 ## Qué es
@@ -72,7 +73,7 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 
 ## Versiones y publicación
 
-Última publicada: **1.0.28** (07/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
+Última publicada: **1.0.29** (07/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
 
 ## Compilar y probar
 
