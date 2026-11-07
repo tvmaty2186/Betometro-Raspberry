@@ -50,7 +50,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] **No publicar si falla una prueba** (Matías: sí). Compilar con las pruebas y arreglar el job roto (09-1.1, 2.a–c).
 - [ ] **Compilar solo desde `main`** (Matías: sí). Que un push no cancele una compilación con `[publicar]` (10-2.2).
 - [ ] Carrera y recorrido libre de punta a punta con `simular_neo` en las pruebas (09 P3).
-- [ ] Probar compilar en ARM de verdad (`ubuntu-24.04-arm`) para bajar de 20 a ~5 min (10-2.1).
+- [ ] Probar compilar en ARM de verdad (`ubuntu-24.04-arm`) para bajar de 20 a ~5 min (10-2.1). ARM **solo al
+      publicar**; en cada subida, solo x86 (Matías).
 - [ ] Arreglar el job «Programa Qt» en `debian:trixie` x86 y correr `ctest` entero (datos, crono con video,
       videos, drive) (09-2.b).
 - [ ] `probar.sh` falla si una captura no sale (09-2.c).
@@ -114,9 +115,9 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] **Engranaje de verdad** en el inicio, `TIcono.qml`, `ajustes.svg` y el video (`Engranaje.qml`). **Mostrar 2 o 3
       dibujos antes** (08-1).
 - [ ] Modo sol, Cámara: el aviso «No se encontró la cámara» se ve (08-2).
-- [ ] «FINALIZADA» entra en su botón (08-4). Pregunta: ¿«Ver informe» en una carrera ya corrida?
+- [ ] Carrera ya corrida: el botón grande dice «Ver informe» y abre el informe (Matías: sí) (08-4).
 - [ ] Informe en Deportivo y Cabina: el título no se pisa con Vel./Acel./Adel. (08-5).
-- [ ] Deportivo: «Actualizar» y «Apagar» no los dos rojos (08-6). Pregunta: ¿cuál cambia?
+- [ ] Deportivo: «Apagar» rojo; «Actualizar» con borde rojo y fondo oscuro (Matías) (08-6).
 - [ ] Botones apagados con estilo propio, no 45 % de opacidad (08-7). Muestra antes.
 - [ ] **Colores fijos pasados a `Tema`**: rojo de peligro, azul de lluvia (con su versión sol), verde de Drive,
       etiquetas de la cámara (08-8).
@@ -124,7 +125,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] Cabina: hora de la barra con B612 normal (08-10); textos que no entran (08-11).
 - [ ] Letras de menos de 21 px y cursiva fija (08-12); letras blancas en «Apagar» en modo sol (08-14).
 - [ ] Informe: columna de velocidad alineada y flecha de volver de 64 px; ficha de pie sin hueco (08-15, 07-3.5).
-- [ ] Título cromado en la barra, solo Avispón (08-13). Pregunta, con muestra.
+- [ ] Título cromado en la barra, solo Avispón (Matías: sí, sin muestra) (08-13).
 - [ ] Borrar: una sola forma de confirmar (lista y ficha) (07-3.5).
 - [ ] Informe: avisar si el video quedó cortado porque se desenchufó la cámara (07-3.3).
 
@@ -139,15 +140,19 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] `plan-ingenieria.md` que diga cómo están las carpetas hoy (01-3.3).
 - [ ] `Crono.estado` en datos sueltos, solo si lo medido en la Pi muestra lentitud (01-3.2, 03-3).
 
-## 6. Preguntas que faltan contestar
+## 6. Respuestas de Matías (07/11/2026)
 
-1. Si la carrera quedó con fecha de otro día (la Pi sin hora): ¿bloquear LARGAR como la app o dejar con un segundo toque? (07)
-2. Carreras: si la próxima es hoy, ¿el botón del inicio va directo al crono (2 toques)? (07-3.1)
-3. ¿Ver la imagen de antes y después cuando cambia una pantalla a propósito, o alcanza con el aviso? (09)
-4. ¿El ARM de GitHub solo cuando se publica? (09)
-5. ¿Hay un circuito de verdad para la carrera simulada de las pruebas? (09)
-6. ¿Entrás por ssh con clave escrita o con llave? (10)
-7. ¿Un `apt full-upgrade` en casa de vez en cuando, o no tocar el sistema? (10)
+1. Fecha mal porque la Pi no tenía hora: **tomar siempre la hora de algún lado, del GPS o de internet** (wifi).
+   - [ ] Hora del sistema desde el GPS en cuanto haya lectura válida, y por internet si hay wifi (07-1.4).
+2. Si la próxima carrera es hoy: **el botón Carreras queda como ahora** (abre la lista).
+3. Fotos de las pantallas en las pruebas: sin decidir (no quedó claro; volver a explicar con un ejemplo).
+4. Compilación en ARM: **solo al publicar**; en cada subida, solo la de x86.
+5. Carrera simulada: la corre la máquina sola en segundo plano; **sin circuito real**, uno de ejemplo.
+6. ssh: **con clave escrita, como ahora**.
+7. Sistema de la Raspberry (`apt full-upgrade`): **no tocarlo nunca**.
+8. Carrera ya corrida: el botón grande de la ficha dice **«Ver informe»** y lo abre (08-4).
+9. Deportivo: **«Apagar» rojo y «Actualizar» con borde rojo** (fondo oscuro) (08-6).
+10. Título cromado en la barra, solo Avispón: **sí, sin muestra** (08-13).
 
 ## No entra (Matías dijo que no)
 
