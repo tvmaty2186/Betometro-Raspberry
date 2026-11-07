@@ -79,6 +79,18 @@ int main() {
                            {"c2", QJsonObject{{"informe", QJsonObject{{"id", "I2"}, {"version", "h2"}}},
                                               {"videos", QJsonObject{{"c.mp4", QJsonObject{{"id", "V3"}}}}}}}};
     CHEQUEAR(pendientes(todo, cs, op).tareas.isEmpty());
+    // La copia de la base: con los informes, después de ellos y antes que los videos; solo cuando cambió
+    op.baseVersion = "b1";
+    p = pendientes(estado, cs, op);
+    CHEQUEAR(p.tareas.size() == 4 && p.tareas[1].tipo == Tarea::Base && p.tareas[1].archivo == "betometro.json" && p.tareas[1].version == "b1");
+    CHEQUEAR(p.tareas[1].idDrive.isEmpty() && p.tareas[2].tipo == Tarea::Video);
+    p = pendientes(estado, cs, op, QJsonObject{{"id", "B1"}, {"version", "viejo"}});
+    CHEQUEAR(p.tareas.size() == 4 && p.tareas[1].tipo == Tarea::Base && p.tareas[1].idDrive == "B1");   // cambió: se reemplaza
+    CHEQUEAR(pendientes(todo, cs, op, QJsonObject{{"id", "B1"}, {"version", "b1"}}).tareas.isEmpty());   // ya está
+    op.informes = false;
+    CHEQUEAR(pendientes({}, cs, op).tareas.size() == 3);   // sin informes tampoco va la base (solo los 3 videos)
+    op.informes = true;
+    op.baseVersion.clear();
 
     // ---- El JSON del cliente de Google (valores inventados)
     QJsonObject limpio;

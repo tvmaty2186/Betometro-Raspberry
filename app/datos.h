@@ -10,7 +10,9 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <set>
 #include <thread>
+#include <vector>
 
 #include "almacen.h"
 #include "modelo.h"
@@ -90,6 +92,9 @@ public:
     void cargarMuestra();
 
     const beto::Base& base() const { return base_; }
+    // Toda la base en un JSON como el de la app ({schemaVersion, config, carreras}): «Betómetro en la red»
+    // (GET /betometro.json) y la copia que sube Drive
+    QByteArray exportar() const { return QByteArray::fromStdString(base_.aJson().escribir()); }
 
 signals:
     void guardaBienChanged();
@@ -102,11 +107,19 @@ private:
     QVariantMap resumen(const beto::Carrera& c) const;
     bool finalizada(const beto::Carrera& c) const;
     QDate hoy() const { return QDate::currentDate(); }
-    void guardar();
+    // Un archivo por carrera (1.0.29, auditoría 05-4): se guarda solo lo que cambió, la carrera «id» o la
+    // configuración. Se copia solo esa carrera (no la base entera, 04-2.2) y un hilo aparte la escribe.
+    void guardar(const QString& id);        // esa carrera, al instante
+    void guardarConfig();
+    void borrar(const QString& id);         // su archivo va a la papelera
     // Ajustes (brillo, volumen) y marcas: se juntan 0,3 s antes de guardar, así deslizar el brillo no
-    // reescribe la base 20 veces (auditoría 04-2.3). Las vueltas se guardan al instante.
-    void guardarLuego();
+    // reescribe la carrera 20 veces (auditoría 04-2.3). Las vueltas se guardan al instante.
+    void guardarLuego(const QString& id);
+    void guardarConfigLuego();
+    void guardarPendientes();               // lo que se estaba juntando
     QTimer guardarLuego_;
+    std::set<QString> luego_;
+    bool configLuego_ = false;
 
     QString carpeta_;
     beto::Almacen almacen_;
@@ -115,13 +128,20 @@ private:
     bool horaValida_ = true;
     bool guardaBien_ = true;
 
-    // Guardado por detrás (04/11/2026): con el GPS a 5 Hz la base pesa varios MB y guardarla en la SD de la
-    // Pi 3 tardaba medio segundo: al marcar, la pantalla se congelaba. Ahora guardar() hace una copia y un
-    // hilo aparte la escribe (siempre la última; si llegan varias seguidas, se escribe solo la más nueva).
+    // Guardado por detrás (04/11/2026): escribir en la SD de la Pi 3 tardaba y al marcar la pantalla se
+    // congelaba. guardar() encola una copia de la carrera (o de la config) y un hilo aparte la escribe.
+    // Si la misma carrera llega varias veces seguidas se escribe solo la más nueva.
+    struct Tarea {
+        enum Tipo { Carrera, Config, Borrar } tipo = Carrera;
+        std::string id;
+        std::shared_ptr<beto::Carrera> carrera;
+        std::shared_ptr<beto::Json> config;
+    };
+    void encolar(Tarea t);
     void hiloGuardar();
     std::thread hilo_;
     std::mutex m_;
     std::condition_variable cv_, listo_;
-    std::shared_ptr<beto::Base> pendiente_;
+    std::vector<Tarea> pendientes_;
     bool escribiendo_ = false, terminar_ = false;
 };

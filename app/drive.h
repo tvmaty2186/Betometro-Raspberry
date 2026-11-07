@@ -1,5 +1,6 @@
 // Google Drive (pedido de Matías, 05/11/2026; docs/google-drive.md).
-// Sube solo los informes y los videos de cada carrera a «Betómetro/AAAA-MM-DD Nombre» en su Drive.
+// Sube solo los informes y los videos de cada carrera a «Betómetro/AAAA-MM-DD Nombre» en su Drive, y una copia
+// de toda la base («Betómetro/betometro.json», formato de la app) cada vez que cambia una carrera (1.0.29).
 // - Conectar (una vez): flujo de Google para equipos sin teclado. La Raspberry muestra un código;
 //   él lo pone en google.com/device desde el celu. Permiso «drive.file»: Betómetro solo ve lo que subió él.
 // - El cliente de Google (client_id y client_secret) lo sube Matías desde la compu en http://<IP>/drive:
@@ -123,6 +124,7 @@ private:
 
     QJsonObject estadoGuardado_;   // drive.json sin el permiso: raiz, carreras, sesion
     QHash<QString, QString> huellas_;   // id de carrera → huella del informe (se borra si cambian las carreras)
+    QString huellaBase_;                // huella de todas las carreras (de las huellas de los informes): la versión de la copia de la base
     // Las huellas se arman de a una carrera por vez (QTimer): armar todos los informes de una trababa la pantalla (04-3.6)
     QStringList porHuellar_;
     QTimer huellar_;

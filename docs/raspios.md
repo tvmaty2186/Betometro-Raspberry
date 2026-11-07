@@ -62,6 +62,24 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
   cd /tmp && curl -LO https://github.com/tvmaty2186/Betometro-actualizaciones/releases/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz && tar xzf betometro-pi-X.Y.Z.tar.gz && sudo bash betometro-pi-X.Y.Z/instalar.sh
   ```
 
+## Dónde quedan los datos (`/var/lib/betometro`, desde la 1.0.29)
+Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almacen.cpp`, `app/datos.cpp`):
+- `config.json`: la configuración guardada (sin mezclar con la de fábrica).
+- `carreras/<id>.json`: cada carrera, exactamente una «carrera» del formato de la app. Se guarda **solo la que
+  cambió** (una vuelta: ~50 KB, no la base entera). Escritura segura por archivo (`.nuevo` + fsync + renombrar;
+  queda `.anterior`). Un archivo roto se aparta como `.danado` y se usa su `.anterior`; los demás se leen igual.
+- `carreras/papelera/`: las carreras borradas; se vacía a los 30 días (al prender).
+- `betometro.json.migrado`: la base vieja de un solo archivo (hasta la 1.0.28). Al prender por primera vez con la
+  1.0.29 se migra: se escribe `config.json` y cada carrera en `carreras.nuevo/`, se vuelve a leer todo y se compara
+  con lo original; recién ahí pasa a `carreras/` y el viejo queda como `.migrado` (**nunca se borra**). Si se corta
+  a mitad, la próxima vez repite. Si algo no coincide, avisa en el reporte y sigue con el archivo viejo.
+- Lo demás: `videos/`, `informes/`, `reportes/errores.log`, `clima.json`, `drive.json`, `drive-cliente.json`.
+- **Copia de todo** en el formato de la app (`{schemaVersion, config, carreras}`): `http://<IP>/betometro.json`
+  (link «Copia de la base» al pie de la página) y Drive la sube como `Betómetro/betometro.json` junto con los
+  informes, pisando la anterior.
+- Bajar la base a la compu: `scp beto@betometro.local:/var/lib/betometro/betometro.json .` (hasta la 1.0.28) o
+  `scp -r beto@betometro.local:/var/lib/betometro/carreras .` (desde la 1.0.29).
+
 ## Partes del programa propias de la Raspberry
 | Archivo | Qué hace |
 |---|---|
@@ -70,11 +88,11 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
 | `app/salud.cpp` | Tensión baja y calor (`get_throttled`, `thermal_zone0`), vigilante de systemd, procesador al máximo en carrera salvo con calor o tensión baja (vuelve 30 s después) |
 | `app/sistema.h` | Apagar y **brillo** (escribe la luz de fondo; 100 % = máximo de la pantalla) |
 | `app/wifi.cpp` | nmcli. Wifi propia «Betometro-<número>» (clave `betometro`) si en 90 s no hay red guardada cerca. **«Conectarse a redes wifi»** (Conectividad, cfg `wifiRedes`): apagado, se desconecta, no se conecta a ninguna red y arma la propia enseguida (si NetworkManager se conecta solo a una guardada, la corta) |
-| `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores, `/drive` (subir el cliente de Google). Puerto 80 en la Pi |
+| `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores, `/betometro.json` (toda la base, formato de la app), `/drive` (subir el cliente de Google). Puerto 80 en la Pi |
 | `app/reportes.cpp` | `<datos>/reportes/errores.log`. Al prender distingue «se cayó el programa» de «se cortó la corriente o se colgó», y suma errores del sistema (journal) y del pstore. Manda issues a `Betometro-reportes` si existe `/var/lib/betometro/reportes.token` |
 | `app/actualizador.cpp` | Ver arriba |
 | `app/clima.cpp` | Pronóstico de Open-Meteo (16 días) y buscador de localidades (Open-Meteo, si no OpenStreetMap). Guarda el último en `<datos>/clima.json` para sin wifi. Pantalla `Pronostico.qml` (no se llama `Clima.qml` porque chocaba con el objeto `Clima`) |
-| `app/drive.cpp` | **Google Drive**: sube solo informes (HTML) y videos a «Betómetro/AAAA-MM-DD Nombre», con wifi, sin carrera y sin la cámara grabando. Videos solo con las wifi elegidas. Subida de a 4 MB con `curl` en prioridad baja; si se corta sigue. Se conecta con un código (google.com/device); el cliente de Google se sube en `http://IP/drive`. Usa `curl` (viene en Raspberry Pi OS). Ver [google-drive.md](google-drive.md) |
+| `app/drive.cpp` | **Google Drive**: sube solo informes (HTML) y videos a «Betómetro/AAAA-MM-DD Nombre», y una copia de la base (`Betómetro/betometro.json`, se pisa cuando cambia alguna carrera), con wifi, sin carrera y sin la cámara grabando. Videos solo con las wifi elegidas. Subida de a 4 MB con `curl` en prioridad baja; si se corta sigue. Se conecta con un código (google.com/device); el cliente de Google se sube en `http://IP/drive`. Usa `curl` (viene en Raspberry Pi OS). Ver [google-drive.md](google-drive.md) |
 | `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
 
 ## Cosas de la pantalla y del arranque (lo que costó)

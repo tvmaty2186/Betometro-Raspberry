@@ -56,13 +56,15 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
     auto l = almacen_.cargar();
     base_ = std::move(l.base);
     cfg_ = armarConfig(base_.config);
+    for (const std::string& a : l.avisos) qWarning("Base: %s", a.c_str());
     if (l.habiaDanado) qWarning("La base estaba dañada: se usó %s", l.origen.c_str());
+    if (l.migrado) qWarning("Base migrada a un archivo por carrera (%zu carreras); betometro.json quedó como .migrado", base_.carreras.size());
+    almacen_.vaciarPapelera();
     hilo_ = std::thread([this] { hiloGuardar(); });
     guardarLuego_.setSingleShot(true);
     guardarLuego_.setInterval(300);
-    connect(&guardarLuego_, &QTimer::timeout, this, [this] { guardar(); });
+    connect(&guardarLuego_, &QTimer::timeout, this, [this] { guardarPendientes(); });
     // Recorrido libre que se cortó (luz, vigilante) antes de Terminar: lo andado queda como su vuelta
-    bool recuperado = false;
     for (Carrera& c : base_.carreras) {
         if (!c.extra.tiene("enCurso")) continue;
         if (c.extra["enCurso"].esObjeto()) {
@@ -72,13 +74,12 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
             qWarning("Recorrido «%s» cortado antes de Terminar: se recuperó lo andado", c.nombre.c_str());
         }
         c.extra.sacar("enCurso");
-        recuperado = true;
+        guardar(q(c.id));
     }
-    if (recuperado) guardar();
 }
 
 Datos::~Datos() {
-    if (guardarLuego_.isActive()) guardar();   // lo que estaba juntándose
+    guardarPendientes();   // lo que estaba juntándose
     {
         std::lock_guard<std::mutex> l(m_);
         terminar_ = true;
@@ -87,24 +88,67 @@ Datos::~Datos() {
     if (hilo_.joinable()) hilo_.join();   // escribe lo último que quedó pendiente antes de cerrar
 }
 
-void Datos::guardarLuego() {
+void Datos::guardarLuego(const QString& id) {
+    luego_.insert(id);
     if (!guardarLuego_.isActive()) guardarLuego_.start();
 }
 
-void Datos::guardar() {
+void Datos::guardarConfigLuego() {
+    configLuego_ = true;
+    if (!guardarLuego_.isActive()) guardarLuego_.start();
+}
+
+void Datos::guardarPendientes() {
     guardarLuego_.stop();
-    auto copia = std::make_shared<beto::Base>(base_);   // la copia en memoria es rápida; escribir en la SD no
+    const std::set<QString> ids = std::move(luego_);
+    luego_.clear();
+    for (const QString& id : ids) guardar(id);
+    if (configLuego_) guardarConfig();
+}
+
+void Datos::encolar(Tarea t) {
     {
         std::lock_guard<std::mutex> l(m_);
-        pendiente_ = std::move(copia);
+        // Si la misma carrera (o la config) ya estaba esperando, se escribe solo la más nueva
+        pendientes_.erase(std::remove_if(pendientes_.begin(), pendientes_.end(), [&](const Tarea& p) {
+            return p.tipo == Tarea::Config ? t.tipo == Tarea::Config : t.tipo != Tarea::Config && p.id == t.id;
+        }), pendientes_.end());
+        pendientes_.push_back(std::move(t));
     }
     cv_.notify_all();
 }
 
+void Datos::guardar(const QString& id) {
+    luego_.erase(id);
+    const Carrera* c = buscar(id);
+    if (!c) return;
+    Tarea t;
+    t.tipo = Tarea::Carrera;
+    t.id = c->id;
+    t.carrera = std::make_shared<beto::Carrera>(*c);   // la copia de una carrera es rápida; escribir en la SD no
+    encolar(std::move(t));
+}
+
+void Datos::guardarConfig() {
+    configLuego_ = false;
+    Tarea t;
+    t.tipo = Tarea::Config;
+    t.config = std::make_shared<beto::Json>(base_.config);
+    encolar(std::move(t));
+}
+
+void Datos::borrar(const QString& id) {
+    luego_.erase(id);
+    Tarea t;
+    t.tipo = Tarea::Borrar;
+    t.id = s(id);
+    encolar(std::move(t));
+}
+
 void Datos::guardarYa() {
-    if (guardarLuego_.isActive()) guardar();
+    guardarPendientes();
     std::unique_lock<std::mutex> l(m_);
-    listo_.wait(l, [this] { return !pendiente_ && !escribiendo_; });
+    listo_.wait(l, [this] { return pendientes_.empty() && !escribiendo_; });
 }
 
 void Datos::hiloGuardar() {
@@ -112,14 +156,22 @@ void Datos::hiloGuardar() {
     setpriority(PRIO_PROCESS, static_cast<id_t>(::gettid()), 10);
     std::unique_lock<std::mutex> l(m_);
     for (;;) {
-        cv_.wait(l, [this] { return pendiente_ || terminar_; });
-        if (!pendiente_) break;   // terminar y no hay nada pendiente
-        auto b = std::move(pendiente_);
+        cv_.wait(l, [this] { return !pendientes_.empty() || terminar_; });
+        if (pendientes_.empty()) break;   // terminar y no hay nada pendiente
+        std::vector<Tarea> tareas = std::move(pendientes_);
+        pendientes_.clear();
         escribiendo_ = true;
         l.unlock();
+        bool ok = true;
         std::string err;
-        const bool ok = almacen_.guardar(*b, &err);
-        b.reset();
+        for (Tarea& t : tareas) {
+            std::string e;
+            const bool bien = t.tipo == Tarea::Config ? almacen_.guardarConfig(*t.config, &e)
+                              : t.tipo == Tarea::Borrar ? almacen_.borrarCarrera(t.id, &e)
+                                                        : almacen_.guardarCarrera(*t.carrera, &e);
+            if (!bien) { ok = false; if (err.empty()) err = e; }
+        }
+        tareas.clear();
         l.lock();
         escribiendo_ = false;
         // Si no se puede guardar (tarjeta llena o dañada) queda en el reporte y la pantalla lo avisa (05-1.2)
@@ -310,7 +362,7 @@ QVariantMap Datos::guardarCarrera(const QVariantMap& m) {
         const QString p = m.value("patron").toString();
         c->patron = s(p == "todas" || p == "alt1" || p == "alt2" ? p : "alt1");
     }
-    guardar();
+    guardar(q(c->id));
     emit carrerasChanged();
     r["ok"] = true;
     r["id"] = q(c->id);
@@ -379,7 +431,7 @@ QString Datos::crearPractica() {
     c.distanciaM = cfg_["distanciaM"].aEntero(3200);
     c.patron = cfg_["patron"].aTexto("alt1");
     base_.carreras.push_back(c);
-    guardar();
+    guardar(q(c.id));
     emit carrerasChanged();
     return q(c.id);
 }
@@ -400,7 +452,7 @@ QString Datos::crearRecorrido() {
     c.extra["recorrido"] = true;
     c.extra["marcas"] = Json::lista();
     base_.carreras.push_back(c);
-    guardar();
+    guardar(q(c.id));
     emit carrerasChanged();
     return q(c.id);
 }
@@ -409,7 +461,7 @@ bool Datos::ponerExtra(const QString& id, const std::string& clave, const Json& 
     Carrera* c = base_.buscar(s(id));
     if (!c) return false;
     c->extra[clave] = valor;
-    guardarLuego();
+    guardarLuego(id);
     emit carrerasChanged();
     return true;
 }
@@ -418,7 +470,7 @@ bool Datos::quitarExtra(const QString& id, const std::string& clave) {
     Carrera* c = base_.buscar(s(id));
     if (!c || !c->extra.tiene(clave)) return false;
     c->extra.sacar(clave);
-    guardar();
+    guardar(id);
     emit carrerasChanged();
     return true;
 }
@@ -427,7 +479,7 @@ bool Datos::agregarVuelta(const QString& id, const Vuelta& v) {
     Carrera* c = base_.buscar(s(id));
     if (!c) return false;
     c->vueltas.push_back(v);
-    guardar();   // al instante: un corte de luz no pierde la vuelta
+    guardar(id);   // al instante: un corte de luz no pierde la vuelta
     emit carrerasChanged();
     return true;
 }
@@ -443,7 +495,7 @@ bool Datos::agregarVideo(const QString& id, const QVariantMap& v) {
     j["espejo"] = v.value("espejo").toBool();
     if (!c->extra["videos"].esLista()) c->extra["videos"] = Json::lista();
     c->extra["videos"].agregar(std::move(j));
-    guardar();
+    guardar(id);
     emit carrerasChanged();
     return true;
 }
@@ -498,9 +550,10 @@ bool Datos::olvidarVideo(const QString& archivo) {
         l.erase(std::remove_if(l.begin(), l.end(), [&](const Json& v) { return q(v["archivo"].aTexto()) == archivo; }), l.end());
         if (l.size() == n) continue;
         if (l.empty()) c.extra.sacar("videos");   // sin videos: el informe no muestra «Video»
+        guardar(q(c.id));
         cambio = true;
     }
-    if (cambio) { guardar(); emit carrerasChanged(); }
+    if (cambio) emit carrerasChanged();
     return cambio;
 }
 
@@ -508,10 +561,12 @@ bool Datos::renombrarVideo(const QString& viejo, const QString& nuevo) {
     bool cambio = false;
     for (auto& c : base_.carreras) {
         if (!c.extra["videos"].esLista()) continue;
+        bool esta = false;
         for (auto& v : c.extra["videos"].elementos())
-            if (q(v["archivo"].aTexto()) == viejo) { v["archivo"] = s(nuevo); cambio = true; }
+            if (q(v["archivo"].aTexto()) == viejo) { v["archivo"] = s(nuevo); esta = true; }
+        if (esta) { guardar(q(c.id)); cambio = true; }
     }
-    if (cambio) { guardar(); emit carrerasChanged(); }
+    if (cambio) emit carrerasChanged();
     return cambio;
 }
 
@@ -531,7 +586,7 @@ bool Datos::cambiarMedida(const QString& id, int indice) {
     if (v.interrumpida) return false;
     c->guardarOriginal();
     v.medida = !v.medida;
-    guardar();
+    guardar(id);
     emit carrerasChanged();
     return true;
 }
@@ -542,7 +597,7 @@ bool Datos::unirConSiguiente(const QString& id, int indice) {
     Carrera antes = *c;
     if (!c->unirConSiguiente(static_cast<size_t>(indice))) return false;
     if (!antes.modificada()) { antes.guardarOriginal(); c->extra = antes.extra; }
-    guardar();
+    guardar(id);
     emit carrerasChanged();
     return true;
 }
@@ -550,7 +605,7 @@ bool Datos::unirConSiguiente(const QString& id, int indice) {
 bool Datos::restablecer(const QString& id) {
     Carrera* c = base_.buscar(s(id));
     if (!c || !c->restablecer()) return false;
-    guardar();
+    guardar(id);
     emit carrerasChanged();
     return true;
 }
@@ -577,7 +632,7 @@ bool Datos::borrarCarrera(const QString& id) {
                 for (const auto& x : c.extra["videos"].elementos()) otra = otra || q(x["archivo"].aTexto()) == a;
         if (!otra && nombreVideoValido(a)) QFile::remove(carpetaVideos() + '/' + a);
     }
-    guardar();
+    borrar(id);   // su archivo va a carreras/papelera/ (se vacía a los 30 días)
     emit carrerasChanged();
     return true;
 }
@@ -625,7 +680,7 @@ void Datos::ponerCfg(const QString& clave, const QVariant& valorQml) {
     }
     base_.config[s(clave)] = v;
     cfg_ = armarConfig(base_.config);
-    guardarLuego();
+    guardarConfigLuego();
     emit cfgChanged();
 }
 

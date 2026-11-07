@@ -297,73 +297,140 @@ static void almacen() {
         auto l = a.cargar();
         IGUAL(l.origen, std::string(""));
         IGUAL(l.base.carreras.size(), size_t(0));
+        CHEQUEAR(!l.migrado && !l.habiaDanado);
     }
-    Base b;
+    // Un archivo por carrera y config.json aparte
     Carrera c;
     c.id = "c1";
     c.nombre = "Primera";
-    b.carreras.push_back(c);
-    CHEQUEAR(a.guardar(b));
-    b.carreras[0].nombre = "Segunda";
-    CHEQUEAR(a.guardar(b));
+    c.creada = "2026-01-01T10:00:00";
+    CHEQUEAR(a.guardarCarrera(c));
+    c.nombre = "Segunda";
+    CHEQUEAR(a.guardarCarrera(c));
+    Json cfg = Json::objeto();
+    cfg["volumen"] = 7;
+    CHEQUEAR(a.guardarConfig(cfg));
+    CHEQUEAR(std::ifstream(dir + "/config.json").good());
+    CHEQUEAR(std::ifstream(a.archivoCarrera("c1")).good());
+    IGUAL(a.archivoCarrera("c1"), dir + "/carreras/c1.json");
+    IGUAL(Almacen::nombreArchivo("a/b..c"), std::string("a_b__c.json"));   // sin caracteres raros
     {
         auto l = a.cargar();
-        IGUAL(l.origen, a.archivo());
+        IGUAL(l.origen, a.carpetaCarreras());
+        IGUAL(l.base.carreras.size(), size_t(1));
         IGUAL(l.base.carreras[0].nombre, std::string("Segunda"));
+        IGUAL(l.base.config["volumen"].aEntero(), int64_t(7));
     }
-    // Copia anterior
+    // Copia anterior de cada archivo
+    CHEQUEAR(std::ifstream(a.archivoCarrera("c1") + ".anterior").good());
+    // Archivo de una carrera roto: se usa su copia anterior, el roto se guarda aparte y las demás se leen igual
+    Carrera c2;
+    c2.id = "c2";
+    c2.nombre = "Otra";
+    c2.creada = "2026-01-02T10:00:00";
+    CHEQUEAR(a.guardarCarrera(c2));
     {
-        std::ifstream f(a.archivo() + ".anterior");
-        CHEQUEAR(f.good());
-    }
-    // Archivo principal roto: se usa la copia anterior y el roto se guarda aparte
-    {
-        std::ofstream f(a.archivo(), std::ios::trunc);
-        f << "{\"schemaVersion\":2,\"carre";
+        std::ofstream f(a.archivoCarrera("c1"), std::ios::trunc);
+        f << "{\"id\":\"c1\",\"nom";
     }
     {
         auto l = a.cargar();
         CHEQUEAR(l.habiaDanado);
-        IGUAL(l.origen, a.archivo() + ".anterior");
-        IGUAL(l.base.carreras[0].nombre, std::string("Primera"));
-        std::ifstream f(a.archivo() + ".danado");
-        CHEQUEAR(f.good());
+        CHEQUEAR(!l.avisos.empty());
+        IGUAL(l.base.carreras.size(), size_t(2));
+        IGUAL(l.base.carreras[0].nombre, std::string("Primera"));   // la copia anterior
+        IGUAL(l.base.carreras[1].nombre, std::string("Otra"));      // por fecha de creación
+        CHEQUEAR(std::ifstream(a.archivoCarrera("c1") + ".danado").good());
     }
     // Corte de luz justo después de escribir «.nuevo»: se usa lo nuevo
+    CHEQUEAR(a.guardarCarrera(c));
     {
-        b.carreras[0].nombre = "Tercera";
-        std::ofstream f(a.archivo() + ".nuevo", std::ios::trunc);
-        f << b.aJson().escribir();
+        c.nombre = "Tercera";
+        std::ofstream f(a.archivoCarrera("c1") + ".nuevo", std::ios::trunc);
+        f << c.aJson().escribir();
     }
     {
         auto l = a.cargar();
         IGUAL(l.base.carreras[0].nombre, std::string("Tercera"));
     }
-    // Corte de luz mientras se escribía «.nuevo»: está incompleto y se ignora
-    CHEQUEAR(a.guardar(b));
+    // Corte de luz mientras se escribía «.nuevo»: está incompleto y se ignora, sin avisar
+    CHEQUEAR(a.guardarCarrera(c));
     {
-        std::ofstream f(a.archivo() + ".nuevo", std::ios::trunc);
-        f << "{\"schemaVersion\":2,\"carreras\":[{\"id\":\"c1\",\"nom";
+        std::ofstream f(a.archivoCarrera("c1") + ".nuevo", std::ios::trunc);
+        f << "{\"id\":\"c1\",\"nom";
     }
     {
         auto l = a.cargar();
-        IGUAL(l.origen, a.archivo());
         IGUAL(l.base.carreras[0].nombre, std::string("Tercera"));
-        CHEQUEAR(!l.habiaDanado);                                 // un guardado cortado no es un daño
-        CHEQUEAR(!std::ifstream(a.archivo() + ".nuevo").good());  // se borró
-        CHEQUEAR(!std::ifstream(a.archivo() + ".nuevo.danado").good());
+        CHEQUEAR(!l.habiaDanado);                                              // un guardado cortado no es un daño
+        CHEQUEAR(!std::ifstream(a.archivoCarrera("c1") + ".nuevo").good());   // se borró
     }
-    // Base sana pero vacía y la anterior con carreras: se usa la anterior y se avisa
-    CHEQUEAR(a.guardar(b));
-    CHEQUEAR(a.guardar(Base{}));
+    // Borrar: el archivo va a la papelera; a los 30 días se vacía
+    CHEQUEAR(a.borrarCarrera("c2"));
+    CHEQUEAR(!std::ifstream(a.archivoCarrera("c2")).good());
+    CHEQUEAR(std::ifstream(a.carpetaPapelera() + "/c2.json").good());
+    CHEQUEAR(a.borrarCarrera("noexiste"));   // nunca se guardó: no es error
+    a.vaciarPapelera(30);
+    CHEQUEAR(std::ifstream(a.carpetaPapelera() + "/c2.json").good());   // recién borrada
+    a.vaciarPapelera(0);
+    CHEQUEAR(!std::ifstream(a.carpetaPapelera() + "/c2.json").good());
     {
         auto l = a.cargar();
-        CHEQUEAR(l.habiaDanado);
-        IGUAL(l.origen, a.archivo() + ".anterior");
         IGUAL(l.base.carreras.size(), size_t(1));
     }
-    std::string limpiar = "rm -rf '" + dir + "'";
-    if (std::system(limpiar.c_str()) != 0) std::cerr << "no pude borrar " << dir << "\n";
+    // Migración desde betometro.json (un solo archivo, hasta la 1.0.28)
+    std::string dir2 = carpetaTemporal();
+    {
+        Base b;
+        b.config["brillo"] = 55;
+        Carrera x;
+        x.id = "cviejo1"; x.nombre = "Vieja 1"; x.creada = "2025-05-01T10:00:00";
+        Vuelta v;
+        v.n = 1; v.realMs = 180500; v.difMs = 500;
+        v.traza.push_back({0, 0, 12.5, -34.6, -58.38, 4});
+        x.vueltas.push_back(v);
+        x.extra["recorrido"] = true;
+        b.carreras.push_back(x);
+        Carrera y;
+        y.id = "cviejo2"; y.nombre = "Vieja 2"; y.creada = "2025-04-01T10:00:00";
+        b.carreras.push_back(y);
+        { std::ofstream f(dir2 + "/betometro.json", std::ios::trunc); f << b.aJson().escribir(); }
+        Almacen m(dir2);
+        auto l = m.cargar();
+        CHEQUEAR(l.migrado && !l.habiaDanado);
+        IGUAL(l.base.carreras.size(), size_t(2));
+        IGUAL(l.base.carreras[0].id, std::string("cviejo2"));   // por fecha de creación
+        CHEQUEAR(l.base.carreras[1].aJson() == x.aJson());
+        CHEQUEAR(l.base.config == b.config);
+        CHEQUEAR(std::ifstream(dir2 + "/betometro.json.migrado").good());
+        CHEQUEAR(!std::ifstream(dir2 + "/betometro.json").good());
+        CHEQUEAR(std::ifstream(dir2 + "/carreras/cviejo1.json").good());
+        CHEQUEAR(!std::ifstream(dir2 + "/carreras.nuevo").good());
+        // La segunda vez no hay nada que migrar
+        auto l2 = m.cargar();
+        CHEQUEAR(!l2.migrado);
+        IGUAL(l2.base.carreras.size(), size_t(2));
+    }
+    // Migración cortada a mitad (quedó carreras.nuevo/ y betometro.json): se repite y no duplica
+    std::string dir3 = carpetaTemporal();
+    {
+        Base b;
+        Carrera x;
+        x.id = "cx"; x.nombre = "Equis";
+        b.carreras.push_back(x);
+        { std::ofstream f(dir3 + "/betometro.json", std::ios::trunc); f << b.aJson().escribir(); }
+        std::string mk = "mkdir -p '" + dir3 + "/carreras.nuevo' && echo '{\"id\":\"cx\",\"nombre\":\"a medias\"}' > '" + dir3 + "/carreras.nuevo/cx.json'";
+        CHEQUEAR(std::system(mk.c_str()) == 0);
+        Almacen m(dir3);
+        auto l = m.cargar();
+        CHEQUEAR(l.migrado);
+        IGUAL(l.base.carreras.size(), size_t(1));
+        IGUAL(l.base.carreras[0].nombre, std::string("Equis"));
+    }
+    for (const std::string& d : {dir, dir2, dir3}) {
+        std::string limpiar = "rm -rf '" + d + "'";
+        if (std::system(limpiar.c_str()) != 0) std::cerr << "no pude borrar " << d << "\n";
+    }
 }
 
 static void voz() {

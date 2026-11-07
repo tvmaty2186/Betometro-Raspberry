@@ -48,19 +48,26 @@ struct CarreraLocal {
     QList<VideoLocal> videos;             // solo los que están en la tarjeta
 };
 struct Tarea {
-    enum Tipo { Informe, Video } tipo = Informe;
-    QString carrera, nombre, carpeta;     // id y nombre de la carrera, y su carpeta en Drive
-    QString archivo;                      // video: nombre del archivo
+    // Base: la copia de toda la base (betometro.json, como el de la app) en la carpeta «Betómetro» (Matías, 1.0.29)
+    enum Tipo { Informe, Video, Base } tipo = Informe;
+    QString carrera, nombre, carpeta;     // id y nombre de la carrera, y su carpeta en Drive (vacíos en Base)
+    QString archivo;                      // video: nombre del archivo; base: «betometro.json»
     qint64 bytes = 0;
-    QString idDrive;                      // informe ya subido antes: se reemplaza (PATCH)
+    QString idDrive;                      // informe o base ya subidos antes: se reemplaza (PATCH)
+    QString version;                      // base: la huella con la que se decidió subirla
 };
-struct Opciones { bool informes = true, videos = true, videosPermitidos = false; };
+struct Opciones {
+    bool informes = true, videos = true, videosPermitidos = false;
+    QString baseVersion;                  // huella de la base de hoy (vacía: todavía no se calculó, no se sube)
+};
 struct Pendientes {
-    QList<Tarea> tareas;                  // en orden: primero los informes (chicos), después los videos
+    QList<Tarea> tareas;                  // en orden: primero los informes (chicos), la base, después los videos
     int videosEsperando = 0;              // videos que esperan la wifi de casa
     qint64 bytesEsperando = 0;
 };
-// `estado`: «carreras» de drive.json ({id: {informe:{id, version}, videos:{archivo:{id}}}})
-Pendientes pendientes(const QJsonObject& estadoCarreras, const QList<CarreraLocal>& carreras, const Opciones& op);
+// `estadoCarreras`: «carreras» de drive.json ({id: {informe:{id, version}, videos:{archivo:{id}}}})
+// `estadoBase`: «base» de drive.json ({id, version}); la base se sube con los informes, cuando cambió
+Pendientes pendientes(const QJsonObject& estadoCarreras, const QList<CarreraLocal>& carreras, const Opciones& op,
+                      const QJsonObject& estadoBase = QJsonObject());
 
 }  // namespace drive

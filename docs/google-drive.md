@@ -2,6 +2,8 @@
 
 El Betómetro sube solo, a tu Drive, los informes y los videos de cada carrera.
 Quedan en la carpeta **Betómetro**, con una carpeta por carrera: «2026-11-08 Santa Clara».
+En la misma carpeta **Betómetro** deja también `betometro.json`: una copia de toda la base (todas las carreras
+y la configuración, en el formato de la app). Se vuelve a subir, pisando la anterior, cada vez que cambia una carrera.
 
 Hay que prepararlo **una sola vez**. Son 6 pasos. Los primeros 4 se hacen en la compu.
 

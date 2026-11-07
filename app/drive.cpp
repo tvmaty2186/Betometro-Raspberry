@@ -75,7 +75,7 @@ Drive::Drive(Datos* datos, const QString& carpetaDatos, const QString& prueba, Q
     pronto_.setSingleShot(true);
     connect(&pronto_, &QTimer::timeout, this, &Drive::revisar);
     // Si cambia una carrera (vuelta medida o libre…), el informe se vuelve a subir
-    connect(datos_, &Datos::carrerasChanged, this, [this] { huellas_.clear(); if (!trabajando_) pronto_.start(30000); });
+    connect(datos_, &Datos::carrerasChanged, this, [this] { huellas_.clear(); huellaBase_.clear(); if (!trabajando_) pronto_.start(30000); });
     connect(datos_, &Datos::cfgChanged, this, [this] { if (!trabajando_) pronto_.start(3000); });
 
     // Capturas en la PC: «--prueba drive-codigo», «drive-subiendo», «drive-listo», «drive-esperando», «drive-error»
@@ -319,6 +319,7 @@ void Drive::desconectar() {
     estado_ = clienteId_.isEmpty() ? QStringLiteral("falta") : QStringLiteral("desconectado");
     guardar();
     QFile::remove(carpeta_ + QStringLiteral("/.drive-informe.html"));
+    QFile::remove(carpeta_ + QStringLiteral("/.drive-base.json"));
     avisar();
 }
 
@@ -333,6 +334,7 @@ drive::Opciones Drive::opciones() const {
     op.informes = datos_->cfg(QStringLiteral("driveInformes")).toBool();
     op.videos = datos_->cfg(QStringLiteral("driveVideos")).toBool();
     op.videosPermitidos = drive::wifiParaVideos(red_ssid_, propia_, datos_->cfg(QStringLiteral("driveWifis")).toStringList());
+    op.baseVersion = huellaBase_;   // la arma carrerasLocales(): llamarla antes
     return op;
 }
 
@@ -385,6 +387,13 @@ QList<drive::CarreraLocal> Drive::carrerasLocales() {
         r << c;
     }
     if (faltan && !huellar_.isActive()) huellar_.start(0);
+    // La versión de la copia de la base: cambia si cambia cualquier informe (o se borra o agrega una carrera)
+    if (faltan) huellaBase_.clear();
+    else {
+        QByteArray todo;
+        for (const drive::CarreraLocal& c : r) todo += c.id.toUtf8() + ':' + c.versionInforme.toUtf8() + '\n';
+        huellaBase_ = huella(todo);
+    }
     return r;
 }
 
@@ -393,12 +402,14 @@ void Drive::actualizarTexto() {
     listo_ = false;
     if (estado_ != QLatin1String("conectado")) { texto_.clear(); return; }
     if (subiendo_) {
-        texto_ = QStringLiteral("Subiendo %1 · %2").arg(tarea_.nombre, tarea_.tipo == drive::Tarea::Informe
+        texto_ = tarea_.tipo == drive::Tarea::Base ? QStringLiteral("Subiendo la copia de la base")
+               : QStringLiteral("Subiendo %1 · %2").arg(tarea_.nombre, tarea_.tipo == drive::Tarea::Informe
                      ? QStringLiteral("informe") : QStringLiteral("video %1 %").arg(qRound(progreso_ * 100)));
         return;
     }
     if (ocupado_) { texto_ = QStringLiteral("Se sube después de la carrera"); return; }   // en carrera no se calcula nada
-    const drive::Pendientes p = drive::pendientes(estadoGuardado_.value("carreras").toObject(), carrerasLocales(), opciones());
+    const QList<drive::CarreraLocal> locales = carrerasLocales();   // antes que opciones(): arma la huella de la base
+    const drive::Pendientes p = drive::pendientes(estadoGuardado_.value("carreras").toObject(), locales, opciones(), estadoGuardado_.value("base").toObject());
     const QString esperando = p.videosEsperando
         ? QStringLiteral("Esperando wifi de casa para los videos (%1 %2, %3)").arg(p.videosEsperando)
               .arg(p.videosEsperando == 1 ? QStringLiteral("video") : QStringLiteral("videos"), drive::textoBytes(p.bytesEsperando))
@@ -426,7 +437,8 @@ void Drive::borrarSubidos() {
 void Drive::seguirCola() {
     if (!puede() || trabajando_) return;
     borrarSubidos();
-    const drive::Pendientes p = drive::pendientes(estadoGuardado_.value("carreras").toObject(), carrerasLocales(), opciones());
+    const QList<drive::CarreraLocal> locales = carrerasLocales();
+    const drive::Pendientes p = drive::pendientes(estadoGuardado_.value("carreras").toObject(), locales, opciones(), estadoGuardado_.value("base").toObject());
     if (p.tareas.isEmpty()) { actualizarTexto(); avisar(); return; }
     trabajando_ = true;
     tarea_ = p.tareas.first();
@@ -436,10 +448,20 @@ void Drive::seguirCola() {
 }
 
 void Drive::conCarpeta(const drive::Tarea& t, std::function<void(const QString&)> seguir) {
+    auto conRaiz = [this](std::function<void(const QString&)> sig) {
+        const QString raiz = estadoGuardado_.value("raiz").toString();
+        if (!raiz.isEmpty()) return sig(raiz);
+        buscarOCrearCarpeta(kCarpetaRaiz, QStringLiteral("root"), [this, sig](const QString& id) {
+            estadoGuardado_[QStringLiteral("raiz")] = id;
+            guardar();
+            sig(id);
+        });
+    };
+    if (t.tipo == drive::Tarea::Base) return conRaiz(seguir);   // la copia de la base va en «Betómetro», no en una carrera
     const QString yaEsta = estadoGuardado_.value("carreras").toObject().value(t.carrera).toObject().value("carpeta").toString();
     if (!yaEsta.isEmpty()) return seguir(yaEsta);   // aunque se haya cambiado el nombre: misma carpeta
     const QString carrera = t.carrera, nombre = t.carpeta;
-    auto enRaiz = [this, carrera, nombre, seguir](const QString& raiz) {
+    conRaiz([this, carrera, nombre, seguir](const QString& raiz) {
         buscarOCrearCarpeta(nombre, raiz, [this, carrera, seguir](const QString& id) {
             QJsonObject cs = estadoGuardado_.value("carreras").toObject();
             QJsonObject e = cs.value(carrera).toObject();
@@ -449,13 +471,6 @@ void Drive::conCarpeta(const drive::Tarea& t, std::function<void(const QString&)
             guardar();
             seguir(id);
         });
-    };
-    const QString raiz = estadoGuardado_.value("raiz").toString();
-    if (!raiz.isEmpty()) return enRaiz(raiz);
-    buscarOCrearCarpeta(kCarpetaRaiz, QStringLiteral("root"), [this, enRaiz](const QString& id) {
-        estadoGuardado_[QStringLiteral("raiz")] = id;
-        guardar();
-        enRaiz(id);
     });
 }
 
@@ -481,23 +496,26 @@ void Drive::buscarOCrearCarpeta(const QString& nombre, const QString& padre, std
 
 namespace {
 QString claveDe(const drive::Tarea& t) {
-    return t.tipo == drive::Tarea::Informe ? QStringLiteral("informe:") + t.carrera : QStringLiteral("video:") + t.archivo;
+    return t.tipo == drive::Tarea::Informe ? QStringLiteral("informe:") + t.carrera
+         : t.tipo == drive::Tarea::Base ? QStringLiteral("base") : QStringLiteral("video:") + t.archivo;
 }
 }  // namespace
 
 void Drive::subir(const drive::Tarea& t, const QString& carpeta) {
     carpetaTarea_ = carpeta;
-    if (t.tipo == drive::Tarea::Informe) {
-        const QByteArray html = datos_->informeHtml(t.carrera);
-        rutaTarea_ = carpeta_ + QStringLiteral("/.drive-informe.html");
+    if (t.tipo == drive::Tarea::Informe || t.tipo == drive::Tarea::Base) {
+        // El informe (HTML) o la copia de la base (betometro.json, como el de la app): se arma en un archivo escondido
+        const bool base = t.tipo == drive::Tarea::Base;
+        const QByteArray cuerpo = base ? datos_->exportar() : datos_->informeHtml(t.carrera);
+        rutaTarea_ = carpeta_ + (base ? QStringLiteral("/.drive-base.json") : QStringLiteral("/.drive-informe.html"));
         QFile f(rutaTarea_);
-        if (html.isEmpty() || !f.open(QIODevice::WriteOnly | QIODevice::Truncate) || f.write(html) != html.size())
-            return fallar(QStringLiteral("No pude armar el informe"));
+        if (cuerpo.isEmpty() || !f.open(QIODevice::WriteOnly | QIODevice::Truncate) || f.write(cuerpo) != cuerpo.size())
+            return fallar(base ? QStringLiteral("No pude armar la copia de la base") : QStringLiteral("No pude armar el informe"));
         f.close();
-        versionTarea_ = huella(html);
-        total_ = html.size();
-        mime_ = QStringLiteral("text/html");
-        nombreArchivo_ = datos_->nombreInforme(t.carrera);
+        versionTarea_ = base ? t.version : huella(cuerpo);
+        total_ = cuerpo.size();
+        mime_ = base ? QStringLiteral("application/json") : QStringLiteral("text/html");
+        nombreArchivo_ = base ? t.archivo : datos_->nombreInforme(t.carrera);
     } else {
         rutaTarea_ = datos_->carpetaVideos() + '/' + t.archivo;
         total_ = QFileInfo(rutaTarea_).size();
@@ -515,7 +533,7 @@ void Drive::subir(const drive::Tarea& t, const QString& carpeta) {
     if (s.value("clave").toString() == claveDe(t) && s.value("bytes").toInteger() == total_ && !s.value("url").toString().isEmpty() &&
         s.value("version").toString() == versionTarea_)
         return preguntarSesion();
-    if (t.tipo == drive::Tarea::Informe && !t.idDrive.isEmpty()) return empezarSesion();   // se reemplaza el que está
+    if (t.tipo != drive::Tarea::Video && !t.idDrive.isEmpty()) return empezarSesion();   // informe o base: se reemplaza el que está
     // ¿Ya está en Drive? (si se borró drive.json o se volvió a conectar la misma cuenta)
     const QString q = QStringLiteral("name = '%1' and '%2' in parents and trashed = false").arg(escapar(nombreArchivo_), escapar(carpeta));
     pedir(QStringLiteral("GET"), req(conPreguntas(url(QStringLiteral("drive/v3/files")), {{"q", q}, {"fields", "files(id,size)"}, {"spaces", "drive"}})), {},
@@ -526,12 +544,13 @@ void Drive::subir(const drive::Tarea& t, const QString& carpeta) {
               const QJsonObject f = fs.isEmpty() ? QJsonObject() : fs.first().toObject();
               if (!f.isEmpty() && tarea_.tipo == drive::Tarea::Video && f.value("size").toString().toLongLong() == total_)
                   return terminoArchivo(aJson({{"id", f.value("id")}}));   // ya estaba entero
-              if (!f.isEmpty() && tarea_.tipo == drive::Tarea::Informe) tarea_.idDrive = f.value("id").toString();
+              if (!f.isEmpty() && tarea_.tipo != drive::Tarea::Video) tarea_.idDrive = f.value("id").toString();
               empezarSesion();
           });
 }
 
 void Drive::olvidarCarpeta() {
+    if (tarea_.tipo == drive::Tarea::Base) return;   // la base va en la raíz, que ya se olvidó
     QJsonObject cs = estadoGuardado_.value("carreras").toObject();
     QJsonObject e = cs.value(tarea_.carrera).toObject();
     e.remove(QStringLiteral("carpeta"));
@@ -695,18 +714,23 @@ void Drive::alimentar() {
 void Drive::terminoArchivo(const QByteArray& cuerpo) {
     const QString id = leerJson(cuerpo).value("id").toString();
     if (id.isEmpty()) return fallar(QStringLiteral("Google no devolvió el archivo"));
-    QJsonObject cs = estadoGuardado_.value("carreras").toObject();
-    QJsonObject e = cs.value(tarea_.carrera).toObject();
-    if (tarea_.tipo == drive::Tarea::Informe) {
-        e[QStringLiteral("informe")] = QJsonObject{{"id", id}, {"version", versionTarea_}};
+    if (tarea_.tipo == drive::Tarea::Base) {
+        estadoGuardado_[QStringLiteral("base")] = QJsonObject{{"id", id}, {"version", versionTarea_}};
         QFile::remove(rutaTarea_);
     } else {
-        QJsonObject vs = e.value("videos").toObject();
-        vs[tarea_.archivo] = QJsonObject{{"id", id}, {"bytes", total_}};
-        e[QStringLiteral("videos")] = vs;
+        QJsonObject cs = estadoGuardado_.value("carreras").toObject();
+        QJsonObject e = cs.value(tarea_.carrera).toObject();
+        if (tarea_.tipo == drive::Tarea::Informe) {
+            e[QStringLiteral("informe")] = QJsonObject{{"id", id}, {"version", versionTarea_}};
+            QFile::remove(rutaTarea_);
+        } else {
+            QJsonObject vs = e.value("videos").toObject();
+            vs[tarea_.archivo] = QJsonObject{{"id", id}, {"bytes", total_}};
+            e[QStringLiteral("videos")] = vs;
+        }
+        cs[tarea_.carrera] = e;
+        estadoGuardado_[QStringLiteral("carreras")] = cs;
     }
-    cs[tarea_.carrera] = e;
-    estadoGuardado_[QStringLiteral("carreras")] = cs;
     estadoGuardado_.remove(QStringLiteral("sesion"));
     guardar();
     trabajando_ = false; subiendo_ = false; progreso_ = 0; cortes_ = 0;

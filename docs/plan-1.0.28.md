@@ -35,8 +35,8 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       «se cortó» si no llegó a Terminar (05-1.1).
 - [x] Informe: no caerse con distancia negativa en la traza, más prueba de bases dañadas en `ctest` (02-1.1).
 - [x] Guardado: números a texto con `std::to_chars` (mismo archivo, 10 a 40 veces más rápido) (05-2.1, 04-2.1).
-- [ ] Guardado: no copiar la base en el hilo principal; no guardar la base entera cuando no hace falta (04-2.2, 2.3).
-      Hecho: ajustes y marcas se juntan 0,3 s antes de guardar. Falta la copia: sale con «un archivo por carrera».
+- [x] Guardado: no copiar la base en el hilo principal; no guardar la base entera cuando no hace falta (04-2.2, 2.3).
+      Ajustes y marcas se juntan 0,3 s antes de guardar. Desde la 1.0.29 se copia y se escribe solo la carrera que cambió.
 - [x] Avisar si no se puede guardar y «Poco lugar» en el Chequeo previo (05-1.2, UX 2.4). **Sin carteles grandes en
       carrera** (Matías: no).
 - [x] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
@@ -46,9 +46,11 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [x] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
 - [x] Borrar los paquetes de actualización viejos (10).
 - [x] Borrar una carrera también borra su video (si ningún otro la usa) (pedido de Matías).
-- [ ] **Copia de la base a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
-- [ ] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
-      Si se hace, el punto 05-2.2 (escribir sin el árbol `Json`) no hace falta.
+- [x] **Copia de la base a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
+      1.0.29: `Betómetro/betometro.json` en Drive, se pisa cuando cambia alguna carrera (con los informes, antes que los videos).
+- [x] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
+      1.0.29: `config.json` + `carreras/<id>.json`, migración al prender (el viejo queda como `.migrado`), papelera 30 días,
+      `GET /betometro.json` junta todo en el formato de la app. El punto 05-2.2 (escribir sin el árbol `Json`) ya no hace falta.
 - [x] Números del JSON sin depender del idioma del sistema (`std::to_chars` / `from_chars`) (02-2).
 - [x] Al prender: no avisar «base dañada» si lo roto es `.nuevo`, y borrar el `.danado` viejo (05-3).
 - [x] Base leída sin carreras y `.anterior` con carreras: avisar y usar `.anterior` (05-3).

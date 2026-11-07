@@ -3,7 +3,9 @@
 #include <QDate>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QTemporaryDir>
+#include <QThread>
 #include <iostream>
 
 #include "datos.h"
@@ -165,6 +167,89 @@ int main(int argc, char** argv) {
             CHEQUEAR(html.contains("const C={\"nombre\":\"Santa Clara\""));
             CHEQUEAR(!html.contains("__DATOS__") && !html.contains("__NOMBRE__"));
             CHEQUEAR(html.contains("interrumpida"));   // la plantilla de la Raspberry
+        }
+    }
+    {
+        // Un archivo por carrera (1.0.29): migración desde un betometro.json viejo, armado con la muestra
+        QTemporaryDir vieja, nueva;
+        beto::Json original;
+        {
+            Datos d(vieja.path());
+            d.cargarMuestra();
+            original = d.base().aJson();
+            QFile f(nueva.path() + "/betometro.json");
+            CHEQUEAR(f.open(QIODevice::WriteOnly));
+            f.write(QByteArray::fromStdString(original.escribir()));
+        }
+        CHEQUEAR(original["carreras"].tamano() == 4);
+        {
+            Datos d(nueva.path());
+            // Ida y vuelta: cada carrera se lee igual que estaba (el orden pasa a ser por fecha de creación)
+            CHEQUEAR(d.base().carreras.size() == 4);
+            CHEQUEAR(d.base().config == original["config"]);
+            for (const auto& c : original["carreras"].elementos()) {
+                const beto::Carrera* m = d.buscar(QString::fromStdString(c["id"].aTexto()));
+                CHEQUEAR(m && m->aJson() == c);
+            }
+            CHEQUEAR(QFile::exists(nueva.path() + "/betometro.json.migrado"));
+            CHEQUEAR(!QFile::exists(nueva.path() + "/betometro.json"));
+            CHEQUEAR(QFile::exists(nueva.path() + "/config.json"));
+            CHEQUEAR(QDir(nueva.path() + "/carreras").entryList({"*.json"}, QDir::Files).size() == 4);
+            // Exportar junta todo igual que el archivo viejo
+            const beto::Json exp = beto::Json::leer(d.exportar().toStdString());
+            CHEQUEAR(exp["schemaVersion"].aEntero() == 2 && exp["carreras"].tamano() == 4 && exp["config"] == original["config"]);
+            bool hay = false;
+            for (const auto& v : d.corridas()) if (v.toMap()["nombre"] == "Santa Clara") hay = true;
+            CHEQUEAR(hay);
+        }
+    }
+    {
+        // Guardar una vuelta escribe solo el archivo de esa carrera; borrar la manda a la papelera;
+        // un archivo roto se repone con su copia anterior sin tocar los demás
+        QTemporaryDir dir;
+        QString a, b;
+        {
+            Datos d(dir.path());
+            a = d.guardarCarrera(carreraNueva("A", hoy))["id"].toString();
+            b = d.guardarCarrera(carreraNueva("B", hoy.addDays(1)))["id"].toString();
+            d.ponerCfg("volumen", 5);
+            d.guardarYa();
+            // Dos veces, así cada una tiene su .anterior
+            d.guardarCarrera(d.carrera(a));
+            d.guardarCarrera(d.carrera(b));
+            d.guardarYa();
+            const QString fa = dir.path() + "/carreras/" + a + ".json", fb = dir.path() + "/carreras/" + b + ".json", fc = dir.path() + "/config.json";
+            CHEQUEAR(QFile::exists(fa) && QFile::exists(fb) && QFile::exists(fc) && QFile::exists(fb + ".anterior"));
+            const QDateTime tb = QFileInfo(fb).lastModified(), tc = QFileInfo(fc).lastModified(), ta = QFileInfo(fa).lastModified();
+            QThread::msleep(1100);
+            beto::Vuelta v;
+            v.n = 1; v.realMs = 180200; v.difMs = 200;
+            CHEQUEAR(d.agregarVuelta(a, v));
+            d.guardarYa();
+            CHEQUEAR(QFileInfo(fa).lastModified() > ta);
+            CHEQUEAR(QFileInfo(fb).lastModified() == tb && QFileInfo(fc).lastModified() == tc);
+            // Se rompe el archivo de B: al abrir de nuevo vuelve de su .anterior
+            QFile r(fb);
+            CHEQUEAR(r.open(QIODevice::WriteOnly | QIODevice::Truncate));
+            r.write("{\"id\":\"");
+            r.close();
+        }
+        {
+            Datos d(dir.path());
+            CHEQUEAR(d.buscar(a) && d.buscar(a)->vueltas.size() == 1);
+            CHEQUEAR(d.buscar(b) && d.carrera(b)["nombre"] == "B");
+            CHEQUEAR(QFile::exists(dir.path() + "/carreras/" + b + ".json.danado"));
+            CHEQUEAR(d.cfg("volumen").toDouble() == 5);
+            CHEQUEAR(d.guardarCarrera(d.carrera(b))["ok"].toBool());   // se vuelve a escribir su archivo
+            d.guardarYa();
+            CHEQUEAR(d.borrarCarrera(b));
+            d.guardarYa();
+            CHEQUEAR(!QFile::exists(dir.path() + "/carreras/" + b + ".json"));
+            CHEQUEAR(QFile::exists(dir.path() + "/carreras/papelera/" + b + ".json"));
+        }
+        {
+            Datos d(dir.path());
+            CHEQUEAR(d.buscar(a) && !d.buscar(b));
         }
     }
     std::cout << chequeos << " chequeos, " << fallas << " fallas\n";

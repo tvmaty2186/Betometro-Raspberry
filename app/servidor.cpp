@@ -192,6 +192,9 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda, bool post) const {
         return respuesta(200, "text/plain; charset=utf-8", t,
                          descargar ? adjunto(QStringLiteral("betometro-errores.txt")) : QByteArray());
     }
+    // Toda la base en un archivo, igual al de la app ({schemaVersion, config, carreras}): la copia para el celu
+    if (ruta == QLatin1String("/betometro.json"))
+        return respuesta(200, "application/json; charset=utf-8", datos_->exportar(), descargar ? adjunto(QStringLiteral("betometro.json")) : QByteArray());
     if (ruta == QLatin1String("/todos.zip")) {
         QList<QPair<QString, QByteArray>> archivos;
         for (const QVariant& v : datos_->corridas() + datos_->proximas()) {
@@ -320,7 +323,7 @@ QByteArray Servidor::pagina() const {
         "<div class=cab><img alt=\"\" src=\"/r/leon.png\"><div class=bar></div><div class=marca><b>BETÓMETRO</b><span>REGULARIDAD PARA EL NAVEGANTE</span></div><div class=rayas></div></div>"
         "<h2>CARRERAS · %1</h2>%2%3"
         "<p class=\"v pie\">Tocá una carrera para ver el informe. «Descargar» lo guarda en el teléfono; desde ahí se puede mandar a Drive o por WhatsApp.</p>"
-        "<p class=\"v pie\"><a href=\"/drive\">Google Drive</a> · <a href=\"/reportes?descargar=1\">Reporte de errores</a> · Avispón Verde #101</p></main></body></html>")
+        "<p class=\"v pie\"><a href=\"/drive\">Google Drive</a> · <a href=\"/reportes?descargar=1\">Reporte de errores</a> · <a href=\"/betometro.json?descargar=1\">Copia de la base</a> · Avispón Verde #101</p></main></body></html>")
                              .arg(n)
                              .arg(filas, n ? QStringLiteral("<a class=z href=\"/todos.zip\">Descargar todos (.zip)</a>") : QString());
     return html.toUtf8();

@@ -92,7 +92,7 @@ QString errorEnPalabras(int http, const QByteArray& cuerpo) {
     return QStringLiteral("Error de Google (%1)").arg(http);
 }
 
-Pendientes pendientes(const QJsonObject& estado, const QList<CarreraLocal>& carreras, const Opciones& op) {
+Pendientes pendientes(const QJsonObject& estado, const QList<CarreraLocal>& carreras, const Opciones& op, const QJsonObject& estadoBase) {
     Pendientes p;
     QList<Tarea> videos;
     for (const CarreraLocal& c : carreras) {
@@ -100,16 +100,21 @@ Pendientes pendientes(const QJsonObject& estado, const QList<CarreraLocal>& carr
         if (op.informes && !c.versionInforme.isEmpty()) {
             const QJsonObject inf = e.value("informe").toObject();
             if (inf.value("version").toString() != c.versionInforme || inf.value("id").toString().isEmpty())
-                p.tareas << Tarea{Tarea::Informe, c.id, c.nombre, c.carpeta, {}, 0, inf.value("id").toString()};
+                p.tareas << Tarea{Tarea::Informe, c.id, c.nombre, c.carpeta, {}, 0, inf.value("id").toString(), {}};
         }
         if (!op.videos) continue;
         const QJsonObject subidos = e.value("videos").toObject();
         for (const VideoLocal& v : c.videos) {
             if (!subidos.value(v.archivo).toObject().value("id").toString().isEmpty()) continue;
             if (!op.videosPermitidos) { p.videosEsperando++; p.bytesEsperando += v.bytes; continue; }
-            videos << Tarea{Tarea::Video, c.id, c.nombre, c.carpeta, v.archivo, v.bytes, {}};
+            videos << Tarea{Tarea::Video, c.id, c.nombre, c.carpeta, v.archivo, v.bytes, {}, {}};
         }
     }
+    // La copia de la base va con los informes (chica), antes que los videos, solo cuando cambió
+    if (op.informes && !op.baseVersion.isEmpty() &&
+        (estadoBase.value("version").toString() != op.baseVersion || estadoBase.value("id").toString().isEmpty()))
+        p.tareas << Tarea{Tarea::Base, {}, QStringLiteral("Betómetro"), {}, QStringLiteral("betometro.json"), 0,
+                          estadoBase.value("id").toString(), op.baseVersion};
     p.tareas += videos;
     return p;
 }
