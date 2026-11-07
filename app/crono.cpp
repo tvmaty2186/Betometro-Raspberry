@@ -104,7 +104,7 @@ void Crono::preparar(const QString& id) {
         practicaSinGuardar_ = true;
         carreraId_.clear();
         c.practica = true;
-        c.nombre = "Práctica libre";
+        c.nombre = "Práctica";
         c.tiempoIdealMs = cfg["tiempoIdealMs"].aEntero(240000);
         c.distanciaM = cfg["distanciaM"].aEntero(3200);
         c.patron = cfg["patron"].aTexto("alt1");

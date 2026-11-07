@@ -46,6 +46,10 @@ QtObject {
     // Letras
     readonly property color tinta: de("#f7f7f2", "#f3e7c8", "#ffffff", "#e8eef2", "#000000")
     readonly property color tintaSuave: de("#d6e6d2", "#b9a98a", "#9aa0a6", "#4fc3f7", "#1f1f1f")
+    // Botón apagado (08-7): fondo oscuro, borde punteado gris y letras tenues (muestra aprobada 1.0.29)
+    readonly property color apagadoFondo: de("#38000000", "#38000000", "#38000000", "#38000000", "#14000000")
+    readonly property color apagadoBorde: de("#7f8a84", "#857d70", "#7c8186", "#5f7f8c", "#8a8f93")
+    readonly property color apagadoTinta: de("#9fb0a5", "#a89f8f", "#9ea3a8", "#86a7b3", "#6f7478")
     readonly property color numero: de("#f3ecd8", "#ffb000", "#ffffff", "#3cf06e", "#000000")   // números grandes
     readonly property color alerta: de("#ff8a7a", "#ff6b4a", "#ff4d4d", "#ff4d5e", "#a33a00")
     readonly property color bien: de("#7fd36b", "#3fa34d", "#19c463", "#3cf06e", "#0a8a35")

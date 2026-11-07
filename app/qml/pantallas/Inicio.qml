@@ -8,7 +8,7 @@ Item {
     readonly property bool h: Contexto.horizontal
     readonly property var botones: [
         { texto: "Carreras", icono: "carreras", pantalla: "carreras" },
-        { texto: "Práctica libre", icono: "practica", pantalla: "practica" },
+        { texto: "Práctica", icono: "practica", pantalla: "practica" },
         { texto: "Chequeo previo", icono: "chequeo", pantalla: "chequeo" },
         { texto: "Pantalla de carrera", icono: "pantalla", pantalla: "editor" },
         { texto: "Clima", icono: "clima", pantalla: "clima" },   // donde estaba Ajustes (Matías, 05/11/2026)

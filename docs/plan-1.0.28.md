@@ -125,9 +125,9 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       a derecha, con − / +; segundos hasta 59). **Las décimas no se editan** (quedan en 0). En Práctica y en la ficha
       de la carrera. Mostrar muestra antes de programar.
 - [ ] Al tocar **Terminar**: ir derecho al **informe**, con el **error total grande arriba** (07-1.1, 2.1).
-- [ ] **«IR A LARGAR»** en los botones de Práctica, Carreras y Ficha que solo llevan al crono (07-1.2).
-- [ ] «Práctica libre» pasa a **«Práctica»** (Recorrido libre queda adentro de Práctica, con ese nombre).
-- [ ] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).
+- [x] **«IR A LARGAR»** en los botones de Práctica, Carreras y Ficha que solo llevan al crono (07-1.2).
+- [x] «Práctica libre» pasa a **«Práctica»** (Recorrido libre queda adentro de Práctica, con ese nombre).
+- [x] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).
 - [ ] Sin GPS en carrera: «SIN GPS · seguí por tiempo» en la Sugerida y un pitido al cortarse (07-2.3).
 - [x] Chequeo previo: cámara prendida sin cámara en rojo; «Poco lugar» (07-2.4).
 - [ ] Textos: ~~«undefined satélites»~~ (hecho), banderita «?» en el nombre del informe, línea de práctica de pie cortada,
@@ -137,10 +137,10 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [ ] **Engranaje de verdad** en el inicio, `TIcono.qml`, `ajustes.svg` y el video (`Engranaje.qml`). **Mostrar 2 o 3
       dibujos antes** (08-1).
 - [ ] Modo sol, Cámara: el aviso «No se encontró la cámara» se ve (08-2).
-- [ ] Carrera ya corrida: el botón grande dice «Ver informe» y abre el informe (Matías: sí) (08-4).
+- [x] Carrera ya corrida: el botón grande dice «Ver informe» y abre el informe (Matías: sí) (08-4).
 - [ ] Informe en Deportivo y Cabina: el título no se pisa con Vel./Acel./Adel. (08-5).
 - [ ] Deportivo: «Apagar» rojo; «Actualizar» con borde rojo y fondo oscuro (Matías) (08-6).
-- [ ] Botones apagados con estilo propio, no 45 % de opacidad (08-7). Muestra antes.
+- [x] Botones apagados con estilo propio, no 45 % de opacidad (08-7). Muestra antes.
 - [ ] **Colores fijos pasados a `Tema`**: rojo de peligro, azul de lluvia (con su versión sol), verde de Drive,
       etiquetas de la cámara (08-8).
 - [ ] Íconos nuevos: termómetro, rayo (tensión), «HD» (calidad); GPS y Localidad distintos (08-9).

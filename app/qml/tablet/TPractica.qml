@@ -5,7 +5,7 @@ import Betometro
 // − / + grandes (dejándolos apretados siguen); tocando el número se escribe con el teclado.
 TPantalla {
     id: raiz
-    titulo: "Práctica libre"
+    titulo: "Práctica"
     property int tiempoIdealMs: Datos.cfg("tiempoIdealMs")
     property int distanciaM: Datos.cfg("distanciaM")
     property string patron: Datos.cfg("patron")
@@ -38,7 +38,7 @@ TPantalla {
         y: raiz.h ? 0 : col.height + 16
         width: raiz.h ? raiz.area.width - x : raiz.area.width
         height: raiz.h ? raiz.area.height : raiz.area.height - y
-        tipo: "acento"; icono: "bandera"; tamIcono: 120; nombre: "LARGAR"; tamNombre: raiz.h ? 110 : 120
+        tipo: "acento"; icono: "bandera"; tamIcono: 120; nombre: "IR A LARGAR"; tamNombre: raiz.h ? 84 : 96   // el LARGAR de verdad está en el crono (07-1.2)
         onTocado: Navegacion.ir("carrera", { practica: true })
     }
     Teclado {

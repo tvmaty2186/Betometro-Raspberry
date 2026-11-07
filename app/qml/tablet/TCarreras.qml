@@ -67,7 +67,8 @@ TPantalla {
                                 onClicked: fp.conLugar ? Navegacion.ir("clima", { nombre: fp.modelData.lugar.split(",")[0], lat: fp.modelData.lugarLat, lon: fp.modelData.lugarLon, fecha: fp.modelData.fecha })
                                                        : Navegacion.ir("ficha", { id: fp.modelData.id }) }
                         }
-                        TBoton { width: raiz.h ? 220 : fp.width - 36 - 214; height: 96; tipo: "acento"; icono: ""; nombre: "LARGAR"; tamNombre: 34
+                        TBoton { width: raiz.h ? 220 : fp.width - 36 - 214; height: 96; tipo: "acento"; icono: ""; nombre: "IR A LARGAR"; tamNombre: 30
+                                 dato: fp.modelData.puedeLargar ? "" : fp.modelData.motivoNoLargar   // gris con el motivo (07-2.2)
                                  activo: fp.modelData.puedeLargar; onTocado: Navegacion.ir("carrera", { id: fp.modelData.id }) }
                     }
                 }

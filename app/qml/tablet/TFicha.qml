@@ -76,16 +76,24 @@ TPantalla {
         TBoton {
             id: largar
             width: parent.width; height: parent.height - 136
-            tipo: "acento"; icono: raiz.h ? "bandera" : ""; tamIcono: 90
-            nombre: c.recorrido && c.tieneVueltas ? "RECORRIDO" : c.finalizada ? "FINALIZADA" : "LARGAR"; tamNombre: 70
-            dato: !raiz.nueva && !c.puedeLargar ? c.motivoNoLargar : "Promedio " + Formato.velocidad(raiz.distanciaM, raiz.tiempoIdealMs)
-            activo: raiz.nueva || c.puedeLargar
-            onTocado: { const id = raiz.cambiada || raiz.nueva ? raiz.guardar() : c.id; if (id && Datos.carrera(id).puedeLargar) Navegacion.ir("carrera", { id: id }); }
+            tipo: "acento"; tamIcono: 90
+            // Carrera ya corrida (o recorrido): el botón grande abre el informe (08-4, muestra aprobada 1.0.29)
+            readonly property bool verInforme: !raiz.nueva && c.tieneVueltas && (c.finalizada || c.recorrido)
+            icono: raiz.h ? (verInforme ? "informe" : "bandera") : ""
+            nombre: verInforme ? "VER INFORME" : "IR A LARGAR"; tamNombre: verInforme ? 64 : 58
+            dato: verInforme ? (c.recorrido ? "Recorrido" : "Finalizada · " + c.vueltas + " vueltas" + (c.errorTotal ? " · error total " + c.errorTotal : ""))
+                  : !raiz.nueva && !c.puedeLargar ? c.motivoNoLargar : "Promedio " + Formato.velocidad(raiz.distanciaM, raiz.tiempoIdealMs)
+            activo: verInforme || raiz.nueva || c.puedeLargar
+            onTocado: {
+                if (verInforme) { Navegacion.ir("informe", { id: c.id }); return; }
+                const id = raiz.cambiada || raiz.nueva ? raiz.guardar() : c.id; if (id && Datos.carrera(id).puedeLargar) Navegacion.ir("carrera", { id: id });
+            }
         }
         Row {
             anchors.bottom: parent.bottom; spacing: 16
             TBoton { width: (largar.width - 16) / 2; height: 120; tamNombre: 27; icono: ""
-                     nombre: c.tieneVueltas && !raiz.cambiada ? "Ver informe" : "Guardar"
+                     nombre: c.tieneVueltas && !raiz.cambiada && !largar.verInforme ? "Ver informe" : "Guardar"
+                     activo: !(largar.verInforme && !raiz.cambiada); dato: activo ? "" : "Sin cambios"
                      onTocado: { if (c.tieneVueltas && !raiz.cambiada) { Navegacion.ir("informe", { id: c.id }); return; }
                                  if (raiz.guardar()) Navegacion.avisar("Carrera guardada"); } }
             TBoton { width: (largar.width - 16) / 2; height: 120; tamNombre: 27; icono: ""; tipo: raiz.borrarArmado ? "peligro" : ""

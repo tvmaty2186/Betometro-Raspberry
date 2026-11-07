@@ -174,6 +174,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["tiempoIdealMs"] = static_cast<qlonglong>(c.tiempoIdealMs);
     r["patron"] = q(c.patron);
     r["tieneVueltas"] = !c.vueltas.empty();
+    r["vueltas"] = static_cast<int>(c.vueltas.size());
     r["finalizada"] = fin;
     r["modificada"] = c.modificada();   // hay una carrera original para restablecer
     r["medidas"] = medidas;
@@ -225,7 +226,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     bool puede = !fin;
     if (!fin && !c.practica && horaValida_ && dias != 0) {
         puede = false;
-        motivo = dias > 0 ? "Se larga el " + QLocale(QLocale::Spanish, QLocale::Argentina).toString(f, "d MMM yyyy")
+        motivo = dias > 0 ? "Se larga el " + QLocale(QLocale::Spanish, QLocale::Argentina).toString(f, f.year() == hoy().year() ? "d MMM" : "d MMM yyyy").remove('.')
                           : QString("La fecha de la carrera ya pasó");
     }
     if (rec && !c.vueltas.empty()) { puede = false; motivo = QStringLiteral("Otro: Práctica → Recorrido libre"); }
