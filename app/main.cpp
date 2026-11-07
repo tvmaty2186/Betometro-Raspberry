@@ -15,6 +15,9 @@
 //   --prueba tele-qr | tele-carreras | tele-remoto   modo tele con el código del celu, con la lista de carreras,
 //                            o listo para probar el celu como control (las dos últimas: Paraná también con video)
 //   --prueba cortado         Paraná con el video en dos partes (se desenchufó la cámara): el aviso del informe
+//   --prueba prueba-completa con --pantalla prueba: arranca la Prueba completa (capturas; BETO_PRUEBA_RAPIDA=1 la acorta)
+//   --prueba grafico | mapa  en el informe: el gráfico o el mapa a pantalla completa, con zoom y un punto tocado
+//                            (1.0.30). Con BETO_MUESTRA_RECORRIDO=1 --muestra suma un recorrido libre de 40 km
 //   BETO_FIJO=1              (variable) para las capturas comparadas: GPS simulado sin azar, hora «12:00», sin
 //                            animación en el inicio. La fecha la fija faketime (herramientas/comparar-capturas.sh)
 #include <QCommandLineParser>
@@ -51,6 +54,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "pulsador_gpio.h"
 #include "reportes.h"
 #include "simulacion.h"
+#include "prueba_completa.h"
 #include "servidor.h"
 #include "control_remoto.h"
 #include "wifi.h"
@@ -174,7 +178,9 @@ int main(int argc, char* argv[]) {
             timex tx{};
             if (::adjtimex(&tx) >= 0 && !(tx.status & STA_UNSYNC)) return;   // internet ya la puso: manda NTP
             const qint64 dif = utc.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();
-            if (std::llabs(dif) < 2000) { if (!horaDelGps) { horaDelGps = true; revisarHora(); } return; }
+            // Una vez puesta, solo se vuelve a corregir si se corrió más de 5 s (la lectura del GPS trae segundos enteros
+            // y llega ~0,1 s tarde: con 2 s a veces se corregía dos veces seguidas; visto en los reportes de la 1.0.29)
+            if (std::llabs(dif) < (horaDelGps ? 5000 : 2000)) { if (!horaDelGps) { horaDelGps = true; revisarHora(); } return; }
             const qint64 ms = utc.toMSecsSinceEpoch() + 100;   // la lectura llega ~0,1 s después del segundo
             timespec ts{static_cast<time_t>(ms / 1000), static_cast<long>((ms % 1000) * 1000000)};
             if (::clock_settime(CLOCK_REALTIME, &ts) == 0) {
@@ -283,7 +289,15 @@ int main(int argc, char* argv[]) {
     // Y se reproduce con GStreamer, que usa el descompresor de video de la Raspberry (app/video_gst.h)
     qmlRegisterType<VideoGst>("Betometro.Video", 1, 0, "VideoGst");
     Simulacion simulacion(carpeta, &audio, &reportes);   // antes que el motor de QML: se destruye después
+    // Prueba completa (Ajustes → Prueba completa, o desde el celu en /prueba): la Pi se revisa sola y manda el resultado
+    PruebaCompleta::Piezas piezas;
+    piezas.carpetaDatos = carpeta; piezas.contexto = &contexto; piezas.datos = &datos; piezas.crono = &crono; piezas.audio = &audio;
+    piezas.camara = &camara; piezas.reportes = &reportes; piezas.wifi = &wifi; piezas.drive = &drive; piezas.simulacion = &simulacion;
+    piezas.pulsador = pulsador;
+    PruebaCompleta pruebaCompleta(piezas);
+    servidor.ponerPrueba(&pruebaCompleta);
     QQmlApplicationEngine motor;
+    pruebaCompleta.ponerMotor(&motor);
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
     motor.rootContext()->setContextProperty(QStringLiteral("Servidor"), &servidor);
@@ -297,6 +311,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
     motor.rootContext()->setContextProperty(QStringLiteral("Simulador"), &simulacion);
+    motor.rootContext()->setContextProperty(QStringLiteral("PruebaCompleta"), &pruebaCompleta);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
     motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
     motor.rootContext()->setContextProperty(QStringLiteral("Hdmi"), &hdmi);
