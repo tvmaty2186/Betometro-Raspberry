@@ -100,8 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
-## 1.0.30 (en preparación)
-Lo que quedó: [docs/plan-1.0.30.md](docs/plan-1.0.30.md).
+## 1.0.30 (publicada 07/11/2026)
+Gráficos a pantalla completa (Pi y celu), Prueba completa (Ajustes), arreglo de pantallas en negro, sin MARCAR
+con la pantalla diseñada, video «procesando», Drive por HTTP/1.1, arranque sin esperar al sonido, hora en el
+Chequeo, pruebas nuevas. Los reportes llegan solos a tvmaty2186/Betometro-reportes.
+Lo que queda: [docs/plan-1.0.30.md](docs/plan-1.0.30.md) (casillas sin marcar).
 
 ## 1.0.29 «pantallas y orden» (publicada 07/11/2026)
 Tiempos m:ss:d, tiempo por casilleros, IR A LARGAR, Terminar → informe, engranaje, MARCAR opcional,
