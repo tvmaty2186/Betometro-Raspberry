@@ -90,7 +90,9 @@ private:
         QString estado = QStringLiteral("espera");
         QString detalle;
         qint64 ms = 0;
+        QString empezo;                    // hora en que empezó el paso (HH:mm:ss), para el reporte
     };
+    QString empezoTotal_;                  // hora en que empezó la prueba
     void siguiente();
     void terminarPaso(const QString& estado, const QString& detalle);
     void preguntar(const QString& que, int segundos);

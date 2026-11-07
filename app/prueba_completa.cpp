@@ -149,6 +149,7 @@ bool PruebaCompleta::correr() {
     camaraMedida_.clear();
     carga_m_ = Carga{};
     relojTotal_.start();
+    empezoTotal_ = QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss"));
     emit cambio();
     emit empezo();
     QTimer::singleShot(50, this, &PruebaCompleta::siguiente);   // que la pantalla se muestre primero
@@ -173,8 +174,12 @@ void PruebaCompleta::siguiente() {
         duracionS_ = relojTotal_.elapsed() / 1000;
         guardar();
         if (p_.reportes) {
-            p_.reportes->anotar(QStringLiteral("prueba"), QStringLiteral("Prueba completa: %1 (duró %2 s)").arg(resumen()).arg(duracionS_));
-            for (const Paso& p : pasos_) p_.reportes->anotar(QStringLiteral("prueba"), QStringLiteral("%1 [%2]: %3").arg(p.nombre, p.estado, p.detalle));
+            // Con la hora de inicio y fin de la prueba y de cada paso (Matías, 07/11/2026)
+            p_.reportes->anotar(QStringLiteral("prueba"), QStringLiteral("Prueba completa: %1 (de %2 a %3, duró %4 s)")
+                .arg(resumen(), empezoTotal_, QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss"))).arg(duracionS_));
+            for (const Paso& p : pasos_)
+                p_.reportes->anotar(QStringLiteral("prueba"), QStringLiteral("%1 [%2] · %3 · %4 s: %5")
+                    .arg(p.nombre, p.estado, p.empezo.isEmpty() ? QStringLiteral("--:--:--") : p.empezo, QString::number(p.ms / 1000.0, 'f', 1).replace('.', ','), p.detalle));
             if (p_.reportes->hayLlave()) p_.reportes->enviarAhora();
         }
         emit cambio();
@@ -183,6 +188,7 @@ void PruebaCompleta::siguiente() {
     }
     Paso& p = pasos_[static_cast<size_t>(actual_)];
     p.estado = kCorriendo;
+    p.empezo = QDateTime::currentDateTime().toString(QStringLiteral("HH:mm:ss"));
     relojPaso_.start();
     tope_.start(rapida() ? 20000 : 120000);
     vivo_ = new QObject(this);
@@ -666,22 +672,23 @@ void PruebaCompleta::guardar() {
 
 QByteArray PruebaCompleta::json() const {
     QJsonArray pasos;
-    for (const Paso& p : pasos_) pasos << QJsonObject{{"nombre", p.nombre}, {"estado", p.estado}, {"detalle", p.detalle}, {"ms", p.ms}};
-    QJsonObject o{{"version", QStringLiteral(BETO_VERSION)}, {"estado", estado_}, {"cuando", cuando_}, {"resumen", resumen()},
+    for (const Paso& p : pasos_) pasos << QJsonObject{{"nombre", p.nombre}, {"estado", p.estado}, {"detalle", p.detalle}, {"ms", p.ms}, {"empezo", p.empezo}};
+    QJsonObject o{{"version", QStringLiteral(BETO_VERSION)}, {"estado", estado_}, {"cuando", cuando_}, {"empezo", empezoTotal_}, {"resumen", resumen()},
                   {"paso", paso()}, {"total", total()}, {"haciendo", haciendo_}, {"pregunta", pregunta_}, {"segundos", segundos_},
                   {"duracionS", estado_ == kCorriendo || estado_.isEmpty() ? 0 : duracionS_}, {"pasos", pasos}};
     return QJsonDocument(o).toJson(QJsonDocument::Indented);
 }
 
 QByteArray PruebaCompleta::texto() const {
-    QString t = QStringLiteral("Prueba completa · Betómetro v%1 · %2\n").arg(QStringLiteral(BETO_VERSION), cuando_.isEmpty() ? QStringLiteral("(sin terminar)") : cuando_);
+    QString t = QStringLiteral("Prueba completa · Betómetro v%1 · empezó %2 · %3\n").arg(QStringLiteral(BETO_VERSION), empezoTotal_.isEmpty() ? QStringLiteral("--:--:--") : empezoTotal_, cuando_.isEmpty() ? QStringLiteral("(sin terminar)") : cuando_);
     t += QStringLiteral("RESULTADO: %1 · %2%3\n\n").arg(estado_ == kOk ? QStringLiteral("TODO BIEN") : estado_ == kLeve ? QStringLiteral("REVISAR") : estado_ == kGrave ? QStringLiteral("HAY ERRORES") : estado_ == kCorriendo ? QStringLiteral("CORRIENDO") : QStringLiteral("SIN CORRER"), resumen(),
                                                      duracionS_ > 0 && estado_ != kCorriendo ? QStringLiteral(" · duró %1 min %2 s").arg(duracionS_ / 60).arg(duracionS_ % 60) : QString());
     int n = 0;
     for (const Paso& p : pasos_) {
         const QString marca = p.estado == kOk ? QStringLiteral("BIEN") : p.estado == kLeve ? QStringLiteral("AVISO") : p.estado == kGrave ? QStringLiteral("ERROR")
                             : p.estado == kSaltado ? QStringLiteral("sin probar") : p.estado == kCorriendo ? QStringLiteral("corriendo") : QStringLiteral("espera");
-        t += QStringLiteral("%1. [%2] %3: %4\n").arg(++n, 2).arg(marca, p.nombre, p.detalle.isEmpty() ? QStringLiteral("—") : p.detalle);
+        t += QStringLiteral("%1. [%2] %3 · %4 · %5 s: %6\n").arg(++n, 2).arg(marca, p.nombre, p.empezo.isEmpty() ? QStringLiteral("--:--:--") : p.empezo,
+                                                                    QString::number(p.ms / 1000.0, 'f', 1).replace('.', ','), p.detalle.isEmpty() ? QStringLiteral("—") : p.detalle);
     }
     return t.toUtf8();
 }
