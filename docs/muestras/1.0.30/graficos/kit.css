@@ -1,0 +1,64 @@
+/* Kit de las muestras «gráficos a pantalla completa» (1.0.30). Imita el informe del tema Avispón en la Pi
+   (app/qml/pantallas/informe/*.qml, Tarjeta.qml, Sub.qml) y la página del informe (recursos/informe-plantilla.html). */
+@font-face{font-family:B;src:url(../../../../recursos/fuentes/barlow-latin-400-normal.woff2);font-weight:400}
+@font-face{font-family:B;src:url(../../../../recursos/fuentes/barlow-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:B;src:url(../../../../recursos/fuentes/barlow-latin-600-italic.woff2);font-weight:600;font-style:italic}
+@font-face{font-family:B;src:url(../../../../recursos/fuentes/barlow-latin-800-italic.woff2);font-weight:800;font-style:italic}
+@font-face{font-family:B;src:url(../../../../recursos/fuentes/barlow-latin-800-italic.woff2);font-weight:800}
+@font-face{font-family:C;src:url(../../../../recursos/fuentes/barlow-condensed-latin-700-normal.woff2);font-weight:700}
+/* los mismos archivos con el nombre que usa la página del informe */
+@font-face{font-family:"Barlow";src:url(../../../../recursos/fuentes/barlow-latin-600-normal.woff2);font-weight:600}
+@font-face{font-family:"Barlow";src:url(../../../../recursos/fuentes/barlow-latin-600-italic.woff2);font-weight:600;font-style:italic}
+@font-face{font-family:"Barlow";src:url(../../../../recursos/fuentes/barlow-latin-800-italic.woff2);font-weight:800;font-style:italic}
+@font-face{font-family:"Barlow Condensed";src:url(../../../../recursos/fuentes/barlow-condensed-latin-700-normal.woff2);font-weight:700}
+*{box-sizing:border-box;margin:0;padding:0}
+svg{display:block}
+
+/* ================= Pi (1280×720) ================= */
+body.pi{width:1280px;height:720px;overflow:hidden;position:relative;font-family:B;color:#f7f7f2;
+ background:radial-gradient(120% 80% at 25% 0%,#3d8c57 0%,#1d5233 40%,#0d2a18 100%)}
+body.pi::before{content:"";position:absolute;inset:0;pointer-events:none;
+ background:repeating-conic-gradient(rgba(255,255,255,.05) 0 25%,transparent 0 50%) 23px 0/46px 46px;
+ -webkit-mask-image:radial-gradient(60% 50% at 0% 20%,#000 0%,transparent 100%)}
+/* Tarjeta oscura (Tarjeta.qml oscura: caja1→caja2, borde cromo doble), ocupa toda la pantalla */
+.tarjeta{position:absolute;left:12px;top:12px;width:1256px;height:696px;border-radius:18px;overflow:hidden;
+ background:linear-gradient(#1f4a2f,#08190e);box-shadow:0 0 0 2px #cfd4d8,0 0 0 3px #4b5258}
+.tarjeta::after{content:"";position:absolute;left:18px;right:18px;top:0;height:1px;background:rgba(255,255,255,.35)}
+/* Sub.qml: 600 cursiva, mayúsculas, espaciado 12 % */
+.sub{position:absolute;font:600 italic 15px B;letter-spacing:1.8px;text-transform:uppercase;color:#d6e6d2;white-space:nowrap}
+.sub.chica{font-size:13px;letter-spacing:1.5px}
+/* Botones Vel./Acel./Adel. (MapaInforme.qml) un poco más grandes porque ahora se tocan a pantalla completa */
+.modos{position:absolute;display:flex;gap:8px}
+.modos div{height:40px;padding:0 20px;border-radius:20px;display:grid;place-items:center;font:600 italic 20px B;
+ background:rgba(0,0,0,.4);border:1px solid #cfd4d8;color:#f7f7f2}
+.modos .on{background:#f4c531;color:#0b0d0c}
+/* X para cerrar: igual al botón Volver de la cabecera (64×60, radio 18) */
+.cerrar{position:absolute;width:64px;height:60px;border-radius:18px;background:rgba(0,0,0,.35);border:3px solid #cfd4d8;display:grid;place-items:center}
+.pista{position:absolute;font:600 italic 13px B;letter-spacing:1.2px;text-transform:uppercase;color:#9fb0a5;white-space:nowrap}
+/* escala de colores y mapita del mapa a pantalla completa */
+.ley{position:absolute;border-radius:14px;background:rgba(8,25,14,.86);border:1px solid rgba(207,212,216,.6);padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.ley .f{display:flex;align-items:center;gap:10px;font:600 15px B;color:#f7f7f2}
+.ley .f i{width:26px;height:8px;border-radius:4px;flex:none}
+.ley .f small{color:#d6e6d2;font-size:13px}
+.mapita{position:absolute;border-radius:14px;background:rgba(8,25,14,.86);border:1px solid rgba(207,212,216,.6);overflow:hidden}
+
+/* ================= Celu (página del informe, 844×390) ================= */
+:root{--bg:#0b2a17;--borde:#cfd4d8;--ink:#f7f7f2;--sub:#b9cdb8;--crema:#f3ead2;--rojo:#d7263d;--ama:#f4c531;--verde:#2ecc71;--azul:#3d8bfd;--celeste:#7fd3ff;
+ --num:"Barlow Condensed","Arial Narrow",sans-serif;--ui:"Barlow",system-ui,sans-serif}
+body.celu{width:844px;height:390px;overflow:hidden;position:relative;color:var(--ink);font-family:var(--ui);font-weight:600;
+ background:linear-gradient(180deg,rgba(11,42,23,0) 0,#0b2a17 260px),
+  repeating-conic-gradient(#ffffff09 0 25%,transparent 0 50%) 0 0/22px 22px,
+  radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}
+/* la tarjeta .card de la página, a pantalla completa */
+.card{position:absolute;inset:6px;background:radial-gradient(120% 90% at 50% 0%,#1f4a2f,#08190e);border-radius:14px;padding:10px 12px;overflow:hidden;
+ box-shadow:0 0 0 2px var(--borde),0 0 0 3px #4b5258,0 10px 18px #0008,inset 0 1px 0 #ffffff4d,inset 0 -18px 30px #00000073}
+.card::after{content:"";position:absolute;left:8%;right:8%;top:3%;height:min(36%,110px);border-radius:50% 50% 45% 45%/60% 60% 40% 40%;
+ background:linear-gradient(#ffffff1c,#ffffff00);pointer-events:none}
+.t{position:absolute;left:12px;top:12px;font-size:10px;letter-spacing:.16em;color:var(--sub);font-weight:600;font-style:italic;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.t b{color:var(--crema);letter-spacing:0;font:700 14px var(--num)}
+.chips{position:absolute;display:flex;gap:6px}
+.chip{padding:4px 10px;border-radius:99px;font:800 italic 12px var(--ui);background:#0f3b20;color:var(--crema);border:1.5px solid #cfd4d855;box-shadow:0 2px 4px #0006}
+.chip.on{background:linear-gradient(#ffe07a,var(--ama) 50%,#d9a20f);color:#14240f;border-color:#fff}
+.x{position:absolute;right:10px;top:8px;width:34px;height:34px;border-radius:50%;background:#0f3b20;border:1.5px solid #cfd4d8aa;box-shadow:0 2px 4px #0006;display:grid;place-items:center}
+.eje{fill:var(--sub);font-size:10px}
+.pie{position:absolute;left:0;right:0;text-align:center;color:var(--sub);font-size:11px;font-style:italic}
