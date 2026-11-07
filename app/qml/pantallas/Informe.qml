@@ -25,7 +25,10 @@ Item {
     readonly property var videos: { rev; return Datos.videos(id_); }
     property bool verVideo: false
     property bool completo: false
-    readonly property bool vv: verVideo && videos.length > 0
+    // Un video que todavía se graba o se pasa a MP4 no se muestra: aviso «se está procesando» y se habilita solo
+    readonly property bool procesando: videos.some(v => Camara.enProceso.indexOf(v.archivo) >= 0)
+    onProcesandoChanged: if (procesando) verVideo = false
+    readonly property bool vv: verVideo && videos.length > 0 && !procesando
     readonly property Item reproductor: video.reproductor
     onVvChanged: {
         if (!vv) completo = false;
@@ -38,6 +41,7 @@ Item {
     readonly property bool botonTele: videos.length > 0 && (Tele.hay || (Tele.hayQueReiniciar && !Crono.enCurso))
     property bool pedirReinicio: false
     function verEnTele() {
+        if (procesando) { Navegacion.avisar("El video se está procesando: en un momento se puede ver"); return; }
         if (!Tele.hay) { pedirReinicio = true; return; }
         verVideo = true;
         completo = false;
@@ -97,7 +101,8 @@ Item {
         numero: Datos.ajustes.numeroAuto || "101"
         onVolver: Navegacion.ir("ficha", { id: raiz.id_ })
         onVerEnTele: raiz.verEnTele()
-        onElegirVideo: (v) => raiz.verVideo = v
+        onElegirVideo: (v) => { if (v && raiz.procesando) { Navegacion.avisar("El video se está procesando: en un momento se puede ver"); return; } raiz.verVideo = v; }
+        procesando: raiz.procesando
         onCompartir: Navegacion.ir("compartir", { id: raiz.id_ })
     }
 

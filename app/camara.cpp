@@ -92,6 +92,8 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     for (QProcess* p : {&vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
     grab_.setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(10); });
     QDir().mkpath(carpeta_);
+    connect(this, &Camara::grabandoChanged, this, &Camara::enProcesoChanged);
+    connect(this, &Camara::convirtiendoChanged, this, &Camara::enProcesoChanged);
     detenerTimer_.setSingleShot(true);
     connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) { grab_.terminate(); matarTimer_.start(); } });
     matarTimer_.setSingleShot(true);
@@ -197,6 +199,13 @@ void Camara::leer(QProcess& p, const std::function<void(const QVariantMap&)>& f)
             if (!m.isEmpty()) f(m);
         }
     });
+}
+
+QStringList Camara::enProceso() const {
+    QStringList r;
+    if (grabando() && !archivo_.isEmpty()) r << QFileInfo(archivo_).fileName();
+    if (convirtiendo() && !mp4Entrada_.isEmpty()) r << QFileInfo(mp4Entrada_).fileName();
+    return r;
 }
 
 QString Camara::ayudante() const {

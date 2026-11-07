@@ -13,6 +13,7 @@ Item {
     property real dist: 0
     property bool conVideo: false    // la carrera tiene video: Informe / Video en vez del 101
     property bool verVideo: false
+    property bool procesando: false  // el video todavía se graba o se pasa a MP4
     property bool botonTele: false
     property bool enTele: false
     property string numero: "101"
@@ -102,7 +103,7 @@ Item {
             visible: cab.conVideo
             anchors.verticalCenter: parent.verticalCenter
             height: cab.h ? 44 : 42
-            opciones: [{ texto: "Informe", valor: false }, { texto: "Video", valor: true }]
+            opciones: [{ texto: "Informe", valor: false }, { texto: cab.procesando ? "Video…" : "Video", valor: true }]
             valor: cab.verVideo
             onElegido: (v) => cab.elegirVideo(v)
         }

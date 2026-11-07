@@ -28,6 +28,9 @@ class Camara : public QObject {
     Q_PROPERTY(QString pruebaMic READ pruebaMic NOTIFY pruebaMicChanged) // "", grabando, escuchando
     Q_PROPERTY(QVariantMap lugar READ lugar NOTIFY lugarChanged)        // usadoGB, videos, horas
     Q_PROPERTY(QVariantList videos READ videos NOTIFY lugarChanged)
+    // Videos que todavía se están grabando o pasando a MP4: el informe no los muestra hasta que terminan (Matías,
+    // 07/11/2026: recién terminada la carrera el video se veía acelerado)
+    Q_PROPERTY(QStringList enProceso READ enProceso NOTIFY enProcesoChanged)
     Q_PROPERTY(bool convirtiendo READ convirtiendo NOTIFY convirtiendoChanged)   // pasando un video a MP4   // los de Datos::videosGuardados, + «grabando»
 
 public:
@@ -41,6 +44,7 @@ public:
     QVariantList microfonos() const { return microfonos_; }
     bool grabando() const { return grab_.state() != QProcess::NotRunning; }
     bool convirtiendo() const { return mp4_.state() != QProcess::NotRunning; }
+    QStringList enProceso() const;
     // En carrera no se pasa nada a MP4 (y si estaba pasando uno, se corta y se sigue después)
     void ponerEnCarrera(bool enCarrera);
     QString falla() const { return falla_; }
@@ -74,6 +78,7 @@ public:
     QString dispositivoAudio() const;         // según el ajuste camaraSonido; "no" si no hay
 
 signals:
+    void enProcesoChanged();
     void dispositivosChanged();
     void grabandoChanged();
     void vistaChanged();
