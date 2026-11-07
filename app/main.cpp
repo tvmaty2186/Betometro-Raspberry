@@ -56,6 +56,8 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "video_gst.h"
 
 #include <QStandardPaths>
+#include <sys/timex.h>
+#include <time.h>
 
 static void cargarFuentes() {
     QDirIterator it(QStringLiteral(":/recursos/fuentes"), {QStringLiteral("*.ttf"), QStringLiteral("*.woff2"), QStringLiteral("*.woff")});
@@ -138,6 +140,25 @@ int main(int argc, char* argv[]) {
         else gps = new GpsSimulado(&app);
     }
     Crono crono(&datos, gps);
+    // Hora del equipo desde el GPS (11B-1.2, Matías 07/11): en el autódromo casi nunca hay internet, y la Pi
+    // arranca con la hora en que se apagó. Si internet (NTP) no la puso y la del GPS difiere más de 2 s, se
+    // corrige el reloj. El cronómetro no se mueve: usa el reloj monotónico. Sin GPS ni internet no se bloquea nada.
+    if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) {
+        QObject::connect(gps, &FuenteGps::datos, &app, [&datos](int, const QDateTime& utc) {
+            if (!utc.isValid() || utc.date().year() < 2025) return;
+            timex tx{};
+            if (::adjtimex(&tx) >= 0 && !(tx.status & STA_UNSYNC)) return;   // internet ya la puso: manda NTP
+            const qint64 dif = utc.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();
+            if (std::llabs(dif) < 2000) return;
+            const qint64 ms = utc.toMSecsSinceEpoch() + 100;   // la lectura llega ~0,1 s después del segundo
+            timespec ts{static_cast<time_t>(ms / 1000), static_cast<long>((ms % 1000) * 1000000)};
+            if (::clock_settime(CLOCK_REALTIME, &ts) == 0) {
+                qWarning("Hora puesta desde el GPS: %s (el equipo estaba %+.1f s corrido)",
+                         qPrintable(utc.toLocalTime().toString(QStringLiteral("dd/MM/yyyy HH:mm:ss"))), dif / 1000.0);
+                emit datos.carrerasChanged();   // «hoy» cambió: las listas de carreras se vuelven a armar
+            }
+        });
+    }
     // Clima: pronóstico de Open-Meteo por la ubicación del GPS o por una localidad
     Clima clima(carpeta);
     QObject::connect(gps, &FuenteGps::muestra, &clima, [&clima](const beto::Muestra& m) {

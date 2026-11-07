@@ -160,7 +160,7 @@ cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del s
 ## 6. Respuestas de Matías (07/11/2026)
 
 1. Fecha mal porque la Pi no tenía hora: **tomar siempre la hora de algún lado, del GPS o de internet** (wifi).
-   - [ ] Hora del sistema desde el GPS en cuanto haya lectura válida, y por internet si hay wifi (07-1.4).
+   - [x] Hora del sistema desde el GPS en cuanto haya lectura válida, y por internet si hay wifi (07-1.4).
    - **Si no encuentra la hora, no pasa nada malo: LARGAR nunca se bloquea** y la carrera se usa normal.
 2. Si la próxima carrera es hoy: **el botón Carreras queda como ahora** (abre la lista).
 3. Fotos de las pantallas en las pruebas: **Matías no quiere verlas**. Si un cambio es a propósito, Claude acepta
@@ -198,13 +198,13 @@ Sistema operativo:
 - [ ] **ssh cerrado en la red propia** y límite de intentos: nftables con pocas reglas + `sshd_config.d`
       (`MaxAuthTries 3`, `AllowUsers beto`). En casa se entra igual, con clave (B-1.1).
 - [ ] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
-      la corrige. **La hora del GPS es lo primero del sistema.** Mostrar en el Chequeo previo de dónde salió la hora
-      (GPS, internet o sin hora) (Pi, 07/11).
+      la corrige. **La hora del GPS es lo primero del sistema.** Hecho en la 1.0.28 (falta probarlo en la Pi sin
+      wifi). Queda para la 1.0.29: mostrar en el Chequeo previo de dónde salió la hora (GPS, internet o sin hora).
 - [x] Arranque 12 s más rápido: PulseAudio sin la tarjeta HDMI (hoy tarda 10 s y falla) y apagar `cloud-init`,
       `NetworkManager-wait-online`, `rpi-eeprom-update`, `udisks2`, `sshswitch`. **Dejar `avahi`** (Pi, 07/11).
 - [x] Quitar el núcleo de la Pi 5 (`linux-image-rpi-2712`) (Pi, 07/11).
 - [x] `sudo` pide la clave: confirmado en la Pi (07/11).
-- [ ] **Hora del sistema desde el GPS** cuando internet no la puso, sin tocar el cronómetro (B-1.2). Corregir
+- [x] **Hora del sistema desde el GPS** cuando internet no la puso, sin tocar el cronómetro (B-1.2). Corregir
       `docs/diseno-sistema.md`, que dice que ya se hacía.
 - [ ] Zona horaria Argentina y nombre `betometro` en el instalador (B-2.4).
 - [x] `config.txt`: escribir las líneas dentro de `[all]` (B-1.3).

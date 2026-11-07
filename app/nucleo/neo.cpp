@@ -146,7 +146,7 @@ void DecodificadorNeo::ubx(const std::vector<uint8_t>& m, std::vector<LecturaGps
     LecturaGps l;
     l.iTOW = u4(p + 0);
     l.anio = u2(p + 4); l.mes = p[6]; l.dia = p[7]; l.hora = p[8]; l.minuto = p[9]; l.segundo = p[10];
-    l.horaValida = (p[11] & 0x03) == 0x03;
+    l.horaValida = (p[11] & 0x07) == 0x07;   // fecha y hora válidas y «resueltas del todo» (sin ±1 s de duda)
     l.fix3d = p[20] == 3 && (p[21] & 0x01);
     l.satelites = p[23];
     l.lon = i4(p + 24) * 1e-7;
