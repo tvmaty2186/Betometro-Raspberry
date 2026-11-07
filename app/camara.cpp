@@ -303,7 +303,8 @@ bool Camara::empezar(const QString& nombreBase) {
         // 480p: si la cámara lo da, directo (16:9 primero, si no 4:3). Si no, una común (MJPEG) se toma en 720p y
         // se achica antes de comprimir; una H.264 sin 480p graba en 720p (achicarla costaría mucho a la Pi).
         tam = QSize(1280, 720);
-        for (const QSize& s : {QSize(848, 480), QSize(854, 480), QSize(640, 480)})
+        // 800×600 (la webcam de Matías no da 480p): directo de la cámara, 2,6 veces menos trabajo que achicar 720p (06-2.1)
+        for (const QSize& s : {QSize(848, 480), QSize(854, 480), QSize(800, 600), QSize(640, 480)})
             if (tamanos_.contains(s)) { tam = s; break; }
         if (tam.height() != 480 && (formatoVideo_ == QLatin1String("mjpeg") || prueba_)) escala = QStringLiteral("848x480");
     }

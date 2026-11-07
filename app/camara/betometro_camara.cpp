@@ -222,12 +222,15 @@ std::string compresorMjpeg(const std::string& escala, int alto) {
     auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };
     std::string d = "jpegdec ! videoconvert";
     const auto x = escala.find('x');
+    // Un solo filtro de caps: dos seguidos («…,height=480 ! video/x-raw,format=I420») GStreamer no los acepta y
+    // la grabación en 480p no arrancaba (06-1.2)
     if (x != std::string::npos) {
-        d += " ! videoscale ! video/x-raw,width=" + escala.substr(0, x) + ",height=" + escala.substr(x + 1);
+        d += " ! videoscale ! video/x-raw,format=I420,width=" + escala.substr(0, x) + ",height=" + escala.substr(x + 1);
         alto = std::atoi(escala.substr(x + 1).c_str());
+    } else {
+        d += " ! video/x-raw,format=I420";
     }
-    d += " ! video/x-raw,format=I420";
-    const int kbps = alto <= 480 ? 2000 : 4000;
+    const int kbps = alto <= 600 ? 2000 : 4000;   // 480p y 800×600: 2 Mbit/s
     if (hay("v4l2h264enc"))
         d += " ! v4l2h264enc extra-controls=controls,video_bitrate=" + std::to_string(kbps * 1000) + ",repeat_sequence_header=1 ! video/x-h264,level=(string)4";
     else if (hay("x264enc"))
