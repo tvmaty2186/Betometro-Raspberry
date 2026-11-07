@@ -58,6 +58,9 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
     cfg_ = armarConfig(base_.config);
     if (l.habiaDanado) qWarning("La base estaba dañada: se usó %s", l.origen.c_str());
     hilo_ = std::thread([this] { hiloGuardar(); });
+    guardarLuego_.setSingleShot(true);
+    guardarLuego_.setInterval(300);
+    connect(&guardarLuego_, &QTimer::timeout, this, [this] { guardar(); });
     // Recorrido libre que se cortó (luz, vigilante) antes de Terminar: lo andado queda como su vuelta
     bool recuperado = false;
     for (Carrera& c : base_.carreras) {
@@ -75,6 +78,7 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
 }
 
 Datos::~Datos() {
+    if (guardarLuego_.isActive()) guardar();   // lo que estaba juntándose
     {
         std::lock_guard<std::mutex> l(m_);
         terminar_ = true;
@@ -83,7 +87,12 @@ Datos::~Datos() {
     if (hilo_.joinable()) hilo_.join();   // escribe lo último que quedó pendiente antes de cerrar
 }
 
+void Datos::guardarLuego() {
+    if (!guardarLuego_.isActive()) guardarLuego_.start();
+}
+
 void Datos::guardar() {
+    guardarLuego_.stop();
     auto copia = std::make_shared<beto::Base>(base_);   // la copia en memoria es rápida; escribir en la SD no
     {
         std::lock_guard<std::mutex> l(m_);
@@ -93,6 +102,7 @@ void Datos::guardar() {
 }
 
 void Datos::guardarYa() {
+    if (guardarLuego_.isActive()) guardar();
     std::unique_lock<std::mutex> l(m_);
     listo_.wait(l, [this] { return !pendiente_ && !escribiendo_; });
 }
@@ -112,7 +122,11 @@ void Datos::hiloGuardar() {
         b.reset();
         l.lock();
         escribiendo_ = false;
-        if (!ok) QMetaObject::invokeMethod(this, [this, err] { emit error(q("No se pudo guardar: " + err)); }, Qt::QueuedConnection);
+        // Si no se puede guardar (tarjeta llena o dañada) queda en el reporte y la pantalla lo avisa (05-1.2)
+        QMetaObject::invokeMethod(this, [this, ok, err] {
+            if (!ok) { qWarning("No se pudo guardar la base: %s", err.c_str()); emit error(q("No se pudo guardar: " + err)); }
+            if (ok != guardaBien_) { guardaBien_ = ok; emit guardaBienChanged(); }
+        }, Qt::QueuedConnection);
         listo_.notify_all();
     }
     listo_.notify_all();
@@ -342,6 +356,11 @@ QString Datos::lugarLibre() const {
     return QString::number(static_cast<int>(gb * 1024)) + " MB";
 }
 
+bool Datos::pocoLugar() const {
+    const QStorageInfo info(carpeta_);
+    return info.isValid() && info.bytesAvailable() < 1024LL * 1024 * 1024;
+}
+
 const Carrera* Datos::buscar(const QString& id) const {
     for (const auto& c : base_.carreras) if (q(c.id) == id) return &c;
     return nullptr;
@@ -389,7 +408,7 @@ bool Datos::ponerExtra(const QString& id, const std::string& clave, const Json& 
     Carrera* c = base_.buscar(s(id));
     if (!c) return false;
     c->extra[clave] = valor;
-    guardar();
+    guardarLuego();
     emit carrerasChanged();
     return true;
 }
@@ -594,7 +613,7 @@ void Datos::ponerCfg(const QString& clave, const QVariant& valorQml) {
     }
     base_.config[s(clave)] = v;
     cfg_ = armarConfig(base_.config);
-    guardar();
+    guardarLuego();
     emit cfgChanged();
 }
 

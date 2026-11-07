@@ -29,7 +29,7 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "gps"; nombre: "GPS"
                  tipo: Datos.ajustes.velActiva && !raiz.gpsOk ? "peligro" : ""
                  dato: !Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? (raiz.g.satelites ? raiz.g.satelites + " satélites…" : "Sin señal")
-                       : raiz.g.satelites + " satélites · " + Number(raiz.g.precision).toFixed(1).replace(".", ",") + " m" }
+                       : (raiz.g.satelites ? raiz.g.satelites + " satélites · " : "GPS listo · ") + Number(raiz.g.precision).toFixed(1).replace(".", ",") + " m" }
         TBoton { width: parent.an; height: parent.al; icono: "velocidad"; nombre: "Módulo"
                  readonly property bool habla: !!raiz.g.ultimoDato && Date.now() - raiz.g.ultimoDato < 5000
                  tipo: raiz.g.modulo && !habla ? "peligro" : ""
@@ -46,8 +46,13 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "tema"; nombre: "Temperatura"
                  tipo: Salud.calor ? "peligro" : ""
                  dato: Salud.temperatura >= 0 ? Salud.temperatura + " °C" + (Salud.calor ? " · se frena" : "") : "—" }
+        // En rojo: cámara prendida sin cámara, poco lugar o la base no se pudo guardar (07-2.4, 05-1.2)
         TBoton { width: parent.an; height: parent.al; icono: "camara"; nombre: "Cámara y lugar"
-                 dato: (!Datos.ajustes.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara") + " · " + Datos.lugarLibre()
+                 readonly property bool sinCamara: !!Datos.ajustes.camara && !Camara.hay
+                 readonly property bool poco: { Datos.ajustes; return Datos.pocoLugar(); }
+                 tipo: sinCamara || poco || !Datos.guardaBien ? "peligro" : ""
+                 dato: !Datos.guardaBien ? "No se puede guardar"
+                       : (!Datos.ajustes.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara") + " · " + (poco ? "Poco lugar " : "") + Datos.lugarLibre()
                  onTocado: Navegacion.ir("camara") }
         TBoton { width: parent.an; height: parent.al; tipo: raiz.todoListo ? "acento" : ""; icono: "check"
                  nombre: raiz.todoListo ? "TODO LISTO" : "Falta el GPS"; activo: raiz.todoListo

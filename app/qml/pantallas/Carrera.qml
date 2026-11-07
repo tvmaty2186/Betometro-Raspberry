@@ -48,6 +48,11 @@ Item {
         if (e.isAutoRepeat) return;
         if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter || e.key === Qt.Key_Space || e.key === Qt.Key_F9) { raiz.marcar("teclado"); e.accepted = true; }
     }
+    // Tarjeta llena o dañada: el aviso chico de siempre (sin carteles grandes en carrera) (05-1.2)
+    Connections {
+        target: Datos
+        function onGuardaBienChanged() { if (!Datos.guardaBien) Navegacion.avisar("No se pudo guardar: revisá la tarjeta"); }
+    }
     Connections {
         target: Crono
         function onAviso(texto) { Navegacion.avisar(texto); }

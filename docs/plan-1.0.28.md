@@ -19,7 +19,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [x] Informe: no caerse con distancia negativa en la traza, más prueba de bases dañadas en `ctest` (02-1.1).
 - [x] Guardado: números a texto con `std::to_chars` (mismo archivo, 10 a 40 veces más rápido) (05-2.1, 04-2.1).
 - [ ] Guardado: no copiar la base en el hilo principal; no guardar la base entera cuando no hace falta (04-2.2, 2.3).
-- [ ] Avisar si no se puede guardar y «Poco lugar» en el Chequeo previo (05-1.2, UX 2.4). **Sin carteles grandes en
+      Hecho: ajustes y marcas se juntan 0,3 s antes de guardar. Falta la copia: sale con «un archivo por carrera».
+- [x] Avisar si no se puede guardar y «Poco lugar» en el Chequeo previo (05-1.2, UX 2.4). **Sin carteles grandes en
       carrera** (Matías: no).
 - [ ] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
 - [ ] Cámara colgada o desenchufada: matarla si no termina, poder volver a grabar (02-1.2, 06-1.4).
@@ -109,8 +110,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] «Práctica libre» pasa a **«Práctica»** (Recorrido libre queda adentro de Práctica, con ese nombre).
 - [ ] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).
 - [ ] Sin GPS en carrera: «SIN GPS · seguí por tiempo» en la Sugerida y un pitido al cortarse (07-2.3).
-- [ ] Chequeo previo: cámara prendida sin cámara en rojo; «Poco lugar» (07-2.4).
-- [ ] Textos: «undefined satélites», banderita «?» en el nombre del informe, línea de práctica de pie cortada,
+- [x] Chequeo previo: cámara prendida sin cámara en rojo; «Poco lugar» (07-2.4).
+- [ ] Textos: ~~«undefined satélites»~~ (hecho), banderita «?» en el nombre del informe, línea de práctica de pie cortada,
       «MARCA 1 · solo deja una marca» en el recorrido (07-2.5); hora «--:--» sin hora válida (07-1.4).
 - [ ] Compartir con la red propia: mostrar la clave de la wifi (07).
 - [ ] Borrar las 10 pantallas viejas que no se usan (Matías: sí) (01-1.1).

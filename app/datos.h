@@ -4,6 +4,7 @@
 
 #include <QDate>
 #include <QObject>
+#include <QTimer>
 #include <QVariant>
 
 #include <condition_variable>
@@ -20,6 +21,7 @@ class Datos : public QObject {
     Q_PROPERTY(QVariantList corridas READ corridas NOTIFY carrerasChanged)
     Q_PROPERTY(bool horaValida READ horaValida NOTIFY horaChanged)
     Q_PROPERTY(QVariantMap ajustes READ ajustes NOTIFY cfgChanged)   // cfg completo, para enlazar en la pantalla
+    Q_PROPERTY(bool guardaBien READ guardaBien NOTIFY guardaBienChanged)   // false: el último guardado falló (tarjeta llena o dañada)
 
 public:
     explicit Datos(const QString& carpeta, QObject* padre = nullptr);
@@ -29,6 +31,7 @@ public:
     QVariantList proximas() const;
     QVariantList corridas() const;
     bool horaValida() const { return horaValida_; }
+    bool guardaBien() const { return guardaBien_; }
     void setHoraValida(bool v) { if (v != horaValida_) { horaValida_ = v; emit horaChanged(); emit carrerasChanged(); } }
 
     // Una carrera lista para mostrar (o una nueva con los valores de la última práctica si id está vacío)
@@ -76,6 +79,7 @@ public:
     Q_INVOKABLE bool modificada(const QString& id) const;   // ¿se cambió algo desde el informe?
     // Lugar libre en la partición de datos, en texto («11,2 GB»)
     Q_INVOKABLE QString lugarLibre() const;
+    Q_INVOKABLE bool pocoLugar() const;   // menos de 1 GB: la cámara empieza a borrar videos y la base puede no entrar
 
     // Configuración (cfg = fábrica + lo guardado)
     Q_INVOKABLE QVariant cfg(const QString& clave) const;
@@ -88,6 +92,7 @@ public:
     const beto::Base& base() const { return base_; }
 
 signals:
+    void guardaBienChanged();
     void carrerasChanged();
     void cfgChanged();
     void horaChanged();
@@ -98,12 +103,17 @@ private:
     bool finalizada(const beto::Carrera& c) const;
     QDate hoy() const { return QDate::currentDate(); }
     void guardar();
+    // Ajustes (brillo, volumen) y marcas: se juntan 0,3 s antes de guardar, así deslizar el brillo no
+    // reescribe la base 20 veces (auditoría 04-2.3). Las vueltas se guardan al instante.
+    void guardarLuego();
+    QTimer guardarLuego_;
 
     QString carpeta_;
     beto::Almacen almacen_;
     beto::Base base_;
     beto::Json cfg_;
     bool horaValida_ = true;
+    bool guardaBien_ = true;
 
     // Guardado por detrás (04/11/2026): con el GPS a 5 Hz la base pesa varios MB y guardarla en la SD de la
     // Pi 3 tardaba medio segundo: al marcar, la pantalla se congelaba. Ahora guardar() hace una copia y un
