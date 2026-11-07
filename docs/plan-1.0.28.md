@@ -60,7 +60,9 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] Dobles de wifi y cámara para que corran en GitHub (09-1.5, P4).
 - [ ] Una biblioteca `betometro_base` para que las pruebas no recompilen el programa (01-2.2).
 - [ ] `-Wall -Wextra` también en el programa y la cámara (02-2).
-- [ ] Sacarle el disparo a `imagen.yml` (Buildroot, sin usar) (10-3).
+- [ ] **Borrar Buildroot** (Matías, 07/11): la carpeta `sistema/` (4,9 MB) e `imagen.yml`. Queda en el historial de git
+      por si algún día se quiere volver (10-3).
+- [ ] Borrar las fotos de referencia viejas de `docs/capturas/` (02/11); las nuevas salen de las capturas comparadas (09-1.2).
 
 ## 3. Rendimiento
 
