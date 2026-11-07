@@ -370,7 +370,7 @@ std::string nombreInforme(const Carrera& c) {
     n = n.substr(0, std::min(i, n.size()));
     std::string fecha = c.fecha;   // AAAA-MM-DD → DD-MM-AAAA
     if (fecha.size() == 10) fecha = fecha.substr(8, 2) + "-" + fecha.substr(5, 2) + "-" + fecha.substr(0, 4);
-    return "\xF0\x9F\x8F\x81 " + n + " " + fecha + ".html";
+    return n + " " + fecha + ".html";   // sin la banderita emoji: la fuente de la Pi no la dibuja («?», 07-2.5)
 }
 
 }  // namespace beto

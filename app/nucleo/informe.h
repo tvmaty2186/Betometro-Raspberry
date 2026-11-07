@@ -17,7 +17,7 @@ Json datosInforme(const Carrera& c, double umbralPrecisionM);
 // El HTML de una sola página, con la plantilla de la app (`informe-plantilla.html`).
 std::string informeHtml(const Carrera& c, double umbralPrecisionM, const std::string& plantilla);
 
-// Nombre del archivo: «🏁 nombre dd-mm-aaaa.html» (sin \ / : * ? " < > |, hasta 40 letras)
+// Nombre del archivo: «nombre dd-mm-aaaa.html» (sin \ / : * ? " < > |, hasta 40 letras)
 std::string nombreInforme(const Carrera& c);
 
 }  // namespace beto

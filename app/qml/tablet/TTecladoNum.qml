@@ -15,7 +15,7 @@ Rectangle {
     gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(Tema.caja1, 1.15) } GradientStop { position: 1; color: Tema.caja2 } }
     MouseArea { anchors.fill: parent }   // no deja pasar los toques al botón de abajo
     Text { x: 26; y: 18; text: raiz.titulo; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 24 } }
-    Text { anchors.right: parent.right; anchors.rightMargin: 26; y: 22; text: raiz.ayuda; color: Tema.acento; font { family: Tema.fuente600; pixelSize: 19 } }
+    Text { anchors.right: parent.right; anchors.rightMargin: 26; y: 22; text: raiz.ayuda; color: Tema.acento; font { family: Tema.fuente600; pixelSize: 21 } }
     Grid {
         id: g
         x: 20; y: 70

@@ -29,7 +29,7 @@ TPantalla {
         width: raiz.h ? raiz.area.width - 478 - 18 : raiz.area.width
         height: raiz.h ? raiz.area.height : width * 9 / 16 + 20
         radius: Math.max(14, Tema.radio * 1.5)
-        color: "#05110a"; clip: true
+        color: Tema.videoFondo; clip: true   // oscuro en todos los temas y en sol: así se lee el aviso (08-2)
         border { width: 3; color: Tema.bordeCromo }
         Image {
             id: imgVista
@@ -43,7 +43,7 @@ TPantalla {
         Column {
             visible: !Camara.viendo
             anchors.centerIn: parent; spacing: 22
-            Text { anchors.horizontalCenter: parent.horizontalCenter; color: Tema.tinta
+            Text { anchors.horizontalCenter: parent.horizontalCenter; color: Tema.videoTinta
                    text: Camara.grabando ? "Grabando…" : Camara.hay ? "Prendiendo la cámara…" : (Camara.problema || "No se encontró la cámara")
                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             Rectangle {
@@ -58,16 +58,16 @@ TPantalla {
         }
         Rectangle {   // estado arriba
             x: 16; y: 14; height: 50; radius: 25; width: est.implicitWidth + 50
-            color: Qt.rgba(0, 0, 0, 0.6); border { width: 2; color: "#c9ced3" }
+            color: Qt.rgba(0, 0, 0, 0.6); border { width: 2; color: Tema.videoBorde }
             Rectangle { x: 18; anchors.verticalCenter: parent.verticalCenter; width: 16; height: 16; radius: 8; color: Camara.hay ? Tema.bien : Tema.alerta }
-            Text { id: est; x: 42; anchors.verticalCenter: parent.verticalCenter; color: "#fff"
+            Text { id: est; x: 42; anchors.verticalCenter: parent.verticalCenter; color: Tema.videoTinta
                    text: Camara.hay ? Camara.nombre.split(" · ").slice(-2).join(" · ") : "Sin cámara"
                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 22 } }
         }
         Rectangle {   // lugar abajo
             x: 16; anchors.bottom: parent.bottom; anchors.bottomMargin: 14; height: 50; radius: 25; width: lug.implicitWidth + 36
-            color: Qt.rgba(0, 0, 0, 0.6); border { width: 2; color: "#c9ced3" }
-            Text { id: lug; anchors.centerIn: parent; color: "#fff"; text: "Entran " + (Camara.lugar.horas || 0) + " h más"
+            color: Qt.rgba(0, 0, 0, 0.6); border { width: 2; color: Tema.videoBorde }
+            Text { id: lug; anchors.centerIn: parent; color: Tema.videoTinta; text: "Entran " + (Camara.lugar.horas || 0) + " h más"
                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 22 } }
         }
         Text { visible: !!Camara.falla; anchors { right: parent.right; rightMargin: 16; bottom: parent.bottom; bottomMargin: 26 }
@@ -89,7 +89,7 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "bandera"; nombre: "Empieza"
                  dato: ({ abrir: "Al abrir", largada: "En la largada", mano: "A mano" })[raiz.a.camaraInicio || "abrir"]
                  onTocado: raiz.poner("camaraInicio", raiz.siguiente(["abrir", "largada", "mano"], raiz.a.camaraInicio || "abrir")) }
-        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "pantalla"; nombre: "Calidad"; dato: raiz.a.camaraCalidad || "720p"
+        TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "hd"; nombre: "Calidad"; dato: raiz.a.camaraCalidad || "720p"
                  onTocado: { const c = raiz.a.camaraCalidad || "720p"; raiz.poner("camaraCalidad", c === "480p" ? "720p" : "480p"); } }
         TBoton { width: parent.an; height: parent.al; tamIcono: 48; icono: "mic"; nombre: "Sonido"
                  dato: ({ camara: "De la cámara", usb: "Micrófono USB", no: "Sin sonido" })[raiz.a.camaraSonido || "camara"]

@@ -3,7 +3,8 @@ import QtQuick.Shapes
 import Betometro
 
 // Botón grande del Modo Tablet (como una app de tablet): ícono, nombre y un dato útil abajo.
-// tipo: "" normal · "acento" (el principal, color del tema) · "peligro" (rojo) · "naranja" (revisar)
+// tipo: "" normal · "acento" (el principal, color del tema) · "peligro" (rojo, letras blancas) · "naranja" (revisar)
+//       · "borde" (fondo oscuro con el borde y el nombre en el color del tema: «Actualizar» en Deportivo, 08-6)
 // Apagado (activo: false): fondo oscuro, borde punteado gris y letras tenues, sin el color del tipo
 // (antes era el mismo botón al 45 %: el amarillo quedaba verde oliva sucio) (08-7, muestra aprobada 1.0.29)
 Rectangle {
@@ -15,11 +16,12 @@ Rectangle {
     property string tipo: ""
     property bool activo: true
     property real tamIcono: 72
-    property real tamNombre: 29
+    property real tamNombre: Tema.cabina ? 27 : 29   // B612 es más ancha (08-11)
     signal tocado()
-    readonly property color tinta: !activo ? Tema.apagadoTinta : tipo === "acento" ? Tema.acentoTinta : Tema.tinta
+    readonly property color tinta: !activo ? Tema.apagadoTinta : tipo === "acento" ? Tema.acentoTinta : tipo === "peligro" ? Tema.peligroTinta : tipo === "borde" ? Tema.acento : Tema.tinta
     radius: Math.max(14, Tema.radio * 1.7)
-    border { width: activo ? 3 : 0; color: tipo === "acento" ? Tema.acentoClaro : tipo === "peligro" ? "#ffb3aa" : tipo === "naranja" ? "#ffd29a" : Tema.bordeCromo }
+    border { width: !activo ? 0 : tipo === "borde" ? 4 : 3
+             color: tipo === "acento" ? Tema.acentoClaro : tipo === "peligro" ? Tema.peligroBorde : tipo === "naranja" ? "#ffd29a" : tipo === "borde" ? Tema.acento : Tema.bordeCromo }
     property color colorDato: Tema.acento   // el dato de un botón normal (verde para «Simulador OK»)
     color: Tema.apagadoFondo
     gradient: activo ? degrade : null
@@ -35,9 +37,9 @@ Rectangle {
     }
     Gradient {
         id: degrade
-        GradientStop { position: 0; color: raiz.tipo === "acento" ? Tema.acentoClaro : raiz.tipo === "peligro" ? "#e0473a" : raiz.tipo === "naranja" ? "#f5a13c" : Qt.lighter(Tema.caja1, Tema.avispon ? 1.35 : 1.25) }
-        GradientStop { position: 0.55; color: raiz.tipo === "acento" ? Tema.acento : raiz.tipo === "peligro" ? "#b8231a" : raiz.tipo === "naranja" ? "#d9741a" : Tema.caja1 }
-        GradientStop { position: 1; color: raiz.tipo === "acento" ? Tema.acentoOscuro : raiz.tipo === "peligro" ? "#8f130b" : raiz.tipo === "naranja" ? "#a8520c" : Tema.caja2 }
+        GradientStop { position: 0; color: raiz.tipo === "acento" ? Tema.acentoClaro : raiz.tipo === "peligro" ? Tema.peligroClaro : raiz.tipo === "naranja" ? "#f5a13c" : Qt.lighter(Tema.caja1, Tema.avispon ? 1.35 : 1.25) }
+        GradientStop { position: 0.55; color: raiz.tipo === "acento" ? Tema.acento : raiz.tipo === "peligro" ? Tema.peligro : raiz.tipo === "naranja" ? "#d9741a" : Tema.caja1 }
+        GradientStop { position: 1; color: raiz.tipo === "acento" ? Tema.acentoOscuro : raiz.tipo === "peligro" ? Tema.peligroOscuro : raiz.tipo === "naranja" ? "#a8520c" : Tema.caja2 }
     }
     // Brillo de arriba, solo en el Avispón (como las cajas cromadas del tema)
     Rectangle {
@@ -57,8 +59,10 @@ Rectangle {
         Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; maximumLineCount: 2
                text: raiz.nombre; color: raiz.tinta
                font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.tamNombre; letterSpacing: raiz.tamNombre > 60 ? 4 : 0 } }
+        // En los botones altos el dato puede ir en 2 renglones («Próxima: Gualeguaychú 21/11» en Cabina, 08-11)
         Text { visible: raiz.dato !== ""; width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
-               text: raiz.dato; color: !raiz.activo ? Tema.apagadoTinta : raiz.tipo === "" ? raiz.colorDato : raiz.tinta; opacity: raiz.tipo === "" || !raiz.activo ? 1 : 0.85
+               wrapMode: Text.WordWrap; maximumLineCount: raiz.height >= 200 ? 2 : 1
+               text: raiz.dato; color: !raiz.activo ? Tema.apagadoTinta : raiz.tipo === "" || raiz.tipo === "borde" ? raiz.colorDato : raiz.tinta; opacity: raiz.tipo === "" || raiz.tipo === "borde" || !raiz.activo ? 1 : 0.85
                font { family: Tema.fuente600; pixelSize: 21 } }
     }
     MouseArea { id: zona; anchors.fill: parent; enabled: raiz.activo; onClicked: raiz.tocado() }

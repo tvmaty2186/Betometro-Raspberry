@@ -7,6 +7,7 @@ TPantalla {
     id: raiz
     titulo: "Carreras"
     property var borrando: null
+    Component.onCompleted: if (Contexto.prueba === "borrar" && Datos.corridas.length) borrando = Datos.corridas[0]   // captura de la ventana
 
     Flickable {
         anchors.fill: raiz.area
@@ -58,10 +59,10 @@ TPantalla {
                                 IconoClima { width: 56; height: 56; anchors.verticalCenter: parent.verticalCenter; codigo: fp.d ? fp.d.codigo || 0 : 0 }
                                 Column { anchors.verticalCenter: parent.verticalCenter
                                     Text { text: fp.d ? fp.d.max + "°" : ""; color: Tema.numero; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 36 } }
-                                    Text { text: fp.d ? fp.d.lluvia + "%" : ""; color: "#5fb4ff"; font { family: Tema.fuente600; pixelSize: 20 } } } }
+                                    Text { text: fp.d ? fp.d.lluvia + "%" : ""; color: Tema.lluvia; font { family: Tema.fuente600; pixelSize: 21 } } } }
                             Column { visible: !(fp.d && fp.d.disponible); anchors.centerIn: parent
                                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Clima"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 25 } }
-                                Text { anchors.horizontalCenter: parent.horizontalCenter; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 18 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 }
                                        text: !fp.conLugar ? "sin localidad" : fp.d && fp.d.desde ? "desde " + fp.d.desde : "cargando…" } }
                             MouseArea { anchors.fill: parent; anchors.margins: -6
                                 onClicked: fp.conLugar ? Navegacion.ir("clima", { nombre: fp.modelData.lugar.split(",")[0], lat: fp.modelData.lugarLat, lon: fp.modelData.lugarLon, fecha: fp.modelData.fecha })
@@ -110,23 +111,7 @@ TPantalla {
         }
     }
 
-    // ¿Borrar?
-    Rectangle {
-        parent: raiz
-        visible: raiz.borrando !== null
-        anchors.fill: parent; z: 80
-        color: Qt.rgba(0, 0, 0, 0.7)
-        MouseArea { anchors.fill: parent; onClicked: raiz.borrando = null }
-        Column {
-            anchors.centerIn: parent; spacing: 30
-            Text { anchors.horizontalCenter: parent.horizontalCenter; text: raiz.borrando ? "¿Borrar «" + raiz.borrando.nombre + "»?" : ""
-                   color: "#fff"; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 38 } }
-            Row {
-                anchors.horizontalCenter: parent.horizontalCenter; spacing: 24
-                TBoton { width: 260; height: 120; nombre: "Cancelar"; onTocado: raiz.borrando = null }
-                TBoton { width: 260; height: 120; tipo: "peligro"; nombre: "Borrar"; dato: raiz.borrando && Datos.videos(raiz.borrando.id).length ? "vueltas y video" : "y sus vueltas"
-                         onTocado: { Datos.borrarCarrera(raiz.borrando.id); raiz.borrando = null; } }
-            }
-        }
-    }
+    // ¿Borrar? La misma ventana que en la ficha (07-3.5)
+    TBorrar { parent: raiz; carrera: raiz.borrando; onCancelar: raiz.borrando = null
+              onBorrar: { Datos.borrarCarrera(raiz.borrando.id); raiz.borrando = null; } }
 }

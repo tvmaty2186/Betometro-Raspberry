@@ -42,7 +42,9 @@ TPantalla {
                 x: parent.height; anchors.verticalCenter: parent.verticalCenter; width: parent.width - x - 16; spacing: 8
                 Text { text: raiz.verWifi ? "1 · Conectá el celu" : (Wifi.propia ? "2 · " : "") + "Informes en el celu"; color: Tema.tinta
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
-                Text { width: parent.width; elide: Text.ElideRight; text: raiz.verWifi ? Wifi.nombrePropia + " · " + Wifi.clavePropia : raiz.url.replace("http://", ""); color: Tema.acento
+                // Si no entra (Cabina: «betometro.local:80…») se achica hasta 22 en vez de cortarse (08-11)
+                Text { width: parent.width; elide: Text.ElideRight; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 22
+                       text: raiz.verWifi ? Wifi.nombrePropia + " · " + Wifi.clavePropia : raiz.url.replace("http://", ""); color: Tema.acento
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
                 Text { text: Wifi.propia ? (raiz.verWifi ? "Tocá: QR de los informes" : "Tocá: QR de la wifi") : "Tocá para agrandar"; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 } }
             }
@@ -50,7 +52,7 @@ TPantalla {
         }
         TFila { etiqueta: "Informes en la red"
             TLlave { prendida: raiz.a.informesRed !== false; onCambiada: v => Datos.ponerCfg("informesRed", v) } }
-        TFila { visible: Wifi.redes; etiqueta: "Wifi propia"; detalle: "Si no hay red, arma «" + Wifi.nombrePropia + "»"
+        TFila { visible: Wifi.redes; etiqueta: "Wifi propia"; detalle: "Sin red, arma «" + Wifi.nombrePropia + "»"   // corto: en Cabina no entraba (08-11)
             TLlave { prendida: raiz.a.wifiPropia !== false; onCambiada: v => Datos.ponerCfg("wifiPropia", v) } }
     }
 

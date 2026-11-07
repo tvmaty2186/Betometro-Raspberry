@@ -94,7 +94,7 @@ TPantalla {
                    color: Drive.listo ? Tema.bien : Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
             Rectangle {
                 visible: Drive.subiendo
-                width: parent.width; height: 26; radius: 13; color: "#0a2414"; border { width: 3; color: Tema.bordeCromo }
+                width: parent.width; height: 26; radius: 13; color: Tema.barraFondo; border { width: 3; color: Tema.bordeCromo }
                 Rectangle { x: 3; y: 3; height: parent.height - 6; radius: 10; width: Math.max(height, (parent.width - 6) * Drive.progreso)
                             gradient: Gradient { GradientStop { position: 0; color: Tema.acentoClaro } GradientStop { position: 1; color: Tema.acento } } }
             }

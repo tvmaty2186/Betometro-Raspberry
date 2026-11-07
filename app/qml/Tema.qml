@@ -89,4 +89,20 @@ QtObject {
     readonly property color glow: sol ? "transparent" : de("transparent", Qt.rgba(1, 170 / 255, 40 / 255, 0.5), Qt.rgba(1, 40 / 255, 20 / 255, 0.55), Qt.rgba(79 / 255, 195 / 255, 247 / 255, 0.32), "transparent")
     readonly property color warn: de("#f4c531", "#ffb000", "#ffd400", "#ffd23f", "#a33a00")
     readonly property color mal: de("#ff6b5a", "#c0162c", "#e10600", "#ff4d5e", "#c4001a")
+
+    // Colores que estaban fijos en las pantallas (08-8, 1.0.29)
+    // Botón de peligro (Apagar, Borrar, Desconectar): rojo en todos los temas, letras blancas siempre (08-14)
+    readonly property color peligroClaro: de("#e0473a", "#e0473a", "#e0473a", "#e0473a", "#d93a2c")
+    readonly property color peligro: de("#b8231a", "#b8231a", "#b8231a", "#b8231a", "#b8231a")
+    readonly property color peligroOscuro: de("#8f130b", "#8f130b", "#8f130b", "#8f130b", "#8f130b")
+    readonly property color peligroBorde: de("#ffb3aa", "#ffb3aa", "#ffb3aa", "#ffb3aa", "#000000")
+    readonly property color peligroTinta: "#ffffff"
+    // Lluvia (Clima, Carreras): celeste; en sol, un azul que se lea sobre blanco
+    readonly property color lluvia: de("#5fb4ff", "#5fb4ff", "#5fb4ff", "#5fb4ff", "#0d5fb5")
+    // Fondo de la barra de progreso (Drive): antes verde del Avispón en todos los temas
+    readonly property color barraFondo: de("#0a2414", "#0b0906", "#0c0d0f", "#020304", "#e6e4dc")
+    // Cuadro del video de la Cámara: siempre oscuro (en sol también, así se lee «No se encontró la cámara») (08-2)
+    readonly property color videoFondo: de("#05110a", "#0b0906", "#0c0d0f", "#020304", "#111111")
+    readonly property color videoTinta: "#ffffff"          // letras y etiquetas sobre el video
+    readonly property color videoBorde: "#c9ced3"          // borde cromo de las etiquetas sobre el video
 }

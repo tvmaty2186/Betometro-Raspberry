@@ -33,7 +33,7 @@ Row {
         property int valor
         spacing: 4
         Text { visible: raiz.etiquetas; text: cas.etiqueta; color: Tema.tintaSuave
-               font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 18; letterSpacing: 2 } }
+               font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 21; letterSpacing: 2 } }
         Row {
             spacing: raiz.chico ? 6 : 8
             Tecla { t: "−"; onTocada: raiz.cambiar(Math.max(0, raiz.ms - (cas.que === "m" ? 60000 : 1000))) }

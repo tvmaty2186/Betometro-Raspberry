@@ -65,6 +65,7 @@ qt_add_qml_module(betometro_qml
     tablet/TIcono.qml
     tablet/TBarra.qml
     tablet/TBoton.qml
+    tablet/TBorrar.qml
     tablet/TCasilleros.qml
     tablet/TTecladoNum.qml
     tablet/TSimulador.qml

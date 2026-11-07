@@ -31,9 +31,13 @@ Item {
         Text {
             width: parent.width; wrapMode: Text.WordWrap; textFormat: Text.StyledText; lineHeight: 1.5
             color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 24 }
-            text: "1. El celular tiene que estar en la misma red wifi: <b><font color='#ffffff'>" + (Wifi.conectada || "Betometro-" + (Datos.ajustes.numeroAuto || "101")) + "</font></b>.<br>"
+            // Con la red propia (o sin wifi, que la arma sola) va también la clave (07-3.3)
+            readonly property bool propia: Wifi.propia || !Wifi.conectada
+            readonly property string red: propia ? Wifi.nombrePropia : Wifi.conectada
+            text: "1. El celular tiene que estar en la misma red wifi: <b><font color='" + Tema.tinta + "'>" + red + "</font></b>"
+                + (propia ? " · clave <b><font color='" + Tema.tinta + "'>" + Wifi.clavePropia + "</font></b>" : "") + ".<br>"
                 + "2. Abrí la cámara y apuntá al código.<br>"
-                + "3. Se descarga <b><font color='#ffffff'>«" + raiz.archivo + "»</font></b>."
+                + "3. Se descarga <b><font color='" + Tema.tinta + "'>«" + raiz.archivo + "»</font></b>."
         }
         Item { width: 1; height: 20 }
         BotonCromo { width: 240; height: 60; tamTexto: 20; texto: "Listo"; onTocado: Navegacion.ir("informe", { id: raiz.id_ }) }

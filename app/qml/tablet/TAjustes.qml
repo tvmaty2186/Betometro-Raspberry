@@ -22,7 +22,7 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "auto"; nombre: "Mi auto"
                  dato: (raiz.a.numeroAuto || "101") + " · " + (raiz.a.nombreAuto || ""); onTocado: raiz.seccion("auto") }
         TBoton { width: parent.an; height: parent.al; icono: "tema"; nombre: "Pantalla y tema"
-                 dato: (raiz.temas[raiz.a.tema] || "Avispón") + " · brillo " + Math.round(raiz.a.brillo) + "%"; onTocado: raiz.seccion("pantalla") }
+                 dato: (raiz.temas[raiz.a.tema] || "Avispón") + " · " + Math.round(raiz.a.brillo) + " %"; onTocado: raiz.seccion("pantalla") }
         TBoton { width: parent.an; height: parent.al; icono: "voz"; nombre: "Voz y sonido"
                  dato: (raiz.a.voz === "tomas" ? "Tomás" : "Elena") + " · " + raiz.a.cuentaN + " s"; onTocado: raiz.seccion("voz") }
         TBoton { width: parent.an; height: parent.al; icono: "velocidad"; nombre: "Velocidad y GPS"
@@ -37,8 +37,9 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "nube"; nombre: "Google Drive"
                  dato: Drive.estado === "conectado" ? (Drive.subiendo ? "Subiendo" : Drive.error ? "Con un problema" : "Conectado") : "Sin conectar"
                  onTocado: Navegacion.ir("drive") }
+        // En Deportivo el acento es rojo como «Apagar»: con versión nueva va con borde rojo y fondo oscuro (Matías, 08-6)
         TBoton { width: parent.an; height: parent.al; icono: "actualizar"; nombre: "Actualizar"
-                 tipo: Contexto.versionNueva ? "acento" : ""
+                 tipo: Contexto.versionNueva ? (Tema.sport ? "borde" : "acento") : ""
                  dato: Contexto.versionNueva ? "Hay " + Contexto.versionNueva : "v" + Contexto.version; onTocado: Navegacion.ir("actualizar") }
         TBoton { width: parent.an; height: parent.al; icono: "apagar"; nombre: raiz.apagarArmado ? "Tocá otra vez" : "Apagar"
                  tipo: "peligro"; dato: raiz.apagarArmado ? "para apagar" : "Tocá 2 veces"

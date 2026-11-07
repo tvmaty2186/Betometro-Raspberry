@@ -32,7 +32,7 @@ TPantalla {
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
                 Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; color: "#ffffff"; opacity: 0.9
                        text: Simulador.fallas + " de " + Simulador.total + " pruebas fallaron · " + Simulador.cuando + " · v" + Contexto.version
-                       font { family: Tema.fuente600; pixelSize: 19 } }
+                       font { family: Tema.fuente600; pixelSize: 21 } }
             }
         }
         Flickable {
@@ -58,7 +58,7 @@ TPantalla {
                             Text { width: parent.width; elide: Text.ElideRight; text: modelData.nombre; color: Tema.tinta
                                    font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 26 } }
                             Text { width: parent.width; elide: Text.ElideRight; text: modelData.detalle || ""; color: Tema.acento
-                                   font { family: Tema.fuente600; pixelSize: 19 } }
+                                   font { family: Tema.fuente600; pixelSize: 21 } }
                         }
                     }
                 }

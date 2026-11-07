@@ -43,10 +43,10 @@ TPantalla {
                  onTocado: { if (raiz.pulsador === "esperando") raiz.recibido("la pantalla"); else { raiz.pulsador = "esperando"; raiz.forceActiveFocus(); } } }
         TBoton { width: parent.an; height: parent.al; icono: "voz"; nombre: "Probar la voz"; dato: "Volumen " + Math.round(Datos.ajustes.volumen) + "%"
                  onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") }
-        TBoton { width: parent.an; height: parent.al; icono: "apagar"; nombre: "Tensión"
+        TBoton { width: parent.an; height: parent.al; icono: "rayo"; nombre: "Tensión"
                  tipo: Salud.tensionBaja ? "peligro" : ""
                  dato: !Salud.sabe ? "—" : Salud.tensionBaja ? "Baja ahora" : Salud.huboTensionBaja ? "Bajó desde que prendió" : "Bien" }
-        TBoton { width: parent.an; height: parent.al; icono: "tema"; nombre: "Temperatura"
+        TBoton { width: parent.an; height: parent.al; icono: "termometro"; nombre: "Temperatura"
                  tipo: Salud.calor ? "peligro" : ""
                  dato: Salud.temperatura >= 0 ? Salud.temperatura + " °C" + (Salud.calor ? " · se frena" : "") : "—" }
         // En rojo: cámara prendida sin cámara, poco lugar o la base no se pudo guardar (07-2.4, 05-1.2)

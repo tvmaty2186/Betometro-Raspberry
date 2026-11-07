@@ -63,7 +63,7 @@ TPantalla {
                 Text { text: raiz.nombre + (raiz.d ? " · " + raiz.nombreDia(raiz.diaElegido) : ""); color: Tema.tinta
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30 } }
                 Text { visible: !!raiz.d; text: "Mínima " + arriba.a.min + "°"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
-                Text { text: "Lluvia " + (arriba.a.lluvia || 0) + " %"; color: "#5fb4ff"; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
+                Text { text: "Lluvia " + (arriba.a.lluvia || 0) + " %"; color: Tema.lluvia; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
                 Text { text: "Viento " + (arriba.a.viento || 0) + " · ráfagas " + (arriba.a.rafagas || 0); color: Tema.tinta
                        font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
             }
@@ -119,13 +119,13 @@ TPantalla {
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: raiz.nombreDia(modelData.fecha); color: Tema.tinta
                            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 28 } }
                     Text { visible: parent.parent.carrera; anchors.horizontalCenter: parent.horizontalCenter; text: "CARRERA"; color: Tema.acento
-                           font { family: Tema.fuente800; italic: true; pixelSize: 15; letterSpacing: 2 } }
+                           font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 21; letterSpacing: 2 } }
                     IconoClima { anchors.horizontalCenter: parent.horizontalCenter; width: 74; height: 74; codigo: modelData.codigo || 0 }
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "°"; color: Tema.numero
                            font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 44 } }
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.min + "°"; color: Tema.tintaSuave
                            font { family: Tema.fuente600; pixelSize: 23 } }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: (modelData.lluvia || 0) + "%"; color: "#5fb4ff"
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: (modelData.lluvia || 0) + "%"; color: Tema.lluvia
                            font { family: Tema.fuente600; pixelSize: 23 } }
                 }
                 MouseArea { anchors.fill: parent; onClicked: raiz.diaElegido = parent.sel ? "" : modelData.fecha }

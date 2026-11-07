@@ -14,6 +14,7 @@
 //   --captura-tele ARCHIVO   con --captura (o sola): también saca la ventana de la tele (modo tele)
 //   --prueba tele-qr | tele-carreras | tele-remoto   modo tele con el código del celu, con la lista de carreras,
 //                            o listo para probar el celu como control (las dos últimas: Paraná también con video)
+//   --prueba cortado         Paraná con el video en dos partes (se desenchufó la cámara): el aviso del informe
 #include <QCommandLineParser>
 #include <QDirIterator>
 #include <QFile>
@@ -125,6 +126,14 @@ int main(int argc, char* argv[]) {
                 break;
             }
     }
+    // --prueba cortado: un segundo video en la misma largada (la cámara se cortó): el informe avisa (07-3.3)
+    if (op.isSet(oMuestra) && op.value(oPrueba) == QStringLiteral("cortado"))
+        for (const auto& c : datos.base().carreras)
+            if (c.nombre == "Paraná") {
+                datos.agregarVideo(QString::fromStdString(c.id), {{"archivo", "muestra.mkv"}, {"largada", 1}, {"desdeLargadaMs", 3000}});
+                datos.agregarVideo(QString::fromStdString(c.id), {{"archivo", "muestra-2.mkv"}, {"largada", 1}, {"desdeLargadaMs", -240000}});
+                break;
+            }
     if (op.isSet(oCarrera)) {
         for (const auto& c : datos.base().carreras)
             if (QString::fromStdString(c.nombre) == op.value(oCarrera)) contexto.setIdInicial(QString::fromStdString(c.id));

@@ -10,8 +10,10 @@ Rectangle {
     height: 76
     gradient: Gradient { GradientStop { position: 0; color: Tema.caja1 } GradientStop { position: 1; color: Tema.caja2 } }
     Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 4; color: Tema.acento }
-    property string hora: Qt.formatTime(new Date(), "HH:mm")
-    Timer { interval: 5000; running: true; repeat: true; onTriggered: raiz.hora = Qt.formatTime(new Date(), "HH:mm") }
+    // Sin hora válida (la Pi no tiene reloj: la da el GPS o internet) se ve «--:--», no una hora inventada (07-1.4)
+    property date ahora: new Date()
+    readonly property string hora: Datos.horaValida ? Qt.formatTime(ahora, "HH:mm") : "--:--"
+    Timer { interval: 5000; running: true; repeat: true; onTriggered: raiz.ahora = new Date() }
 
     Row {
         x: 20; anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -2
@@ -24,13 +26,13 @@ Rectangle {
             MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: raiz.volver() }
         }
         Image { visible: raiz.titulo === ""; source: "qrc:/recursos/img/leon.png"; height: 52; fillMode: Image.PreserveAspectFit; anchors.verticalCenter: parent.verticalCenter }
-        Text {
+        // Título cromado solo en el Avispón, como el del Informe y la app (Matías, 08-13); en los demás, en tinta
+        TextoCromo {
             anchors.verticalCenter: parent.verticalCenter
             // De pie, en el inicio no entra todo: queda el león y la versión
             visible: raiz.titulo !== "" || Contexto.horizontal
-            text: raiz.titulo !== "" ? raiz.titulo.toUpperCase() : "BETÓMETRO"
-            color: Tema.tinta
-            font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.titulo !== "" ? 34 : 32; letterSpacing: 1 }
+            texto: raiz.titulo !== "" ? raiz.titulo.toUpperCase() : "BETÓMETRO"
+            tam: raiz.titulo !== "" ? 34 : 32
         }
         // En el inicio, al lado de BETÓMETRO: la versión; si hay una nueva, «Actualizar» en amarillo (se toca)
         Rectangle {
@@ -44,7 +46,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: Contexto.versionNueva ? "Actualizar a " + Contexto.versionNueva : "v" + Contexto.version
                 color: Contexto.versionNueva ? Tema.acentoTinta : Tema.tintaSuave
-                font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 20 }
+                font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 21 }
             }
             MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: !!Contexto.versionNueva; onClicked: Navegacion.ir("actualizar") }
         }
@@ -73,7 +75,8 @@ Rectangle {
             }
             MouseArea { anchors.fill: parent; onClicked: Navegacion.ir("conectividad") }
         }
+        // En Cabina la hora va con B612 normal: la Mono deja huecos en «03: 39» (08-10)
         Text { text: raiz.hora; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta
-               font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 42 } }
+               font { family: Tema.cabina ? Tema.fuente : Tema.fuenteNum; weight: Font.Bold; pixelSize: 42 } }
     }
 }

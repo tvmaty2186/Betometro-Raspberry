@@ -132,26 +132,27 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [x] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).
 - [x] Sin GPS en carrera: «SIN GPS · seguí por tiempo» en la Sugerida y un pitido al cortarse (07-2.3).
 - [x] Chequeo previo: cámara prendida sin cámara en rojo; «Poco lugar» (07-2.4).
-- [ ] Textos: ~~«undefined satélites»~~ (hecho), banderita «?» en el nombre del informe, línea de práctica de pie cortada,
-      «MARCA 1 · solo deja una marca» en el recorrido (07-2.5); hora «--:--» sin hora válida (07-1.4).
-- [ ] Compartir con la red propia: mostrar la clave de la wifi (07).
+- [ ] Textos: ~~«undefined satélites»~~ (hecho), ~~banderita «?» en el nombre del informe~~ (hecho), línea de práctica de
+      pie cortada (`Carrera.qml:92`, falta), «MARCA 1 · solo deja una marca» en el recorrido (`widgets/TableroRecorrido.qml:40`,
+      falta) (07-2.5); ~~hora «--:--» sin hora válida~~ (hecho) (07-1.4).
+- [x] Compartir con la red propia: mostrar la clave de la wifi (07).
 - [x] Borrar las 10 pantallas viejas que no se usan (Matías: sí) (01-1.1).
 - [x] **Engranaje de verdad** en el inicio, `TIcono.qml`, `ajustes.svg` y el video (`Engranaje.qml`). **Mostrar 2 o 3
       dibujos antes** (08-1).
-- [ ] Modo sol, Cámara: el aviso «No se encontró la cámara» se ve (08-2).
+- [x] Modo sol, Cámara: el aviso «No se encontró la cámara» se ve (08-2).
 - [x] Carrera ya corrida: el botón grande dice «Ver informe» y abre el informe (Matías: sí) (08-4).
-- [ ] Informe en Deportivo y Cabina: el título no se pisa con Vel./Acel./Adel. (08-5).
-- [ ] Deportivo: «Apagar» rojo; «Actualizar» con borde rojo y fondo oscuro (Matías) (08-6).
+- [x] Informe en Deportivo y Cabina: el título no se pisa con Vel./Acel./Adel. (08-5).
+- [x] Deportivo: «Apagar» rojo; «Actualizar» con borde rojo y fondo oscuro (Matías) (08-6).
 - [x] Botones apagados con estilo propio, no 45 % de opacidad (08-7). Muestra antes.
-- [ ] **Colores fijos pasados a `Tema`**: rojo de peligro, azul de lluvia (con su versión sol), verde de Drive,
+- [x] **Colores fijos pasados a `Tema`**: rojo de peligro, azul de lluvia (con su versión sol), verde de Drive,
       etiquetas de la cámara (08-8).
-- [ ] Íconos nuevos: termómetro, rayo (tensión), «HD» (calidad); GPS y Localidad distintos (08-9).
-- [ ] Cabina: hora de la barra con B612 normal (08-10); textos que no entran (08-11).
-- [ ] Letras de menos de 21 px y cursiva fija (08-12); letras blancas en «Apagar» en modo sol (08-14).
-- [ ] Informe: columna de velocidad alineada y flecha de volver de 64 px; ficha de pie sin hueco (08-15, 07-3.5).
-- [ ] Título cromado en la barra, solo Avispón (Matías: sí, sin muestra) (08-13).
-- [ ] Borrar: una sola forma de confirmar (lista y ficha) (07-3.5).
-- [ ] Informe: avisar si el video quedó cortado porque se desenchufó la cámara (07-3.3).
+- [x] Íconos nuevos: termómetro, rayo (tensión), «HD» (calidad); GPS y Localidad distintos (08-9).
+- [x] Cabina: hora de la barra con B612 normal (08-10); textos que no entran (08-11).
+- [x] Letras de menos de 21 px y cursiva fija (08-12); letras blancas en «Apagar» en modo sol (08-14).
+- [x] Informe: columna de velocidad alineada y flecha de volver de 64 px; ficha de pie sin hueco (08-15, 07-3.5).
+- [x] Título cromado en la barra, solo Avispón (Matías: sí, sin muestra) (08-13).
+- [x] Borrar: una sola forma de confirmar (lista y ficha) (07-3.5).
+- [x] Informe: avisar si el video quedó cortado porque se desenchufó la cámara (07-3.3) (`--prueba cortado` para verlo).
 
 ## 5. Ordenar el código (sin cambiar lo que se ve)
 

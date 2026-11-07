@@ -123,9 +123,16 @@ Item {
     Fondo { anchors.fill: parent }
 
     // Cabecera: volver, león, nombre y datos; 101 y Compartir
-    Volver { x: raiz.h ? 24 : 20; y: raiz.h ? 30 : 26; onTocado: Navegacion.ir("ficha", { id: raiz.id_ }) }
+    // Volver de 64 px como en las demás pantallas (TBarra), no el de 40 (07-3.5, 08-15)
+    Rectangle {
+        x: raiz.h ? 24 : 20; y: raiz.h ? 12 : 16
+        width: 64; height: 60; radius: 18
+        color: Qt.rgba(0, 0, 0, 0.35); border { width: 3; color: Tema.bordeCromo }
+        TIcono { anchors.centerIn: parent; width: 38; height: 38; nombre: "atras" }
+        MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: Navegacion.ir("ficha", { id: raiz.id_ }) }
+    }
     Row {
-        x: raiz.h ? 80 : 24; y: raiz.h ? 14 : 96; spacing: 14
+        x: raiz.h ? 104 : 24; y: raiz.h ? 14 : 96; spacing: 14
         Image { source: "qrc:/recursos/img/leon.png"; height: raiz.h ? 46 : 50; fillMode: Image.PreserveAspectFit; anchors.verticalCenter: parent.verticalCenter; sourceSize.height: 100; smooth: true }
         Column {
             anchors.verticalCenter: parent.verticalCenter
@@ -141,13 +148,14 @@ Item {
         visible: !raiz.rec && med.length > 0
         readonly property real promS: med.length ? med.reduce((a, v) => a + Math.abs(v.difMs), 0) / med.length / 1000 : 0
         anchors { right: raiz.h ? derecha.left : undefined; rightMargin: 28 }
-        x: raiz.h ? 0 : 84
+        x: raiz.h ? 0 : 104   // de pie, a la derecha del volver de 64 px
         y: raiz.h ? 14 : 12
         spacing: 0
         Sub { text: "Error total · " + errorArriba.med.length + (errorArriba.med.length === 1 ? " medida" : " medidas"); tam: 13
               anchors.right: raiz.h ? parent.right : undefined }
         Text { anchors.right: raiz.h ? parent.right : undefined
                text: raiz.c.errorTotal || ""
+               height: 50; verticalAlignment: Text.AlignVCenter   // alto fijo: con Chakra Petch (Deportivo) la línea de abajo se salía
                color: errorArriba.promS <= 0.2 ? Tema.bien : errorArriba.promS <= 0.5 ? Tema.acento : Tema.mal
                font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 46 } }
         Sub { visible: raiz.h; text: "promedio " + (raiz.c.promedio || "–") + " · mejor " + (raiz.c.mejor || "–"); tam: 12
@@ -169,7 +177,7 @@ Item {
                 anchors.fill: parent; anchors.margins: -5; radius: botonTele.radio + 5
                 color: "transparent"; border { width: 3; color: Tema.acento }
                 SequentialAnimation on opacity {
-                    running: botonTele.visible; loops: Animation.Infinite
+                    running: botonTele.visible && !raiz.enTele; loops: Animation.Infinite   // debajo del control de la tele, no (03-1.1)
                     NumberAnimation { from: 0.15; to: 0.9; duration: 900; easing.type: Easing.InOutSine }
                     NumberAnimation { from: 0.9; to: 0.15; duration: 900; easing.type: Easing.InOutSine }
                 }
@@ -211,8 +219,11 @@ Item {
         y: !raiz.vv ? (raiz.h ? 110 : 180) : (raiz.h ? 110 : 600)
         width: !raiz.vv ? (raiz.h ? 600 : parent.width - 40) : (raiz.h ? 608 : 330)
         height: !raiz.vv ? (raiz.h ? 590 : 470) : (raiz.h ? 230 : 280)
-        Sub { x: 18; y: 16; visible: !raiz.vv || raiz.h; text: raiz.vv ? "Dónde está · tocá y el video va ahí" : raiz.modo === "vel" ? (raiz.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
+        // Hasta los botones Vel./Acel./Adel. y con «…» si no entra (Deportivo y Cabina, 08-5)
+        Sub { x: 18; y: 16; width: botonesModo.x - 18 - 10; elide: Text.ElideRight
+              visible: !raiz.vv || raiz.h; text: raiz.vv ? "Dónde está · tocá y el video va ahí" : raiz.modo === "vel" ? (raiz.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
         Row {
+            id: botonesModo
             anchors { right: parent.right; rightMargin: 14; top: parent.top; topMargin: 10 }
             spacing: 6
             Repeater {
@@ -448,9 +459,11 @@ Item {
                             onPressAndHold: { raiz.fila = index; if (modelData.m) raiz.lap = index; }
                         }
                         Row {
+                            id: filaV
                             anchors.verticalCenter: parent.verticalCenter; x: 6
                             readonly property real u: (colT.width - 12) / 10
-                            Text { width: parent.u * 1.6; text: raiz.nombreV(modelData); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
+                            // Cada columna centrada en la fila: la velocidad (letra más chica) quedaba más arriba (08-15)
+                            Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 1.6; text: raiz.nombreV(modelData); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
                             // Etiqueta MEDIDA / LIBRE: se toca y cambia (la libre no suma error)
                             Item { width: parent.u * 3; height: 30
                                 Rectangle {
@@ -465,14 +478,14 @@ Item {
                                     MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: !modelData.interrumpida
                                                 onClicked: raiz.cambiarMedida(index) }
                                 } }
-                            Text { width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                            Text { width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
+                            Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
+                            Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
                                    color: modelData.difMs === undefined ? Tema.tintaSuave : raiz.colorDif(modelData.difMs)
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                            Text { visible: raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                            Text { anchors.verticalCenter: parent.verticalCenter; visible: raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
                                    text: "▸ " + raiz.inicioVideo(index); color: index === raiz.lap ? Tema.acento : Tema.tinta
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
-                            Text { visible: !raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                            Text { anchors.verticalCenter: parent.verticalCenter; visible: !raiz.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
                                    text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
                                    color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                         }
@@ -555,6 +568,15 @@ Item {
         x: raiz.h ? 24 : 20; y: raiz.h ? 110 : 180
         width: raiz.h ? 600 : parent.width - 40; height: 400
     }
+    // El video quedó cortado (se desenchufó la cámara): hay más de un video de la misma largada, o uno que
+    // empieza después de la largada. Un texto chico arriba del video (07-3.3).
+    readonly property bool videoCortado: {
+        const vistas = {}; let cortado = false;
+        for (const v of videos) { if (vistas[v.largada]) cortado = true; vistas[v.largada] = true; if ((v.desdeLargadaMs || 0) < 0) cortado = true; }
+        return cortado;
+    }
+    Sub { visible: raiz.vv && raiz.videoCortado && !raiz.completo; x: cajaVideo.x + 4; y: cajaVideo.y - (raiz.h ? 22 : 17); width: cajaVideo.width - 8; elide: Text.ElideRight
+          color: Tema.warn; tam: 12; text: "Video cortado: se cortó la cámara y falta un pedazo" }
     Tarjeta {
         visible: raiz.vv
         oscura: true
@@ -658,6 +680,7 @@ Item {
         if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") fila = 3;
         else if (Contexto.prueba === "menu") menuAbierto = true;
+        else if (Contexto.prueba === "cortado") verVideo = true;   // con --prueba cortado: el aviso del video cortado
         else if (Contexto.prueba === "tele-reiniciar") verEnTele();
         else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos, tele-qr, tele-carreras, tele-remoto (con dos pantallas)
             if (conTraza.indexOf(lapP) >= 0) lap = lapP;

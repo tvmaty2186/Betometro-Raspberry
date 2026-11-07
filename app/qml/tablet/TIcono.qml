@@ -3,7 +3,8 @@ import Betometro
 
 // Íconos de línea del Modo Tablet (dibujados: se pintan del color que se pida, en cualquier tema).
 // nombre: bandera, crono, check, pantalla, camara, red, ajustes, voz, tema, auto, gps, velocidad,
-//         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar, nube, ruta
+//         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar, nube, ruta,
+//         termometro, rayo, hd (08-9, 1.0.29)
 Canvas {
     id: raiz
     property string nombre: ""
@@ -51,9 +52,14 @@ Canvas {
         case "voz": L([10, 26, 20, 26, 34, 14, 34, 50, 20, 38, 10, 38, 10, 26]); A(34, 32, 12, -45, 45); A(34, 32, 20, -45, 45); break;
         case "tema": C(32, 32, 24); C(22, 24, 4); C(36, 18, 4); C(44, 30, 4); break;
         case "auto": L([8, 42, 8, 32, 14, 20, 50, 20, 56, 32, 56, 42, 8, 42]); C(18, 42, 5); C(46, 42, 5); break;
-        case "gps": C(32, 26, 8);
-            c.beginPath(); c.moveTo(32, 58); c.bezierCurveTo(20, 44, 14, 36, 14, 26); c.arc(32, 26, 18, Math.PI, 0, false);
-            c.bezierCurveTo(50, 36, 44, 44, 32, 58); c.stroke(); break;
+        case "gps":   // mira del GPS (distinta del pin de «lugar», 08-9): círculo, cruz de rayitas y punto al medio
+            C(32, 32, 19); C(32, 32, 4, true); L([32, 4, 32, 14]); L([32, 50, 32, 60]); L([4, 32, 14, 32]); L([50, 32, 60, 32]); break;
+        case "termometro":   // tubo con bulbo abajo y la columna de mercurio
+            L([25, 42, 25, 15]); A(32, 15, 7, 180, 360); L([39, 15, 39, 42]); A(32, 49, 10, -45, 225); C(32, 49, 4, true); L([32, 26, 32, 45]); break;
+        case "rayo": L([37, 5, 15, 35, 29, 35, 27, 59, 49, 27, 35, 27, 37, 5]); break;
+        case "hd":   // «HD» a trazo
+            L([8, 18, 8, 46]); L([26, 18, 26, 46]); L([8, 32, 26, 32]);
+            L([36, 18, 36, 46]); c.beginPath(); c.moveTo(36, 18); c.lineTo(44, 18); c.arc(44, 32, 14, -Math.PI / 2, Math.PI / 2, false); c.lineTo(36, 46); c.stroke(); break;
         case "velocidad": A(32, 44, 22, 180, 360); L([32, 44, 44, 30]); break;
         case "actualizar": A(32, 32, 18, 20, 330); L([50, 12, 50, 24, 38, 24]); L([32, 22, 32, 40]); L([25, 33, 32, 40, 39, 33]); break;
         case "apagar": L([32, 8, 32, 30]); A(32, 34, 20, -55, 235); break;

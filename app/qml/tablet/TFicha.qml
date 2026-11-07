@@ -2,7 +2,7 @@ import QtQuick
 import Betometro
 
 // Ficha de la carrera en Modo Tablet: los datos en filas grandes (− / + o tocando para escribir) y LARGAR enorme.
-// Misma lógica que Ficha.qml (guardar, largar, borrar con doble toque, informe si ya tiene vueltas).
+// Misma lógica que Ficha.qml (guardar, largar, informe si ya tiene vueltas). Borrar: la ventana Cancelar/Borrar (07-3.5).
 TPantalla {
     id: raiz
     property var c: Datos.carrera(Navegacion.parametros.id || "")
@@ -16,7 +16,10 @@ TPantalla {
     property int tiempoIdealMs: c.tiempoIdealMs
     // Casilleros del tiempo (muestra aprobada 1.0.29): «m»/«s» y lo que se va escribiendo
     property string casillero: ""
-    Component.onCompleted: if (Contexto.prueba === "casillero") { casillero = "m"; escribir("5"); }   // solo para capturas
+    Component.onCompleted: {   // solo para capturas
+        if (Contexto.prueba === "casillero") { casillero = "m"; escribir("5"); }
+        if (Contexto.prueba === "borrar") borrando = true;
+    }
     property string escrito: ""
     function escribir(d) {
         if (escrito.length >= 2) return;
@@ -37,7 +40,7 @@ TPantalla {
     property var lugarLon: c.lugarLon
     property string campo: ""
     property string error: ""
-    property bool borrarArmado: false
+    property bool borrando: false   // la ventana de ¿Borrar?
     readonly property bool cambiada: nombre !== c.nombre || fecha !== c.fecha || distanciaM !== c.distanciaM
                                      || tiempoIdealMs !== c.tiempoIdealMs || patron !== c.patron || lugar !== (c.lugar || "")
     function datos() {
@@ -51,12 +54,12 @@ TPantalla {
         return r.id;
     }
     function moverDia(n) { const f = Formato.desdeIso(fecha); f.setDate(f.getDate() + n); fecha = Formato.fechaIso(f); }
-    Timer { id: desarmar; interval: 3000; onTriggered: raiz.borrarArmado = false }
 
     Flickable {
         id: izq
         width: raiz.h ? raiz.area.width - 420 - 18 : raiz.area.width
-        height: raiz.h ? raiz.area.height : raiz.area.height - 330
+        // De pie: las filas miden lo que miden y el botón va pegado abajo, sin hueco (08-15)
+        height: raiz.h ? raiz.area.height : Math.min(col.height + 10, raiz.area.height - 330)
         contentHeight: col.height + 10
         clip: true; boundsBehavior: Flickable.StopAtBounds
         Column {
@@ -114,10 +117,8 @@ TPantalla {
                      activo: !(largar.verInforme && !raiz.cambiada); dato: activo ? "" : "Sin cambios"
                      onTocado: { if (c.tieneVueltas && !raiz.cambiada) { Navegacion.ir("informe", { id: c.id }); return; }
                                  if (raiz.guardar()) Navegacion.avisar("Carrera guardada"); } }
-            TBoton { width: (largar.width - 16) / 2; height: 120; tamNombre: 27; icono: ""; tipo: raiz.borrarArmado ? "peligro" : ""
-                     nombre: raiz.borrarArmado ? "Tocá otra vez" : "Borrar"; activo: !raiz.nueva
-                     dato: raiz.borrarArmado && !raiz.nueva && Datos.videos(c.id).length ? "borra también el video" : ""
-                     onTocado: { if (raiz.borrarArmado) { Datos.borrarCarrera(c.id); Navegacion.ir("carreras"); } else { raiz.borrarArmado = true; desarmar.restart(); } } }
+            TBoton { width: (largar.width - 16) / 2; height: 120; tamNombre: 27; icono: ""
+                     nombre: "Borrar"; activo: !raiz.nueva; onTocado: raiz.borrando = true }
         }
     }
 
@@ -133,6 +134,8 @@ TPantalla {
         onBorrar: raiz.escrito = raiz.escrito.slice(0, -1)
         onListo: raiz.aceptarCasillero()
     }
+    TBorrar { parent: raiz; carrera: raiz.borrando && !raiz.nueva ? c : null; onCancelar: raiz.borrando = false
+              onBorrar: { raiz.borrando = false; Datos.borrarCarrera(c.id); Navegacion.ir("carreras"); } }
     BuscadorLugar { id: buscador; parent: raiz
         onElegido: l => { raiz.lugar = l.nombre + (l.detalle ? ", " + l.detalle.split(",")[0] : ""); raiz.lugarLat = l.lat; raiz.lugarLon = l.lon; } }
     Teclado {
