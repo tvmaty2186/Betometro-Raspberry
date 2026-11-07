@@ -23,6 +23,7 @@ sesiones nuevas (esta lista la pide Matías; el prompt para cada sesión está a
 | 08 | Diseño visual | Opus | Todas las pantallas contra la app y entre sí: tamaños, márgenes, íconos (engranaje que parece sol), 4 temas, horizontal y vertical, modo sol |
 | 09 | Pruebas automáticas | **Fable** | Capturas de cada pantalla que se comparan antes y después; simulador de carrera completa con GPS; que corra en GitHub antes de publicar |
 | 10 | Sistema y actualizaciones | Opus | Arranque, servicios, vigilante, escrituras en la SD, vuelta atrás si falla una actualización, la compilación de 20 min en GitHub |
+| 11 | Lo que faltó (07/11, pedido de Matías) | **Fable** | A: [programa](11a-programa.md) (clima, tele, página del celu, QR, voz, simulador, arranque, Drive, reportes). B: [sistema operativo](11b-sistema.md) (ssh, firewall, hora, config.txt, disco, sonido, red, paquetes). Falta sumar lo medido en la Pi |
 
 Para ahorrar: si hay que elegir, Fable solo en 01, 05 y 07.
 
