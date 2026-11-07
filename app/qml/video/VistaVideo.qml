@@ -223,18 +223,19 @@ Item {
     Row {
         visible: !vista.completo && !!vista.rep.vid && !vista.rep.falta
         x: 14; y: 12; spacing: 8
-        Repeater {
-            model: vista.e.lap >= 0 ? [vista.rep.nombreV(vista.e.v) + " · " + (vista.e.v.medida ? "medida" : "libre"), Formato.tiempo(vista.e.tMs) + " de la vuelta"]
-                                    : [vista.e.antes ? "Antes de largar" : "Terminada"]
-            Rectangle {
-                required property var modelData
-                required property int index
-                width: tc.implicitWidth + 24; height: 32; radius: 16
-                color: index === 0 ? Tema.acento : Qt.rgba(0, 0, 0, 0.55); border { width: 1; color: index === 0 ? Tema.acento : Tema.bordeCromo }
-                Text { id: tc; anchors.centerIn: parent; text: modelData; color: index === 0 ? Tema.acentoTinta : Tema.tinta
-                       font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 16 } }
-            }
+        // Dos chips fijos con el texto enlazado: el Repeater recibía una lista nueva 10 veces por segundo y borraba y
+        // creaba todo (03-1.2)
+        component Chip: Rectangle {
+            property string texto
+            property bool primero
+            width: tc.implicitWidth + 24; height: 32; radius: 16
+            color: primero ? Tema.acento : Qt.rgba(0, 0, 0, 0.55); border { width: 1; color: primero ? Tema.acento : Tema.bordeCromo }
+            Text { id: tc; anchors.centerIn: parent; text: parent.texto; color: parent.primero ? Tema.acentoTinta : Tema.tinta
+                   font { family: Tema.fuente600; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 16 } }
         }
+        Chip { primero: true
+               texto: vista.e.lap >= 0 ? vista.rep.nombreV(vista.e.v) + " · " + (vista.e.v.medida ? "medida" : "libre") : (vista.e.antes ? "Antes de largar" : "Terminada") }
+        Chip { visible: vista.e.lap >= 0; texto: vista.e.lap >= 0 ? Formato.tiempo(vista.e.tMs) + " de la vuelta" : "" }
     }
 
     // ---------- Barra de abajo: play/pausa, tiempo, línea con una rayita por vuelta, total, engranaje ----------

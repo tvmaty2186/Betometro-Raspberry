@@ -586,26 +586,26 @@ Item {
         Grid {
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 18 }
             columns: raiz.h ? 3 : 1; rowSpacing: 4
-            Repeater {
-                model: [
-                    { e: "Velocidad", v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–", u: "km/h", c: Tema.numero },
-                    { e: "Sugerida", v: raiz.sug > 0 ? raiz.sug.toFixed(1).replace(".", ",") : "–", u: "", c: Tema.tinta },
-                    { e: "Adelanto", v: reproductor.e.lap >= 0 && raiz.dist > 0 ? Formato.dif(reproductor.e.ade * 1000) : "–", u: "",
-                      c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : "#d23b2c" }
-                ]
-                Item {
-                    required property var modelData
-                    width: raiz.h ? (cajaVideo.width - 36) / 3 : 294; height: raiz.h ? 96 : 64
-                    Sub { text: modelData.e; tam: 11; anchors.top: raiz.h ? parent.top : undefined; anchors.verticalCenter: raiz.h ? undefined : parent.verticalCenter }
-                    Row {
-                        anchors { bottom: parent.bottom; right: raiz.h ? undefined : parent.right }
-                        spacing: 4
-                        Text { text: modelData.v; color: modelData.c; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 52 : 44 } }
-                        Text { anchors.baseline: parent.children[0].baseline; text: modelData.u; color: Tema.tintaSuave
-                               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
-                    }
+            // Tres datos fijos con el texto enlazado: el Repeater recibía una lista nueva 10 veces por segundo (03-1.2)
+            component DatoAhora: Item {
+                property string e
+                property string v
+                property string u
+                property color c
+                width: raiz.h ? (cajaVideo.width - 36) / 3 : 294; height: raiz.h ? 96 : 64
+                Sub { text: parent.e; tam: 11; anchors.top: raiz.h ? parent.top : undefined; anchors.verticalCenter: raiz.h ? undefined : parent.verticalCenter }
+                Row {
+                    anchors { bottom: parent.bottom; right: raiz.h ? undefined : parent.right }
+                    spacing: 4
+                    Text { id: num; text: parent.parent.v; color: parent.parent.c; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 52 : 44 } }
+                    Text { anchors.baseline: num.baseline; text: parent.parent.u; color: Tema.tintaSuave
+                           font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                 }
             }
+            DatoAhora { e: "Velocidad"; v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–"; u: "km/h"; c: Tema.numero }
+            DatoAhora { e: "Sugerida"; v: raiz.sug > 0 ? raiz.sug.toFixed(1).replace(".", ",") : "–"; u: ""; c: Tema.tinta }
+            DatoAhora { e: "Adelanto"; v: reproductor.e.lap >= 0 && raiz.dist > 0 ? Formato.dif(reproductor.e.ade * 1000) : "–"; u: ""
+                        c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : "#d23b2c" }
         }
     }
     Reproductor {

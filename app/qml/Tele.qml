@@ -58,7 +58,8 @@ QtObject {
             if (!c.tieneVueltas) continue;
             const vs = Datos.videos(c.id);
             if (!vs.length) continue;
-            r.push({ id: c.id, nombre: c.nombre, fecha: c.fechaLarga, dia: c.dia, vueltas: (Datos.informe(c.id).vueltas || []).length, videos: vs.length });
+            // c.vueltas: la cuenta ya viene en el resumen (antes se armaba el informe entero de cada carrera) (04-3.7)
+            r.push({ id: c.id, nombre: c.nombre, fecha: c.fechaLarga, dia: c.dia, vueltas: c.vueltas || 0, videos: vs.length });
         }
         return r;
     }
@@ -71,14 +72,20 @@ QtObject {
 
     // ---------- El celu como control remoto (/control en «Betómetro en la red») ----------
     // Cómo está la tele, para la página del celu
-    readonly property var estado: {
+    // Lo fijo (las vueltas) se arma una vez; antes se rehacía 10 veces por segundo con la posición del video (03-1.3)
+    readonly property var vueltasTele: {
         const r = reproductor;
-        if (!r) return { activa: false };
-        const v = r.vueltas.map((x, i) => {
+        if (!r) return [];
+        r.videoActual;
+        return r.vueltas.map((x, i) => {
             const m = r.momento(i, 0);
             return { nombre: r.nombreV(x), tiempo: Formato.tiempo(x.realMs || 0), desdeMs: m && m.v === r.videoActual ? Math.round(m.ms) : -1, video: !!m };
         });
-        return { activa: true, carrera: carrera, carreraId: carreraId, vueltas: v, vuelta: r.lapAhora,
+    }
+    readonly property var estado: {
+        const r = reproductor;
+        if (!r) return { activa: false };
+        return { activa: true, carrera: carrera, carreraId: carreraId, vueltas: vueltasTele, vuelta: r.lapAhora,
                  pos: Math.round(r.arrastre >= 0 ? r.arrastre : r.pos), total: Math.round(r.total), andando: r.andando,
                  marcas: r.tramosVideo.map(t => Math.round(t.desde)) };
     }
