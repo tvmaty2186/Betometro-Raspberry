@@ -1,18 +1,21 @@
 # Cómo conectarse a la Raspberry por ssh
 
-## Rápido
+## Rápido (anda desde el 07/11/2026)
 
-En la compu (Windows): tecla Windows → escribir `powershell` → Enter. Después:
+En la compu (Windows), en la ventana negra (cmd o PowerShell, cualquiera):
 
 ```
-ssh beto@192.168.1.83
+ssh beto@betometro.local
 ```
+
+Si no anda por nombre, con la IP: `ssh beto@192.168.1.83`.
 
 Pide la clave de `beto` (no se ve mientras se escribe) → Enter.
 
-## Para no acordarse la IP (una sola vez en la compu)
+## Atajo opcional: escribir solo `ssh beto` (una sola vez en la compu)
 
-Pegar esto en PowerShell **una vez**:
+Se pega **en Windows, no en la Pi**, y en **PowerShell** (tecla Windows → `powershell`; no en el cmd que dice
+`C:\Users\...>`):
 
 ```powershell
 mkdir -Force $HOME\.ssh | Out-Null; Add-Content $HOME\.ssh\config "`nHost beto`n  HostName 192.168.1.83`n  User beto`n"
@@ -31,14 +34,6 @@ ssh beto
   (y en `$HOME\.ssh\config` si se usó el atajo).
 - Lejos de casa: conectar la compu a la red propia **«Betometro-101»** (clave `betometro`). Desde la 1.0.28 ssh
   queda cerrado en esa red (plan, sección 8).
-
-## Desde la 1.0.28
-
-La Pi se va a llamar `betometro`, así que también va a andar sin la IP:
-
-```
-ssh beto@betometro.local
-```
 
 ## Para salir
 

@@ -168,3 +168,29 @@ findmnt / -o OPTIONS; findmnt /tmp; systemctl is-enabled bluetooth fstrim.timer
    contraseña una vez más por sesión de ssh. Si decís que no, queda como está (con 1.1 ya alcanza bastante).
 2. ¿Aceptás que el instalador, **solo si hay wifi**, suba esos pocos paquetes (certificados, zona horaria, ssh,
    dnsmasq, curl) y nada más? No cambia nada de cómo se ve ni se usa Betómetro.
+
+## Medido en la Pi (07/11/2026, Matías por ssh, versión 1.0.26/1.0.27, 18 min prendida)
+
+| Qué | Resultado | Qué significa |
+|---|---|---|
+| **Hora** | La Pi decía **06/11 23:57** cuando eran las **07/11 ~11:20**. `System clock synchronized: no` con wifi de casa y `timesyncd` activo | **Lo más grave de la medición.** 11 horas atrasada *con* internet. Las carreras de hoy salen con fecha de ayer y el clima / Drive / Actualizar pueden fallar. NTP no está sincronizando (falta ver por qué) |
+| Tensión y calor | `throttled=0x0`, 49,9 °C, 1,4 GHz | Bien |
+| `sudo` | **Pide la clave** (beto está en el grupo sudo, sin archivo NOPASSWD) | Bien, como quería Matías |
+| ssh | `PasswordAuthentication yes`, escucha en todas las redes; `PermitRootLogin without-password` (root solo con llave) | Confirma 1.1 |
+| Firewall | Ninguna regla de nftables | Confirma 1.1 |
+| Escuchan en la red | ssh 22, Betómetro 80, avahi 5353 (lo que hace andar `betometro.local`) | Lo esperado |
+| Nombre | La Pi ya se llama **BETOMETRO** y `ssh beto@betometro.local` anda | 2.4: el nombre ya está; dejarlo igual en el instalador |
+| Zona horaria | America/Argentina/Buenos_Aires | Bien (la puso el Imager) |
+| **Arranque** | 27,4 s (4,3 núcleo + 23,1 sistema). Betómetro espera a **PulseAudio: 10,4 s**, que espera a **cloud-init (~5 s)** | PulseAudio se demora probando el sonido HDMI y falla («Failed to find a working profile»). Apagar esa tarjeta en PulseAudio y apagar cloud-init: unos **12 s menos** |
+| Servicios que sobran | `cloud-init` (5 servicios), `bluetooth`, `rpi-eeprom-update` (la Pi 3 no tiene eeprom), `NetworkManager-wait-online` (6 s), `udisks2`, `sshswitch` | Apagarlos en el instalador. **Dejar** `avahi` (hace andar `betometro.local`) y `fake-hwclock`/`timesyncd` |
+| `config.txt` | Las líneas de Betómetro están bajo `[all]` | Hoy anda; 1.3 sigue valiendo para que no dependa de la suerte |
+| `cmdline.txt` | `video=Composite-1:d` **dos veces** y sin salto de línea al final | Confirma 10-1.2 (se reescribe en cada actualización) |
+| Núcleo | Instalado también el de la **Pi 5** (`linux-image-rpi-2712`) | Ocupa lugar y alarga cada actualización del núcleo. Se puede quitar |
+| Disco | 3,3 GB usados de 15 GB (11 GB libres); `/var/lib/betometro` 498 MB; versión anterior 22 MB | Bien. Los 498 MB incluyen los paquetes de actualización viejos (ya en el plan) |
+| Escrituras | ~6 MB en 18 min | Bien |
+| zram | 904 MB, sin uso | Bien |
+| Versiones | GStreamer 1.26.2, PulseAudio 17, openssh 10.0p1, núcleo 6.18.50, firmware 2026-09-15 | Las de trixie. Qt no salió (cambiar el filtro) |
+| Errores | Solo PulseAudio HDMI y avisos de wpa_supplicant (`bgscan`) | Nada grave |
+
+**Faltó** (el comando no lo mostró): opciones de montaje del disco, versión de Qt y el detalle de
+`/var/lib/betometro`. Se piden con el segundo bloque de comandos.
