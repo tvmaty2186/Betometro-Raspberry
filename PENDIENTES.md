@@ -95,6 +95,9 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## 1.0.27 (en preparación)
+Todo lo que entra, con las decisiones de Matías: **[docs/plan-1.0.27.md](docs/plan-1.0.27.md)**. Seguir esa lista.
+
 ## Auditorías (plan aprobado 07/11/2026)
 Diez revisiones del proyecto por dentro, de a una, en sesiones nuevas. Lista, modelo de cada una y el prompt
 para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los informes van a `docs/auditorias/`.
