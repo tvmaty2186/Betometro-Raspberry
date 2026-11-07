@@ -174,6 +174,45 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
       los tiempos dan mal; leve: tarda más de lo normal).
 - [ ] Mostrar muestra de la pantalla antes de programar.
 
+## 8. Auditoría 11: lo que faltó (Matías: sí a todo, 07/11/2026)
+
+Detalle en [auditorias/11a-programa.md](auditorias/11a-programa.md) (A) y [auditorias/11b-sistema.md](auditorias/11b-sistema.md) (B).
+Falta sumar lo que salga de los comandos en la Pi.
+
+Sistema operativo:
+- [ ] **ssh cerrado en la red propia** y límite de intentos: nftables con pocas reglas + `sshd_config.d`
+      (`MaxAuthTries 3`, `AllowUsers beto`). En casa se entra igual, con clave (B-1.1).
+- [ ] `sudo` pide la clave (confirmar en la Pi) (B-1.1).
+- [ ] **Hora del sistema desde el GPS** cuando internet no la puso, sin tocar el cronómetro (B-1.2). Corregir
+      `docs/diseno-sistema.md`, que dice que ya se hacía.
+- [ ] Zona horaria Argentina y nombre `betometro` en el instalador (B-2.4).
+- [ ] `config.txt`: escribir las líneas dentro de `[all]` (B-1.3).
+- [ ] PulseAudio con `Type=notify`, Betómetro espera al sonido (B-1.4).
+- [ ] Con wifi, el instalador actualiza **solo** certificados, zona horaria, `sshd`, `dnsmasq` y `wpa_supplicant`
+      (nunca núcleo, Qt, Mesa ni GStreamer) y guarda las versiones para el reporte (Matías: sí) (B-2.1).
+- [ ] Red propia: crearla una vez y después solo prenderla (`wifi.cpp:138`) (B-2.2).
+- [ ] NetworkManager: sin ahorro de energía del wifi y sin MAC al azar, si la Pi muestra fallas (B-2.3).
+- [ ] Vigilante en 15 s (lo máximo del chip) y `bluetooth.service` apagado (B-3).
+- [ ] Anotar en `docs/raspios.md` que trixie pasa a archivo hacia 2028; fijar la versión de `edge-tts` (B-3).
+
+Programa:
+- [ ] **Clima en carrera sin internet:** no reintentar el nombre del lugar 10 veces por segundo (A-1.1).
+- [ ] Simulador de GPS que pierda la señal como el NEO-M8N real (A-1.2). El **simulador del Chequeo previo va
+      adentro del programa** (GPS y pulsador simulados) (Matías: sí).
+- [ ] Reportes: avisar si la llave de GitHub venció; no perder el medio de un reporte largo; no repetir lo ya
+      mandado; `reportes.token` con permiso 0600 (A-1.3, A-3). El repo `Betometro-reportes` es privado (Matías).
+- [ ] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
+      (Matías: sí) (A-1.4).
+- [ ] Caché del clima con tope (A-2.1); prueba con un JSON real de Open-Meteo (A-3).
+- [ ] Si falta un audio, que quede en el reporte (A-2.2).
+- [ ] `despertar-touch`: dejar rastro si demora (A-2.3).
+- [ ] `/control/accion` solo por POST (A-2.4).
+- [ ] Página Drive del celu sin mostrar el mail de Google (A-2.5).
+- [ ] QR: anotar la versión de `qrcodegen` y atajar el error (A-2.6).
+- [ ] Control de la tele: no fallar si la tele termina mientras se toca (A-3).
+- [ ] Drive: borrar `.drive-curl` al arrancar (A-3).
+- [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
+
 ## No entra (Matías dijo que no)
 
 - Botón Deshacer, carteles grandes en carrera, clave distinta por equipo.
