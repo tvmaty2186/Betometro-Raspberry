@@ -197,6 +197,27 @@ if ! uname -r | grep -q 2712; then
   [ -n "$k5" ] && { DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq $k5 >/dev/null 2>&1 || true; }
 fi
 
+echo "== 3e ssh: cerrado en la red propia «Betometro-…» (su clave la sabe cualquiera en boxes)"
+# En casa se entra igual: ssh beto@betometro.local con la contraseña. Desde la red propia (10.42.0.1), no.
+# Sin firewall ni paquetes nuevos: lo hace el mismo ssh. OpenSSH 10 ya castiga a quien prueba claves de más
+# (PerSourcePenalties); además, 3 intentos por conexión y 20 s para entrar (11B-1.1).
+if [ -d /etc/ssh/sshd_config.d ]; then
+  cat > /etc/ssh/sshd_config.d/betometro.conf <<'SSH'
+# Betómetro (raspios/instalar.sh)
+MaxAuthTries 3
+LoginGraceTime 20
+PermitRootLogin no
+AllowUsers beto
+Match LocalAddress 10.42.0.1
+    DenyUsers *
+SSH
+  if command -v sshd >/dev/null && ! sshd -t 2>/dev/null; then
+    echo "OJO: ssh no aceptó el ajuste: se deja como estaba"; rm -f /etc/ssh/sshd_config.d/betometro.conf
+  else
+    systemctl reload ssh 2>/dev/null || true
+  fi
+fi
+
 echo "== 4/5 Arranque directo en Betómetro"
 # Ajuste de prueba del video (06/11/2026, mandaba los mensajes a /tmp): ya no hace falta
 rm -f /etc/systemd/system/betometro.service.d/video.conf

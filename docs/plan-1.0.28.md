@@ -195,8 +195,9 @@ Detalle en [auditorias/11a-programa.md](auditorias/11a-programa.md) (A) y [audit
 Medido en la Pi el 07/11 (tabla al final de 11b).
 
 Sistema operativo:
-- [ ] **ssh cerrado en la red propia** y límite de intentos: nftables con pocas reglas + `sshd_config.d`
+- [x] **ssh cerrado en la red propia** y límite de intentos: nftables con pocas reglas + `sshd_config.d`
       (`MaxAuthTries 3`, `AllowUsers beto`). En casa se entra igual, con clave (B-1.1).
+      Hecho sin firewall ni paquetes nuevos: `Match LocalAddress 10.42.0.1` + `DenyUsers *` (probado con `sshd -T`).
 - [ ] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
       la corrige. **La hora del GPS es lo primero del sistema.** Hecho en la 1.0.28 (falta probarlo en la Pi sin
       wifi). Queda para la 1.0.29: mostrar en el Chequeo previo de dónde salió la hora (GPS, internet o sin hora).

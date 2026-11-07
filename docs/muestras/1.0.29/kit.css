@@ -87,7 +87,7 @@ svg{display:block}
 .seg .on{background:#f4c531;color:#0b0d0c}
 
 /* Casilleros nuevos (minutos / segundos) */
-.cas{width:96px;height:64px;border-radius:16px;background:rgba(0,0,0,.35);border:3px solid rgba(207,212,216,.55);
+.cas{width:92px;height:64px;border-radius:16px;background:rgba(0,0,0,.35);border:3px solid rgba(207,212,216,.55);
  display:grid;place-items:center;font:700 italic 56px C;color:#f3ecd8;line-height:1}
 .cas.on{border-color:#f4c531;background:rgba(244,197,49,.14);box-shadow:0 0 0 3px rgba(244,197,49,.35)}
 .cas .cur{display:inline-block;width:4px;height:44px;background:#f4c531;margin-left:4px;vertical-align:-6px}

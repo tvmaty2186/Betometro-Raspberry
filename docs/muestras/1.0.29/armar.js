@@ -82,13 +82,13 @@ const paginas = [];
 // ============ 1. Tiempo por casilleros (Práctica) ============
 function cajaTiempo({ segOn = false, segTxt = '00', total = '4:00:0' }) {
   const grupo = (sub, val, on, x) => `<div style="position:absolute;left:${x}px;top:44px" class="sub">${sub}</div>
-    <div style="position:absolute;left:${x}px;top:72px;display:flex;align-items:center;gap:8px"><div class="tk">−</div><div class="cas ${on ? 'on' : ''}">${val}</div><div class="tk">+</div></div>`;
+    <div style="position:absolute;left:${x}px;top:72px;display:flex;align-items:center;gap:8px"><div class="tk">−</div><div class="cas ${on ? 'on' : ''}"><span>${val}</span></div><div class="tk">+</div></div>`;
   return `<div class="dato" style="left:0;top:0;width:560px;height:150px">
     <div class="et">Tiempo ideal</div>
     <div style="position:absolute;right:26px;top:6px;font:700 italic 38px C;color:#f3ecd8">${total}</div>
-    ${grupo('Minutos', '4', false, 19)}
-    <div style="position:absolute;left:267px;top:66px;width:26px;text-align:center;font:700 italic 60px C;color:#f3ecd8;line-height:1">:</div>
-    ${grupo('Segundos', segTxt, segOn, 293)}
+    ${grupo('Minutos', '4', false, 26)}
+    <div style="position:absolute;left:270px;top:66px;width:26px;text-align:center;font:700 italic 60px C;color:#f3ecd8;line-height:1">:</div>
+    ${grupo('Segundos', segTxt, segOn, 296)}
   </div>`;
 }
 function practica(opts, teclado) {
