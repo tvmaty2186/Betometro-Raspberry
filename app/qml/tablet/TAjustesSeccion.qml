@@ -6,7 +6,7 @@ import Betometro
 TPantalla {
     id: raiz
     readonly property string sec: (Navegacion.parametros || {}).seccion || (Contexto.prueba.indexOf("tablet-") === 0 ? Contexto.prueba.slice(7) : "pantalla")
-    titulo: ({ auto: "Mi auto", pantalla: "Pantalla y tema", voz: "Voz y sonido", velocidad: "Velocidad y GPS" })[sec]
+    titulo: ({ auto: "Mi auto", pantalla: "Pantalla y tema", voz: "Voz y sonido", velocidad: "Velocidad y GPS", pulsador: "Pulsador" })[sec]
     volverA: "ajustes"
     readonly property var a: Datos.ajustes
     property string campo: ""
@@ -93,7 +93,15 @@ TPantalla {
                             onMenos: raiz.poner("umbralPrecisionM", raiz.entre(raiz.a.umbralPrecisionM - 5, 1, 200)); onMas: raiz.poner("umbralPrecisionM", raiz.entre(raiz.a.umbralPrecisionM + 5, 1, 200)) } }
             TFila { visible: raiz.sec === "velocidad"; etiqueta: "Calibración automática"
                 TLlave { prendida: !!raiz.a.calibrar; onCambiada: v => raiz.poner("calibrar", v) } }
-            TFila { visible: raiz.sec === "velocidad"; etiqueta: "Ignorar 2.ª marca"; detalle: "Durante"
+            // ---- Pulsador (1.0.29). MARCAR en pantalla opcional (Matías, 07/11/2026): apagado, sin botón; larga y
+            //      marca solo el pulsador, sin nada en pantalla como plan B.
+            TFila { visible: raiz.sec === "pulsador"; etiqueta: "MARCAR en pantalla"
+                    detalle: raiz.a.marcarPantalla !== false ? "Se marca con el botón o con el pulsador" : "Larga y marca solo el pulsador"
+                TLlave { prendida: raiz.a.marcarPantalla !== false; onCambiada: v => raiz.poner("marcarPantalla", v) } }
+            TFila { visible: raiz.sec === "pulsador"; etiqueta: "Probar el pulsador"; detalle: "En el Chequeo previo"; tocable: true
+                    onTocada: Navegacion.ir("chequeo")
+                TIcono { width: 40; height: 40; nombre: "check" } }
+            TFila { visible: raiz.sec === "pulsador"; etiqueta: "Ignorar 2.ª marca"; detalle: "Durante"
                 TMasMenos { texto: String(raiz.a.antirreboteMs / 1000).replace(".", ",") + " s"
                             onMenos: raiz.poner("antirreboteMs", Math.max(0, raiz.a.antirreboteMs - 500)); onMas: raiz.poner("antirreboteMs", Math.min(60000, raiz.a.antirreboteMs + 500)) } }
         }

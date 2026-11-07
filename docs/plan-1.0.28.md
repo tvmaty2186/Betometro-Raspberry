@@ -110,13 +110,15 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 
 - [x] ± segundos grande (`WDelta.qml`) y nueva pantalla de fábrica (`Armado.qml`): acostada ± arriba a la derecha
       y la Sugerida al lado de la velocidad; de pie ± abajo al lado de la última vuelta. **Salió en la 1.0.27.**
-- [ ] **MARCAR en pantalla opcional:** llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo
+- [x] **MARCAR en pantalla opcional:** llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo
       (prendida de fábrica). Apagada: sin botón; larga y marca solo el pulsador; **nada en pantalla como plan B**.
       Armado sin MARCAR (aprobado): [muestras/sin-marcar/](muestras/sin-marcar/) — acostada `horizontal.png`
       (cronómetro a todo el ancho con datos extra; V1, Ideal y ± segundos encima; abajo Velocidad, Sugerida,
       Faltan y Última vuelta; **no cambiar nada**), de pie `vertical.png` (la propuesta 2, con reloj). Medidas en `armado.json` (px). Guardarlo como
       segundo armado de fábrica (cfg `widgetsH`/`widgets` siguen siendo los del usuario; el «sin MARCAR» se usa
       cuando la llave está apagada y el usuario no armó uno propio).
+      Hecho: llave en Ajustes → Pulsador (botón nuevo). Falta en el Chequeo previo (va con el simulador). El tablero del
+      recorrido libre sigue con su MARCAR.
 - [x] **Tiempos con «:» en todos lados: `m:ss:d`** (Matías, opción A): ideal «3:00:0», cronómetro «0:24:8», tiempos de
       vuelta «3:01:5». **Las diferencias siguen con coma**: error, ± segundos, «+1,5 s».
       Ojo: la página del celu (`recursos/informe-plantilla.html`) y los textos de C++ (`datos.cpp` «tiempo()»)

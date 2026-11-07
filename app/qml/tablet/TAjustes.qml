@@ -1,7 +1,7 @@
 import QtQuick
 import Betometro
 
-// Ajustes en Modo Tablet: 9 botones grandes (Google Drive, 05/11/2026). Muestra: docs/muestras/tablet/ajustes-h.png
+// Ajustes en Modo Tablet: 10 botones grandes (Pulsador desde la 1.0.29) (Google Drive, 05/11/2026). Muestra: docs/muestras/tablet/ajustes-h.png
 // Cada uno abre su sección (TAjustesSeccion) o su pantalla.
 TPantalla {
     id: raiz
@@ -28,6 +28,8 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "velocidad"; nombre: "Velocidad y GPS"
                  dato: Crono.gps.modulo ? Crono.gps.modulo.split(" · ")[0] : (raiz.a.velActiva !== false ? "Prendida" : "Apagada")
                  onTocado: raiz.seccion("velocidad") }
+        TBoton { width: parent.an; height: parent.al; icono: "bandera"; nombre: "Pulsador"
+                 dato: raiz.a.marcarPantalla !== false ? "MARCAR en pantalla" : "Solo el pulsador"; onTocado: raiz.seccion("pulsador") }
         TBoton { width: parent.an; height: parent.al; icono: "red"; nombre: "Conectividad"
                  dato: Wifi.propia ? Wifi.nombrePropia : (Wifi.conectada || "Sin wifi"); onTocado: Navegacion.ir("conectividad") }
         TBoton { width: parent.an; height: parent.al; icono: "camara"; nombre: "Cámara"

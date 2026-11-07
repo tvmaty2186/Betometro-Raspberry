@@ -29,6 +29,28 @@ QtObject {
         { t: "ultima", x: 370, y: 890, w: 330, h: 120 },
         { t: "marcar", x: 20, y: 1030, w: 680, h: 230 }
     ]
+    // Sin MARCAR en pantalla (llave apagada, Matías 07/11/2026): el lugar libre muestra más datos (Faltan y Tiempo
+    // ideal). Aprobados: docs/muestras/sin-marcar/ (acostada horizontal.png; de pie vertical.png, la propuesta 2).
+    readonly property var pxHSinMarcar: [
+        { t: "cuenta", x: 24, y: 56, w: 1232, h: 328, extra: true, barra: true, ancho: 1.2 },
+        { t: "tipo", x: 48, y: 74, w: 186, h: 186, forma: "redondo" },
+        { t: "ideal", x: 40, y: 274, w: 204, h: 92 },
+        { t: "delta", x: 992, y: 68, w: 250, h: 300 },
+        { t: "velocimetro", x: 24, y: 400, w: 330, h: 296, barra: true },
+        { t: "necesaria", x: 370, y: 400, w: 330, h: 296 },
+        { t: "faltan", x: 716, y: 400, w: 540, h: 140 },
+        { t: "ultima", x: 716, y: 556, w: 540, h: 140 }
+    ]
+    readonly property var pxVSinMarcar: [
+        { t: "velocimetro", x: 20, y: 66, w: 380, h: 380, forma: "redondo" },
+        { t: "tipo", x: 463, y: 66, w: 190, h: 190, forma: "redondo" },
+        { t: "necesaria", x: 416, y: 262, w: 284, h: 184 },
+        { t: "cuenta", x: 20, y: 468, w: 680, h: 290, extra: false, barra: false, ancho: 1.1 },
+        { t: "delta", x: 20, y: 774, w: 330, h: 270 },
+        { t: "faltan", x: 366, y: 774, w: 334, h: 270 },
+        { t: "ideal", x: 20, y: 1060, w: 330, h: 200 },
+        { t: "ultima", x: 366, y: 1060, w: 334, h: 200 }
+    ]
     readonly property var tipos: [
         { t: "cuenta", nombre: "Cronómetro de la vuelta", vel: false },
         { t: "tipo", nombre: "Vuelta y tipo", vel: false },
@@ -47,14 +69,19 @@ QtObject {
     function aFracciones(lista, W, H) {
         return lista.map(w => Object.assign({}, w, { x: w.x / W, y: w.y / H, w: w.w / W, h: w.h / H }));
     }
-    function fabrica(horizontal) { return horizontal ? aFracciones(pxH, 1280, 720) : aFracciones(pxV, 720, 1280); }
+    function fabrica(horizontal, sinMarcar) {
+        if (sinMarcar) return horizontal ? aFracciones(pxHSinMarcar, 1280, 720) : aFracciones(pxVSinMarcar, 720, 1280);
+        return horizontal ? aFracciones(pxH, 1280, 720) : aFracciones(pxV, 720, 1280);
+    }
     function cargar(horizontal, ajustes) {
+        const sinMarcar = ajustes.marcarPantalla === false || Contexto.prueba.indexOf("sin-marcar") >= 0;   // «--prueba largar-sin-marcar»: capturas
         // Ojo: la lista guardada llega de C++ como lista de Qt, no como Array de JavaScript
         // (Array.isArray da false): se recorre por índice. Antes se ignoraba y siempre quedaba la de fábrica.
         const g = ajustes[horizontal ? "widgetsH" : "widgets"];
-        if (!g || typeof g !== "object" || !(g.length > 0)) return fabrica(horizontal);
+        if (!g || typeof g !== "object" || !(g.length > 0)) return fabrica(horizontal, sinMarcar);
         const l = [];
-        for (let i = 0; i < g.length; i++) if (g[i] && g[i].t) l.push(Object.assign({}, g[i]));
-        return l.length ? l : fabrica(horizontal);
+        // Con la llave apagada no hay botón MARCAR aunque el armado propio lo tenga (nada en pantalla como plan B)
+        for (let i = 0; i < g.length; i++) if (g[i] && g[i].t && !(sinMarcar && g[i].t === "marcar")) l.push(Object.assign({}, g[i]));
+        return l.length ? l : fabrica(horizontal, sinMarcar);
     }
 }

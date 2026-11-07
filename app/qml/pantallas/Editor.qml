@@ -71,7 +71,7 @@ Item {
             readonly property real ancho: raiz.h ? 150 : (raiz.width - 32 - 24) / 3
             BotonCromo { width: parent.ancho; height: 42; texto: "+ Widget"; onTocado: { raiz.lista = true; raiz.panel = false; } }
             DobleToque { width: parent.ancho; height: 42; textoNormal: "De fábrica"
-                         onConfirmado: { raiz.poner(Armado.fabrica(raiz.h)); tablero.elegido = -1; } }
+                         onConfirmado: { raiz.poner(Armado.fabrica(raiz.h, Datos.ajustes.marcarPantalla === false)); tablero.elegido = -1; } }
             BotonAmarillo { width: raiz.h ? 140 : parent.ancho; height: 42; tamTexto: 18; texto: "Guardar"
                 onTocado: { Datos.ponerCfg(raiz.h ? "widgetsH" : "widgets", raiz.armado); raiz.cambiado = false; Navegacion.avisar("Pantalla guardada"); } }
         }

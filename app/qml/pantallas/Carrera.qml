@@ -30,7 +30,7 @@ Item {
         const pruebaRec = Contexto.prueba.indexOf("recorrido") === 0;   // solo para capturas: recorrido, recorrido-largo
         if (!Crono.enCurso) Crono.preparar(Navegacion.parametros.recorrido || pruebaRec ? "recorrido" : Navegacion.parametros.practica ? "" : (Navegacion.parametros.id || ""));
         if (pruebaRec) { Crono.marcar("pantalla"); tPruebaRec.start(); }
-        if (Contexto.prueba === "largar") Crono.marcar("pantalla");
+        if (Contexto.prueba === "largar" || Contexto.prueba === "largar-sin-marcar") Crono.marcar("pantalla");
         if (Contexto.prueba === "salir") Qt.callLater(raiz.volver);   // solo para capturas: Salir sin largar
         if (Contexto.prueba === "largar-60")   // solo para capturas: 59 vueltas cerradas, va por la 60
             for (let i = 60; i > 0; i--) Crono.marcar("pantalla", i * 4000);

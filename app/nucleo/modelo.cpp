@@ -246,6 +246,7 @@ Json configFabrica() {
     c["voz"] = "elena";               // Raspberry: voz grabada (elena, tomas)
     c["pitidoCero"] = false;
     c["clicMarca"] = true;
+    c["marcarPantalla"] = true;       // botón MARCAR en la pantalla (Matías, 07/11): apagado, marca solo el pulsador
     c["anticipoMs"] = 40;             // como la app nativa, hasta medirlo en E4
     c["avisoInicio"] = true;
     c["antirreboteMs"] = 3000;
@@ -317,6 +318,7 @@ Json armarConfig(const Json& guardado) {
     opcionEn(c, def, "voz", {"elena", "tomas"});
     boolEn(c, def, "pitidoCero");
     boolEn(c, def, "clicMarca");
+    boolEn(c, def, "marcarPantalla");
     numeroEn(c, def, "anticipoMs", 0, 1500);
     boolEn(c, def, "avisoInicio");
     numeroEn(c, def, "antirreboteMs", 0, 60000);
