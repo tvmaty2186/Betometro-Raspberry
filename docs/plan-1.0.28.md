@@ -86,13 +86,13 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 
 ## 3. Rendimiento
 
-- [ ] Sacar la animación de la barrita (60 → 20 cuadros por segundo en carrera), la aguja del inicio y el borde que
+- [x] Sacar la animación de la barrita (60 → 20 cuadros por segundo en carrera), la aguja del inicio y el borde que
       late debajo del control de la tele (03-1.1).
 - [ ] Listas del video que se rearman 10 veces por segundo → elementos fijos; aliviar el modo tele (03-1.2, 1.3).
-- [ ] Crear solo el tablero que se usa (vueltas o recorrido) (03-2.1); un solo fondo (03-2.2); foto del inicio con
+- [x] Crear solo el tablero que se usa (vueltas o recorrido) (03-2.1); ~~un solo fondo~~ (hecho: en carrera el fondo tapado no se dibuja) (03-2.2); foto del inicio con
       `sourceSize` (03-2.3); juntar capas de cada caja (03-2.4).
-- [ ] 480p en **800×600** con la cámara de Matías (Matías: sí), arreglando `--escala` (06-1.2, 2.1).
-- [ ] Sonido del video en sincronía (06-1.1).
+- [x] 480p en **800×600** con la cámara de Matías (Matías: sí), arreglando `--escala` (06-1.2, 2.1).
+- [x] Sonido del video en sincronía (06-1.1).
 - [ ] Video: colas de 10 s antes del archivo (06-2.2), MP4 sin `faststart` (06-2.3), un cuadro clave por segundo
       (06-2.4), hacer lugar al abrir la carrera y no en la largada (06-2.5).
 - [ ] Video, el resto: un solo `nice` (10) (06-3.1), no borrar el video que se pasa a MP4 (06-3.2), conteo de
