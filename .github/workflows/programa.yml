@@ -68,7 +68,9 @@ jobs:
             sudo timeout 180 apt-get update -q || true
           done
           command -v ffmpeg
-          timeout 180 pip install --break-system-packages edge-tts
+          # Versión fija (11B-3): la última de PyPI el 07/11/2026. Si edge-tts deja de andar (Microsoft cambia la
+          # API), subirla acá a propósito, no que cambie sola en cada compilación.
+          timeout 180 pip install --break-system-packages edge-tts==7.3.1
           timeout 600 python3 voz/grabar.py salida-pi/voz
 
       - name: Simulador de ARM (la Raspberry es arm64)

@@ -123,6 +123,10 @@ private:
 
     QJsonObject estadoGuardado_;   // drive.json sin el permiso: raiz, carreras, sesion
     QHash<QString, QString> huellas_;   // id de carrera → huella del informe (se borra si cambian las carreras)
+    // Las huellas se arman de a una carrera por vez (QTimer): armar todos los informes de una trababa la pantalla (04-3.6)
+    QStringList porHuellar_;
+    QTimer huellar_;
+    void huellarUna();
 
     QString red_ssid_;
     bool propia_ = false, ocupado_ = false;

@@ -48,7 +48,15 @@ void Audio::ponerVolumen(double porcentaje) {
 
 void Audio::reproducir(const QString& nombre) {
     auto* e = efectos_.value(nombre);
-    if (!e) return;
+    if (!e) {
+        // Sin el archivo no suena y nadie se enteraba (en carrera se saltea un número en silencio): queda en el
+        // reporte, una vez por nombre (11A-2.2). Si no hay ningún audio, ya se avisó al arrancar.
+        if (!efectos_.isEmpty() && !faltantes_.contains(nombre)) {
+            faltantes_.insert(nombre);
+            qWarning("Voz: falta el audio «%s» (no suena)", qPrintable(nombre));
+        }
+        return;
+    }
     e->setVolume(static_cast<float>(volumen_));
     e->play();
 }

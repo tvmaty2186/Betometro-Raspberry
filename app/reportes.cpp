@@ -11,11 +11,14 @@
 #include <QSysInfo>
 #include <QTimer>
 
+#include <algorithm>
+
 namespace {
 Reportes* gReportes = nullptr;
 QtMessageHandler gAnterior = nullptr;
 QMutex gMutex;
 constexpr qint64 kMaxBytes = 200 * 1024;
+constexpr qsizetype kPedazo = 60 * 1024;   // por issue (GitHub acepta 65 KB): lo que sobra va en el próximo
 const char* kRepo = "https://api.github.com/repos/tvmaty2186/Betometro-reportes/issues";
 
 void manejador(QtMsgType tipo, const QMessageLogContext& ctx, const QString& msg) {
@@ -66,6 +69,16 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
     }
     QFile v(marcaVivo_);
     if (v.open(QIODevice::WriteOnly)) v.write(QDateTime::currentDateTime().toString(Qt::ISODate).toUtf8() + '\n' + arranque + '\n');
+    // La llave de GitHub, solo para el dueño: hecha a mano con «echo» quedaba 0644, legible por cualquiera (11A-1.3)
+    const QString token = carpetaDatos + QStringLiteral("/reportes.token");
+    if (QFile::exists(token)) {
+        const QFileDevice::Permissions p = QFile::permissions(token);
+        if (p & (QFileDevice::ReadGroup | QFileDevice::WriteGroup | QFileDevice::ExeGroup | QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther)) {
+            const bool ok = QFile::setPermissions(token, QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ReadUser | QFileDevice::WriteUser);
+            anotar(QStringLiteral("reportes"), ok ? QStringLiteral("reportes.token era legible por cualquiera: se le puso permiso 0600")
+                                                  : QStringLiteral("reportes.token es legible por cualquiera y no se pudo cambiar el permiso"));
+        }
+    }
     connect(&cada_, &QTimer::timeout, this, &Reportes::enviar);
     cada_.start(10 * 60 * 1000);
     QTimer::singleShot(60 * 1000, this, &Reportes::enviar);
@@ -126,10 +139,22 @@ void Reportes::instalar() {
 void Reportes::anotar(const QString& tipo, const QString& texto) {
     QMutexLocker l(&gMutex);
     QFile f(archivo_);
-    if (f.size() > kMaxBytes) {   // se recorta: queda la mitad más nueva
-        if (f.open(QIODevice::ReadOnly)) { const QByteArray d = f.readAll(); f.close(); QFile w(archivo_);
-            if (w.open(QIODevice::WriteOnly | QIODevice::Truncate)) w.write(d.mid(d.size() / 2)); }
-        QFile::remove(enviadoHasta_);
+    if (f.size() > kMaxBytes && f.open(QIODevice::ReadOnly)) {   // se recorta: queda la mitad más nueva (líneas enteras)
+        const QByteArray d = f.readAll();
+        f.close();
+        qsizetype corte = d.size() / 2;
+        const qsizetype salto = d.indexOf('\n', corte);
+        if (salto >= 0) corte = salto + 1;
+        QFile w(archivo_);
+        if (w.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            w.write(d.mid(corte));
+            // «Enviado hasta» se corre lo mismo: antes se borraba y lo que quedaba se mandaba de nuevo (11A-3)
+            recortado_ += corte;
+            QFile e(enviadoHasta_);
+            const qint64 desde = e.open(QIODevice::ReadOnly) ? e.readAll().trimmed().toLongLong() : 0;
+            e.close();
+            if (e.open(QIODevice::WriteOnly | QIODevice::Truncate)) e.write(QByteArray::number(std::max<qint64>(0, desde - corte)));
+        }
     }
     if (!f.open(QIODevice::Append)) return;
     const QString linea = QStringLiteral("%1 · v%2 · %3 · %4\n")
@@ -149,7 +174,7 @@ bool Reportes::hayLlave() const {
 }
 
 void Reportes::enviar() {
-    if (carrera_) return;   // nunca durante una carrera
+    if (carrera_ || llaveRechazada_ || mandando_) return;   // nunca durante una carrera; con la llave vencida, hasta el próximo arranque
     QFile t(carpeta_ + QStringLiteral("/../reportes.token"));
     if (!t.open(QIODevice::ReadOnly)) return;   // sin llave: quedan guardados (se ven en /reportes)
     const QByteArray llave = t.readAll().trimmed();
@@ -159,26 +184,58 @@ void Reportes::enviar() {
     qint64 desde = e.open(QIODevice::ReadOnly) ? e.readAll().trimmed().toLongLong() : 0;
     e.close();
     if (desde > todo.size()) desde = 0;
-    const QByteArray nuevo = todo.mid(desde);
+    QByteArray nuevo = todo.mid(desde);
     if (nuevo.trimmed().isEmpty()) return;
+    // De a 60 KB, en líneas enteras: el resto va en el próximo issue (antes se mandaban solo los últimos 60 KB
+    // y lo del medio se daba por mandado: se perdía) (11A-1.3)
+    bool sigue = false;
+    if (nuevo.size() > kPedazo) {
+        qsizetype corte = nuevo.lastIndexOf('\n', kPedazo - 1);
+        if (corte <= 0) corte = kPedazo - 1;
+        nuevo = nuevo.left(corte + 1);
+        sigue = true;
+    }
+    // Versiones del sistema que guarda el instalador (11B-2.1), para saber con qué anda cada equipo
+    QString versiones;
+    QFile fv(carpeta_ + QStringLiteral("/../versiones.txt"));
+    if (desde == 0 && fv.open(QIODevice::ReadOnly)) versiones = QString::fromUtf8(fv.readAll()).simplified();
     QNetworkRequest q{QUrl(QString::fromLatin1(kRepo))};
     q.setRawHeader("Authorization", "Bearer " + llave);
     q.setRawHeader("Accept", "application/vnd.github+json");
     q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);
     q.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
     q.setTransferTimeout(20000);
-    const QString titulo = QStringLiteral("Reporte v%1 · %2 · %3 líneas")
+    const QString titulo = QStringLiteral("Reporte v%1 · %2 · %3 líneas%4")
                                .arg(QStringLiteral(BETO_VERSION), QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm")))
-                               .arg(nuevo.count('\n'));
+                               .arg(nuevo.count('\n')).arg(sigue ? QStringLiteral(" (sigue)") : QString());
     const QJsonObject o{{"title", titulo},
-                        {"body", QStringLiteral("Equipo: %1 · %2\n\n```\n%3\n```").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(),
-                                                                                  QString::fromUtf8(nuevo.right(60000)))}};
+                        {"body", QStringLiteral("Equipo: %1 · %2%3\n\n```\n%4\n```").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(),
+                                                                                   versiones.isEmpty() ? QString() : QStringLiteral(" · ") + versiones,
+                                                                                   QString::fromUtf8(nuevo))}};
+    mandando_ = true;
     QNetworkReply* r = red_.post(q, QJsonDocument(o).toJson(QJsonDocument::Compact));
-    const qint64 hasta = todo.size();
-    connect(r, &QNetworkReply::finished, this, [this, r, hasta] {
+    const qint64 hasta = desde + nuevo.size();
+    const qint64 recortado = [this] { QMutexLocker l(&gMutex); return recortado_; }();
+    connect(r, &QNetworkReply::finished, this, [this, r, hasta, recortado, sigue] {
         r->deleteLater();
+        mandando_ = false;
+        const int http = r->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (http == 401 || http == 403) {   // la llave venció o no sirve: avisar una vez y parar hasta el próximo arranque
+            llaveRechazada_ = true;
+            cada_.stop();
+            problema_ = QStringLiteral("GitHub rechazó la llave de reportes.token (HTTP %1): venció o no tiene permiso. "
+                                       "Los reportes quedan guardados acá y no se mandan hasta cambiarla.").arg(http);
+            qWarning("Reportes: %s", qPrintable(problema_));
+            if (gReportes != this) anotar(QStringLiteral("reportes"), problema_);   // sin manejador instalado (PC) no llegaría al registro
+            return;
+        }
         if (r->error() != QNetworkReply::NoError) return;   // sin internet: se reintenta más tarde
-        QFile e(enviadoHasta_);
-        if (e.open(QIODevice::WriteOnly | QIODevice::Truncate)) e.write(QByteArray::number(hasta));
+        // Si mientras tanto se recortó el registro, la marca se corre lo mismo
+        {
+            QMutexLocker l(&gMutex);
+            QFile e(enviadoHasta_);
+            if (e.open(QIODevice::WriteOnly | QIODevice::Truncate)) e.write(QByteArray::number(std::max<qint64>(0, hasta - (recortado_ - recortado))));
+        }
+        if (sigue) QTimer::singleShot(5000, this, &Reportes::enviar);   // la parte que sigue
     });
 }

@@ -93,9 +93,9 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       `sourceSize` (03-2.3); juntar capas de cada caja (03-2.4).
 - [x] 480p en **800×600** con la cámara de Matías (Matías: sí), arreglando `--escala` (06-1.2, 2.1).
 - [x] Sonido del video en sincronía (06-1.1).
-- [ ] Video: colas de 10 s antes del archivo (06-2.2), MP4 sin `faststart` (06-2.3), un cuadro clave por segundo
+- [x] Video: colas de 10 s antes del archivo (06-2.2), MP4 sin `faststart` (06-2.3), un cuadro clave por segundo
       (06-2.4), hacer lugar al abrir la carrera y no en la largada (06-2.5).
-- [ ] Video, el resto: un solo `nice` (10) (06-3.1), no borrar el video que se pasa a MP4 (06-3.2), conteo de
+- [x] Video, el resto: un solo `nice` (10) (06-3.1), no borrar el video que se pasa a MP4 (06-3.2), conteo de
       cuadros también si falla (06-3.3), sacar la rama vieja de 1080p (06-3.7).
 - [ ] Relojes del cronómetro prendidos solo con una carrera preparada (02-2).
 - [ ] GPS con puerto fijo: apagar el aviso si se desenchufa (02-2).
@@ -219,32 +219,32 @@ Sistema operativo:
 - [x] `sudo` pide la clave: confirmado en la Pi (07/11).
 - [x] **Hora del sistema desde el GPS** cuando internet no la puso, sin tocar el cronómetro (B-1.2). Corregir
       `docs/diseno-sistema.md`, que dice que ya se hacía.
-- [ ] Zona horaria Argentina y nombre `betometro` en el instalador (B-2.4).
+- [x] Zona horaria Argentina y nombre `betometro` en el instalador (B-2.4). Solo si no están; «BETOMETRO» se deja.
 - [x] `config.txt`: escribir las líneas dentro de `[all]` (B-1.3).
 - [x] PulseAudio con `Type=notify`, Betómetro espera al sonido (B-1.4).
-- [ ] Con wifi, el instalador actualiza **solo** certificados, zona horaria, `sshd`, `dnsmasq` y `wpa_supplicant`
+- [x] Con wifi, el instalador actualiza **solo** certificados, zona horaria, `sshd`, `dnsmasq` y `wpa_supplicant`
       (nunca núcleo, Qt, Mesa ni GStreamer) y guarda las versiones para el reporte (Matías: sí) (B-2.1).
-- [ ] Red propia: crearla una vez y después solo prenderla (`wifi.cpp:138`) (B-2.2).
+- [x] Red propia: crearla una vez y después solo prenderla (`wifi.cpp:138`) (B-2.2). Si quedó con otro nombre o clave, se recrea.
 - [ ] NetworkManager: sin ahorro de energía del wifi y sin MAC al azar, si la Pi muestra fallas (B-2.3).
 - [x] Vigilante en 15 s (lo máximo del chip) y `bluetooth.service` apagado (B-3).
-- [ ] Anotar en `docs/raspios.md` que trixie pasa a archivo hacia 2028; fijar la versión de `edge-tts` (B-3).
+- [x] Anotar en `docs/raspios.md` que trixie pasa a archivo hacia 2028; fijar la versión de `edge-tts` (B-3) (`edge-tts==7.3.1`).
 
 Programa:
-- [ ] **Clima en carrera sin internet:** no reintentar el nombre del lugar 10 veces por segundo (A-1.1).
+- [x] **Clima en carrera sin internet:** no reintentar el nombre del lugar 10 veces por segundo (A-1.1). En carrera no se pide; si falla, 2 min.
 - [ ] Simulador de GPS que pierda la señal como el NEO-M8N real (A-1.2). El **simulador del Chequeo previo va
       adentro del programa** (GPS y pulsador simulados) (Matías: sí).
-- [ ] Reportes: avisar si la llave de GitHub venció; no perder el medio de un reporte largo; no repetir lo ya
-      mandado; `reportes.token` con permiso 0600 (A-1.3, A-3). El repo `Betometro-reportes` es privado (Matías).
+- [x] Reportes: avisar si la llave de GitHub venció; no perder el medio de un reporte largo; no repetir lo ya
+      mandado; `reportes.token` con permiso 0600 (A-1.3, A-3). Se manda de a 60 KB; con 401/403 para y se ve en `/reportes`. El repo `Betometro-reportes` es privado (Matías).
 - [ ] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
       (Matías: sí) (A-1.4).
-- [ ] Caché del clima con tope (A-2.1); prueba con un JSON real de Open-Meteo (A-3).
-- [ ] Si falta un audio, que quede en el reporte (A-2.2).
-- [ ] `despertar-touch`: dejar rastro si demora (A-2.3).
-- [ ] `/control/accion` solo por POST (A-2.4).
-- [ ] Página Drive del celu sin mostrar el mail de Google (A-2.5).
-- [ ] QR: anotar la versión de `qrcodegen` y atajar el error (A-2.6).
-- [ ] Control de la tele: no fallar si la tele termina mientras se toca (A-3).
-- [ ] Drive: borrar `.drive-curl` al arrancar (A-3).
+- [x] Caché del clima con tope (A-2.1); prueba con un JSON real de Open-Meteo (A-3). Clave a 0,05°, 20 lugares; `pruebas/programa/prueba_clima.cpp` (el JSON con el formato exacto de Open-Meteo; la API no dejó bajar uno ese día).
+- [x] Si falta un audio, que quede en el reporte (A-2.2). Una vez por nombre.
+- [x] `despertar-touch`: dejar rastro si demora (A-2.3). Aviso en el journal (prioridad warning).
+- [x] `/control/accion` solo por POST (A-2.4). La página del celu ya usaba POST.
+- [x] Página Drive del celu sin mostrar el mail de Google (A-2.5).
+- [x] QR: anotar la versión de `qrcodegen` y atajar el error (A-2.6). Es la 1.8.0 (comparada byte a byte).
+- [x] Control de la tele: no fallar si la tele termina mientras se toca (A-3).
+- [x] Drive: borrar `.drive-curl` al arrancar (A-3). Y las huellas de los informes se arman de a una (QTimer), no todas juntas (04-3.6).
 - [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
 
 ## No entra (Matías dijo que no)

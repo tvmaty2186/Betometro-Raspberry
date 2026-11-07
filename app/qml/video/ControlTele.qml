@@ -8,6 +8,7 @@ import Betometro
 // la tele usa los mismos lugares.
 Item {
     id: c
+    // Puede quedar nulo mientras se toca un botón (la tele terminó): todo lo que lo usa lo chequea (11A-3)
     property Item rep: null
     property string titulo: ""
     property bool verDatos: false
@@ -105,12 +106,12 @@ Item {
                     required property var modelData
                     required property int index
                     width: 142; height: 98
-                    amarilla: c.rep.lapAhora === index
-                    enabled: !!c.rep.momento(index, 0)
-                    onTocado: c.rep.irA(index, 0)
+                    amarilla: !!c.rep && c.rep.lapAhora === index
+                    enabled: !!c.rep && !!c.rep.momento(index, 0)
+                    onTocado: if (c.rep) c.rep.irA(index, 0)
                     Column {
                         anchors.centerIn: parent
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: c.rep.nombreV(modelData)
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: c.rep ? c.rep.nombreV(modelData) : ""
                                color: fv.amarilla ? Tema.acentoTinta : Tema.tinta
                                font { family: Tema.fuente800; italic: true; weight: Font.ExtraBold; pixelSize: 32 } }
                         Text { anchors.horizontalCenter: parent.horizontalCenter; text: Formato.tiempo(modelData.realMs || 0)
@@ -132,20 +133,20 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 248 * c.kc; height: 186 * c.kc; radius: 62 * c.kc
                 Texto { anchors.centerIn: parent; text: "−10 s"; font { family: Tema.fuenteNum; italic: false; weight: Font.Bold; pixelSize: 52 * c.kc } }
-                onTocado: c.rep.saltar(-10000)
+                onTocado: if (c.rep) c.rep.saltar(-10000)
             }
             Ficha {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 310 * c.kc; height: 248 * c.kc; radius: height / 2
                 amarilla: true; border.color: "#fff6d0"
-                onTocado: c.rep.alternar()
+                onTocado: if (c.rep) c.rep.alternar()
                 Row {
-                    visible: c.rep.andando; anchors.centerIn: parent; spacing: 26 * c.kc
+                    visible: !!c.rep && c.rep.andando; anchors.centerIn: parent; spacing: 26 * c.kc
                     Rectangle { width: 36 * c.kc; height: 104 * c.kc; radius: 8 * c.kc; color: "#111111" }
                     Rectangle { width: 36 * c.kc; height: 104 * c.kc; radius: 8 * c.kc; color: "#111111" }
                 }
                 Canvas {   // play
-                    visible: !c.rep.andando
+                    visible: !c.rep || !c.rep.andando
                     anchors.centerIn: parent; anchors.horizontalCenterOffset: 10 * c.kc
                     width: 84 * c.kc; height: 104 * c.kc
                     onWidthChanged: requestPaint()
@@ -156,7 +157,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 248 * c.kc; height: 186 * c.kc; radius: 62 * c.kc
                 Texto { anchors.centerIn: parent; text: "+10 s"; font { family: Tema.fuenteNum; italic: false; weight: Font.Bold; pixelSize: 52 * c.kc } }
-                onTocado: c.rep.saltar(10000)
+                onTocado: if (c.rep) c.rep.saltar(10000)
             }
         }
     }
@@ -173,8 +174,8 @@ Item {
             model: c.rep ? c.rep.rayitas(linea.width) : []
             Rectangle {
                 required property var modelData
-                visible: modelData.desde > 0 && modelData.desde <= c.rep.total
-                x: linea.width * modelData.desde / c.rep.total - 2; width: 5; height: 40; radius: 2
+                visible: !!c.rep && modelData.desde > 0 && modelData.desde <= c.rep.total
+                x: c.rep ? linea.width * modelData.desde / c.rep.total - 2 : 0; width: 5; height: 40; radius: 2
                 anchors.verticalCenter: parent.verticalCenter; color: Qt.rgba(1, 1, 1, 0.6)
             }
         }
@@ -185,10 +186,10 @@ Item {
         MouseArea {
             anchors { fill: parent; topMargin: -16; bottomMargin: -16 }
             preventStealing: true
-            onPressed: (m) => c.rep.arrastre = c.rep.msEn(m.x, linea.width)
-            onPositionChanged: (m) => c.rep.arrastre = c.rep.msEn(m.x, linea.width)
-            onReleased: c.rep.soltarArrastre()
-            onCanceled: c.rep.arrastre = -1
+            onPressed: (m) => { if (c.rep) c.rep.arrastre = c.rep.msEn(m.x, linea.width) }
+            onPositionChanged: (m) => { if (c.rep) c.rep.arrastre = c.rep.msEn(m.x, linea.width) }
+            onReleased: if (c.rep) c.rep.soltarArrastre()
+            onCanceled: if (c.rep) c.rep.arrastre = -1
         }
     }
     Text {
@@ -246,9 +247,9 @@ Item {
                     Llave {
                         anchors { right: parent.right; verticalCenter: parent.verticalCenter }
                         scale: 1.4; transformOrigin: Item.Right
-                        prendida: c.rep.prendido(modelData.clave)
-                        opacity: modelData.clave === "adelanto" && !(c.rep.distancia > 0) ? 0.4 : 1
-                        onCambiada: (v) => c.rep.guardar(modelData.clave, { on: v })
+                        prendida: !!c.rep && c.rep.prendido(modelData.clave)
+                        opacity: modelData.clave === "adelanto" && !(c.rep && c.rep.distancia > 0) ? 0.4 : 1
+                        onCambiada: (v) => { if (c.rep) c.rep.guardar(modelData.clave, { on: v }) }
                     }
                 }
             }

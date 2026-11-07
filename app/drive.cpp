@@ -64,6 +64,10 @@ Drive::Drive(Datos* datos, const QString& carpetaDatos, const QString& prueba, Q
     real_ = qEnvironmentVariableIsSet("BETO_RASPBERRY") || !base_.isEmpty();
     enlace_ = kEnlace;
     cargar();
+    // Si se cortó la luz a mitad de una subida, quedó el archivo de curl con el permiso de 1 hora (11A-3)
+    QFile::remove(carpeta_ + QStringLiteral("/.drive-curl"));
+    huellar_.setSingleShot(true);
+    connect(&huellar_, &QTimer::timeout, this, &Drive::huellarUna);
     sondeo_.setSingleShot(true);
     connect(&sondeo_, &QTimer::timeout, this, &Drive::esperarCodigo);
     connect(&cada_, &QTimer::timeout, this, &Drive::revisar);
@@ -351,8 +355,18 @@ void Drive::revisar() {
     if (puede() && !trabajando_) seguirCola();
 }
 
+// Una huella por vez, dejando respirar a la pantalla entre una y otra; cuando están todas, se revisa qué falta subir
+void Drive::huellarUna() {
+    while (!porHuellar_.isEmpty() && huellas_.contains(porHuellar_.first())) porHuellar_.removeFirst();
+    if (porHuellar_.isEmpty()) { revisar(); return; }
+    const QString id = porHuellar_.takeFirst();
+    huellas_.insert(id, huella(datos_->informeHtml(id)));
+    huellar_.start(porHuellar_.isEmpty() ? 0 : 50);
+}
+
 QList<drive::CarreraLocal> Drive::carrerasLocales() {
     QList<drive::CarreraLocal> r;
+    bool faltan = false;
     for (const QVariant& v : datos_->corridas() + datos_->proximas()) {
         const QVariantMap m = v.toMap();
         if (!m.value("tieneVueltas").toBool()) continue;
@@ -360,7 +374,8 @@ QList<drive::CarreraLocal> Drive::carrerasLocales() {
         c.id = m.value("id").toString();
         c.nombre = m.value("nombre").toString();
         c.carpeta = drive::nombreCarpeta(m.value("fecha").toString(), c.nombre);
-        if (!huellas_.contains(c.id)) huellas_.insert(c.id, huella(datos_->informeHtml(c.id)));
+        // Sin huella todavía (vacía): pendientes() saltea ese informe hasta que huellarUna la arme
+        if (!huellas_.contains(c.id)) { faltan = true; if (!porHuellar_.contains(c.id)) porHuellar_ << c.id; }
         c.versionInforme = huellas_.value(c.id);
         for (const QVariant& x : datos_->videos(c.id)) {
             const QString a = x.toMap().value("archivo").toString();
@@ -369,6 +384,7 @@ QList<drive::CarreraLocal> Drive::carrerasLocales() {
         }
         r << c;
     }
+    if (faltan && !huellar_.isActive()) huellar_.start(0);
     return r;
 }
 

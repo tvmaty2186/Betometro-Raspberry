@@ -227,6 +227,7 @@ int main(int argc, char* argv[]) {
         const QVariant v = datos.cfg(QStringLiteral("informesRed"));
         servidor.prender(!crono.enCurso() && (!v.isValid() || v.isNull() || v.toBool()));
         reportes.ponerOcupado(crono.enCurso());  // los reportes no se mandan en carrera
+        clima.ponerCarrera(crono.enCurso());     // ni el clima pide el nombre del lugar (11A-1.1)
     };
     prenderServidor();
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);

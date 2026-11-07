@@ -32,6 +32,21 @@ else
   echo "Ya está todo (no hace falta internet)"
 fi
 
+echo "== 1b Con internet: se actualizan solo certificados, zona horaria, ssh, dnsmasq y wpa_supplicant"
+# Lo que mira a internet o escucha a extraños en la red propia (11B-2.1, Matías: sí). Nunca el núcleo, Qt,
+# Mesa ni GStreamer (eso cambia cómo anda Betómetro). Sin internet, o si tarda, sigue igual: nunca falla por esto.
+SEGUROS="ca-certificates tzdata openssh-server dnsmasq-base wpasupplicant"
+if timeout 120 apt-get update -qq >/dev/null 2>&1; then
+  DEBIAN_FRONTEND=noninteractive timeout 600 apt-get install -y -qq --only-upgrade --no-install-recommends $SEGUROS >/dev/null 2>&1 \
+    || echo "   (no se pudieron actualizar: se deja como estaba)"
+else
+  echo "   (sin internet: se deja como estaba)"
+fi
+# Las versiones de lo que importa, para el reporte de errores (reportes.cpp las manda con cada issue)
+mkdir -p /var/lib/betometro
+{ dpkg-query -W -f='${Package} ${Version}\n' $SEGUROS libqt6core6t64 libgstreamer1.0-0 pulseaudio network-manager curl 2>/dev/null
+  echo "nucleo $(uname -r)"; } > /var/lib/betometro/versiones.txt || true
+
 echo "== 2/5 Betómetro"
 # Primero se desarma la versión nueva aparte y se fuerza a la tarjeta: si se corta la luz acá, el programa
 # que anda no se tocó (antes se escribía encima del viejo y podía quedar a medias) (10-1.1)
@@ -181,6 +196,21 @@ fi
 # cmdline.txt: todo de una vez (y solo si cambió)
 cmd_cambiar "$(cmd_armar fsck.repair=yes video=Composite-1:d quiet splash plymouth.ignore-serial-consoles logo.nologo vt.global_cursor_default=0 loglevel=3)"
 
+echo "== 3f Zona horaria Argentina y nombre «betometro» (solo si no están)"
+# Normalmente ya los puso el Imager; si la tarjeta se grabó sin eso, la hora salía en UTC y el equipo se
+# llamaba «raspberrypi» (11B-2.4). Si ya se llama betometro (con mayúsculas o sin), se deja como está.
+ZONA=America/Argentina/Buenos_Aires
+if [ "$(timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || true)" != "$ZONA" ]; then
+  timedatectl set-timezone "$ZONA" 2>/dev/null || { ln -sf "/usr/share/zoneinfo/$ZONA" /etc/localtime && echo "$ZONA" > /etc/timezone; } || true
+fi
+NOMBRE=$(hostname 2>/dev/null || cat /etc/hostname 2>/dev/null || true)
+if [ "$(echo "$NOMBRE" | tr '[:upper:]' '[:lower:]')" != betometro ]; then
+  hostnamectl set-hostname betometro 2>/dev/null || echo betometro > /etc/hostname || true
+  # /etc/hosts también, si no «sudo» se queja de que no resuelve el nombre
+  [ -n "$NOMBRE" ] && sed -i "s/^\(127\.0\.1\.1[[:space:]]\+\)$NOMBRE\([[:space:]]\|\$\)/\1betometro\2/" /etc/hosts 2>/dev/null || true
+  grep -q "^127\.0\.1\.1[[:space:]]\+betometro" /etc/hosts 2>/dev/null || printf '127.0.1.1\tbetometro\n' >> /etc/hosts || true
+fi
+
 echo "== 3d Arranque más rápido: servicios que no se usan"
 # cloud-init (lo usa el Imager solo la primera vez), esperar la red, la eeprom (la Pi 3 no tiene),
 # discos automáticos (el pendrive lo monta Betómetro), bluetooth (apagado en config.txt) (11B, medido 07/11)
@@ -193,7 +223,7 @@ mkdir -p /etc/udev/rules.d
 printf 'SUBSYSTEM=="sound", ATTRS{id}=="vc4hdmi*", ENV{PULSE_IGNORE}="1"\n' > /etc/udev/rules.d/80-betometro-sin-hdmi.rules
 # El núcleo de la Pi 5 no se usa en la Pi 3: ocupa lugar y alarga cada actualización del núcleo
 if ! uname -r | grep -q 2712; then
-  k5=$(dpkg -l 'linux-image-*' 2>/dev/null | awk '/^ii/ && $2 ~ /rpi-2712/ {print $2}')
+  k5=$(dpkg -l 'linux-image-*' 2>/dev/null | awk '/^ii/ && $2 ~ /rpi-2712/ {print $2}' || true)   # sin ninguno, dpkg sale con 1 (pipefail)
   [ -n "$k5" ] && { DEBIAN_FRONTEND=noninteractive apt-get purge -y -qq $k5 >/dev/null 2>&1 || true; }
 fi
 

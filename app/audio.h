@@ -5,6 +5,7 @@
 
 #include <QHash>
 #include <QObject>
+#include <QSet>
 #include <QSoundEffect>
 
 class Audio : public QObject {
@@ -31,5 +32,6 @@ private:
     void cargar(const QString& dir);
     QString voz_;
     QHash<QString, QSoundEffect*> efectos_;
+    QSet<QString> faltantes_;   // audios que faltaron (se avisa una vez por nombre)
     double volumen_ = 1;
 };

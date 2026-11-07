@@ -7,7 +7,9 @@ Before=betometro.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'for i in 1 2 3 4 5; do ls /sys/bus/i2c/drivers/Goodix-TS/ 2>/dev/null | grep -q 005d && exit 0; sleep 2; modprobe -r goodix_ts; sleep 1; modprobe goodix_ts; done; exit 0'
+# Si tuvo que insistir o no apareció, queda en el registro del sistema con prioridad aviso («<4>»), que journald
+# guarda en la tarjeta: antes demoraba hasta 15 s el arranque sin dejar rastro (11A-2.3)
+ExecStart=/bin/sh -c 'for i in 1 2 3 4 5; do if ls /sys/bus/i2c/drivers/Goodix-TS/ 2>/dev/null | grep -q 005d; then [ "$i" = 1 ] || echo "<4>despertar-touch: el touch apareció en el intento $i"; exit 0; fi; sleep 2; modprobe -r goodix_ts; sleep 1; modprobe goodix_ts; done; echo "<4>despertar-touch: el touch no apareció en 15 s (sin touch en la pantalla)"; exit 0'
 RemainAfterExit=yes
 
 [Install]

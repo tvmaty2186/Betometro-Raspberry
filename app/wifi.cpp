@@ -146,25 +146,49 @@ void Wifi::armarPropia() {
     armandoPropia_ = true;
     errorPropia_.clear();
     emit cambio();
+    // Si ya está guardada con el mismo nombre de red y la misma clave, solo se prende. Antes se borraba y se
+    // volvía a crear cada vez: dos escrituras en la tarjeta por nada (11B-2.2)
+    nmcli({"-t", "--show-secrets", "-f", "802-11-wireless.ssid,802-11-wireless-security.psk", "connection", "show", kConPropia},
+          [this](int codigo, const QString& out, const QString&) {
+              bool nombreOk = false, claveOk = false;
+              if (codigo == 0)
+                  for (const auto& l : out.split('\n', Qt::SkipEmptyParts)) {
+                      const QStringList c = campos(l);
+                      if (c.size() < 2) continue;
+                      if (c[0] == QLatin1String("802-11-wireless.ssid")) nombreOk = c[1] == nombrePropia();
+                      else if (c[0] == QLatin1String("802-11-wireless-security.psk")) claveOk = c[1] == clavePropia();
+                  }
+              if (!nombreOk || !claveOk) { crearPropia(); return; }   // no está, o quedó con otro nombre o clave
+              nmcli({"connection", "up", kConPropia}, [this](int codigo, const QString&, const QString& err) {
+                  if (codigo == 0) { propiaArmada(0, QString()); return; }
+                  qWarning("Wifi propia: la guardada no prendió (%s): se arma de nuevo", qPrintable(err));
+                  crearPropia();
+              });
+          });
+}
+
+void Wifi::crearPropia() {
     // 2,4 GHz (la Pi 3 y todos los celus la ven); la conexión vieja se borra antes por si quedó mal guardada
     nmcli({"connection", "delete", kConPropia}, [this](int, const QString&, const QString&) {
         nmcli({"dev", "wifi", "hotspot", "ifname", "wlan0", "con-name", kConPropia, "ssid", nombrePropia(), "band", "bg", "password", clavePropia()},
-              [this](int codigo, const QString&, const QString& err) {
-                  armandoPropia_ = false;
-                  if (codigo != 0) {
-                      qWarning("Wifi propia: no se pudo armar (%s)", qPrintable(err));
-                      errorPropia_ = err.contains(QLatin1String("dnsmasq"), Qt::CaseInsensitive) ? QStringLiteral("Falta un programa del sistema (dnsmasq): actualizá Betómetro con wifi")
-                                   : err.isEmpty() ? QStringLiteral("No se pudo armar la red propia") : QStringLiteral("No se pudo armar: ") + err;
-                      sinRedDesde_ = 0;
-                      fallaPropia_ = QDateTime::currentMSecsSinceEpoch();
-                      emit cambio();
-                      return;
-                  }
-                  propia_ = true;
-                  emit cambio();
-                  contarConectados();
-              });
+              [this](int codigo, const QString&, const QString& err) { propiaArmada(codigo, err); });
     });
+}
+
+void Wifi::propiaArmada(int codigo, const QString& err) {
+    armandoPropia_ = false;
+    if (codigo != 0) {
+        qWarning("Wifi propia: no se pudo armar (%s)", qPrintable(err));
+        errorPropia_ = err.contains(QLatin1String("dnsmasq"), Qt::CaseInsensitive) ? QStringLiteral("Falta un programa del sistema (dnsmasq): actualizá Betómetro con wifi")
+                     : err.isEmpty() ? QStringLiteral("No se pudo armar la red propia") : QStringLiteral("No se pudo armar: ") + err;
+        sinRedDesde_ = 0;
+        fallaPropia_ = QDateTime::currentMSecsSinceEpoch();
+        emit cambio();
+        return;
+    }
+    propia_ = true;
+    emit cambio();
+    contarConectados();
 }
 
 // Cuántos celus están conectados a la wifi propia (iw: las «estaciones» del punto de acceso)

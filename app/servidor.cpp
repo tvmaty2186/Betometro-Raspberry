@@ -115,7 +115,7 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                 }
                 // POST solo para los botones del celu (/control/accion): todo va en la dirección, sin cuerpo
                 const bool postControl = linea.size() >= 2 && linea[0] == "POST" && QUrl(QString::fromUtf8(linea[1])).path() == QLatin1String("/control/accion");
-                s->write(linea.size() >= 2 && (linea[0] == "GET" || postControl) ? responder(linea[1]) : respuesta(400, "text/plain", "Solo se puede mirar"));
+                s->write(linea.size() >= 2 && (linea[0] == "GET" || postControl) ? responder(linea[1], postControl) : respuesta(400, "text/plain", "Solo se puede mirar"));
                 s->disconnectFromHost();
             });
         }
@@ -135,7 +135,7 @@ void Servidor::prender(bool si) {
     emit cambio();
 }
 
-QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
+QByteArray Servidor::responder(const QByteArray& rutaCruda, bool post) const {
     const QUrl url(QString::fromUtf8(rutaCruda));
     const QString ruta = url.path();
     const bool descargar = url.query().contains(QLatin1String("descargar"));
@@ -174,6 +174,8 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
     if (ruta == QLatin1String("/control/estado"))
         return respuesta(200, "application/json; charset=utf-8", control_ ? control_->estadoJson() : QByteArray("{\"activa\":false,\"carreras\":[]}"));
     if (ruta == QLatin1String("/control/accion")) {
+        // Solo por POST: con GET, una página cualquiera abierta en el celu podía meter un <img src=…/control/accion?tipo=salir> (11A-2.4)
+        if (!post) return respuesta(405, "text/plain; charset=utf-8", "Solo por POST");
         const QUrlQuery q(url);
         const QString problema = control_ ? control_->hacer(q.queryItemValue(QStringLiteral("tipo"), QUrl::FullyDecoded),
                                                             q.queryItemValue(QStringLiteral("valor"), QUrl::FullyDecoded))
@@ -184,8 +186,10 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda) const {
     }
     if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
     if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
-        const QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
-        return respuesta(200, "text/plain; charset=utf-8", t.isEmpty() ? QByteArray("Sin errores anotados.\n") : t,
+        QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
+        if (t.isEmpty()) t = "Sin errores anotados.\n";
+        if (reportes_ && !reportes_->problema().isEmpty()) t.prepend("OJO: " + reportes_->problema().toUtf8() + "\n\n");   // la llave vencida (11A-1.3)
+        return respuesta(200, "text/plain; charset=utf-8", t,
                          descargar ? adjunto(QStringLiteral("betometro-errores.txt")) : QByteArray());
     }
     if (ruta == QLatin1String("/todos.zip")) {
@@ -339,8 +343,8 @@ QByteArray Servidor::paginaDrive(const QString& aviso, bool bien) const {
     QString estado;
     if (!drive_) estado = QStringLiteral("No disponible.");
     else if (drive_->estado() == QLatin1String("conectado"))
-        estado = QStringLiteral("Conectado") + (drive_->cuenta().isEmpty() ? QString() : QStringLiteral(" como <b>%1</b>").arg(esc(drive_->cuenta()))) +
-                 (drive_->texto().isEmpty() ? QString() : QStringLiteral(" · ") + esc(drive_->texto()));
+        // Sin el mail de la cuenta: lo ve cualquiera de la wifi (la cuenta se ve en la pantalla de la Pi) (11A-2.5)
+        estado = QStringLiteral("Conectado") + (drive_->texto().isEmpty() ? QString() : QStringLiteral(" · ") + esc(drive_->texto()));
     else if (drive_->tieneCliente()) estado = QStringLiteral("El cliente de Google ya está cargado ✓. Falta tocar «Conectar» en el Betómetro.");
     else estado = QStringLiteral("Falta el cliente de Google (paso 4 de la guía).");
     const QString html = QStringLiteral(

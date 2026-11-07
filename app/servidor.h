@@ -31,7 +31,7 @@ public:
     QByteArray recibirDrive(const QByteArray& cuerpo);
 
     // Para probar sin red: arma la respuesta HTTP completa de un pedido «GET ruta»
-    QByteArray responder(const QByteArray& ruta) const;
+    QByteArray responder(const QByteArray& ruta, bool post = false) const;   // post: llegó por POST (/control/accion solo así)
     // .zip sin comprimir (los HTML ya son chicos); público para probarlo
     static QByteArray zip(const QList<QPair<QString, QByteArray>>& archivos);
     // «Range: bytes=a-b» de un archivo de `tam` bytes → [desde, hasta] (inclusive). false si no se puede cumplir.

@@ -8,6 +8,14 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 - Usuario `beto`. En casa la IP es `192.168.1.83` (`ssh beto@192.168.1.83` desde PowerShell). Paso a paso y atajo: [conectarse-ssh.md](conectarse-ssh.md).
 - La luz de fondo es `/sys/class/backlight/panel_backlight@1`.
 
+## Hasta cuándo sirve trixie (11B-3)
+- Debian 13 «trixie» tiene soporte normal hasta mediados de **2028** y después pasa a archivo (`archive.debian.org`):
+  `compilar.sh`/`pruebas.sh` (que instalan paquetes en `debian:trixie`) dejarían de poder bajarlos y en la Pi
+  `apt-get install` fallaría. Cuando pase: cambiar las fuentes de apt a `archive.debian.org` o pasar a Debian 14 (Qt nuevo:
+  recompilar y probar todo). No es urgente; anotado para no sorprenderse.
+- `edge-tts` (la voz) va con versión fija en `programa.yml` (`edge-tts==7.3.1`, la última al 07/11/2026): si Microsoft
+  cambia la API, se sube el número a propósito.
+
 ## Qué instala `raspios/instalar.sh`
 **Desde la 1.0.28:** desarma la versión nueva aparte y la cambia con `mv` (un corte de luz no la deja a medias);
 si falla a mitad vuelve sola a la anterior y prende Betómetro; `cmdline.txt` se escribe solo si cambia; deja
@@ -17,6 +25,10 @@ corre `/var/lib/betometro-anterior/volver.sh` y avisa. Si anduvo un minuto, ya n
 Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/2026).
 
 1. Paquetes de `raspios/paquetes.txt` (antes repara dpkg con `dpkg --configure -a`; solo instala lo que falta).
+   - 1b: **con internet**, actualiza solo `ca-certificates`, `tzdata`, `openssh-server`, `dnsmasq-base` y `wpasupplicant`
+     (`--only-upgrade`, con tiempo límite; nunca núcleo, Qt, Mesa ni GStreamer) y guarda las versiones en
+     `/var/lib/betometro/versiones.txt` (van en cada reporte de errores). Sin internet sigue igual (11B-2.1).
+   - 3f: zona horaria `America/Argentina/Buenos_Aires` y nombre `betometro`, solo si no están (11B-2.4).
 2. Guarda la versión anterior en `/var/lib/betometro-anterior` (`volver.sh` para volver a mano), copia el programa, la voz y los servicios.
 3. `config.txt`: `dtoverlay=vc4-kms-dsi-ili9881-5inch`, `enable_uart=1`, `disable-bt`, audio, watchdog, `disable_splash=1`, `ramoops` (si existe).
    - `cmdline.txt`: sin consola serie (el puerto es del GPS), `console=tty3 quiet splash … video=Composite-1:d fsck.repair=yes`.

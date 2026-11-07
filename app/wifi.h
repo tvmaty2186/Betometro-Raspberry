@@ -70,6 +70,8 @@ private:
     void nmcli(const QStringList& args, std::function<void(int, const QString&, const QString&)> listo);
     void refrescar();             // red conectada, señal y redes guardadas
     void revisarPropia();         // ¿hay que armar la wifi propia?
+    void crearPropia();           // la crea de cero (borra la guardada)
+    void propiaArmada(int codigo, const QString& err);
     void apagarPropia();
     void cortarYArmar();
     void contarConectados();

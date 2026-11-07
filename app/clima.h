@@ -44,8 +44,12 @@ public:
     Q_INVOKABLE QVariantList horasDe(double lat, double lon, const QString& fecha);
 
     void ponerPosicion(double lat, double lon);   // desde el GPS
+    void ponerCarrera(bool enCurso);              // en carrera no se pide el nombre del lugar (11A-1.1)
 
     static int kDias;   // días de pronóstico (16 en Open-Meteo)
+    static constexpr int kLugares = 20;   // lugares guardados como mucho (11A-2.1)
+    static QString clave(double lat, double lon);   // lat,lon redondeadas a 0,05° (≈5 km). Pública para probarla
+    int lugaresEnCache() const { return cache_.size(); }
 
 signals:
     void sugerenciasChanged();
@@ -54,7 +58,7 @@ signals:
 
 private:
     struct Entrada { QJsonObject datos; qint64 cuando = 0, intento = 0; bool pidiendo = false; QString error; };
-    static QString clave(double lat, double lon);
+    void podarCache(const QString& salvo = {});   // deja como mucho kLugares (los más nuevos; «salvo» queda siempre)
     QJsonObject inventado(double lat, double lon) const;   // para la PC
     void guardarCache() const;
     void cargarCache();
@@ -70,8 +74,9 @@ private:
     QVariantList sugerencias_;
     bool buscandoLugar_ = false;
     int pedidoLugar_ = 0;
-    bool hayGps_ = false;
+    bool hayGps_ = false, enCarrera_ = false, nombrando_ = false;
     double gpsLat_ = 0, gpsLon_ = 0, nombradoLat_ = 999, nombradoLon_ = 999;
+    qint64 intentoNombre_ = 0;   // cuándo se pidió el nombre por última vez (si falló, se espera 2 min)
     QString nombreGps_;
     int version_ = 0;
 };

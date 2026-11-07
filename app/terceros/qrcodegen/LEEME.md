@@ -1,3 +1,11 @@
+Copia de la versión **1.8.0** (marzo de 2022) de la librería de Nayuki, solo la parte de C++
+(`qrcodegen.hpp` y `qrcodegen.cpp`, comparados byte a byte con la etiqueta `v1.8.0` del repo
+[nayuki/QR-Code-generator](https://github.com/nayuki/QR-Code-generator) el 07/11/2026). Licencia MIT (abajo).
+Betómetro la usa en `app/qr.cpp` para el código de la página del celu; `encodeText` tira
+`data_too_long` con más de ~2.300 bytes y `qr.cpp` lo ataja. Lo que sigue es el README original.
+
+---
+
 QR Code generator library
 =========================
 

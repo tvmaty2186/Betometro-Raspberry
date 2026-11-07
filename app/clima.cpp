@@ -9,11 +9,14 @@
 #include <QUrlQuery>
 #include <QtMath>
 
+#include <algorithm>
+
 int Clima::kDias = 16;
 
 namespace {
 const char* kAgente = "Betometro/" BETO_VERSION " (equipo de regularidad)";
 constexpr qint64 kViejoMs = 30 * 60 * 1000;   // un pronóstico de hace más de 30 min se vuelve a pedir
+constexpr qint64 kEsperaNombreMs = 2 * 60 * 1000;   // si falló el nombre del lugar (sin wifi), 2 min antes de reintentar
 
 QNetworkRequest pedido(const QUrl& u) {
     QNetworkRequest q(u);
@@ -35,7 +38,20 @@ Clima::Clima(const QString& carpetaDatos, QObject* padre)
     }
 }
 
-QString Clima::clave(double lat, double lon) { return QString::number(lat, 'f', 2) + ',' + QString::number(lon, 'f', 2); }
+// Redondeada a 0,05° (≈5 km): viajando a la carrera no se pide un pronóstico por cada kilómetro (11A-2.1)
+QString Clima::clave(double lat, double lon) {
+    return QString::number(qRound(lat * 20) / 20.0, 'f', 2) + ',' + QString::number(qRound(lon * 20) / 20.0, 'f', 2);
+}
+
+void Clima::podarCache(const QString& salvo) {
+    while (cache_.size() > kLugares) {   // se va el más viejo (por su último pedido, para que uno que acaba de fallar quede)
+        auto viejo = cache_.end();
+        for (auto it = cache_.begin(); it != cache_.end(); ++it)
+            if (it.key() != salvo && (viejo == cache_.end() || std::max(it->cuando, it->intento) < std::max(viejo->cuando, viejo->intento))) viejo = it;
+        if (viejo == cache_.end()) return;
+        cache_.erase(viejo);
+    }
+}
 
 void Clima::cargarCache() {
     QFile f(archivo_);
@@ -48,6 +64,7 @@ void Clima::cargarCache() {
         x.cuando = static_cast<qint64>(e.value(QStringLiteral("cuando")).toDouble());
         if (!x.datos.isEmpty()) cache_.insert(it.key(), x);
     }
+    podarCache();
 }
 
 void Clima::guardarCache() const {
@@ -136,19 +153,27 @@ void Clima::ponerPosicion(double lat, double lon) {
     const bool nuevo = !hayGps_;
     gpsLat_ = lat; gpsLon_ = lon; hayGps_ = true;
     if (nuevo) emit gpsChanged();
-    // El nombre del lugar se pregunta de nuevo solo si se movió más de 5 km
-    if (km(lat, lon, nombradoLat_, nombradoLon_) > 5) nombrarGps();
+    // El nombre del lugar se pregunta de nuevo solo si se movió más de 5 km. Nunca en carrera (es lo único
+    // que saldría a internet, y sin wifi fallaba 10 veces por segundo); si falló, 2 min antes de reintentar (11A-1.1)
+    if (enCarrera_ || nombrando_ || km(lat, lon, nombradoLat_, nombradoLon_) <= 5) return;
+    if (QDateTime::currentMSecsSinceEpoch() - intentoNombre_ < kEsperaNombreMs) return;
+    nombrarGps();
 }
+
+void Clima::ponerCarrera(bool enCurso) { enCarrera_ = enCurso; }
 
 void Clima::nombrarGps() {
     nombradoLat_ = gpsLat_; nombradoLon_ = gpsLon_;
+    nombrando_ = true;
+    intentoNombre_ = QDateTime::currentMSecsSinceEpoch();
     QUrl u(QStringLiteral("https://nominatim.openstreetmap.org/reverse"));
     u.setQuery(QUrlQuery{{"lat", QString::number(gpsLat_, 'f', 4)}, {"lon", QString::number(gpsLon_, 'f', 4)},
                          {"format", "jsonv2"}, {"zoom", "10"}, {"accept-language", "es"}});
     QNetworkReply* r = red_.get(pedido(u));
     connect(r, &QNetworkReply::finished, this, [this, r] {
         r->deleteLater();
-        if (r->error() != QNetworkReply::NoError) { nombradoLat_ = 999; return; }   // sin internet: se reintenta
+        nombrando_ = false;
+        if (r->error() != QNetworkReply::NoError) { nombradoLat_ = 999; return; }   // sin internet: se reintenta en 2 min
         const QJsonObject a = QJsonDocument::fromJson(r->readAll()).object().value(QStringLiteral("address")).toObject();
         for (const char* k : {"city", "town", "village", "municipality", "county", "state"}) {
             const QString x = a.value(QLatin1String(k)).toString();
@@ -168,6 +193,7 @@ void Clima::avisar() {
 
 void Clima::pedir(double lat, double lon, bool forzar) {
     const QString k = clave(lat, lon);
+    if (!cache_.contains(k)) { cache_.insert(k, Entrada{}); podarCache(k); }   // lugar nuevo: que no crezca sin tope
     Entrada& e = cache_[k];
     const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
     if (e.pidiendo || (!forzar && !e.datos.isEmpty() && ahora - e.cuando < kViejoMs)) return;
