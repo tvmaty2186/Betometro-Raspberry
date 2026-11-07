@@ -46,7 +46,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
       (prendida de fábrica). Apagada: sin botón; larga y marca solo el pulsador; **nada en pantalla como plan B**.
       Armado sin MARCAR (aprobado): [muestras/sin-marcar/](muestras/sin-marcar/) — acostada `horizontal.png`
       (cronómetro a todo el ancho con datos extra; V1, Ideal y ± segundos encima; abajo Velocidad, Sugerida,
-      Faltan y Última vuelta; **no cambiar nada**), de pie `vertical.png`. Medidas en `armado.json` (px). Guardarlo como
+      Faltan y Última vuelta; **no cambiar nada**), de pie `vertical.png` (la propuesta 2, con reloj). Medidas en `armado.json` (px). Guardarlo como
       segundo armado de fábrica (cfg `widgetsH`/`widgets` siguen siendo los del usuario; el «sin MARCAR» se usa
       cuando la llave está apagada y el usuario no armó uno propio).
 - [ ] **Tiempos con «:» en todos lados: `m:ss:d`** (Matías, opción A): ideal «3:00:0», cronómetro «0:24:8», tiempos de
