@@ -101,6 +101,9 @@ private:
     bool mp4Error_ = false, enCarrera_ = false;
     QStringList mp4Fallados_;                 // no se reintentan hasta reiniciar
     QTimer detenerTimer_;
+    QTimer matarTimer_;                       // si 12 s después de terminate() sigue vivo, kill() (02-1.2)
+    qlonglong cuadrosAntes_ = -1;             // para ver si la cámara se colgó (no suben los cuadros)
+    void cortar(const QString& motivo);       // corta la grabación por un problema (queda en falla())
     QUrl vista_;
     int fotos_ = 0;
     double nivel_ = 0, primerCuadro_ = 0;

@@ -22,8 +22,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
       Hecho: ajustes y marcas se juntan 0,3 s antes de guardar. Falta la copia: sale con «un archivo por carrera».
 - [x] Avisar si no se puede guardar y «Poco lugar» en el Chequeo previo (05-1.2, UX 2.4). **Sin carteles grandes en
       carrera** (Matías: no).
-- [ ] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
-- [ ] Cámara colgada o desenchufada: matarla si no termina, poder volver a grabar (02-1.2, 06-1.4).
+- [x] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
+- [x] Cámara colgada o desenchufada: matarla si no termina, poder volver a grabar (02-1.2, 06-1.4).
 - [ ] `nmcli` / `iw` con tiempo límite y menos chequeos de wifi en carrera (02-1.3).
 - [ ] Instalador: no tocar `cmdline.txt` si no cambia, `sync`, `trap` si falla a mitad, `Type=notify` (10-1.2 a 1.4).
 - [ ] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
@@ -58,7 +58,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] `probar.sh` falla si una captura no sale (09-2.c).
 - [ ] Recorrido libre en `prueba_crono` (09-2.d).
 - [ ] Capturas comparadas contra referencias: primero Avispón h/v, después los 4 temas (09-1.2, P2).
-- [ ] Dobles de wifi y cámara para que corran en GitHub (09-1.5, P4).
+- [ ] Dobles de wifi y cámara para que corran en GitHub (09-1.5, P4). La cámara de prueba necesita
+      `gstreamer1.0-plugins-ugly` (x264enc): con eso `prueba_crono` y `prueba_videos` pasan en Docker.
 - [ ] Una biblioteca `betometro_base` para que las pruebas no recompilen el programa (01-2.2).
 - [ ] `-Wall -Wextra` también en el programa y la cámara (02-2).
 - [ ] **Borrar Buildroot** (Matías, 07/11): la carpeta `sistema/` (4,9 MB) e `imagen.yml`. Queda en el historial de git

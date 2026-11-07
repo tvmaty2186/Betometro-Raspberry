@@ -95,6 +95,7 @@ private:
     beto::ProgramadorVoz programador_;
     std::function<double()> reloj_ms_ = ahoraMs;
     Camara* camara_ = nullptr;
+    QTimer reintentoVideo_;                   // en carrera, si la cámara se cortó (desenchufada, colgada): probar cada 10 s (06-1.4)
     double largadaT_ = 0;          // hora de la largada (reloj de la carrera)
     bool videoPendiente_ = false;  // falta anotar en qué momento del video fue la largada
     QVariantMap info_, estado_, ultima_, gpsInfo_;

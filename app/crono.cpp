@@ -41,7 +41,22 @@ Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), dat
 // ---------- Video de la carrera ----------
 void Crono::ponerCamara(Camara* c) {
     camara_ = c;
-    if (camara_) connect(camara_, &Camara::primerCuadroListo, this, [this] { asociarVideo(); });
+    if (!camara_) return;
+    connect(camara_, &Camara::primerCuadroListo, this, [this] { asociarVideo(); });
+    // Se cortó sola en carrera (no por Terminar ni a mano): se vuelve a grabar en otro archivo. Con poco lugar, no.
+    reintentoVideo_.setInterval(10000);
+    connect(camara_, &Camara::grabandoChanged, this, [this] {
+        if (enCurso() && !camara_->grabando() && !camara_->falla().isEmpty() && !camara_->falla().startsWith(QLatin1String("Poco lugar"))
+            && !reintentoVideo_.isActive())
+            reintentoVideo_.start();
+    });
+    connect(&reintentoVideo_, &QTimer::timeout, this, [this] {
+        if (!enCurso() || camara_->grabando() || !datos_->config()["camara"].aBool(false)) { reintentoVideo_.stop(); return; }
+        camara_->detectar();   // por si la volvieron a enchufar
+        if (!camaraActiva()) return;   // todavía no está: se prueba en 10 s
+        empezarVideo();
+        if (camara_->grabando()) { videoPendiente_ = true; asociarVideo(); reintentoVideo_.stop(); }
+    });
 }
 
 bool Crono::camaraActiva() const { return camara_ && camara_->hay() && datos_->config()["camara"].aBool(false); }

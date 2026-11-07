@@ -92,7 +92,14 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     for (QProcess* p : {&grab_, &vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
     QDir().mkpath(carpeta_);
     detenerTimer_.setSingleShot(true);
-    connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) grab_.terminate(); });
+    connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) { grab_.terminate(); matarTimer_.start(); } });
+    matarTimer_.setSingleShot(true);
+    matarTimer_.setInterval(12000);
+    connect(&matarTimer_, &QTimer::timeout, this, [this] {
+        if (!grabando()) return;
+        qWarning("Cámara: no terminó al pedírselo, se cortó a la fuerza");
+        grab_.kill();
+    });
 
     leer(grab_, [this](const QVariantMap& m) {
         if (m.contains("primerCuadro")) {
@@ -100,7 +107,17 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
             emit primerCuadroListo(primerCuadro_);
         }
         if (m.contains("error")) { falla_ = m.value("error").toString(); emit grabandoChanged(); }
-        if (m.contains("cuadros")) cuadros_ = m;   // el último conteo (cada 30 s y al terminar)
+        if (m.contains("cuadros")) {   // el último conteo (cada 30 s y al terminar)
+            cuadros_ = m;
+            const qlonglong n = m.value("cuadros").toLongLong();
+            // Cámara colgada sin error (cable, corriente): en 30 s no llegó ningún cuadro (06-1.4)
+            if (grabando() && !matarTimer_.isActive() && cuadrosAntes_ >= 0 && n <= cuadrosAntes_) cortar(QStringLiteral("La cámara se colgó"));
+            cuadrosAntes_ = n;
+            // Tarjeta casi llena: se para el video y la carrera sigue (Matías, 07/11; 06-1.3)
+            const QStorageInfo d(carpeta_);
+            if (grabando() && !matarTimer_.isActive() && d.isValid() && d.bytesAvailable() < 300LL * 1024 * 1024)
+                cortar(QStringLiteral("Poco lugar: se paró el video"));
+        }
     });
     // Al terminar de grabar: si la webcam mandó cuadros cortados o dañados, queda en el reporte
     connect(&grab_, &QProcess::finished, this, [this] {
@@ -111,6 +128,7 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
         cuadros_.clear();
     });
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
+        if (s == QProcess::NotRunning) matarTimer_.stop();
         if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
         emit grabandoChanged();
         if (s != QProcess::Starting) actualizarLugar();   // la lista de videos marca el que se está grabando
@@ -274,7 +292,9 @@ bool Camara::empezar(const QString& nombreBase) {
     hacerLugar();
     falla_.clear();
     primerCuadro_ = 0;
+    cuadrosAntes_ = -1;
     detenerTimer_.stop();
+    matarTimer_.stop();
     archivo_ = carpeta_ + '/' + nombreBase + QStringLiteral(".mkv");
     const QString calidad = QString::fromStdString(datos_->config()["camaraCalidad"].aTexto("720p"));
     QSize tam(1280, 720);   // 720p o 480p (sin 1080p)
@@ -301,8 +321,17 @@ bool Camara::empezar(const QString& nombreBase) {
 
 void Camara::detener(int retrasoS) {
     if (!grabando()) return;
-    if (retrasoS <= 0) { grab_.terminate(); return; }
+    if (retrasoS <= 0) { grab_.terminate(); matarTimer_.start(); return; }
     detenerTimer_.start(retrasoS * 1000);
+}
+
+void Camara::cortar(const QString& motivo) {
+    qWarning("Cámara: %s", qPrintable(motivo));
+    falla_ = motivo;
+    detenerTimer_.stop();
+    grab_.terminate();
+    matarTimer_.start();
+    emit grabandoChanged();
 }
 
 void Camara::hacerLugar() {

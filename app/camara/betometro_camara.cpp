@@ -64,6 +64,12 @@ std::string escapar(const char* s) {
 gboolean alSenal(gpointer) {
     // Cerrar ordenado: fin de flujo, así el archivo queda completo
     if (tubo) gst_element_send_event(tubo, gst_event_new_eos());
+    // Si la cámara está trabada, el fin de flujo no llega nunca: a los 8 s se corta igual (el .mkv sirve) (02-1.2)
+    g_timeout_add_seconds(8, +[](gpointer) -> gboolean {
+        decir("{\"error\":\"La cámara no respondió al cerrar\"}");
+        g_main_loop_quit(bucle);
+        return G_SOURCE_REMOVE;
+    }, nullptr);
     return G_SOURCE_REMOVE;
 }
 
