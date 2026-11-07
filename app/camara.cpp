@@ -148,11 +148,14 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     });
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
         if (s == QProcess::NotRunning) matarTimer_.stop();
+        // El conteo de cuadros se guarda acá: «finished» llega después de este aviso y la Prueba completa leía el
+        // de la grabación anterior (salía «no se cuentan» o un número viejo)
+        if (s == QProcess::NotRunning) ultimosCuadros_ = cuadros_;
         if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
         // Falló antes del primer cuadro («failed during initialization», el USB que se reinicia): a los 2 s se
         // vuelve a probar sola, en otro archivo. Pasaba en una de cada dos pruebas completas (07/11/2026).
         if (s == QProcess::NotRunning && !aMano_ && primerCuadro_ <= 0 && reintentos_ < 2 && !falla_.startsWith(QLatin1String("Poco lugar"))) {
-            quedabanMs_ = detenerTimer_.isActive() ? detenerTimer_.remainingTime() : 0;
+            quedabanMs_ = detenerTimer_.isActive() ? detenerTimer_.interval() : 0;   // el tiempo entero de nuevo (la prueba graba 30 s)
             detenerTimer_.stop();
             const QFileInfo f(archivo_);   // el que no llegó a tener cuadros
             if (f.exists() && f.size() < 1024 * 1024) QFile::remove(f.absoluteFilePath());

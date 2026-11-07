@@ -222,6 +222,10 @@ done
 mkdir -p /etc/udev/rules.d
 # Ni la tele ni el micrófono de la webcam (Betómetro lo graba directo por ALSA; PulseAudio lo probaba y fallaba)
 printf 'SUBSYSTEM=="sound", ATTRS{id}=="vc4hdmi*", ENV{PULSE_IGNORE}="1"\nSUBSYSTEM=="sound", ENV{ID_BUS}=="usb", ENV{PULSE_IGNORE}="1"\n' > /etc/udev/rules.d/80-betometro-sin-hdmi.rules
+# Que la Pi no duerma la cámara (ni nada USB): a los 2 s sin usarla la ponía a dormir y al despertarla la
+# grabación fallaba con «failed during initialization» (07/11/2026). En el auto el ahorro no importa.
+printf 'ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", TEST=="power/control", ATTR{power/control}="on"\n' > /etc/udev/rules.d/81-betometro-usb-despierto.rules
+for c in /sys/bus/usb/devices/*/power/control; do echo on > "$c" 2>/dev/null || true; done
 # El núcleo de la Pi 5 no se usa en la Pi 3: ocupa lugar y alarga cada actualización del núcleo
 if ! uname -r | grep -q 2712; then
   k5=$(dpkg -l 'linux-image-*' 2>/dev/null | awk '/^ii/ && $2 ~ /rpi-2712/ {print $2}' || true)   # sin ninguno, dpkg sale con 1 (pipefail)
