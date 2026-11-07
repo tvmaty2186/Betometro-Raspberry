@@ -45,7 +45,19 @@ Actualizador::Actualizador(const QString& carpetaDatos, QObject* padre)
     sim_.setInterval(120);
     connect(&sim_, &QTimer::timeout, this, &Actualizador::simular);
     QDir().mkpath(carpeta_);
+    // Lo que dejó el instalador (o la vuelta atrás automática): se muestra una vez y se borra
+    {
+        QFile r(carpeta_ + QStringLiteral("/resultado"));
+        if (r.open(QIODevice::ReadOnly)) {
+            resultado_ = QString::fromUtf8(r.readAll()).trimmed();
+            r.close();
+            r.remove();
+            if (!resultado_.startsWith(QLatin1String("Se instaló"))) qWarning("Actualización: %s", qPrintable(resultado_));
+        }
+    }
     if (raspberry_) {
+        // Si la versión anda bien un minuto, ya no se vuelve sola a la anterior (betometro-volver.service)
+        QTimer::singleShot(60000, this, [this] { QFile::remove(carpeta_ + QStringLiteral("/a-probar")); });
         // Al rato de prender y después cada media hora (cuando aparezca la wifi o se ponga la hora)
         // Al prender el wifi tarda en conectar: se busca a los 20 s, y si no hubo respuesta se reintenta
         // cada minuto hasta que la haya; después, cada 15 minutos. También apenas conecta el wifi

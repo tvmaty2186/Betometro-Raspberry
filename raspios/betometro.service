@@ -5,9 +5,17 @@ Wants=pulseaudio-sistema.service
 # Betómetro ocupa la pantalla: sin la consola de texto en tty1
 Conflicts=getty@tty1.service
 After=getty@tty1.service
+# Si se cae 4 veces en 5 minutos queda «fallado» y entra betometro-volver: si es una versión recién
+# instalada, vuelve a la anterior y avisa; si no, espera y prueba de nuevo (auditoría 10-1.1 y 1.4)
+StartLimitIntervalSec=300
+StartLimitBurst=4
+OnFailure=betometro-volver.service
 
 [Service]
-Type=simple
+# notify: el vigilante empieza a contar cuando Betómetro avisa que abrió (READY=1), no al lanzarlo; con una
+# base grande la Pi 3 puede tardar en abrir más que los 30 s del vigilante (10-1.4)
+Type=notify
+TimeoutStartSec=180
 Environment=LANG=C.UTF-8
 Environment=QT_QPA_PLATFORM=eglfs
 Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms

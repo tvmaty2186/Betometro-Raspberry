@@ -24,6 +24,7 @@ class Actualizador : public QObject {
     Q_PROPERTY(QString mensaje READ mensaje NOTIFY cambio)
     Q_PROPERTY(QString busqueda READ busqueda NOTIFY cambio)    // cómo salió la última búsqueda por internet: buscando, aldia, sinred
     Q_PROPERTY(QString ultima READ ultima NOTIFY cambio)        // la última versión publicada (si se pudo ver)
+    Q_PROPERTY(QString resultado READ resultado CONSTANT)      // al prender: cómo salió la última instalación («Se instaló la 1.0.28»)
 
 public:
     explicit Actualizador(const QString& carpetaDatos, QObject* padre = nullptr);
@@ -38,6 +39,7 @@ public:
     QString busqueda() const { return busqueda_; }
     QString ultima() const { return ultima_; }
 
+    QString resultado() const { return resultado_; }
     Q_INVOKABLE void buscar();             // por internet (si hay wifi)
     Q_INVOKABLE bool buscarPendrive();     // un betometro-pi-X.Y.Z.tar.gz en un pendrive
     void buscarPagina();                   // plan B sin la API de GitHub
@@ -55,6 +57,7 @@ private:
     void simular();
 
     QString carpeta_;                      // /datos/actualizacion
+    QString resultado_;
     QString url_;                          // última versión publicada (JSON de GitHub)
     QString versionNueva_, notas_, origen_, estado_ = QStringLiteral("nada"), mensaje_;
     QString descarga_, archivoPendrive_;

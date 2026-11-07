@@ -1,0 +1,9 @@
+[Unit]
+Description=Betómetro no arranca: volver a la versión anterior (si es nueva) o probar de nuevo
+
+[Service]
+Type=oneshot
+# «a-probar» lo deja el instalador y Betómetro lo borra al minuto de andar bien. Si está, la versión nueva
+# no arranca: se vuelve a la anterior (y lo avisa al prender). Si no está, no es culpa de la versión:
+# se espera un poco y se prueba de nuevo.
+ExecStart=/bin/bash -c 'if [ -f /var/lib/betometro/actualizacion/a-probar ] && [ -x /var/lib/betometro-anterior/volver.sh ]; then rm -f /var/lib/betometro/actualizacion/a-probar; exec /var/lib/betometro-anterior/volver.sh; fi; sleep 20; systemctl reset-failed betometro; systemctl start betometro'

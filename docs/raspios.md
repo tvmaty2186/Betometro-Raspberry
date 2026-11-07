@@ -9,6 +9,13 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 - La luz de fondo es `/sys/class/backlight/panel_backlight@1`.
 
 ## Qué instala `raspios/instalar.sh`
+**Desde la 1.0.28:** desarma la versión nueva aparte y la cambia con `mv` (un corte de luz no la deja a medias);
+si falla a mitad vuelve sola a la anterior y prende Betómetro; `cmdline.txt` se escribe solo si cambia; deja
+`/var/lib/betometro/actualizacion/resultado` («Se instaló la X» o el error), que Betómetro muestra al prender.
+**Vuelta atrás automática:** si la versión recién instalada se cae 4 veces en 5 minutos, `betometro-volver.service`
+corre `/var/lib/betometro-anterior/volver.sh` y avisa. Si anduvo un minuto, ya no vuelve sola (archivo `a-probar`).
+Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/2026).
+
 1. Paquetes de `raspios/paquetes.txt` (antes repara dpkg con `dpkg --configure -a`; solo instala lo que falta).
 2. Guarda la versión anterior en `/var/lib/betometro-anterior` (`volver.sh` para volver a mano), copia el programa, la voz y los servicios.
 3. `config.txt`: `dtoverlay=vc4-kms-dsi-ili9881-5inch`, `enable_uart=1`, `disable-bt`, audio, watchdog, `disable_splash=1`, `ramoops` (si existe).

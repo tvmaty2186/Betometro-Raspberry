@@ -38,9 +38,9 @@ cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del s
 - [x] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
 - [x] Cámara colgada o desenchufada: matarla si no termina, poder volver a grabar (02-1.2, 06-1.4).
 - [x] `nmcli` / `iw` con tiempo límite y menos chequeos de wifi en carrera (02-1.3).
-- [ ] Instalador: no tocar `cmdline.txt` si no cambia, `sync`, `trap` si falla a mitad, `Type=notify` (10-1.2 a 1.4).
-- [ ] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
-- [ ] Borrar los paquetes de actualización viejos (10).
+- [x] Instalador: no tocar `cmdline.txt` si no cambia, `sync`, `trap` si falla a mitad, `Type=notify` (10-1.2 a 1.4).
+- [x] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
+- [x] Borrar los paquetes de actualización viejos (10).
 - [ ] Borrar una carrera también borra su video (si ningún otro la usa) (pedido de Matías).
 - [ ] **Copia de la base a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
 - [ ] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
@@ -53,10 +53,10 @@ cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del s
 - [ ] Descarga de la actualización con tiempo límite (02-3).
 - [ ] Servidor web: tiempo límite para pedidos a medias y no juntar de más (02-3).
 - [ ] Nombre del archivo del pendrive sin pasar por el shell (10-3).
-- [ ] Instalador: no pisar la copia buena si se instala la misma versión (10-3).
+- [x] Instalador: no pisar la copia buena si se instala la misma versión (10-3).
 - [ ] Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
       probándolo en la Pi (10-1.5 b).
-- [ ] Apagar los servicios que sobran en el arranque (`cloud-init`, `ModemManager`…), según lo medido (10-2.5).
+- [x] Apagar los servicios que sobran en el arranque (`cloud-init`, `ModemManager`…), según lo medido (10-2.5).
 - [ ] Firmar los paquetes de actualización (opcional, medio) (10-3).
 
 ## 2. GitHub y pruebas
@@ -200,20 +200,20 @@ Sistema operativo:
 - [ ] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
       la corrige. **La hora del GPS es lo primero del sistema.** Mostrar en el Chequeo previo de dónde salió la hora
       (GPS, internet o sin hora) (Pi, 07/11).
-- [ ] Arranque 12 s más rápido: PulseAudio sin la tarjeta HDMI (hoy tarda 10 s y falla) y apagar `cloud-init`,
+- [x] Arranque 12 s más rápido: PulseAudio sin la tarjeta HDMI (hoy tarda 10 s y falla) y apagar `cloud-init`,
       `NetworkManager-wait-online`, `rpi-eeprom-update`, `udisks2`, `sshswitch`. **Dejar `avahi`** (Pi, 07/11).
-- [ ] Quitar el núcleo de la Pi 5 (`linux-image-rpi-2712`) (Pi, 07/11).
+- [x] Quitar el núcleo de la Pi 5 (`linux-image-rpi-2712`) (Pi, 07/11).
 - [x] `sudo` pide la clave: confirmado en la Pi (07/11).
 - [ ] **Hora del sistema desde el GPS** cuando internet no la puso, sin tocar el cronómetro (B-1.2). Corregir
       `docs/diseno-sistema.md`, que dice que ya se hacía.
 - [ ] Zona horaria Argentina y nombre `betometro` en el instalador (B-2.4).
-- [ ] `config.txt`: escribir las líneas dentro de `[all]` (B-1.3).
-- [ ] PulseAudio con `Type=notify`, Betómetro espera al sonido (B-1.4).
+- [x] `config.txt`: escribir las líneas dentro de `[all]` (B-1.3).
+- [x] PulseAudio con `Type=notify`, Betómetro espera al sonido (B-1.4).
 - [ ] Con wifi, el instalador actualiza **solo** certificados, zona horaria, `sshd`, `dnsmasq` y `wpa_supplicant`
       (nunca núcleo, Qt, Mesa ni GStreamer) y guarda las versiones para el reporte (Matías: sí) (B-2.1).
 - [ ] Red propia: crearla una vez y después solo prenderla (`wifi.cpp:138`) (B-2.2).
 - [ ] NetworkManager: sin ahorro de energía del wifi y sin MAC al azar, si la Pi muestra fallas (B-2.3).
-- [ ] Vigilante en 15 s (lo máximo del chip) y `bluetooth.service` apagado (B-3).
+- [x] Vigilante en 15 s (lo máximo del chip) y `bluetooth.service` apagado (B-3).
 - [ ] Anotar en `docs/raspios.md` que trixie pasa a archivo hacia 2028; fijar la versión de `edge-tts` (B-3).
 
 Programa:

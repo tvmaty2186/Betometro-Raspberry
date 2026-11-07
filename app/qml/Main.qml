@@ -62,6 +62,8 @@ Window {
         }
         Aviso { id: aviso }
         Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
+        // Al prender: cómo salió la última actualización («Se instaló la 1.0.28» o que volvió a la anterior)
+        Component.onCompleted: if (Actualizador.resultado) Qt.callLater(() => aviso.mostrar(Actualizador.resultado))
     }
 
     // Modo tele: la ventana de la tele (HDMI) solo si hay una segunda pantalla (docs/video.md)
