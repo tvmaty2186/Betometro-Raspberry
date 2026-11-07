@@ -21,6 +21,7 @@ class Contexto : public QObject {
     Q_PROPERTY(QString nombreAuto READ nombreAuto NOTIFY numeroAutoChanged)
     Q_PROPERTY(int satelites READ satelites NOTIFY gpsChanged)
     Q_PROPERTY(QString redWifi READ redWifi NOTIFY wifiChanged)
+    Q_PROPERTY(QString horaFuente READ horaFuente NOTIFY horaFuenteChanged)   // de dónde salió la hora: internet, gps o ""
 
 public:
     bool horizontal() const { return horizontal_; }
@@ -47,7 +48,10 @@ public:
     int satelites() const { return satelites_; }
     QString redWifi() const { return redWifi_; }
 
+    QString horaFuente() const { return horaFuente_; }
+    void setHoraFuente(const QString& f) { if (f != horaFuente_) { horaFuente_ = f; emit horaFuenteChanged(); } }
 signals:
+    void horaFuenteChanged();
     void horizontalChanged();
     void temaChanged();
     void solChanged();
@@ -57,6 +61,7 @@ signals:
     void wifiChanged();
 
 private:
+    QString horaFuente_ = QStringLiteral("internet");
     bool horizontal_ = true;
     bool fisica_ = false;
     bool sol_ = false;

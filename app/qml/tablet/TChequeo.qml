@@ -32,7 +32,11 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "gps"; nombre: "GPS"
                  tipo: Datos.ajustes.velActiva && !raiz.gpsOk ? "peligro" : ""
                  dato: !Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? (raiz.g.satelites ? raiz.g.satelites + " satélites…" : "Sin señal")
-                       : (raiz.g.satelites ? raiz.g.satelites + " satélites · " : "GPS listo · ") + Number(raiz.g.precision).toFixed(1).replace(".", ",") + " m" }
+                       : (raiz.g.satelites ? raiz.g.satelites + " satélites · " : "GPS listo · ") + Number(raiz.g.precision).toFixed(1).replace(".", ",") + " m"
+                 // Segundo renglón: de dónde salió la hora (Matías, 07/11; sin internet, la del GPS)
+                 readonly property string hora: Contexto.horaFuente === "internet" ? "Hora de internet" : Contexto.horaFuente === "gps" ? "Hora del GPS" : "Sin hora todavía"
+                 Component.onCompleted: dato = Qt.binding(() => (!Datos.ajustes.velActiva ? "Velocidad apagada" : !raiz.g.ok ? (raiz.g.satelites ? raiz.g.satelites + " satélites…" : "Sin señal")
+                       : (raiz.g.satelites ? raiz.g.satelites + " satélites · " : "GPS listo · ") + Number(raiz.g.precision).toFixed(1).replace(".", ",") + " m") + "\n" + hora) }
         TBoton { width: parent.an; height: parent.al; icono: "velocidad"; nombre: "Módulo"
                  readonly property bool habla: !!raiz.g.ultimoDato && Date.now() - raiz.g.ultimoDato < 5000
                  tipo: raiz.g.modulo && !habla ? "peligro" : ""

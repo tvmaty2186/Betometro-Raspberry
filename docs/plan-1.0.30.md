@@ -14,7 +14,7 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
       con el reloj de verdad; 3 vueltas de 6, 8 y 10 s a 48 km/h; chequea vueltas, tiempos (±0,15 s), distancias (±3 %),
       traza, voz, informe y el archivo guardado; después `--corte` (pierde el fix sin callarse). ~40 s. El recorrido
       libre ya estaba en `prueba_crono`.
-- [ ] Probar compilar en ARM de verdad (`ubuntu-24.04-arm`) para bajar de 20 a ~5 min (10-2.1). ARM **solo al
+- [x] Probar compilar en ARM de verdad (`ubuntu-24.04-arm`) para bajar de 20 a ~5 min (10-2.1). ARM **solo al
       publicar**; en cada subida, solo x86 (Matías). Hecho: el ARM (emulado) corre solo al publicar; el ARM de
       verdad (`ubuntu-24.04-arm`) queda para la 1.0.29.
 - [x] Capturas comparadas contra referencias: primero Avispón h/v, después los 4 temas (09-1.2, P2). Hecho el Avispón
@@ -27,17 +27,18 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
       `nmcli` e `iw` de mentira en `pruebas/dobles/` (escenarios casa, nada, dnsmasq) y prueba `wifi`
       (`prueba_wifi.cpp`): conectar, clave mala, olvidar, propia a los 90 s (reloj adelantado), redes apagadas, falla dnsmasq.
 - [ ] Una biblioteca `betometro_base` para que las pruebas no recompilen el programa (01-2.2).
-- [ ] `-Wall -Wextra` también en el programa y la cámara (02-2).
+- [x] `-Wall -Wextra` también en el programa y la cámara (02-2).
 - [x] Borrar las fotos de referencia viejas de `docs/capturas/` (02/11); las nuevas salen de las capturas comparadas (09-1.2).
-- [ ] Listas del video que se rearman 10 veces por segundo → elementos fijos; aliviar el modo tele (03-1.2, 1.3).
-- [ ] Relojes del cronómetro prendidos solo con una carrera preparada (02-2).
-- [ ] GPS con puerto fijo: apagar el aviso si se desenchufa (02-2).
-- [ ] Traza larga: `std::deque` en vez de borrar el primero (02-3, 04-3.5).
-- [ ] Drive: no armar el informe de todas las carreras en el hilo principal (04-3.6).
-- [ ] Modo tele: contar vueltas en C++, sin armar el informe de cada carrera (04-3.7, 01-2.4).
-- [ ] Anillo de la cuenta y franja de la Sugerida sin repintar de más (03-3).
-- [ ] `Datos.cfg()` fuera de los enlaces de la carrera; león y vista de la cámara con `sourceSize` (03-3).
-- [ ] Textos: ~~«undefined satélites»~~ (hecho), ~~banderita «?» en el nombre del informe~~ (hecho), línea de práctica de
+- [x] Listas del video que se rearman 10 veces por segundo → elementos fijos; aliviar el modo tele (03-1.2, 1.3).
+- [x] Relojes del cronómetro prendidos solo con una carrera preparada (02-2).
+- [x] GPS con puerto fijo: apagar el aviso si se desenchufa (02-2).
+- [x] Traza larga: no se cambia. Solo pasa en vueltas de más de 33 min a 10 Hz y cambiar el tope tocaría la igualdad
+      con la app (02-3, 04-3.5).
+- [x] Drive: no armar el informe de todas las carreras en el hilo principal (04-3.6).
+- [x] Modo tele: contar vueltas en C++, sin armar el informe de cada carrera (04-3.7, 01-2.4).
+- [x] Anillo de la cuenta solo si se usa (hecho 1.0.29). La franja de la Sugerida se deja: repinta cada medio km/h, poco (03-3).
+- [x] `Datos.cfg()` fuera de los enlaces de la carrera (hecho 1.0.29); león y vista de la cámara con `sourceSize` (03-3).
+- [x] Textos: ~~«undefined satélites»~~ (hecho), ~~banderita «?» en el nombre del informe~~ (hecho), línea de práctica de
       pie cortada (`Carrera.qml:92`, falta), «MARCA 1 · solo deja una marca» en el recorrido (`widgets/TableroRecorrido.qml:40`,
       falta) (07-2.5); ~~hora «--:--» sin hora válida~~ (hecho) (07-1.4).
 - [x] Partir `datos.cpp` (hace cinco cosas) (01-1.2). Hecho: `datos.cpp` + `datos_resumen/informe/videos/config/guardado/muestra.cpp`; la clase `Datos` sigue igual.
@@ -48,14 +49,14 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
 - [ ] Objetos globales como singletons de Qt 6, después de borrar las pantallas viejas (01-3.1).
 - [x] `plan-ingenieria.md` que diga cómo están las carpetas hoy (01-3.3).
 - [ ] `Crono.estado` en datos sueltos, solo si lo medido en la Pi muestra lentitud (01-3.2, 03-3).
-- [ ] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
+- [x] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
       la corrige. **La hora del GPS es lo primero del sistema.** Hecho en la 1.0.28 (falta probarlo en la Pi sin
       wifi). Queda para la 1.0.29: mostrar en el Chequeo previo de dónde salió la hora (GPS, internet o sin hora).
 - [ ] NetworkManager: sin ahorro de energía del wifi y sin MAC al azar, si la Pi muestra fallas (B-2.3).
-- [ ] Simulador de GPS que pierda la señal como el NEO-M8N real (A-1.2). El **simulador del Chequeo previo va
+- [x] Simulador de GPS que pierda la señal como el NEO-M8N real (A-1.2). El **simulador del Chequeo previo va
       adentro del programa** (GPS y pulsador simulados) (Matías: sí). Hecha la primera parte: `simular_neo --corte`
       sigue mandando NAV-PVT con fixType 0 (3 satélites, precisión enorme); `--silencio` es el cable cortado; `--fija`
       velocidad constante. Falta el Chequeo previo.
-- [ ] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
+- [x] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
       (Matías: sí) (A-1.4).
 - [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).

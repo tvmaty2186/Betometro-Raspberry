@@ -32,20 +32,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  programa:
+  # Primero todas las pruebas (PC x86, Debian trixie, donde se sacaron las capturas de referencia):
+  # si una falla, no se publica (09-1.1)
+  pruebas:
     runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pruebas (si una falla, no se publica)
+        run: docker run --rm -v "$PWD:/src" debian:trixie bash /src/raspios/pruebas.sh
+
+  programa:
+    needs: pruebas
+    # Máquina ARM de verdad (como la Pi): sin emular con QEMU, de ~20 a ~5 min (10-2.1, 1.0.30)
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 150
     env:
       PUBLICAR: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.publicar || contains(github.event.head_commit.message, '[publicar]') }}
     steps:
       - uses: actions/checkout@v4
 
-      # Primero todas las pruebas (PC, Debian trixie): si una falla, se corta acá y no se publica (09-1.1)
-      - name: Pruebas (si una falla, no se publica)
-        timeout-minutes: 40
-        run: docker run --rm -v "$PWD:/src" debian:trixie bash /src/raspios/pruebas.sh
-
-      # El paquete para la Raspberry (ARM, emulado: lo lento) solo cuando se publica (Matías, 07/11/2026)
+      # El paquete para la Raspberry (ARM) solo cuando se publica (Matías, 07/11/2026)
       - name: Caché (voz y compilación)
         if: env.PUBLICAR == 'true'
         uses: actions/cache@v4
@@ -62,6 +69,10 @@ jobs:
         # ahora cada parte tiene tiempo límite, se reintenta y se ve lo que hace.
         timeout-minutes: 15
         run: |
+          # La voz grabada está en el repo (voz/grabada, 1.0.30): no depende de edge-tts (API no oficial de
+          # Microsoft) ni de la caché de GitHub que se borra a los 7 días (A-1.4). Para regrabarla (frases nuevas):
+          # borrar voz/grabada y correr python3 voz/grabar.py voz/grabada en una PC con internet.
+          if [ -d voz/grabada/elena ]; then mkdir -p salida-pi/voz && cp -r voz/grabada/. salida-pi/voz/ && ls salida-pi/voz | head && exit 0; fi
           for i in 1 2 3; do
             sudo timeout 240 apt-get -o Acquire::Retries=3 -o DPkg::Lock::Timeout=60 install -y -q --no-install-recommends ffmpeg && break
             echo "apt no anduvo (intento $i), actualizo la lista y reintento"
@@ -72,12 +83,6 @@ jobs:
           # API), subirla acá a propósito, no que cambie sola en cada compilación.
           timeout 180 pip install --break-system-packages edge-tts==7.3.1
           timeout 600 python3 voz/grabar.py salida-pi/voz
-
-      - name: Simulador de ARM (la Raspberry es arm64)
-        if: env.PUBLICAR == 'true'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
 
       - name: Compilar (Debian trixie arm64, como Raspberry Pi OS)
         if: env.PUBLICAR == 'true'

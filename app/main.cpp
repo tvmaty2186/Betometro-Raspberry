@@ -158,18 +158,31 @@ int main(int argc, char* argv[]) {
     // arranca con la hora en que se apagó. Si internet (NTP) no la puso y la del GPS difiere más de 2 s, se
     // corrige el reloj. El cronómetro no se mueve: usa el reloj monotónico. Sin GPS ni internet no se bloquea nada.
     if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) {
-        QObject::connect(gps, &FuenteGps::datos, &app, [&datos](int, const QDateTime& utc) {
+        // De dónde salió la hora, para el Chequeo previo: internet (NTP), GPS, o ninguna (la del último apagado)
+        static bool horaDelGps = false;
+        auto revisarHora = [&contexto] {
+            timex tx{};
+            const bool ntp = ::adjtimex(&tx) >= 0 && !(tx.status & STA_UNSYNC);
+            contexto.setHoraFuente(ntp ? QStringLiteral("internet") : horaDelGps ? QStringLiteral("gps") : QString());
+        };
+        revisarHora();
+        auto* relojHora = new QTimer(&app);
+        QObject::connect(relojHora, &QTimer::timeout, &app, revisarHora);
+        relojHora->start(10000);
+        QObject::connect(gps, &FuenteGps::datos, &app, [&datos, revisarHora](int, const QDateTime& utc) {
             if (!utc.isValid() || utc.date().year() < 2025) return;
             timex tx{};
             if (::adjtimex(&tx) >= 0 && !(tx.status & STA_UNSYNC)) return;   // internet ya la puso: manda NTP
             const qint64 dif = utc.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();
-            if (std::llabs(dif) < 2000) return;
+            if (std::llabs(dif) < 2000) { if (!horaDelGps) { horaDelGps = true; revisarHora(); } return; }
             const qint64 ms = utc.toMSecsSinceEpoch() + 100;   // la lectura llega ~0,1 s después del segundo
             timespec ts{static_cast<time_t>(ms / 1000), static_cast<long>((ms % 1000) * 1000000)};
             if (::clock_settime(CLOCK_REALTIME, &ts) == 0) {
                 qWarning("Hora puesta desde el GPS: %s (el equipo estaba %+.1f s corrido)",
                          qPrintable(utc.toLocalTime().toString(QStringLiteral("dd/MM/yyyy HH:mm:ss"))), dif / 1000.0);
                 emit datos.carrerasChanged();   // «hoy» cambió: las listas de carreras se vuelven a armar
+                horaDelGps = true;
+                revisarHora();
             }
         });
     }
