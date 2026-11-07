@@ -207,10 +207,6 @@ Item {
         { clave: "adelanto", nombre: "Adelanto" }, { clave: "velocidad", nombre: "Velocidad" },
         { clave: "distancia", nombre: "Distancia" }, { clave: "pista", nombre: "Pista" }
     ]
-    function reloj(ms) {
-        const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = String(s % 60).padStart(2, "0");
-        return h > 0 ? h + ":" + String(m).padStart(2, "0") + ":" + ss : m + ":" + ss;
-    }
 
     // ---------- La vista de la Pi (imagen, datos, chips y barra: VistaVideo.qml) ----------
     VistaVideo {

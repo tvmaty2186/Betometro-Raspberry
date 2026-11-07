@@ -60,6 +60,10 @@ public:
 
     // Separa una línea de «nmcli -t» (los «:» de adentro vienen como «\:»). Público para probarlo.
     static QStringList campos(const QString& linea);
+    // Para las pruebas (con un nmcli de mentira en el PATH): el reloj de los 90 s y la revisión de cada 10 s a mano
+    void ponerReloj(std::function<qint64()> r) { reloj_ = std::move(r); }
+    void revisarAhora() { refrescar(); revisarPropia(); }
+    bool ocupado() const { return enVuelo_ > 0; }   // hay nmcli corriendo
 
 signals:
     void cambio();
@@ -92,5 +96,6 @@ private:
     bool redes_permitidas_ = true;
     qint64 fallaPropia_ = 0;      // ms de la última vez que no se pudo armar (para no reintentar sin parar)
     QTimer cada_;
+    std::function<qint64()> reloj_;   // ms de hora de pared (QDateTime); las pruebas lo adelantan
     int enVuelo_ = 0;             // nmcli/iw que todavía no terminaron: no se lanza otra vuelta encima
 };

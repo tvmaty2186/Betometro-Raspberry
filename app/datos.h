@@ -1,5 +1,13 @@
 // Puente entre la base (núcleo: modelo + almacén) y la pantalla (QML).
 // Las reglas son las de la app: docs/app/lo-aprendido.md, secciones 5.2 a 5.5.
+// La clase está repartida por tema (1.0.30, auditoría 01-1.2):
+//   datos.cpp           la base de carreras: cargar, crear, cambiar y borrar
+//   datos_resumen.cpp   el resumen de cada carrera para la pantalla y las listas próximas/corridas
+//   datos_informe.cpp   el informe (datos, HTML) y los cambios que se hacen desde él
+//   datos_videos.cpp    los videos de las carreras y los archivos de videos/
+//   datos_config.cpp    la configuración (cfg, ajustes, ponerCfg)
+//   datos_guardado.cpp  el guardado: un archivo por carrera, en un hilo aparte
+//   datos_muestra.cpp   las carreras de ejemplo (--muestra)
 #pragma once
 
 #include <QDate>

@@ -89,13 +89,16 @@ private:
 class GpsSimulado : public FuenteGps {
     Q_OBJECT
 public:
-    explicit GpsSimulado(QObject* padre = nullptr);
+    // `fijo` (BETO_FIJO=1, capturas comparadas): sin azar ni ondas, lecturas cada 100 ms justos, 11 satélites
+    explicit GpsSimulado(QObject* padre = nullptr, bool fijo = false);
     // Ajusta la velocidad a la de una vuelta ideal (distancia / tiempo), con variaciones
     void ponerVuelta(double distanciaM, double tiempoMs);
 
 private:
     void tic();
     QTimer reloj_;
+    bool fijo_ = false;
+    int lecturas_ = 0;
     double base_ = 13.3;      // m/s
     double t0_ = 0;
     double recorrido_ = 0;    // m, para la posición

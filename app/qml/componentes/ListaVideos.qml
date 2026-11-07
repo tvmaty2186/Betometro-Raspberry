@@ -196,8 +196,7 @@ Rectangle {
             Text {
                 id: tiempo; anchors { left: icono.right; leftMargin: 20; verticalCenter: parent.verticalCenter }
                 color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 }
-                function mmss(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
-                text: mmss(reproductor.position) + " / " + mmss(reproductor.duration)
+                text: Formato.horaVideo(reproductor.position) + " / " + Formato.horaVideo(reproductor.duration)
             }
             Item {
                 id: linea

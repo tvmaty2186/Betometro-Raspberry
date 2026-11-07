@@ -64,12 +64,12 @@ Item {
         property real t: 0
         // Con GPS andando (lectura de hace menos de 3 s): la velocidad real del auto. Si no, la animación
         // de siempre (Matías, 05/11/2026). La aguja se mueve suave entre lecturas.
-        readonly property bool real: !Contexto.prueba && !!Crono.gps.ok && Crono.gps.kmh !== undefined
+        readonly property bool real: !Contexto.prueba && !Contexto.fijo && !!Crono.gps.ok && Crono.gps.kmh !== undefined
                                      && t >= 0 && Date.now() - Crono.gps.kmhCuando < 3000
         property real kmhSuave: real ? Crono.gps.kmh : 0   // sin animación: 60 cuadros por segundo de más (03-1.1)
-        valor: Contexto.prueba ? 47 : real ? kmhSuave : 47 + 2.5 * Math.sin(0.9 * t) + 1.2 * Math.sin(2.3 * t)
+        valor: Contexto.prueba || Contexto.fijo ? 47 : real ? kmhSuave : 47 + 2.5 * Math.sin(0.9 * t) + 1.2 * Math.sin(2.3 * t)
         sugerida: real ? -1 : 48   // con la velocidad real no hay sugerida
-        Timer { interval: 80; repeat: true; running: raiz.visible && !Contexto.prueba; onTriggered: velInicio.t += 0.08 }
+        Timer { interval: 80; repeat: true; running: raiz.visible && !Contexto.prueba && !Contexto.fijo; onTriggered: velInicio.t += 0.08 }
     }
 
     Repeater {

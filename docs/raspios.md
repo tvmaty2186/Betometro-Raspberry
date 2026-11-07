@@ -109,6 +109,11 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
 ## Probar en la PC (la sesión de Claude)
 - Qt 6.8.2 con aqtinstall en `/opt/qt/6.8.2/gcc_64`; compilar el programa con `cmake --build <bq>` y el núcleo + pruebas con `ctest`.
 - Capturas: `QT_QPA_PLATFORM=offscreen QT_PLUGIN_PATH=/opt/qt/6.8.2/gcc_64/plugins betometro --datos D --muestra --pantalla X --captura f.png`.
+- Pruebas de la 1.0.30 (todas en `ctest`, las corre `raspios/pruebas.sh` antes de publicar):
+  `carrera_simulada` (simular_neo por un puerto virtual + GpsNeo + Crono, 3 vueltas, ~40 s), `wifi` (nmcli e iw de
+  mentira en `pruebas/dobles/`) y `capturas` (11 pantallas Avispón h/v contra `pruebas/capturas/`, con `faketime` y
+  `BETO_FIJO=1`). Si una pantalla cambió a propósito, se aceptan las nuevas y se commitean:
+  `herramientas/comparar-capturas.sh build/betometro build/comparar_capturas /tmp/cap --aceptar`.
 - Simulador de GPS: `simular_neo --enlace /tmp/betometro-gps` y `betometro --gps /tmp/betometro-gps` (con `--enlace /dev/ttyACM0` se prueba el modo USB).
 - Con `BETO_RASPBERRY=1` se activan las partes de la Raspberry (sin sensores en la PC).
 

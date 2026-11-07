@@ -12,7 +12,7 @@ Rectangle {
     Rectangle { anchors { left: parent.left; right: parent.right; bottom: parent.bottom } height: 4; color: Tema.acento }
     // Sin hora válida (la Pi no tiene reloj: la da el GPS o internet) se ve «--:--», no una hora inventada (07-1.4)
     property date ahora: new Date()
-    readonly property string hora: Datos.horaValida ? Qt.formatTime(ahora, "HH:mm") : "--:--"
+    readonly property string hora: Contexto.fijo ? "12:00" : Datos.horaValida ? Qt.formatTime(ahora, "HH:mm") : "--:--"
     Timer { interval: 5000; running: true; repeat: true; onTriggered: raiz.ahora = new Date() }
 
     Row {

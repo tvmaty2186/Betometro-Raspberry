@@ -12,7 +12,7 @@ for i in 1 2 3; do
     qt6-svg-dev qt6-multimedia-dev qt6-shadertools-dev qt6-base-private-dev \
     libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
     gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-ugly >/dev/null' && break   # ugly: x264enc, la cámara de prueba
+    gstreamer1.0-plugins-ugly faketime >/dev/null' && break   # ugly: x264enc, la cámara de prueba; faketime: las capturas comparadas
   echo "apt no anduvo (intento $i), reintento"
 done
 cmake -S . -B build-pruebas -G Ninja -DCMAKE_BUILD_TYPE=Release -DBETO_PRUEBAS=ON -DBETO_PROGRAMA=ON >/dev/null

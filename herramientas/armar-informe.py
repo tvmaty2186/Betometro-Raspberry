@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Arma recursos/informe-plantilla.html desde recursos/informe/fuente.html:
 mete adentro (en base64) las tipografías de Betómetro y el león, para que el informe se vea igual
-en cualquier celular y sin internet. Uso: python3 herramientas/armar-informe.py"""
+en cualquier celular y sin internet, y pega el JS del video (recursos/informe-video.js, propio de la
+Raspberry) donde dice __VIDEO_JS__, así el informe descargado sigue siendo un solo archivo.
+Uso: python3 herramientas/armar-informe.py"""
 import base64, io, os
 from PIL import Image
 R = os.path.join(os.path.dirname(__file__), '..', 'recursos')
@@ -16,6 +18,7 @@ for marca, valor in {
     '__F_B800I__': b64('fuentes/barlow-latin-800-italic.woff2'),
     '__F_BC700__': b64('fuentes/barlow-condensed-latin-700-normal.woff2'),
     '__LEON__': base64.b64encode(buf.getvalue()).decode(),
+    '__VIDEO_JS__': open(os.path.join(R, 'informe-video.js'), encoding='utf-8').read().rstrip('\n'),
 }.items():
     assert marca in s, marca
     s = s.replace(marca, valor)

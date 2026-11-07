@@ -20,6 +20,19 @@ QtObject {
         const dec = Math.floor(ms / 100), d = dec % 10, s = Math.floor(dec / 10);
         return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + ":" + d;
     }
+    // H:MM:SS, siempre con las horas (recorrido libre: tiempo, parado, marcas). `redondear`: al segundo más
+    // cercano (informe); si no, truncado (el tablero en marcha)
+    function hms(ms, redondear) {
+        const s = Math.max(0, redondear ? Math.round(ms / 1000) : Math.floor(ms / 1000));
+        return Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    }
+    // Hora de un video: m:ss, y h:mm:ss si pasa de la hora (reproductor, control de la tele, lista de videos)
+    function horaVideo(ms) {
+        const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = String(s % 60).padStart(2, "0");
+        return h > 0 ? h + ":" + String(m).padStart(2, "0") + ":" + ss : m + ":" + ss;
+    }
+    // Número con coma y `d` decimales: coma(12.34, 1) → «12,3»; sin dato → «–»
+    function coma(x, d) { return (x === undefined || x === null) ? "–" : Number(x).toFixed(d).replace(".", ","); }
     // Dígitos tecleados → ms: el último es la décima, los dos anteriores los segundos, el resto minutos.
     // Los segundos de más se reacomodan (0:90,0 → 1:30,0), como la app.
     function digitosAMs(t) {

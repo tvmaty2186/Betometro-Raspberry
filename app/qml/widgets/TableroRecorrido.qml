@@ -9,11 +9,6 @@ Item {
     readonly property bool h: width > height
     signal marcar()
     function efectoMarcar() { boton.efecto(); }
-    function reloj(ms) {
-        const s = Math.max(0, Math.floor(ms / 1000));
-        return Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
-    }
-    function coma(x, dec) { return x.toFixed(dec).replace(".", ","); }
     readonly property bool corre: !!est.enCurso
     readonly property real km: (est.distM || 0) / 1000
     // [x, y, ancho, alto] en horizontal (1280×720) y de pie (720×1280)
@@ -22,16 +17,16 @@ Item {
         property var l
         x: l.x; y: l.y; width: l.w; height: l.hh
     }
-    Dato { l: raiz.lugar([22, 72, 760, 300], [20, 72, 680, 290]); etiqueta: "Tiempo"; numero: raiz.reloj(raiz.est.transMs || 0)
-           extra: raiz.corre && raiz.est.paradoMs >= 1000 ? "parado " + raiz.reloj(raiz.est.paradoMs).replace(/^0:/, "") : "" }
+    Dato { l: raiz.lugar([22, 72, 760, 300], [20, 72, 680, 290]); etiqueta: "Tiempo"; numero: Formato.hms(raiz.est.transMs || 0)
+           extra: raiz.corre && raiz.est.paradoMs >= 1000 ? "parado " + Formato.hms(raiz.est.paradoMs).replace(/^0:/, "") : "" }
     Dato { l: raiz.lugar([800, 72, 458, 300], [20, 380, 680, 220]); etiqueta: "Distancia km"
-           numero: raiz.km < 100 ? raiz.coma(raiz.km, 2) : raiz.coma(raiz.km, 1) }
+           numero: raiz.km < 100 ? Formato.coma(raiz.km, 2) : Formato.coma(raiz.km, 1) }
     Dato { l: raiz.lugar([22, 392, 360, 306], [20, 618, 330, 250]); etiqueta: "Velocidad km/h"
            numero: raiz.est.vActKmh !== undefined && raiz.est.vActKmh !== null ? String(Math.round(raiz.est.vActKmh)) : "–" }
     Dato { l: raiz.lugar([400, 392, 190, 145], [370, 618, 330, 117]); etiqueta: "Máxima"
            numero: raiz.corre ? String(Math.round(raiz.est.velMaxVuelta || 0)) : "–" }
     Dato { l: raiz.lugar([400, 553, 190, 145], [370, 751, 330, 117]); etiqueta: "Promedio"
-           numero: raiz.corre && raiz.est.promKmh > 0 ? raiz.coma(raiz.est.promKmh, 1) : "–" }
+           numero: raiz.corre && raiz.est.promKmh > 0 ? Formato.coma(raiz.est.promKmh, 1) : "–" }
     WMarcar {
         id: boton
         readonly property var l: raiz.lugar([608, 392, 650, 306], [20, 888, 680, 372])

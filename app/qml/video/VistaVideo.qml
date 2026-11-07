@@ -262,14 +262,14 @@ Item {
         Text {
             id: tAhora
             x: bPlay.x + bPlay.width + 10 * barra.b; anchors.verticalCenter: parent.verticalCenter
-            text: vista.rep.reloj(vista.rep.arrastre >= 0 ? vista.rep.arrastre : vista.rep.pos)
+            text: Formato.horaVideo(vista.rep.arrastre >= 0 ? vista.rep.arrastre : vista.rep.pos)
             color: "#ffffff"; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 * barra.b }
         }
         Text {
             id: tTotal
             anchors { right: bPantalla.visible ? bPantalla.left : bDatos.visible ? bDatos.left : parent.right
                       rightMargin: bPantalla.visible || bDatos.visible ? 12 * barra.b : 20 * barra.b; verticalCenter: parent.verticalCenter }
-            text: vista.rep.reloj(vista.rep.total)
+            text: Formato.horaVideo(vista.rep.total)
             color: "#ffffff"; opacity: 0.8; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 * barra.b }
         }
         // Pantalla completa / achicar, a la derecha del tiempo (Matías, 06/11/2026: el doble toque a veces no

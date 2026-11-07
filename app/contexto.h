@@ -14,6 +14,7 @@ class Contexto : public QObject {
     Q_PROPERTY(QString pantallaInicial READ pantallaInicial CONSTANT)
     Q_PROPERTY(QString idInicial READ idInicial CONSTANT)
     Q_PROPERTY(QString prueba READ prueba CONSTANT)   // solo para capturas: abre algo al empezar
+    Q_PROPERTY(bool fijo READ fijo CONSTANT)          // BETO_FIJO=1 (capturas comparadas): hora y GPS quietos
     Q_PROPERTY(QString version READ version CONSTANT)
     Q_PROPERTY(QString versionNueva READ versionNueva NOTIFY versionNuevaChanged)
     Q_PROPERTY(QString numeroAuto READ numeroAuto NOTIFY numeroAutoChanged)
@@ -34,6 +35,8 @@ public:
     void setPantallaInicial(const QString& p) { pantallaInicial_ = p; }
     QString prueba() const { return prueba_; }
     void setPrueba(const QString& p) { prueba_ = p; }
+    bool fijo() const { return fijo_; }
+    void setFijo(bool f) { fijo_ = f; }
     QString idInicial() const { return idInicial_; }
     void setIdInicial(const QString& i) { idInicial_ = i; }
     QString version() const { return QStringLiteral(BETO_VERSION); }
@@ -61,6 +64,7 @@ private:
     QString pantallaInicial_ = QStringLiteral("inicio");
     QString idInicial_;
     QString prueba_;
+    bool fijo_ = false;
     QString versionNueva_;                              // la pone el Actualizador
     QString numeroAuto_ = QStringLiteral("101");
     QString nombreAuto_ = QStringLiteral("Avispón Verde");

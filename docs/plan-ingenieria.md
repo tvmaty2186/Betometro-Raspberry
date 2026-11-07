@@ -69,24 +69,52 @@ E1 y E2 se hacen sin hardware. Mientras tanto Matías junta las piezas que falta
 
 ---
 
-## 3. Estructura del repo (a medida que se crea)
+## 3. Estructura del repo (cómo está hoy, 07/11/2026)
+
+El plan original pensaba `app/hw/` con una versión real y una simulada de cada pieza, y un hilo para el GPS y
+otro para la voz. Quedó distinto (auditoría 01-3.3): todo lo del programa está plano en `app/`; solo el GPS tiene
+simulado (`GpsSimulado` en `gps.cpp`); pulsador, salud, HDMI y sistema se apagan solos si no está `BETO_RASPBERRY`;
+el cronómetro y la voz van por temporizadores de 50 y 15 ms en el hilo principal (`crono.cpp`); el guardado va en
+un hilo aparte (`datos_guardado.cpp`); la cámara es un proceso aparte (`betometro-camara`). No se mueven carpetas:
+rompe CMake y el historial.
 
 ```
 app/
-  nucleo/        motor, modelo, almacén, programador de voz, informe (C++ sin pantalla)
-  hw/            gps, pulsador, audio, brillo, wifi, sistema (real + simulado)
-  qml/           pantallas, widgets, temas
-  main.cpp
+  nucleo/        motor, modelo, almacén (un archivo por carrera), programador de voz, informe, NEO-M8N, pulsador
+                 (C++ puro, sin Qt de pantalla; se compara con la app)
+  main.cpp       cablea todo y registra los objetos para QML
+  datos*.cpp     Datos: la base de carreras (datos.cpp), resumen, informe, videos, config, guardado, muestra
+  crono.*        el cronómetro (motor + GPS + pulsador + voz)
+  gps.*          GpsNeo (UART/USB) y GpsSimulado (en la PC)
+  pulsador_gpio.*, salud.*, hdmi.*, sistema.h, audio.*, wifi.*, actualizador.*   hardware y sistema (solo con BETO_RASPBERRY)
+  servidor.*, control_remoto.*   «Betómetro en la red» (páginas en recursos/web/) y el celu como control de la tele
+  camara.*, video_gst.*, imagen_video.*, camara/   la cámara (proceso aparte con GStreamer) y el video en pantalla
+  drive.*, drive_logica.*   Google Drive
+  clima.*, qr.*, reportes.*, simulacion.*, contexto.h
+  shaders/       colores del video por el chip gráfico
+  terceros/      qrcodegen
+  qml/           Main, Tema, Navegacion, Formato, Armado, Tele y las carpetas:
+    tablet/      las pantallas (Modo Tablet, botones grandes): TInicio, TFicha, TPractica, TAjustes…
+    pantallas/   Carrera, Informe (+ informe/: cabecera, mapa, gráfico, tabla, recorrido libre, video), Editor, Compartir, Inicio, WifiClave
+    componentes/ botones, tarjetas, teclado, chips, etc.
+    widgets/     los widgets de la carrera (cuenta, delta, velocidad, tablero, recorrido libre)
+    video/       reproductor, vista del video, control de la tele
+    iconos/
 pruebas/
-  motor/         casos de prueba y comparación con el Motor de la app
-  datos/         recorridos de ejemplo
-simulador/       generador de datos del NEO-M8N (UBX y NMEA)
-voz/             lista de frases y armado de los audios con Piper
-sistema/         Buildroot: placa, configuración, overlays, RAUC, servicios
-docs/            documentación (este plan, diseño, muestras, app/)
-recursos/        fuentes, imágenes, ícono
+  nucleo/        prueba_nucleo (motor, modelo, almacén, informe)
+  motor/         casos y comparación con el Motor de la app (Node)
+  informe/       comparación del informe con el de la app (Node)
+  programa/      pruebas con Qt: datos, crono, videos, drive, clima…
+  reales/        recorridos reales
+simulador/       simular_neo: generador de datos del NEO-M8N (UBX y NMEA)
+voz/             grabar.py: las frases con Piper
+raspios/         instalador, servicios, kms.json, pruebas.sh (Raspberry Pi OS)
+herramientas/    armar-informe.py (la plantilla del informe), capturas.sh
+docs/            documentación (este plan, diseño, auditorías, muestras, app/)
+recursos/        fuentes, imágenes, ícono, la plantilla del informe (informe/fuente.html → informe-plantilla.html,
+                 con el JS del video en informe-video.js) y las páginas del celu (web/)
 referencia/      copia del código de la app 2.1.1 (no se edita)
-.github/workflows/
+.github/workflows/   programa.yml (compila y publica), pruebas.yml
 ```
 
 ---

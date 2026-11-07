@@ -2,11 +2,15 @@
 // (UBX NAV-PVT, o NMEA con --nmea), como si el auto diera vueltas a un circuito.
 // Solo para desarrollo: el programa lee el puerto igual que el UART real de la Raspberry.
 //
-// Uso: simular_neo [--enlace /tmp/betometro-gps] [--hz 5] [--kmh 48] [--largo 3200] [--nmea]
-//                  [--mala 0.05] [--corte 20] [--segundos N] [--modulo m8|7|6]
+// Uso: simular_neo [--enlace /tmp/betometro-gps] [--hz 5] [--kmh 48] [--largo 3200] [--nmea] [--fija]
+//                  [--mala 0.05] [--corte 20] [--silencio 20] [--segundos N] [--modulo m8|7|6]
 //   --modulo     se hace pasar por un NEO-7M (NAV-PVT de 84 bytes) o un NEO-6M (solo NMEA)
+//   --fija       velocidad clavada en --kmh, sin ondas ni ruido, precisión siempre 1,5 m (para las pruebas:
+//                la distancia de una vuelta es exactamente velocidad × tiempo)
 //   --mala P     probabilidad de una lectura con mala precisión (30 a 60 m)
-//   --corte S    cada vuelta, S segundos sin señal (como entre árboles)
+//   --corte S    cada vuelta, S segundos sin señal (como entre árboles). Como el NEO-M8N de verdad, el módulo
+//                no se calla: sigue mandando lecturas con fixType 0, 3 satélites y precisión enorme (11A-1.2)
+//   --silencio S cada vuelta, S segundos sin mandar nada (el cable cortado o el módulo apagado)
 // Después: betometro --gps /tmp/betometro-gps
 #include <chrono>
 #include <cmath>
@@ -26,8 +30,8 @@
 
 int main(int argc, char** argv) {
     std::string enlace = "/tmp/betometro-gps";
-    double hz = 5, kmh = 48, largo = 3200, mala = 0, corte = 0, segundos = 0;
-    bool nmea = false;
+    double hz = 5, kmh = 48, largo = 3200, mala = 0, corte = 0, silencio = 0, segundos = 0;
+    bool nmea = false, fija = false;
     std::string modulo = "m8";
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
@@ -38,6 +42,8 @@ int main(int argc, char** argv) {
         else if (a == "--largo") largo = std::atof(sig().c_str());
         else if (a == "--mala") mala = std::atof(sig().c_str());
         else if (a == "--corte") corte = std::atof(sig().c_str());
+        else if (a == "--silencio") silencio = std::atof(sig().c_str());
+        else if (a == "--fija") fija = true;
         else if (a == "--segundos") segundos = std::atof(sig().c_str());
         else if (a == "--nmea") nmea = true;
         else if (a == "--modulo") modulo = sig();
@@ -93,10 +99,11 @@ int main(int argc, char** argv) {
     iTOW -= iTOW % static_cast<uint32_t>(1000 / hz);
     auto proximo = std::chrono::steady_clock::now();
     while (segundos <= 0 || s < segundos) {
-        const double v = std::max(0.0, base * (1 + 0.12 * std::sin(s / 9) + 0.06 * std::sin(s / 2.7)) + (u(azar) - 0.5) * 0.3);
+        const double v = fija ? base : std::max(0.0, base * (1 + 0.12 * std::sin(s / 9) + 0.06 * std::sin(s / 2.7)) + (u(azar) - 0.5) * 0.3);
         recorrido += v * paso;
         const double a = recorrido / R, enVuelta = std::fmod(recorrido, largo);
-        const bool sinSenal = corte > 0 && enVuelta < base * corte;
+        const bool sinFix = corte > 0 && enVuelta < base * corte;
+        const bool callado = silencio > 0 && enVuelta < base * silencio;
         beto::LecturaGps l;
         l.iTOW = iTOW;
         const std::time_t ahora = std::time(nullptr);
@@ -105,14 +112,14 @@ int main(int argc, char** argv) {
         l.anio = utc.tm_year + 1900; l.mes = utc.tm_mon + 1; l.dia = utc.tm_mday;
         l.hora = utc.tm_hour; l.minuto = utc.tm_min; l.segundo = utc.tm_sec;
         l.horaValida = true;
-        l.fix3d = true;
-        l.satelites = 9 + static_cast<int>(u(azar) * 4);
+        l.fix3d = !sinFix;
+        l.satelites = sinFix ? 3 : fija ? 11 : 9 + static_cast<int>(u(azar) * 4);
         l.lat = -34.6 + R * 0.8 * std::sin(a) / 110540.0;
         l.lon = -58.4 + R * 1.4 * std::cos(a) / (111320.0 * std::cos(34.6 * M_PI / 180));
-        l.velMs = v;
-        l.precisionM = u(azar) < mala ? 30 + u(azar) * 30 : 1.2 + u(azar) * 1.5;
-        l.precisionVelMs = 0.1 + u(azar) * 0.2;
-        if (!sinSenal) {
+        l.velMs = sinFix ? 0 : v;
+        l.precisionM = sinFix ? 4294967.0 : fija ? 1.5 : u(azar) < mala ? 30 + u(azar) * 30 : 1.2 + u(azar) * 1.5;
+        l.precisionVelMs = sinFix ? 1000 : fija ? 0.1 : 0.1 + u(azar) * 0.2;
+        if (!callado) {
             if (nmea) {
                 const std::string txt = beto::armarNmea(l);
                 if (write(maestro, txt.data(), txt.size()) < 0) break;

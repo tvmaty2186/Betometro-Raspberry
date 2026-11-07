@@ -15,6 +15,8 @@
 //   --prueba tele-qr | tele-carreras | tele-remoto   modo tele con el código del celu, con la lista de carreras,
 //                            o listo para probar el celu como control (las dos últimas: Paraná también con video)
 //   --prueba cortado         Paraná con el video en dos partes (se desenchufó la cámara): el aviso del informe
+//   BETO_FIJO=1              (variable) para las capturas comparadas: GPS simulado sin azar, hora «12:00», sin
+//                            animación en el inicio. La fecha la fija faketime (herramientas/comparar-capturas.sh)
 #include <QCommandLineParser>
 #include <QDirIterator>
 #include <QFile>
@@ -107,6 +109,8 @@ int main(int argc, char* argv[]) {
     contexto.setFisica(op.isSet(oFisica));
     contexto.setPantallaInicial(op.value(oPantalla));
     contexto.setPrueba(op.value(oPrueba));
+    const bool fijo = qEnvironmentVariableIsSet("BETO_FIJO");
+    contexto.setFijo(fijo);
 
     QString carpeta = op.value(oDatos);
     if (carpeta.isEmpty()) carpeta = qEnvironmentVariable("BETO_DATOS");
@@ -147,7 +151,7 @@ int main(int argc, char* argv[]) {
     FuenteGps* gps = &sinGps;
     if (!op.isSet(oSinGps)) {
         if (!puertoGps.isEmpty()) gps = new GpsNeo(puertoGps, datos.cfg(QStringLiteral("gpsSoloGps")).toBool(), datos.cfg(QStringLiteral("gpsModulo")).toString(), &app);
-        else gps = new GpsSimulado(&app);
+        else gps = new GpsSimulado(&app, fijo);
     }
     Crono crono(&datos, gps);
     // Hora del equipo desde el GPS (11B-1.2, Matías 07/11): en el autódromo casi nunca hay internet, y la Pi

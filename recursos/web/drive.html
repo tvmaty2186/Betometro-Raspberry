@@ -1,0 +1,41 @@
+<!doctype html><html lang=es><head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Betómetro · Google Drive</title><style>
+@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}
+@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;background:radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}
+main{max-width:620px;margin:auto;padding:0 16px 40px}
+.cab{display:flex;align-items:center;gap:10px;padding:16px 0 12px;border-bottom:3px solid #f4c531}
+.cab img{height:50px}
+.cab b{font:800 italic 28px/1 Barlow}
+h2{font:800 italic 13px Barlow;letter-spacing:.18em;color:#b9cdb8;margin:18px 2px 6px}
+.c{margin-top:12px;border-radius:18px;padding:16px;background:radial-gradient(120% 90% at 50% 0%,#1f4a2f,#08190e);box-shadow:0 0 0 2px #cfd4d8,0 0 0 3px #4b5258,0 10px 18px #0008}
+ol{padding-left:22px;line-height:1.5}
+a{color:#f4c531}
+input[type=file]{width:100%;margin:10px 0;font:600 16px Barlow;color:#f7f7f2}
+button{width:100%;border:0;border-radius:14px;padding:14px;font:800 italic 18px Barlow;color:#14240f;background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f)}
+.aviso{border-radius:14px;padding:12px 14px;margin-top:12px;font-size:17px}
+.bien{background:#1f7a3a}
+.mal{background:#8f130b}
+.v{color:#b9cdb8;font-size:14px}</style></head><body><main>
+<div class=cab><img alt="" src="/r/leon.png"><b>GOOGLE DRIVE</b></div>%1<h2>ESTADO</h2>
+<div class=c>%2</div>
+<h2>SUBIR EL CLIENTE DE GOOGLE</h2>
+<div class=c>
+<p>Elegí el archivo <b>.json</b> que bajaste de Google Cloud (cliente «TVs y dispositivos de entrada limitada»).</p>
+<form method=post action=/drive enctype=multipart/form-data>
+<input type=file name=cliente accept=".json,application/json" required>
+<button>Subir</button></form>
+<p class=v>Queda guardado solo en el Betómetro. Nunca lo mandes por chat ni lo subas a otro lado.</p></div>
+<h2>LOS PASOS</h2>
+<div class=c>
+<ol>
+<li>Crear el proyecto: <a href="https://console.cloud.google.com/projectcreate">console.cloud.google.com/projectcreate</a></li>
+<li>Activar la API de Drive: <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com">abrir</a> → «Habilitar»</li>
+<li>Pantalla de consentimiento: <a href="https://console.cloud.google.com/auth/overview">abrir</a> (nombre Betómetro, tu mail, «Externo») y después «Publicar app»</li>
+<li>Cliente: <a href="https://console.cloud.google.com/auth/clients/create">abrir</a> → «TVs y dispositivos de entrada limitada» → bajar el JSON</li>
+<li>Subirlo acá arriba</li>
+<li>En el Betómetro: Ajustes → Google Drive → Conectar</li></ol></div>
+<p class=v><a href="/">‹ Volver a las carreras</a></p></main></body></html>

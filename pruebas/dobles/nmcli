@@ -1,0 +1,94 @@
+#!/bin/bash
+# nmcli de mentira para probar app/wifi.cpp sin Raspberry (auditoría 09, P4). Se pone primero en el PATH.
+# Contesta como NetworkManager según el escenario y anota cada llamada en un registro.
+#   NMCLI_FALSO_ESTADO    carpeta con el estado (se arma sola la primera vez): conectada, propia, guardadas
+#   NMCLI_FALSO_ESCENARIO casa     en casa: red «Casa» guardada y conectada, «Celu de Matías» guardada
+#                         nada     lejos: ninguna red guardada cerca, no está conectada a nada
+#                         dnsmasq  como «nada», pero la red propia no se puede armar (falta dnsmasq)
+#   NMCLI_FALSO_REGISTRO  archivo donde se anota cada llamada (una línea por llamada, los argumentos tal cual)
+E=${NMCLI_FALSO_ESTADO:?falta NMCLI_FALSO_ESTADO}
+ESC=${NMCLI_FALSO_ESCENARIO:-casa}
+[ -n "${NMCLI_FALSO_REGISTRO:-}" ] && printf '%s\n' "$*" >> "$NMCLI_FALSO_REGISTRO"
+mkdir -p "$E"
+if [ ! -f "$E/guardadas" ]; then   # primera vez: el estado del escenario
+  printf 'preconfigured:Casa\nCelu de Matías:Celu de Matías\n' > "$E/guardadas"
+  if [ "$ESC" = casa ]; then echo Casa > "$E/conectada"; else : > "$E/conectada"; fi
+  echo 0 > "$E/propia"
+fi
+conectada=$(cat "$E/conectada")
+propia=$(cat "$E/propia")
+# Redes que se ven: en casa, la de casa; lejos, solo las de los vecinos
+if [ "$ESC" = casa ]; then cerca="Casa:80:WPA2
+Vecino_2.4G:60:WPA2
+Invitados:30:"; else cerca="Vecino_2.4G:60:WPA2
+Invitados:30:"; fi
+ssid_de() { grep "^$1:" "$E/guardadas" | head -1 | cut -d: -f2-; }
+args="$*"
+case "$args" in
+  "-t -f NAME connection show --active")
+    [ -n "$conectada" ] && grep ":$conectada\$" "$E/guardadas" | cut -d: -f1 | head -1
+    [ "$propia" = 1 ] && echo betometro-propia
+    exit 0 ;;
+  "-t -f ACTIVE,SIGNAL,SSID dev wifi list --rescan no"|"-t -f SSID,SIGNAL,SECURITY dev wifi list --rescan yes"|"-t -f SSID dev wifi list --rescan yes")
+    echo "$cerca" | while IFS=: read -r s sig sec; do
+      case "$args" in
+        *ACTIVE*) if [ "$s" = "$conectada" ]; then echo "yes:$sig:$s"; else echo "no:$sig:$s"; fi ;;
+        *SECURITY*) echo "$s:$sig:$sec" ;;
+        *) echo "$s" ;;
+      esac
+    done
+    exit 0 ;;
+  "-t -f NAME,TYPE connection show")
+    cut -d: -f1 "$E/guardadas" | sed 's/$/:802-11-wireless/'
+    echo "Wired connection 1:802-3-ethernet"
+    [ -f "$E/guardada-propia" ] && echo "betometro-propia:802-11-wireless"
+    exit 0 ;;
+  "-g 802-11-wireless.ssid connection show "*)
+    n=${args#-g 802-11-wireless.ssid connection show }
+    ssid_de "$n"
+    exit 0 ;;
+  "-t --show-secrets -f 802-11-wireless.ssid,802-11-wireless-security.psk connection show betometro-propia")
+    [ -f "$E/guardada-propia" ] || { echo "Error: betometro-propia - no such connection profile." >&2; exit 10; }
+    IFS=: read -r s p < "$E/guardada-propia"
+    printf '802-11-wireless.ssid:%s\n802-11-wireless-security.psk:%s\n' "$s" "$p"
+    exit 0 ;;
+  "connection up betometro-propia")
+    [ -f "$E/guardada-propia" ] || { echo "Error: unknown connection 'betometro-propia'." >&2; exit 10; }
+    [ "$ESC" = dnsmasq ] && { echo "Error: Connection activation failed: (7) Could not start dnsmasq" >&2; exit 4; }
+    echo 1 > "$E/propia"; exit 0 ;;
+  "connection down betometro-propia")
+    echo 0 > "$E/propia"; exit 0 ;;
+  "connection delete betometro-propia")
+    [ -f "$E/guardada-propia" ] || { echo "Error: unknown connection 'betometro-propia'." >&2; exit 10; }
+    rm -f "$E/guardada-propia"; echo 0 > "$E/propia"; exit 0 ;;
+  "connection delete "*)
+    n=${args#connection delete }
+    grep -q "^$n:" "$E/guardadas" || { echo "Error: unknown connection '$n'." >&2; exit 10; }
+    [ "$(ssid_de "$n")" = "$conectada" ] && : > "$E/conectada"   # borrar la activa la desconecta
+    grep -v "^$n:" "$E/guardadas" > "$E/guardadas.n"; mv "$E/guardadas.n" "$E/guardadas"
+    exit 0 ;;
+  "connection up "*)
+    n=${args#connection up }
+    s=$(ssid_de "$n"); [ -n "$s" ] || { echo "Error: unknown connection '$n'." >&2; exit 10; }
+    echo "$s" > "$E/conectada"; exit 0 ;;
+  "dev wifi hotspot ifname wlan0 con-name betometro-propia ssid "*" band bg password "*)
+    r=${args#dev wifi hotspot ifname wlan0 con-name betometro-propia ssid }
+    s=${r% band bg password *}; p=${r##* password }
+    [ "$ESC" = dnsmasq ] && { echo "Error: Connection activation failed: (7) Could not start dnsmasq" >&2; exit 4; }
+    echo "$s:$p" > "$E/guardada-propia"; echo 1 > "$E/propia"
+    echo "Device 'wlan0' successfully activated with 'betometro-propia'."; exit 0 ;;
+  "dev disconnect wlan0")
+    : > "$E/conectada"; echo 0 > "$E/propia"; exit 0 ;;
+  "dev wifi connect "*)
+    r=${args#dev wifi connect }
+    case "$r" in *" password "*) red=${r% password *}; clave=${r##* password } ;; *) red=$r; clave= ;; esac
+    echo "$cerca" | cut -d: -f1 | grep -qx "$red" || { echo "Error: No network with SSID '$red' found." >&2; exit 10; }
+    # La clave de «Vecino_2.4G» es avispon101; «Invitados» es abierta
+    if [ "$red" != Invitados ] && [ "$clave" != avispon101 ]; then
+      echo "Error: Connection activation failed: Secrets were required, but not provided." >&2; exit 4; fi
+    grep -q ":$red\$" "$E/guardadas" || echo "$red:$red" >> "$E/guardadas"
+    echo "$red" > "$E/conectada"; echo 0 > "$E/propia"
+    echo "Device 'wlan0' successfully activated with '$red'."; exit 0 ;;
+esac
+echo "nmcli falso: no sé contestar «$args»" >&2
+exit 2

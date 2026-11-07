@@ -195,7 +195,7 @@ Item {
     Text {
         id: tTiempo
         x: c.m; anchors { bottom: parent.bottom; bottomMargin: c.h ? 30 : 60 }
-        text: !c.rep ? "" : c.rep.reloj(c.rep.arrastre >= 0 ? c.rep.arrastre : c.rep.pos) + " / " + c.rep.reloj(c.rep.total)
+        text: !c.rep ? "" : Formato.horaVideo(c.rep.arrastre >= 0 ? c.rep.arrastre : c.rep.pos) + " / " + Formato.horaVideo(c.rep.total)
         color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 46 }
     }
     Ficha {

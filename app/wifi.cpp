@@ -14,7 +14,8 @@ namespace {
 int rayitas(int porcentaje) { return porcentaje >= 75 ? 4 : porcentaje >= 55 ? 3 : porcentaje >= 35 ? 2 : porcentaje > 0 ? 1 : 0; }
 }
 
-Wifi::Wifi(QObject* padre) : QObject(padre), real_(qEnvironmentVariableIsSet("BETO_RASPBERRY")) {
+Wifi::Wifi(QObject* padre) : QObject(padre), real_(qEnvironmentVariableIsSet("BETO_RASPBERRY")),
+                             reloj_([] { return QDateTime::currentMSecsSinceEpoch(); }) {
     if (!real_) {   // Simulado: lo que se vería en casa
         redes_ = {{"Casa", 3, true}, {"Vecino_2.4G", 4, true}, {"Fibertel WiFi 552", 2, true}, {"Invitados", 1, false}};
         guardadas_ = {"Casa", "Celu de Matías"};
@@ -116,7 +117,7 @@ void Wifi::apagarPropia() {
 // podía quedar vieja; ahora busca de nuevo justo antes. Y si falla, lo dice en Conectividad.
 void Wifi::revisarPropia() {
     if (!real_ || conectando_ || armandoPropia_) return;
-    const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
+    const qint64 ahora = reloj_();
     if (!redes_permitidas_) {   // solo la propia: si se conectó a otra red o la propia se cayó, se arma de nuevo
         if (propia_ && conectada_.isEmpty()) return;
         if (!conectada_.isEmpty() && conectada_ != nombrePropia()) { cortarYArmar(); return; }
@@ -134,7 +135,7 @@ void Wifi::revisarPropia() {
         armandoPropia_ = false;
         for (const auto& l : out.split('\n', Qt::SkipEmptyParts)) {
             const QString ssid = campos(l).value(0);
-            if (!ssid.isEmpty() && guardadas_.contains(ssid)) { sinRedDesde_ = QDateTime::currentMSecsSinceEpoch(); emit cambio(); return; }   // se conecta sola
+            if (!ssid.isEmpty() && guardadas_.contains(ssid)) { sinRedDesde_ = reloj_(); emit cambio(); return; }   // se conecta sola
         }
         armarPropia();
     });
@@ -182,7 +183,7 @@ void Wifi::propiaArmada(int codigo, const QString& err) {
         errorPropia_ = err.contains(QLatin1String("dnsmasq"), Qt::CaseInsensitive) ? QStringLiteral("Falta un programa del sistema (dnsmasq): actualizá Betómetro con wifi")
                      : err.isEmpty() ? QStringLiteral("No se pudo armar la red propia") : QStringLiteral("No se pudo armar: ") + err;
         sinRedDesde_ = 0;
-        fallaPropia_ = QDateTime::currentMSecsSinceEpoch();
+        fallaPropia_ = reloj_();
         emit cambio();
         return;
     }

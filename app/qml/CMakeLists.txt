@@ -90,6 +90,12 @@ qt_add_qml_module(betometro_qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
     pantallas/Informe.qml
+    pantallas/informe/CabeceraInforme.qml
+    pantallas/informe/MapaInforme.qml
+    pantallas/informe/GraficoVelocidad.qml
+    pantallas/informe/TablaVueltas.qml
+    pantallas/informe/RecorridoLibre.qml
+    pantallas/informe/VideoInforme.qml
     pantallas/Inicio.qml
     pantallas/WifiClave.qml
     widgets/Barra.qml

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es"><head>
-<!-- Plantilla de la app 2.1.1 con la vuelta interrumpida de la Raspberry y el tema Avispón Verde. FUENTE: se arma con herramientas/armar-informe.py (mete las tipografías y el león) --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Plantilla de la app 2.1.1 con la vuelta interrumpida de la Raspberry y el tema Avispón Verde. FUENTE: se arma con herramientas/armar-informe.py (mete las tipografías, el león y el JS del video). Lo propio de la Raspberry está marcado con RASPBERRY … /RASPBERRY (01-2.3) --><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Betómetro · __NOMBRE__</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%2316181B'/%3E%3Crect%20x='27'%20y='5'%20width='10'%20height='6'%20rx='2'%20fill='%23d7263d'/%3E%3Ccircle%20cx='32'%20cy='35'%20r='22'%20fill='none'%20stroke='%23d7263d'%20stroke-width='6'/%3E%3Cpath%20d='M44%2022a17%2017%200%200%201%205%2013'%20fill='none'%20stroke='%232ecc71'%20stroke-width='5'/%3E%3Cpath%20d='M32%2035L44%2024'%20stroke='%23f5c518'%20stroke-width='5'%20stroke-linecap='round'/%3E%3Ccircle%20cx='32'%20cy='35'%20r='4'%20fill='%23fff'/%3E%3C/svg%3E">
 <style>
@@ -71,7 +71,7 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .tot2 td{border-top:0;padding-top:0;color:var(--sub);font:600 italic 12px var(--ui);text-align:left}
 .aviso{color:var(--sub);font-size:13px;text-align:center;padding:16px 6px}
 .pie{text-align:center;color:var(--sub);font-size:11px;margin-top:14px;font-style:italic}
-/* Video de la cámara (solo Raspberry): se ve cuando la página la sirve Betómetro en la red.
+/* RASPBERRY (hasta /RASPBERRY): el video de la cámara, que se ve cuando la página la sirve Betómetro en la red, y el aviso de la vista previa.
    Medidas en «u»: 1 u = 1 px con el video a 1280 de ancho (como las muestras aprobadas); en chico no baja de 0,55 px. */
 .vw{container-type:inline-size;margin-top:2px}
 .vid{--u:max(.55px,calc(100cqw / 1280));position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;
@@ -136,15 +136,18 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .vbajar a{flex:1;min-width:150px;text-align:center;text-decoration:none;padding:10px;border-radius:12px;border:2px solid var(--ama);color:var(--ama);font:800 italic 14px var(--ui)}
 .sinjs{margin:10px 0 0;padding:14px 16px;border-radius:14px;border:2px solid #f4c531;background:#08190e;color:#f4f1e6;font-size:17px;line-height:1.35}
 .sinjs b{color:#f4c531}
+/* /RASPBERRY */
 </style></head><body><main>
+<!-- RASPBERRY: aviso para cuando el informe se abre en una vista previa (Google Drive) -->
 <!-- Si la página no puede hacer funcionar el informe (por ejemplo la vista previa de Google Drive), queda este aviso;
      si funciona, el informe lo saca enseguida (Matías, 06/11/2026) -->
 <div class=sinjs id=sinjs><b>Para ver los gráficos y el mapa:</b> tocá los tres puntos <b>⋮</b> → <b>Abrir con</b> → <b>Chrome</b>
 (o <b>Descargar</b> y abrilo). Esta vista no deja funcionar el informe.</div>
+<!-- /RASPBERRY -->
 <div class="cab"><img alt="" src="data:image/png;base64,__LEON__"><div class="bar"></div>
   <div class="marca"><b>BETÓMETRO</b><span>REGULARIDAD PARA EL NAVEGANTE</span></div><div class="rayas"></div></div>
 <h1 id="tit"></h1><div class="fecha" id="fecha"></div>
-<div id="video"></div>
+<div id="video"></div><!-- RASPBERRY: acá va el video de la cámara -->
 <div id="conRecorrido">
 <div class="chips" id="vueltas"></div>
 <div class="k" id="kpi"></div>
@@ -156,21 +159,23 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
   <div class="lg"><span><i style="background:var(--verde)"></i>acelera</span><span><i style="background:var(--rojo)"></i>frena</span></div></div>
 <div class="pie" style="margin:0 0 12px">tocá o deslizá el dedo sobre el mapa o los gráficos</div>
 </div>
-<div class="card"><div class="t">Todas las vueltas<b id="totInfo"></b></div><div id="tabla"></div></div>
+<!-- RASPBERRY: recorrido libre (en vez de la tabla de vueltas) -->
+<div class="card" id="cajaRec" style="display:none"><div class="t">Recorrido libre<b id="recInfo"></b></div><div class="k" id="recKpi"></div><div id="recMarcas"></div></div>
+<div class="card" id="cajaVueltas"><div class="t">Todas las vueltas<b id="totInfo"></b></div><div id="tabla"></div></div>
 <div class="pie">Generado con Betómetro · Avispón Verde #101</div>
 </main>
 <div class="barra" id="barra"><i></i></div>
-<script>document.getElementById('sinjs').remove();</script>
+<script>document.getElementById('sinjs').remove();</script><!-- RASPBERRY -->
 <script>
 const C=__DATOS__;
 const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id);
 const E=(p,n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.append(e);return e};
 const nf=(x,d)=>x.toFixed(d).replace('.',',');
-const tfmt=ms=>{const s=Math.abs(ms)/1000,h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=(s%60).toFixed(1).padStart(4,'0').replace('.',',');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
+const tfmt=ms=>{const s=Math.abs(ms)/1000,h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=(s%60).toFixed(1).padStart(4,'0').replace('.',':');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
 const dur=ms=>Math.abs(ms)<59950?nf(Math.abs(ms)/1000,1)+' s':tfmt(ms);
 const dif=ms=>(ms>0?'+':ms<0?'−':'±')+dur(ms);
 $('tit').textContent=C.nombre;
-$('fecha').textContent=new Date(C.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · ideal '+tfmt(C.idealMs)+(C.distanciaM?' · '+C.distanciaM.toLocaleString('es-AR')+' m':'');
+$('fecha').textContent=new Date(C.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(C.recorrido?' · recorrido libre':' · ideal '+tfmt(C.idealMs))+(C.distanciaM?' · '+C.distanciaM.toLocaleString('es-AR')+' m':'');
 const vSug=C.distanciaM?C.distanciaM/(C.idealMs/1000)*3.6:null;
 const conT=C.vueltas.map((v,i)=>i).filter(i=>C.vueltas[i].m);
 let lap=conT.length?conT[0]:-1,modo='vel',sel=null;
@@ -183,21 +188,22 @@ const LEY={vel:[['var(--azul)','muy lento'],['var(--verde)','en sugerida'],['var
  ade:[['var(--verde)','±1 s'],['var(--ama)','1 a 3 s'],['var(--rojo)','más de 3 s'],['#555','sin señal']]};
 const color=p=>modo==='vel'?colVel(p[2]):modo==='ace'?colAce(p[3]):colAde(p[4]);
 const nombreV=v=>'V'+v.n+(C.largadas>1?' L'+v.largada:'');
-let irVideo=null;   // lo pone el reproductor de video (si la carrera tiene video y la página la sirve Betómetro)
+let irVideo=null;   // RASPBERRY: lo pone el reproductor de video (si la carrera tiene video y la página la sirve Betómetro)
 // tabla con todas las vueltas
 (()=>{let h='<table><tr><th>VUELTA</th><th>TIPO</th><th>TIEMPO</th><th>DIF.</th><th>PROM</th><th>MÁX</th></tr>';
+  // RASPBERRY: la vuelta interrumpida, «▸ video» en las filas y el error total al pie
   C.vueltas.forEach((v,i)=>{h+=`<tr data-i="${i}" class="${v.m||v.video!=null?'clic':''}"><td><b>${nombreV(v)}</b></td><td><span class="tipo ${v.interrumpida?'i':v.medida?'m':'l'}">${v.interrumpida?'INTERR.':v.medida?'MEDIDA':'LIBRE'}</span></td><td>${tfmt(v.realMs)}</td><td style="color:${v.difMs==null?'#8a929b':colAde(v.difMs/1000)}">${v.difMs==null?'–':dif(v.difMs)}</td><td>${v.velPromKmh!=null?nf(v.velPromKmh,1):'–'}</td><td>${v.velMaxKmh!=null?Math.round(v.velMaxKmh):'–'}</td></tr>`});
   const med=C.vueltas.filter(v=>v.medida&&v.difMs!=null);
   if(med.length){const s=med.reduce((a,v)=>a+Math.abs(v.difMs),0);const mej=Math.min(...med.map(v=>Math.abs(v.difMs)));h+=`<tr class="tot"><td colspan="3">Error total <small>· ${med.length} medida${med.length>1?'s':''}</small></td><td colspan="3" class="grande">${dur(s)}</td></tr><tr class="tot2"><td colspan="6">promedio ${dur(s/med.length)} · mejor ${dur(mej)}</td></tr>`;$('totInfo').textContent='promedio '+dur(s/med.length);}
   $('tabla').innerHTML=h+'</table>';
-  $('tabla').querySelectorAll('tr.clic').forEach(r=>r.onclick=()=>{const i=+r.dataset.i;if(C.vueltas[i].m){lap=i;sel=null;dibujar()}if(irVideo)irVideo(i,0);scrollTo({top:0,behavior:'smooth'})});})();
+  $('tabla').querySelectorAll('tr.clic').forEach(r=>r.onclick=()=>{const i=+r.dataset.i;if(C.vueltas[i].m){lap=i;sel=null;dibujar()}if(irVideo)irVideo(i,0);scrollTo({top:0,behavior:'smooth'})});})();   // RASPBERRY: irVideo
 if(lap<0){$('conRecorrido').innerHTML='<div class="card aviso">Esta carrera no tiene el recorrido grabado. Se graba con el GPS en las carreras corridas desde la versión 1.8 de Betómetro.</div>';}
 else{
 conT.forEach(i=>{const v=C.vueltas[i],b=document.createElement('button');b.className='chip';b.dataset.i=i;b.innerHTML=nombreV(v)+'<small>'+(v.interrumpida?'interrumpida':v.medida?'medida':'libre')+'</small>';b.onclick=()=>{lap=i;sel=null;dibujar()};$('vueltas').append(b)});
 if(conT.length>12)$('vueltas').classList.add('una');
 for(const k in MODOS){if(k==='ade'&&!C.distanciaM)continue;const b=document.createElement('button');b.className='chip modo';b.dataset.m=k;b.textContent=MODOS[k];b.onclick=()=>{modo=k;dibujar()};$('modos').append(b)}
 dibujar();}
-// En la fila que se desliza, la vuelta elegida queda a la vista (solo cuando cambia de vuelta)
+// RASPBERRY: en la fila que se desliza, la vuelta elegida queda a la vista (solo cuando cambia de vuelta)
 var lapVisto=-1;   // var: dibujar() se llama antes de esta línea
 function verChip(){const F=$('vueltas'),b=F.querySelector('.chip.on');if(!F.classList.contains('una')||!b||lapVisto===lap)return;
   lapVisto=lap;F.scrollLeft=b.offsetLeft-F.offsetLeft-(F.clientWidth-b.offsetWidth)/2}
@@ -205,7 +211,7 @@ function X(d,W){return 30+(W-36)*d/C.vueltas[lap].L}
 function dibujar(){
   const V=C.vueltas[lap],M=V.m,err=V.difMs;
   document.querySelectorAll('#vueltas .chip').forEach(b=>b.classList.toggle('on',+b.dataset.i===lap));
-  verChip();
+  verChip();   // RASPBERRY
   document.querySelectorAll('#modos .chip').forEach(b=>b.classList.toggle('on',b.dataset.m===modo));
   document.querySelectorAll('#tabla tr[data-i]').forEach(r=>r.classList.toggle('sel',+r.dataset.i===lap));
   const ok=M.filter(p=>p[7]),vs=ok.map(p=>p[2]),as=ok.map(p=>p[3]);
@@ -218,11 +224,15 @@ function dibujar(){
   E(m,'polyline',{points:C.pista.map(p=>p.join(',')).join(' ')+(C.cerrada?' '+C.pista[0].join(','):''),fill:'none',stroke:'#3a3f45','stroke-width':11,'stroke-linecap':'round','stroke-linejoin':'round'});
   for(let i=1;i<M.length;i++){if(!M[i][7]||!M[i-1][7])continue;E(m,'line',{x1:M[i-1][5],y1:M[i-1][6],x2:M[i][5],y2:M[i][6],stroke:color(M[i]),'stroke-width':8,'stroke-linecap':'round'})}
   const p0=C.pista[0];E(m,'circle',{cx:p0[0],cy:p0[1],r:6,fill:'#fff'});const der=p0[0]>364-70;const tl=E(m,'text',{x:der?p0[0]-10:p0[0]+10,y:p0[1]-8,fill:'#fff','font-size':10,'font-weight':700,'text-anchor':der?'end':'start'});tl.textContent='LARGADA';
+  if(C.recorrido){   // RASPBERRY: recorrido libre: la llegada y las marcas numeradas
+    const pf=C.pista[C.pista.length-1];if(!C.cerrada){E(m,'rect',{x:pf[0]-6,y:pf[1]-6,width:12,height:12,fill:'#111',stroke:'#fff','stroke-width':2});const dF=pf[0]>364-70,tF=E(m,'text',{x:dF?pf[0]-10:pf[0]+10,y:pf[1]-8,fill:'#fff','font-size':10,'font-weight':700,'text-anchor':dF?'end':'start'});tF.textContent='LLEGADA'}
+    (C.marcas||[]).forEach(k=>{if(k.x==null)return;E(m,'circle',{cx:k.x,cy:k.y,r:8,fill:'#f4c531',stroke:'#111','stroke-width':2});const t=E(m,'text',{x:k.x,y:k.y+3.5,fill:'#111','font-size':10,'font-weight':800,'text-anchor':'middle'});t.textContent=k.n})}
   if(as.length){let iF=-1;M.forEach((p,i)=>{if(p[7]&&(iF<0||p[3]<M[iF][3]))iF=i});if(M[iF][3]<-0.3){E(m,'circle',{cx:M[iF][5],cy:M[iF][6],r:8,fill:'none',stroke:'#fff','stroke-width':2});const tf=E(m,'text',{x:M[iF][5]>250?M[iF][5]-12:M[iF][5]+12,y:M[iF][6]+4,fill:'#fff','font-size':10,'text-anchor':M[iF][5]>250?'end':'start'});tf.textContent='frenada '+nf(M[iF][3],1);}}
   // velocidad
   const g=$('gVel'),W=364,H=160;g.innerHTML='';const vmax=Math.max(20,Math.ceil(Math.max(...vs,(vSug||0)+10)/10)*10),yv=v=>H-14-(v/vmax)*(H-24);
   for(let k=0;k<=vmax+.1;k+=vmax/4){E(g,'line',{x1:30,x2:W-6,y1:yv(k),y2:yv(k),stroke:'#262a2f'});const t=E(g,'text',{x:2,y:yv(k)+3,class:'eje'});t.textContent=Math.round(k)}
   if(vSug)E(g,'line',{x1:30,x2:W-6,y1:yv(vSug),y2:yv(vSug),stroke:'#fff','stroke-dasharray':'4 4','stroke-width':1});
+  if(C.recorrido)(C.marcas||[]).forEach(k=>{const x=X(k.m||0,W);E(g,'line',{x1:x,x2:x,y1:4,y2:H-14,stroke:'#f4c531','stroke-dasharray':'3 3'});const t=E(g,'text',{x:x+3,y:12,fill:'#f4c531','font-size':10,'font-weight':800});t.textContent=k.n});   // RASPBERRY: recorrido libre
   for(let i=1;i<M.length;i++){const a=M[i-1],b=M[i];if(!a[7]||!b[7]){E(g,'line',{x1:X(a[1],W),y1:H-14,x2:X(b[1],W),y2:H-14,stroke:'#555','stroke-width':3});continue}
     E(g,'line',{x1:X(a[1],W),y1:yv(a[2]),x2:X(b[1],W),y2:yv(b[2]),stroke:color(b),'stroke-width':3,'stroke-linecap':'round'})}
   // aceleración
@@ -252,7 +262,7 @@ function tocar(s,f,arrastre){let ini=null,lado=false;
   if(arrastre)s.addEventListener('touchmove',ev=>{if(lado)ev.preventDefault()},{passive:false});}
 if(lap>=0){
 for(const id of ['gVel','gAce'])tocar($(id),ev=>{const s=ev.currentTarget,{x}=local(s,ev),M=C.vueltas[lap].m,d=(x-30)/(364-36)*C.vueltas[lap].L;let b=0;M.forEach((p,i)=>{if(Math.abs(p[1]-d)<Math.abs(M[b][1]-d))b=i});marcar(b)},true);
-tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,bd=1e9;M.forEach((p,i)=>{const d=(p[5]-x)**2+(p[6]-y)**2;if(d<bd){bd=d;b=i}});marcar(b);if(irVideo)irVideo(lap,M[b][0])},false);}
+tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,bd=1e9;M.forEach((p,i)=>{const d=(p[5]-x)**2+(p[6]-y)**2;if(d<bd){bd=d;b=i}});marcar(b);if(irVideo)irVideo(lap,M[b][0])},false);}   // RASPBERRY: irVideo
 // barra de desplazamiento a la derecha: se arrastra con el dedo
 (()=>{const b=$('barra'),th=b.querySelector('i');
   const med=()=>{const H=document.documentElement.scrollHeight,v=innerHeight,h=b.clientHeight;b.style.display=H<=v+4?'none':'';const t=Math.max(44,h*v/H);th.style.height=t+'px';th.style.top=((h-t)*scrollY/Math.max(1,H-v))+'px';return{H,v,h,t}};
@@ -262,150 +272,18 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
   b.addEventListener('pointerdown',ev=>{b.setPointerCapture(ev.pointerId);b.classList.add('activa');const r=th.getBoundingClientRect();if(ev.clientY>=r.top&&ev.clientY<=r.bottom){y0=ev.clientY;s0=scrollY}else{y0=null;mover(ev);y0=ev.clientY;s0=scrollY}ev.preventDefault()});
   b.addEventListener('pointermove',ev=>{if(b.classList.contains('activa'))mover(ev)});
   const fin=()=>{b.classList.remove('activa');y0=null};b.addEventListener('pointerup',fin);b.addEventListener('pointercancel',fin);})();
-// ---------- Video de la cámara (solo Raspberry) ----------
-// C.videos: [{archivo, largada, desdeLargadaMs, girar, espejo}] (girar → 180°, espejo → izquierda/derecha; solo el video, no los datos); cada vuelta con video trae video (cuál) y videoMs (dónde empieza).
-// Un punto de la traza (t, segundos desde que empezó la vuelta) está en el video en videoMs + t·1000.
-(()=>{const VS=C.videos,caja=$('video');if(!VS||!VS.length)return;
- if(!/^https?:$/.test(location.protocol)){caja.innerHTML='<div class="card aviso">Esta carrera tiene video. El video se ve desde Betómetro en la red.</div>';return}
- const DATOS=[['chip','Vuelta y tipo'],['tiempo','Tiempo de la vuelta'],['ade','Adelanto'],['vel','Velocidad'],['dist','Distancia'],['pista','Pista']];
- const ID={chip:'ovChip',tiempo:'ovTiempo',ade:'ovAde',vel:'ovVel',dist:'ovDist',pista:'ovPista'};
- const NOMBRE={chip:'Vuelta',tiempo:'Vuelta',ade:'Adelanto',vel:'Velocidad',dist:'Distancia',pista:'Pista'};
- let guardado={ocultos:[],pos:{}};
- try{const g=JSON.parse(localStorage.getItem('betoVideoDatos')||'null');if(g&&typeof g==='object')guardado={ocultos:g.ocultos||[],pos:g.pos||{}}}catch(e){}
- const guardar=()=>{try{localStorage.setItem('betoVideoDatos',JSON.stringify(guardado))}catch(e){}};
- const PLAY='<svg viewBox="0 0 26 26"><path d="M5 2l19 11L5 24z" fill="#fff"/></svg>',PAUSA='<svg viewBox="0 0 26 26"><rect x="4" y="2" width="6" height="22" rx="1.5" fill="#fff"/><rect x="16" y="2" width="6" height="22" rx="1.5" fill="#fff"/></svg>';
- const ENG='<svg viewBox="0 0 64 64" fill="none" stroke="#111" stroke-width="6" stroke-linecap="round"><circle cx="32" cy="32" r="9"/><path d="M32 6v9M32 49v9M6 32h9M49 32h9M13.6 13.6l6.4 6.4M44 44l6.4 6.4M13.6 50.4l6.4-6.4M44 20l6.4-6.4"/></svg>';
- const url=a=>'/video/'+encodeURIComponent(a);
- const nombreVid=k=>VS.length===1?'':C.largadas>1?'Largada '+VS[k].largada+(VS.filter(x=>x.largada===VS[k].largada).length>1?' ('+(k+1)+')':''):'Video '+(k+1);
- caja.innerHTML=`<div class="card"><div class="t">Video<b id="vInfoV"></b></div><div class="chips" id="vSel"></div>
-<div class="vw" id="vw"><div class="vid" id="vid"><video id="vv" playsinline preload="metadata"></video><div class="toque" id="vToque"></div>
-<div class="ov" id="ovChip"></div>
-<div class="ov" id="ovAde"><span class="n"></span><span class="e"></span></div>
-<div class="ov" id="ovTiempo"><span class="e">Vuelta</span><span class="n"></span></div>
-<div class="ov" id="ovDist"><span class="e">Dist.</span><span class="n"></span><span class="u"></span></div>
-<div class="ov" id="ovVel"><span class="e">Vel.</span><span class="n"></span><span class="u">km/h</span><span class="vbarra"><i></i></span><span class="e sug">sug. <span class="y"></span></span></div>
-<div class="ov" id="ovPista"><svg></svg></div>
-<div class="vgrande" id="vGrande"><i></i></div>
-<div class="vbar"><button class="pp" id="vPP" aria-label="Reproducir"></button><span class="hora" id="vHora">0:00</span>
-<div class="vlinea" id="vLinea"><div class="avance" id="vAvance"></div></div><span class="hora tot" id="vTot">–</span>
-<button class="eng no" id="vEng" aria-label="Configurar los datos"></button></div>
-<div class="vpanel no" id="vPanel"></div><div class="vmsj no" id="vMsj"></div></div></div>
-<div class="vbajar" id="vBajar"></div><div class="pie">doble toque: pantalla completa · tocá una vuelta o el mapa y el video va ahí</div></div>`;
- const vv=$('vv'),vid=$('vid'),vw=$('vw');
- let cur=0,lps=[];
- // ---- de la hora del video a la vuelta y el punto de la traza ----
- const enVideo=ms=>{let b=-1;for(const i of lps)if(C.vueltas[i].videoMs<=ms)b=i;if(b<0)return null;const v=C.vueltas[b];return{i:b,t:Math.min((ms-v.videoMs)/1000,v.realMs/1000),fin:ms-v.videoMs>v.realMs+500}};
- const punto=(i,t)=>{const M=C.vueltas[i].m;if(!M||!M.length)return null;let a=0,b=M.length-1;if(t<=M[0][0])return{p:M[0],ok:!!M[0][7]};if(t>=M[b][0])return{p:M[b],ok:!!M[b][7]};
-  while(b-a>1){const c=(a+b)>>1;if(M[c][0]<=t)a=c;else b=c}const P=M[a],Q=M[b],f=(t-P[0])/Math.max(1e-6,Q[0]-P[0]);
-  return{p:P.map((x,k)=>k===7?x:x+(Q[k]-x)*f),ok:!!(P[7]&&Q[7])}};
- // ---- mini pista ----
- const mini=()=>{const s=$('ovPista').querySelector('svg');if(!C.pista||C.pista.length<2){$('ovPista').dataset.sin=1;return}
-  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;C.pista.forEach(([x,y])=>{x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)});
-  const sc=Math.min(204/Math.max(1,x1-x0),124/Math.max(1,y1-y0)),ox=(230-(x1-x0)*sc)/2,oy=(150-(y1-y0)*sc)/2;
-  s.setAttribute('viewBox',`${x0-ox/sc} ${y0-oy/sc} ${230/sc} ${150/sc}`);
-  const pts=C.pista.map(p=>p.join(',')).join(' ')+(C.cerrada?' '+C.pista[0].join(','):'');
-  E(s,'polyline',{points:pts,fill:'none',stroke:'#3a3f45','stroke-width':13/sc,'stroke-linejoin':'round','stroke-linecap':'round'});
-  E(s,'polyline',{points:pts,fill:'none',stroke:'#cfd4d8','stroke-width':4/sc,'stroke-linejoin':'round','stroke-linecap':'round'});
-  E(s,'circle',{cx:C.pista[0][0],cy:C.pista[0][1],r:5/sc,fill:'#fff'});
-  E(s,'circle',{id:'vAuto',r:11/sc,fill:'#f4c531',stroke:'#111','stroke-width':3/sc,cx:-999,cy:-999})};
- mini();
- // ---- poner los datos ----
- const tx=(id,sel,t)=>{const e=$(id).querySelector(sel);if(e.textContent!==t)e.textContent=t};
- function actualizar(){
-  const ms=vv.currentTime*1000,dur=duracion(),r=enVideo(ms);
-  $('vHora').textContent=hms(ms);$('vAvance').style.width=(dur?Math.min(100,ms/dur*100):0)+'%';
-  const v=r&&C.vueltas[r.i],q=r&&!r.fin?punto(r.i,r.t):null,p=q&&q.p;
-  // El mapa y los gráficos del informe siguen al video: la vuelta que se ve y la raya en el punto exacto (Matías, 06/11/2026)
-  if(r&&!r.fin&&C.vueltas[r.i].m&&C.vueltas[r.i].m.length){if(lap!==r.i){lap=r.i;sel=null;dibujar()}
-   const M=C.vueltas[lap].m;let a=0,b=M.length-1;while(b-a>1){const c=(a+b)>>1;if(M[c][0]<=r.t)a=c;else b=c}
-   const k=Math.abs(M[b][0]-r.t)<Math.abs(M[a][0]-r.t)?b:a;if(k!==sel)marcar(k)}
-  $('ovChip').textContent=!r?'ANTES DE LARGAR':r.fin&&r.i===lps[lps.length-1]?'FIN':nombreV(v)+' · '+(v.interrumpida?'INTERR.':v.medida?'MEDIDA':'LIBRE');
-  tx('ovTiempo','.n',r?tfmt(r.t*1000):'–');
-  const tot=C.distanciaM||(v&&v.L)||0;
-  tx('ovDist','.n',p?Math.round(p[1]).toLocaleString('es-AR'):'–');tx('ovDist','.u',tot?'/ '+Math.round(tot).toLocaleString('es-AR')+' m':'m');
-  tx('ovVel','.n',p&&q.ok?String(Math.round(p[2])):'–');
-  $('ovVel').querySelector('.vbarra').classList.toggle('no',!vSug);$('ovVel').querySelector('.sug').classList.toggle('no',!vSug);
-  if(vSug){tx('ovVel','.y',nf(vSug,1));$('ovVel').querySelector('.vbarra i').style.left=(p&&q.ok?Math.max(0,Math.min(1,(p[2]-vSug)/20+.5))*100:50)+'%'}
-  // adelanto: con el mismo signo y colores que la lectura del informe (+ adelantado, − atrasado; como la app)
-  const a=$('ovAde');
-  if(p&&C.distanciaM){const s=p[4],c=colAde(s);tx('ovAde','.n',(s>0?'+':s<0?'−':'±')+nf(Math.abs(s),1)+' s');tx('ovAde','.e',s>=0?'adelantado':'atrasado');a.querySelector('.n').style.color=c;a.querySelector('.e').style.color=c}
-  else{tx('ovAde','.n','–');tx('ovAde','.e','');a.querySelector('.n').style.color=''}
-  const au=$('vAuto');if(au){au.setAttribute('cx',p?p[5]:-999);au.setAttribute('cy',p?p[6]:-999)}
- }
- const hms=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=String(s%60).padStart(2,'0');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
- const duracion=()=>{if(isFinite(vv.duration)&&vv.duration>0)return vv.duration*1000;const l=lps[lps.length-1];return l===undefined?0:C.vueltas[l].videoMs+C.vueltas[l].realMs};
- // ---- rayitas de las vueltas en la línea ----
- // con muchas vueltas, una rayita cada 2, 5 o 10 (que no se peguen ni tapen la línea)
- function rayas(){const L=$('vLinea'),d=duracion();L.querySelectorAll('.raya').forEach(e=>e.remove());if(!d)return;
-  const n=lps.length,sep=n>1?L.clientWidth*(C.vueltas[lps[n-1]].videoMs-C.vueltas[lps[0]].videoMs)/(n-1)/d:1e9,
-   paso=[1,2,5,10,20].find(p=>sep*p>=30)||Math.ceil(30/Math.max(sep,.01));
-  lps.forEach((i,k)=>{if(k%paso)return;const ms=C.vueltas[i].videoMs;if(ms<0||ms>d)return;const e=document.createElement('div');e.className='raya';e.style.left=ms/d*100+'%';e.title=nombreV(C.vueltas[i]);
-   e.addEventListener('pointerdown',ev=>{ev.stopPropagation();ir(ms)});L.append(e)});$('vTot').textContent=hms(d)}
- if(window.ResizeObserver){let anchoL=0;new ResizeObserver(()=>{const w=$('vLinea').clientWidth;if(w&&Math.abs(w-anchoL)>2){anchoL=w;rayas()}}).observe($('vLinea'))}
- const ir=ms=>{const d=duracion();vv.currentTime=Math.max(0,Math.min(d?d/1000-0.05:1e9,ms/1000));actualizar()};
- (()=>{const L=$('vLinea');let tomado=false;const a=ev=>{const r=L.getBoundingClientRect();ir(Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width))*duracion())};
-  L.addEventListener('pointerdown',ev=>{tomado=true;L.setPointerCapture(ev.pointerId);a(ev)});L.addEventListener('pointermove',ev=>{if(tomado)a(ev)});
-  L.addEventListener('pointerup',()=>tomado=false);L.addEventListener('pointercancel',()=>tomado=false)})();
- // ---- elegir video ----
- function elegir(k){cur=k;const x=VS[k];lps=C.vueltas.map((v,i)=>i).filter(i=>C.vueltas[i].video===k).sort((a,b)=>C.vueltas[a].videoMs-C.vueltas[b].videoMs);
-  $('vMsj').classList.add('no');vv.src=url(x.archivo);vv.style.transform=x.girar&&x.espejo?'scaleY(-1)':x.girar?'rotate(180deg)':x.espejo?'scaleX(-1)':'';
-  document.querySelectorAll('#vSel .chip').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));$('vInfoV').textContent=nombreVid(k);rayas();actualizar()}
- if(VS.length>1)VS.forEach((x,k)=>{const b=document.createElement('button');b.className='chip';b.dataset.k=k;b.textContent=nombreVid(k);b.onclick=()=>elegir(k);$('vSel').append(b)});
- $('vBajar').innerHTML=VS.map((x,k)=>`<a href="${url(x.archivo)}?descargar=1" download="${x.archivo.replace(/"/g,'')}">Descargar video${VS.length>1?' · '+nombreVid(k):''}</a>`).join('');
- // ---- reproducir, pausa, pantalla completa ----
- let anim=0;const lazo=()=>{actualizar();anim=vv.paused?0:requestAnimationFrame(lazo)};
- const estado=()=>{const p=vv.paused;vid.classList.toggle('pausa',p);$('vPP').innerHTML=p?PLAY:PAUSA;$('vGrande').classList.toggle('no',!p);$('vEng').classList.toggle('no',!p);if(!p){panel(false);if(!anim)anim=requestAnimationFrame(lazo)}};
- const alternar=()=>{if(vv.paused){const pr=vv.play();if(pr&&pr.catch)pr.catch(()=>{})}else vv.pause()};
- ['play','pause','ended'].forEach(e=>vv.addEventListener(e,estado));
- ['timeupdate','seeked','loadeddata'].forEach(e=>vv.addEventListener(e,actualizar));
- vv.addEventListener('loadedmetadata',()=>{rayas();actualizar()});
- vv.addEventListener('error',()=>{const m=$('vMsj');m.classList.remove('no');m.textContent=vv.error&&vv.error.code===4?'Este navegador no puede abrir el video. Probá con Chrome, o descargalo.':'No se pudo abrir el video (¿se borró?).'});
- $('vPP').onclick=alternar;
- const completa=()=>{const fs=document.fullscreenElement||document.webkitFullscreenElement;
-  if(fs){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}
-  if(vw.classList.contains('fs')){vw.classList.remove('fs');return}
-  const f=vw.requestFullscreen||vw.webkitRequestFullscreen;
-  if(f){const r=f.call(vw);if(r&&r.then)r.then(()=>{try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}}).catch(()=>vw.classList.add('fs'))}else vw.classList.add('fs')};
- let toque=null;
- $('vToque').addEventListener('click',()=>{if(toque){clearTimeout(toque);toque=null;completa();return}
-  toque=setTimeout(()=>{toque=null;if(!$('vPanel').classList.contains('no'))panel(false);else alternar()},280)});
- document.addEventListener('keydown',ev=>{if(ev.key==='Escape')vw.classList.remove('fs')});
- // ---- configuración (solo en pausa): prender/apagar cada dato y moverlos ----
- const mostrar=()=>DATOS.forEach(([k])=>$(ID[k]).classList.toggle('no',guardado.ocultos.includes(k)||(k==='ade'&&!C.distanciaM)||(k==='pista'&&!!$('ovPista').dataset.sin)));
- function panel(abrir){const P=$('vPanel'),b=$('vEng');P.classList.toggle('no',!abrir);b.classList.toggle('abierto',abrir);b.innerHTML=abrir?'✎ Datos':ENG;
-  if(!abrir)return;
-  P.innerHTML='<h3>Datos sobre el video</h3>'+DATOS.filter(([k])=>!(k==='ade'&&!C.distanciaM)).map(([k,t])=>`<label>${t}<input type="checkbox" data-k="${k}" ${guardado.ocultos.includes(k)?'':'checked'}><span class="sw"></span></label>`).join('')+
-   '<p>Mantené apretado un dato para moverlo · se pega a los otros y a los bordes. <a id="vReset">Volver a como venía</a></p>';
-  P.querySelectorAll('input').forEach(i=>i.onchange=()=>{const k=i.dataset.k;guardado.ocultos=guardado.ocultos.filter(x=>x!==k);if(!i.checked)guardado.ocultos.push(k);guardar();mostrar()});
-  $('vReset').onclick=()=>{guardado={ocultos:[],pos:{}};guardar();DATOS.forEach(([k])=>{const e=$(ID[k]);e.style.left=e.style.top=e.style.right=e.style.bottom=''});mostrar();panel(true)}}
- $('vEng').onclick=()=>panel($('vPanel').classList.contains('no'));
- const ponerPos=()=>{const W=vid.clientWidth,H=vid.clientHeight;DATOS.forEach(([k])=>{const p=guardado.pos[k],e=$(ID[k]);if(!p)return;
-  e.style.right=e.style.bottom='auto';e.style.left=Math.max(0,Math.min(W-e.offsetWidth,p.x*W))+'px';e.style.top=Math.max(0,Math.min(H-e.offsetHeight,p.y*H))+'px'})};
- addEventListener('resize',ponerPos);document.addEventListener('fullscreenchange',()=>setTimeout(ponerPos,60));
- DATOS.forEach(([k])=>{const e=$(ID[k]);let reloj=null,ini=null,mov=false,dx=0,dy=0;
-  const limpiar=()=>vid.querySelectorAll('.vguia,.vpega').forEach(g=>g.remove());
-  e.addEventListener('pointerdown',ev=>{if(!vv.paused)return;ini={x:ev.clientX,y:ev.clientY};ev.preventDefault();
-   reloj=setTimeout(()=>{reloj=null;mov=true;e.classList.add('mov');try{e.setPointerCapture(ev.pointerId)}catch(_){}const r=e.getBoundingClientRect();dx=ini.x-r.left;dy=ini.y-r.top},420)});
-  e.addEventListener('pointermove',ev=>{if(reloj&&ini&&Math.hypot(ev.clientX-ini.x,ev.clientY-ini.y)>8){clearTimeout(reloj);reloj=null}
-   if(!mov)return;const R=vid.getBoundingClientRect(),W=R.width,H=R.height,w=e.offsetWidth,h=e.offsetHeight,u=parseFloat(getComputedStyle(vid).getPropertyValue('--u'))||W/1280;
-   let x=ev.clientX-R.left-dx,y=ev.clientY-R.top-dy;const um=Math.max(8,14*u),mg=22*u,sep=10*u,barra=(18+52+14)*u;
-   // imán: bordes del video y los otros datos (alinear bordes o ponerse al lado)
-   const otros=DATOS.map(([j])=>j).filter(j=>j!==k&&!$(ID[j]).classList.contains('no')).map(j=>{const o=$(ID[j]),q=o.getBoundingClientRect();return{j,l:q.left-R.left,t:q.top-R.top,r:q.right-R.left,b:q.bottom-R.top}});
-   let bx=null,by=null;const prueba=(pos,ref,de,es,eje)=>{const d=Math.abs(pos-ref);const m=eje==='x'?bx:by;if(d<um&&(!m||d<m.d)){const n={d,v:ref-(pos-(eje==='x'?x:y)),linea:ref,de};if(eje==='x')bx=n;else by=n}};
-   prueba(x,mg,null,0,'x');prueba(x+w,W-mg,null,0,'x');prueba(y,mg,null,0,'y');prueba(y+h,H-barra,null,0,'y');
-   otros.forEach(o=>{prueba(x,o.l,o.j,0,'x');prueba(x+w,o.r,o.j,0,'x');prueba(x,o.r+sep,o.j,0,'x');prueba(x+w,o.l-sep,o.j,0,'x');
-    prueba(y,o.t,o.j,0,'y');prueba(y+h,o.b,o.j,0,'y');prueba(y,o.b+sep,o.j,0,'y');prueba(y+h,o.t-sep,o.j,0,'y')});
-   if(bx)x=bx.v;if(by)y=by.v;x=Math.max(0,Math.min(W-w,x));y=Math.max(0,Math.min(H-h,y));
-   e.style.right=e.style.bottom='auto';e.style.left=x+'px';e.style.top=y+'px';
-   limpiar();const g=(c,v)=>{const d=document.createElement('div');d.className='vguia '+c;d.style[c==='x'?'left':'top']=v+'px';vid.append(d)};
-   if(bx)g('x',bx.linea);if(by)g('y',by.linea);const de=(by&&by.de)||(bx&&bx.de);
-   if(de){const l=document.createElement('div');l.className='vpega';l.textContent='se pega a «'+NOMBRE[de]+'»';l.style.left=x+'px';l.style.top=(y+h+8*u>H-barra-20*u?y-26*u:y+h+8*u)+'px';vid.append(l)}});
-  const fin=()=>{if(reloj){clearTimeout(reloj);reloj=null}ini=null;if(!mov)return;mov=false;e.classList.remove('mov');limpiar();
-   guardado.pos[k]={x:e.offsetLeft/vid.clientWidth,y:e.offsetTop/vid.clientHeight};guardar()};
-  e.addEventListener('pointerup',fin);e.addEventListener('pointercancel',fin);e.addEventListener('contextmenu',ev=>ev.preventDefault())});
- // ---- desde el informe: una vuelta de la tabla o un punto del mapa llevan el video ahí ----
- irVideo=(i,t)=>{const v=C.vueltas[i];if(!v||v.video==null||!VS[v.video])return;if(v.video!==cur)elegir(v.video);
-  const ms=v.videoMs+(t||0)*1000;if(vv.readyState>=1)ir(ms);else vv.addEventListener('loadedmetadata',()=>ir(ms),{once:true})};
- $('vEng').innerHTML=ENG;mostrar();elegir(0);estado();setTimeout(ponerPos,0);
-})();
+// RASPBERRY: el video de la cámara. Está en recursos/informe-video.js; herramientas/armar-informe.py lo pega acá
+__VIDEO_JS__
+// /RASPBERRY
+
+// RASPBERRY: recorrido libre: resumen y marcas en vez de la tabla de vueltas
+if(C.recorrido){(function(){
+  const r=C.resumen||{},h=ms=>{const s=Math.round((ms||0)/1000);return Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+  const n1=(x,d)=>x==null?'–':nf(x,d);
+  $('cajaVueltas').style.display='none';$('cajaRec').style.display='';
+  $('recKpi').innerHTML=[[h(r.tiempoMs),'TIEMPO'],[n1((r.distM||0)/1000,1)+' km','DISTANCIA'],[n1(r.promKmh,1),'PROMEDIO KM/H'],[n1(r.maxKmh,0),'MÁXIMA KM/H'],[h(r.paradoMs).replace(/^0:/,''),'PARADO'],[n1(r.acelMax,1),'ACEL. MÁX. M/S²']].map(([b,t])=>`<div><b>${b}</b><span>${t}</span></div>`).join('');
+  const M=C.marcas||[];$('recInfo').textContent=M.length?M.length+(M.length===1?' marca':' marcas'):'sin marcas';
+  $('recMarcas').innerHTML=M.map(k=>`<div style="display:flex;gap:14px;align-items:center;padding:6px 2px;border-top:1px solid #ffffff1a"><b style="width:26px;height:26px;border-radius:50%;background:#f4c531;color:#111;display:grid;place-items:center">${k.n}</b><span>${h(k.ms)}</span><span>${n1((k.m||0)/1000,1)} km</span><span style="color:#f4c531">${Math.round(k.kmh||0)} km/h</span></div>`).join('');
+})()}
+// /RASPBERRY
 </script></body></html>

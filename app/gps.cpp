@@ -24,7 +24,7 @@ double monotonicoAAhora(double monoMs) {
     return monoMs - static_cast<double>(relojCarrera().msecsSinceReference()) + 1000;
 }
 
-GpsSimulado::GpsSimulado(QObject* padre) : FuenteGps(padre) {
+GpsSimulado::GpsSimulado(QObject* padre, bool fijo) : FuenteGps(padre), fijo_(fijo) {
     t0_ = ahoraMs();
     reloj_.setTimerType(Qt::PreciseTimer);
     reloj_.setInterval(100);   // 10 Hz, como el NEO-M8N
@@ -40,9 +40,10 @@ void GpsSimulado::ponerVuelta(double distanciaM, double tiempoMs) {
 }
 
 void GpsSimulado::tic() {
-    const double t = ahoraMs(), s = (t - t0_) / 1000;
+    ++lecturas_;
+    const double t = fijo_ ? t0_ + lecturas_ * 100.0 : ahoraMs(), s = (t - t0_) / 1000;
     auto* azar = QRandomGenerator::global();
-    double v = base_ * (1 + 0.12 * std::sin(s / 9) + 0.06 * std::sin(s / 2.7)) + (azar->generateDouble() - 0.5) * 0.3;
+    double v = fijo_ ? base_ : base_ * (1 + 0.12 * std::sin(s / 9) + 0.06 * std::sin(s / 2.7)) + (azar->generateDouble() - 0.5) * 0.3;
     v = std::max(0.0, v);
     recorrido_ += v * 0.1;
     // Circuito redondo cerca de Buenos Aires
@@ -50,9 +51,10 @@ void GpsSimulado::tic() {
     beto::Muestra m;
     m.t = t;
     m.velMs = v;
-    m.precisionM = 1.5 + azar->generateDouble() * 1.5;
+    m.precisionM = fijo_ ? 1.5 : 1.5 + azar->generateDouble() * 1.5;
     m.lat = -34.6 + (r * std::sin(a)) / 111320.0;
     m.lon = -58.4 + (r * std::cos(a)) / (111320.0 * std::cos(34.6 * M_PI / 180));
+    if (fijo_) emit datos(11, QDateTime::currentDateTimeUtc());   // como un módulo de verdad: «GPS 11» en la barra
     emit muestra(m);
 }
 

@@ -1,0 +1,9 @@
+#!/bin/bash
+# iw de mentira (pruebas/dobles): con la red propia armada contesta un celu conectado; si no, nada.
+E=${NMCLI_FALSO_ESTADO:?falta NMCLI_FALSO_ESTADO}
+[ -n "${NMCLI_FALSO_REGISTRO:-}" ] && printf 'iw %s\n' "$*" >> "$NMCLI_FALSO_REGISTRO"
+if [ "$*" = "dev wlan0 station dump" ] && [ "$(cat "$E/propia" 2>/dev/null)" = 1 ]; then
+  echo "Station 5c:f3:70:9a:12:34 (on wlan0)"
+  echo "	inactive time:	120 ms"
+fi
+exit 0
