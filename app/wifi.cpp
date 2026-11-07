@@ -22,8 +22,11 @@ Wifi::Wifi(QObject* padre) : QObject(padre), real_(qEnvironmentVariableIsSet("BE
         senalConectada_ = 3;
         return;
     }
-    connect(&cada_, &QTimer::timeout, this, &Wifi::refrescar);
-    connect(&cada_, &QTimer::timeout, this, &Wifi::revisarPropia);
+    connect(&cada_, &QTimer::timeout, this, [this] {
+        if (enVuelo_ > 0) return;   // NetworkManager lento: no se apilan programas
+        refrescar();
+        revisarPropia();
+    });
     cada_.start(10000);
     refrescar();
     QTimer::singleShot(3000, this, &Wifi::buscar);
@@ -45,14 +48,23 @@ QStringList Wifi::campos(const QString& linea) {
 void Wifi::nmcli(const QStringList& args, std::function<void(int, const QString&, const QString&)> listo) {
     auto* p = new QProcess(this);
     p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(10); });   // el wifi espera: primero GPS, cronómetro y pulsador
-    connect(p, &QProcess::finished, this, [p, listo](int codigo, QProcess::ExitStatus) {
+    ++enVuelo_;
+    connect(p, &QProcess::finished, this, [this, p, listo](int codigo, QProcess::ExitStatus) {
+        --enVuelo_;
         listo(codigo, QString::fromUtf8(p->readAllStandardOutput()), QString::fromUtf8(p->readAllStandardError()).trimmed());
         p->deleteLater();
     });
-    connect(p, &QProcess::errorOccurred, this, [p, listo](QProcess::ProcessError e) {
-        if (e == QProcess::FailedToStart) { listo(-1, {}, QStringLiteral("No está nmcli")); p->deleteLater(); }
+    connect(p, &QProcess::errorOccurred, this, [this, p, listo](QProcess::ProcessError e) {
+        if (e == QProcess::FailedToStart) { --enVuelo_; listo(-1, {}, QStringLiteral("No está nmcli")); p->deleteLater(); }
     });
+    // Tiempo límite: si NetworkManager no contesta en 15 s, se corta (el «hotspot» puede tardar: 40 s)
+    const bool lento = args.contains(QStringLiteral("hotspot")) || args.contains(QStringLiteral("connect")) || args.contains(QStringLiteral("--rescan"));
+    QTimer::singleShot(lento ? 40000 : 15000, p, [p] { if (p->state() != QProcess::NotRunning) p->kill(); });
     p->start(QStringLiteral("nmcli"), args);
+}
+
+void Wifi::modoCarrera(bool enCarrera) {
+    if (real_) cada_.setInterval(enCarrera ? 60000 : 10000);
 }
 
 namespace { const QString kConPropia = QStringLiteral("betometro-propia"); }
@@ -165,6 +177,7 @@ void Wifi::contarConectados() {
         if (n != conectadosPropia_) { conectadosPropia_ = n; emit cambio(); }
     });
     connect(p, &QProcess::errorOccurred, p, &QObject::deleteLater);
+    QTimer::singleShot(5000, p, [p] { if (p->state() != QProcess::NotRunning) p->kill(); });
     p->start(QStringLiteral("iw"), {QStringLiteral("dev"), QStringLiteral("wlan0"), QStringLiteral("station"), QStringLiteral("dump")});
 }
 

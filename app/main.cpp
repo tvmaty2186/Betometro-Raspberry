@@ -212,6 +212,7 @@ int main(int argc, char* argv[]) {
     });
     salud.modoCarrera(crono.enCurso());
     QObject::connect(&crono, &Crono::enCursoChanged, &salud, [&] { salud.modoCarrera(crono.enCurso()); });
+    QObject::connect(&crono, &Crono::enCursoChanged, &wifi, [&] { wifi.modoCarrera(crono.enCurso()); });
     // Brillo: al prender y cada vez que cambia en Ajustes
     auto ponerBrillo = [&] {
         const QVariant b = datos.cfg(QStringLiteral("brillo"));

@@ -24,7 +24,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
       carrera** (Matías: no).
 - [x] Tarjeta llena en carrera: **parar el video y que la carrera siga** (Matías: sí) (06-1.3).
 - [x] Cámara colgada o desenchufada: matarla si no termina, poder volver a grabar (02-1.2, 06-1.4).
-- [ ] `nmcli` / `iw` con tiempo límite y menos chequeos de wifi en carrera (02-1.3).
+- [x] `nmcli` / `iw` con tiempo límite y menos chequeos de wifi en carrera (02-1.3).
 - [ ] Instalador: no tocar `cmdline.txt` si no cambia, `sync`, `trap` si falla a mitad, `Type=notify` (10-1.2 a 1.4).
 - [ ] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
 - [ ] Borrar los paquetes de actualización viejos (10).
@@ -82,7 +82,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] Relojes del cronómetro prendidos solo con una carrera preparada (02-2).
 - [ ] GPS con puerto fijo: apagar el aviso si se desenchufa (02-2).
 - [ ] Traza larga: `std::deque` en vez de borrar el primero (02-3, 04-3.5).
-- [ ] Wifi en carrera cada 30 s (04-3.3).
+- [x] Wifi en carrera cada 30 s (04-3.3).
 - [ ] Drive: no armar el informe de todas las carreras en el hilo principal (04-3.6).
 - [ ] Modo tele: contar vueltas en C++, sin armar el informe de cada carrera (04-3.7, 01-2.4).
 - [ ] Anillo de la cuenta y franja de la Sugerida sin repintar de más (03-3).

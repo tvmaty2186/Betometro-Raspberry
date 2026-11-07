@@ -53,6 +53,7 @@ public:
     QString error() const { return error_; }
 
     Q_INVOKABLE void buscar();
+    void modoCarrera(bool enCarrera);   // en carrera se revisa cada 60 s en vez de cada 10 s (02-1.3, 04-3.3)
     Q_INVOKABLE bool tieneClave(const QString& red) const;
     Q_INVOKABLE void conectar(const QString& red, const QString& clave);
     Q_INVOKABLE void olvidar(const QString& red);
@@ -89,4 +90,5 @@ private:
     bool redes_permitidas_ = true;
     qint64 fallaPropia_ = 0;      // ms de la última vez que no se pudo armar (para no reintentar sin parar)
     QTimer cada_;
+    int enVuelo_ = 0;             // nmcli/iw que todavía no terminaron: no se lanza otra vuelta encima
 };
