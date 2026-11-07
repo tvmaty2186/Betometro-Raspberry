@@ -183,18 +183,22 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 
 ## 7. Simulador de carrera en el Chequeo previo (pedido de Matías, 07/11/2026)
 
-- [ ] En el Chequeo previo, una fila **«Simulador»**: corre una carrera simulada corta por detrás (GPS simulado,
+- [x] En el Chequeo previo, una fila **«Simulador»**: corre una carrera simulada corta por detrás (GPS simulado,
       largar, vueltas, MARCAR, Terminar, guardado e informe), sin tocar las carreras de verdad.
-- [ ] Revisa todos los errores y muestra el resultado:
+- [x] Revisa todos los errores y muestra el resultado:
   - **Verde «Simulador OK»**: pasó todo.
   - **Naranja, falla leve**: «Revisar». Muestra el detalle y el **QR para mandar el reporte**.
   - **Rojo, necesita atención**: «Hay errores en la simulación que hay que atender. Comunicate con el
     desarrollador». Muestra el detalle y el **QR para mandar el reporte**.
-- [ ] El QR abre en el celu el reporte (en «Betómetro en la red» → «Reporte de errores») para mandárselo al
+- [x] El QR abre en el celu el reporte (en «Betómetro en la red» → «Reporte de errores») para mandárselo al
       desarrollador.
-- [ ] Qué es leve y qué es grave: definirlo al programar (por ejemplo, grave: no guarda, el informe no abre,
+- [x] Qué es leve y qué es grave: definirlo al programar (por ejemplo, grave: no guarda, el informe no abre,
       los tiempos dan mal; leve: tarda más de lo normal).
-- [ ] Mostrar muestra de la pantalla antes de programar.
+- [x] Mostrar muestra de la pantalla antes de programar.
+
+Hecho (1.0.29): `app/simulacion.cpp` (15 pruebas: 12 graves, 3 leves: voz, lugar y velocidad del equipo). Lo que
+falla va al reporte de errores; el QR abre `/reportes`; «Mandar» lo manda por internet si hay llave. Falta en el
+Chequeo la llave de MARCAR y de dónde salió la hora (no entran en la grilla: quedan en Ajustes).
 
 ## 8. Auditoría 11: lo que faltó (Matías: sí a todo, 07/11/2026)
 

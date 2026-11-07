@@ -143,6 +143,11 @@ QByteArray Reportes::texto() const {
     return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
 }
 
+bool Reportes::hayLlave() const {
+    QFile t(carpeta_ + QStringLiteral("/../reportes.token"));
+    return t.open(QIODevice::ReadOnly) && !t.readAll().trimmed().isEmpty();
+}
+
 void Reportes::enviar() {
     if (carrera_) return;   // nunca durante una carrera
     QFile t(carpeta_ + QStringLiteral("/../reportes.token"));

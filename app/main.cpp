@@ -47,6 +47,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "camara.h"
 #include "pulsador_gpio.h"
 #include "reportes.h"
+#include "simulacion.h"
 #include "servidor.h"
 #include "control_remoto.h"
 #include "wifi.h"
@@ -254,6 +255,7 @@ int main(int argc, char* argv[]) {
     qmlRegisterType<ImagenVideo>("Betometro.Video", 1, 0, "ImagenVideo");
     // Y se reproduce con GStreamer, que usa el descompresor de video de la Raspberry (app/video_gst.h)
     qmlRegisterType<VideoGst>("Betometro.Video", 1, 0, "VideoGst");
+    Simulacion simulacion(carpeta, &audio, &reportes);   // antes que el motor de QML: se destruye después
     QQmlApplicationEngine motor;
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);
     motor.rootContext()->setContextProperty(QStringLiteral("Wifi"), &wifi);
@@ -267,6 +269,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);
     motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
+    motor.rootContext()->setContextProperty(QStringLiteral("Simulador"), &simulacion);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
     motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
     motor.rootContext()->setContextProperty(QStringLiteral("Hdmi"), &hdmi);

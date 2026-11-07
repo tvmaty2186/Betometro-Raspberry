@@ -13,15 +13,18 @@ TPantalla {
     readonly property bool gpsOk: !!g.ok && g.hz > 0 && g.precision <= umbral
     readonly property bool todoListo: gpsOk || !Datos.ajustes.velActiva
     focus: true
-    Component.onCompleted: forceActiveFocus()
+    Component.onCompleted: { forceActiveFocus(); if (Contexto.prueba === "simulador") Simulador.correr(); }   // simulador: solo capturas
     function recibido(por) { if (pulsador !== "esperando") return; pulsador = "funciona"; llegoPor = por; }
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca() { raiz.recibido("el pulsador"); } }
     Keys.onPressed: e => {
         if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter || e.key === Qt.Key_Space || e.key === Qt.Key_F9) { recibido("el teclado"); e.accepted = true; }
     }
 
+    // Muestra aprobada 1.0.29: TODO LISTO pasa a barra ancha abajo para que entre la casilla «Simulador»
     Grid {
-        anchors.fill: raiz.area
+        id: grilla
+        width: raiz.area.width
+        height: raiz.area.height - 110 - 18
         columns: raiz.h ? 4 : 2
         spacing: 18
         readonly property real an: (width - (columns - 1) * spacing) / columns
@@ -54,8 +57,20 @@ TPantalla {
                  dato: !Datos.guardaBien ? "No se puede guardar"
                        : (!Datos.ajustes.camara ? "Apagada" : Camara.hay ? "Lista" : "Sin cámara") + " · " + (poco ? "Poco lugar " : "") + Datos.lugarLibre()
                  onTocado: Navegacion.ir("camara") }
-        TBoton { width: parent.an; height: parent.al; tipo: raiz.todoListo ? "acento" : ""; icono: "check"
-                 nombre: raiz.todoListo ? "TODO LISTO" : "Falta el GPS"; activo: raiz.todoListo
-                 onTocado: Navegacion.ir("inicio") }
+        // Simulador de carrera (Matías, 07/11/2026): verde OK · naranja revisar · rojo avisar al desarrollador
+        TBoton { width: parent.an; height: parent.al; icono: "simulador"; nombre: "Simulador"
+                 readonly property string e: Simulador.estado
+                 tipo: e === "grave" ? "peligro" : e === "leve" ? "naranja" : ""
+                 colorDato: e === "ok" ? Tema.bien : Tema.acento
+                 dato: e === "corriendo" ? "Probando…" : e === "ok" ? "Simulador OK · " + Simulador.total + " pruebas"
+                       : e === "leve" ? "Revisar · " + Simulador.fallas + (Simulador.fallas === 1 ? " aviso" : " avisos")
+                       : e === "grave" ? "Hay errores: avisá" : "Tocá para probar"
+                 onTocado: { if (e === "leve" || e === "grave") Navegacion.ir("simulador"); else if (e !== "corriendo") Simulador.correr(); } }
+    }
+    TBoton {
+        x: 0; y: grilla.height + 18; width: raiz.area.width; height: 110
+        tipo: raiz.todoListo ? "acento" : ""; icono: ""; tamNombre: 40
+        nombre: raiz.todoListo ? "TODO LISTO" : "Falta el GPS"; activo: raiz.todoListo
+        onTocado: Navegacion.ir("inicio")
     }
 }

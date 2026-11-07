@@ -21,6 +21,8 @@ public:
     void anotar(const QString& tipo, const QString& texto);
     QByteArray texto() const;                // todo el registro (para la página)
     void ponerOcupado(bool siCarrera) { carrera_ = siCarrera; }
+    bool hayLlave() const;                   // está reportes.token (se puede mandar por internet)
+    void enviarAhora() { enviar(); }         // botón «Mandar el reporte» del simulador
     static bool esRuido(const QString& m);   // avisos que no son errores (público para probarlo)
 
 private:

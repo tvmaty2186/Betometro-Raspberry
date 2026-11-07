@@ -30,7 +30,7 @@ if(BETO_PROGRAMA)
   find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg Multimedia Network)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
-    qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp
+    qt_add_executable(betometro app/main.cpp app/contexto.h app/datos.h app/datos.cpp app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp app/simulacion.h app/simulacion.cpp
       app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp app/imagen_video.h app/imagen_video.cpp app/video_gst.h app/video_gst.cpp
       app/drive.h app/drive.cpp app/drive_logica.h app/drive_logica.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
