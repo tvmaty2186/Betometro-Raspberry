@@ -197,12 +197,13 @@ findmnt / -o OPTIONS; findmnt /tmp; systemctl is-enabled bluetooth fstrim.timer
 
 ### Segunda medición (07/11, la hora)
 
-- `timesyncd` activo pero **nunca mandó un paquete** (`Packet count: 0`, `Server: n/a`) en 38 minutos con la wifi
-  de casa. No es el router bloqueando: ni siquiera lo intenta. El registro no dice por qué porque journald guarda
-  solo avisos (`instalar.sh:61`, `MaxLevelStore=warning`).
+- `timesyncd` activo pero **nunca mandó un paquete** (`Packet count: 0`, `Server: n/a`). **Causa: la wifi de casa
+  no tenía internet ese día** (Matías). Sin internet no resuelve el nombre del servidor y no pide la hora. No es
+  una falla de `timesyncd`.
 - **No hay `fake-hwclock`.** Al prender, la Pi arranca con la hora en que se apagó (la guarda `timesyncd`) y,
   como NTP no corrige, queda atrasada todo el tiempo que estuvo apagada. Por eso decía 06/11 23:57: es la hora
-  del apagado de anoche más los minutos prendida.
+  del apagado de anoche más los minutos prendida. **Conclusión: sin internet, la única fuente de hora es el GPS**
+  (punto 1.2): es lo más importante de la parte del sistema.
 - Disco: `/` con `noatime` (bien). `/var/lib/betometro/actualizacion` = **494 MB** de paquetes viejos (de 498
   MB); la base pesa 364 KB.
 - Qt 6.8.2 (`libqt6core6t64 6.8.2+dfsg-9+deb13u2`).

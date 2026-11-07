@@ -182,8 +182,9 @@ Medido en la Pi el 07/11 (tabla al final de 11b).
 Sistema operativo:
 - [ ] **ssh cerrado en la red propia** y límite de intentos: nftables con pocas reglas + `sshd_config.d`
       (`MaxAuthTries 3`, `AllowUsers beto`). En casa se entra igual, con clave (B-1.1).
-- [ ] **Hora: la Pi estaba 11 h atrasada con la wifi de casa** (NTP no sincroniza). Averiguar por qué y arreglarlo,
-      además de la hora del GPS. Mostrar en el Chequeo previo si la hora no está sincronizada (Pi, 07/11).
+- [ ] **Hora: la Pi estaba 11 h atrasada** porque la wifi no tenía internet: arranca con la hora del apagado y nada
+      la corrige. **La hora del GPS es lo primero del sistema.** Mostrar en el Chequeo previo de dónde salió la hora
+      (GPS, internet o sin hora) (Pi, 07/11).
 - [ ] Arranque 12 s más rápido: PulseAudio sin la tarjeta HDMI (hoy tarda 10 s y falla) y apagar `cloud-init`,
       `NetworkManager-wait-online`, `rpi-eeprom-update`, `udisks2`, `sshswitch`. **Dejar `avahi`** (Pi, 07/11).
 - [ ] Quitar el núcleo de la Pi 5 (`linux-image-rpi-2712`) (Pi, 07/11).
