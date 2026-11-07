@@ -10,18 +10,26 @@ Caja {
     readonly property real interiorA: redondo ? width * 0.68 : width - 24
     readonly property real interiorH: redondo ? height * 0.68 : height - 16
     readonly property var d: est.deltaS === undefined ? null : est.deltaS
+    // Número grande (Matías, 07/11/2026: «que se lea de lejos»): ±segundos enorme y abajo ADELANTADO / ATRASADO /
+    // EN TIEMPO en color (verde adelantado, amarillo atrasado). Antes era «ADELANTADO 2,4 s» en una línea y salía chico.
+    readonly property bool enTiempo: d !== null && Math.abs(d) < 0.05
+    readonly property color tono: d === null || enTiempo ? Tema.numero : d > 0 ? Tema.bien : Tema.warn
     Column {
         visible: raiz.estilo !== "barra"
         anchors.centerIn: parent
         width: raiz.interiorA
-        Etiq { alto: raiz.height; width: parent.width; text: "Adelantado / atrasado" }
+        Etiq { alto: raiz.height; width: parent.width; text: "± segundos" }   // abajo ya dice ADELANTADO / ATRASADO
         Numero {
             width: parent.width
-            pAlto: 70; pAncho: 95; alto: raiz.interiorH; anchoCaja: raiz.interiorA; ancho: raiz.ancho
-            color: raiz.d !== null && raiz.d <= -0.05 ? Tema.warn : Tema.numero
-            text: raiz.d === null ? (raiz.est.enCurso ? "SIN DATOS" : "EN TIEMPO")
-                : Math.abs(raiz.d) < 0.05 ? "EN TIEMPO"
-                : (raiz.d > 0 ? "ADELANTADO " : "ATRASADO ") + Math.abs(raiz.d).toFixed(1).replace(".", ",") + " s"
+            pAlto: 58; pAncho: 116; alto: raiz.interiorH; anchoCaja: raiz.interiorA; ancho: raiz.ancho
+            color: raiz.tono
+            text: raiz.d === null ? "–" : raiz.enTiempo ? "0,0" : (raiz.d > 0 ? "+" : "−") + Math.abs(raiz.d).toFixed(1).replace(".", ",")
+        }
+        Text {
+            width: parent.width; horizontalAlignment: Text.AlignHCenter
+            text: raiz.d === null ? (raiz.est.enCurso ? "SIN DATOS" : "EN TIEMPO") : raiz.enTiempo ? "EN TIEMPO" : raiz.d > 0 ? "ADELANTADO" : "ATRASADO"
+            color: raiz.tono
+            font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.max(14, Math.min(28, raiz.height * 0.1)); letterSpacing: 2 }
         }
     }
     // Barra: cero en el medio; a la derecha adelantado (verde), a la izquierda atrasado (amarillo), ±5 s
