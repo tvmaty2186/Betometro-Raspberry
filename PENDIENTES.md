@@ -97,6 +97,8 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 
 ## 1.0.28 (en preparación)
 Todo lo que entra, con las decisiones de Matías: **[docs/plan-1.0.28.md](docs/plan-1.0.28.md)**. Seguir esa lista.
+**Matías (07/11): entra todo lo de las auditorías**, también lo que era «para después» (engranaje, Drive con la base,
+un archivo por carrera, ordenar el código). Afuera solo Deshacer, carteles grandes y clave distinta.
 
 ## Auditorías (plan aprobado 07/11/2026)
 Diez revisiones del proyecto por dentro, de a una, en sesiones nuevas. Lista, modelo de cada una y el prompt
