@@ -7,22 +7,27 @@ import QtQuick
 // en fracciones de la pantalla (6.6 de la app). Redondos: w = diámetro como fracción del ancho.
 // Se guardan en la configuración: «widgetsH» (horizontal) y «widgets» (vertical).
 QtObject {
-    // De fábrica, medidos en las muestras aprobadas (px de 1280×720 y 720×1280)
+    // De fábrica, medidos en las muestras aprobadas (px de 1280×720 y 720×1280).
+    // 07/11/2026 (Matías): se suma ± segundos (delta). Acostada va arriba a la derecha y la Sugerida baja al lado
+    // de la velocidad (que la sugerida quede cerca de la medida). De pie, la Sugerida queda al lado del velocímetro
+    // y ± segundos va abajo, al lado de la última vuelta.
     readonly property var pxH: [
         { t: "cuenta", x: 24, y: 56, w: 1232, h: 320, extra: true, barra: true, ancho: 1.2 },
         { t: "tipo", x: 50, y: 90, w: 210, h: 210, forma: "redondo" },
-        { t: "necesaria", x: 1010, y: 96, w: 220, h: 200 },
-        { t: "velocimetro", x: 24, y: 400, w: 330, h: 300, barra: true },
-        { t: "ultima", x: 378, y: 400, w: 270, h: 300 },
-        { t: "marcar", x: 672, y: 400, w: 584, h: 300 }
+        { t: "delta", x: 1010, y: 96, w: 220, h: 200 },
+        { t: "velocimetro", x: 24, y: 400, w: 290, h: 300, barra: true },
+        { t: "necesaria", x: 334, y: 400, w: 250, h: 300 },
+        { t: "ultima", x: 604, y: 400, w: 220, h: 300 },
+        { t: "marcar", x: 844, y: 400, w: 412, h: 300 }
     ]
     readonly property var pxV: [
         { t: "velocimetro", forma: "redondo", x: 150, y: 72, w: 420, h: 420 },
         { t: "tipo", x: 20, y: 410, w: 190, h: 190, forma: "redondo" },
         { t: "necesaria", x: 500, y: 430, w: 200, h: 160 },
-        { t: "cuenta", x: 20, y: 620, w: 680, h: 270, extra: true, barra: true, ancho: 1.2 },
-        { t: "ultima", x: 20, y: 910, w: 680, h: 96 },
-        { t: "marcar", x: 20, y: 1026, w: 680, h: 234 }
+        { t: "cuenta", x: 20, y: 620, w: 680, h: 250, extra: true, barra: true, ancho: 1.2 },
+        { t: "delta", x: 20, y: 890, w: 330, h: 120 },
+        { t: "ultima", x: 370, y: 890, w: 330, h: 120 },
+        { t: "marcar", x: 20, y: 1030, w: 680, h: 230 }
     ]
     readonly property var tipos: [
         { t: "cuenta", nombre: "Cronómetro de la vuelta", vel: false },

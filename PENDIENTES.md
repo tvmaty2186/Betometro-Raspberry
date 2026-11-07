@@ -101,6 +101,9 @@ para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los inf
 **Hechas las 10 (07/11/2026).** Resumen y preguntas para Matías: [docs/auditorias/00-resumen.md](docs/auditorias/00-resumen.md).
 Respuestas de Matías en el resumen. **OK de Matías (07/11): 1.0.27 con todos los arreglos chicos de A y B más
 todas las mejoras de rendimiento** (guardado, barrita, listas del video, tableros, capas, fondo, 480p 800×600).
+Ya hecho para la 1.0.27 (sin publicar): **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
+a la derecha y la Sugerida abajo, al lado de la velocidad. De pie: abajo, al lado de la última vuelta (`Armado.qml`).
+UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorrido libre queda adentro de Práctica.
 
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar

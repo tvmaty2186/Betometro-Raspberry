@@ -114,6 +114,9 @@ Cambian lo que hace la app en estos puntos:
 - **Volumen:** un solo ajuste, en Ajustes → «Voz y sonido» → «Volumen auriculares», con botón ▶ Probar. **De fábrica viene al máximo (100 %).** Es el volumen con que se escucha la voz al largar y durante la carrera. Si el usuario lo cambia, se guarda y se usa siempre el último que eligió. (No se fuerza el máximo al largar.)
 - **Fondo en carrera:** como la app: toda la pantalla roja en vuelta medida y verde en práctica (indicador «fondo»). Decidido el 01/11/2026.
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
+- **± segundos en la pantalla de carrera (07/11/2026):** cuadro «delta» con el número grande (+2,4 / −1,0) y abajo
+  ADELANTADO (verde), ATRASADO (amarillo) o EN TIEMPO. De fábrica: acostada arriba a la derecha (la Sugerida baja al lado
+  de la velocidad), de pie abajo al lado de la última vuelta. Distinto de la app, decidido por Matías.
 - **Recorrido libre (07/11/2026):** en Práctica libre. Una sola «vuelta» abierta y libre, sin tiempo ideal ni distancia
   (`extra.recorrido`), sin voz. MARCAR deja marcas (`extra.marcas`: `{n, ms, m, kmh}`), no corta. Al terminar no queda
   «interrumpida». Pantalla: `widgets/TableroRecorrido.qml`; informe: resumen y marcas (`datosInforme` → `resumen`, `marcas`).
