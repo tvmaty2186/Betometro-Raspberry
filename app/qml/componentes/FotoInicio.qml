@@ -15,8 +15,7 @@ Canvas {
         const c = getContext("2d"), W = width, H = height;
         c.reset();
         if (!isImageLoaded(archivo)) return;
-        const img = c.createImageData(archivo);
-        const iw = img.width, ih = img.height;
+        const iw = 1200, ih = 800;   // medidas de inicio.jpg (antes se copiaba la foto entera, 3,8 MB, solo para leerlas) (03-2.3)
         const e = Math.max(W / iw, H / ih), dw = iw * e, dh = ih * e;
         c.drawImage(archivo, (W - dw) / 2, (H - dh) * focoY, dw, dh);
         c.globalCompositeOperation = "destination-in";

@@ -15,7 +15,7 @@ Item {
 
     function marcar(fuente, edadMs) {
         const r = Crono.marcar(fuente, edadMs || 0);
-        if (r === "largada" || r === "marca") (raiz.recorrido ? tableroRec : tablero).efectoMarcar();
+        if ((r === "largada" || r === "marca") && tablero.item) tablero.item.efectoMarcar();
     }
     // Pulsador por cable: la marca vale cuando se apoyó el dedo (edadMs atrás)
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca(edadMs) { raiz.marcar("pulsador", edadMs); } }
@@ -65,19 +65,22 @@ Item {
     }
 
     // Fondo: del tema, o del color de la vuelta con la carrera en curso (indicador «fondo», fábrica)
-    Fondo { anchors.fill: parent }
+    // Tapado por el color de la vuelta, el fondo no se dibuja (03-2.2). Los colores salen de Datos.ajustes: antes
+    // Datos.cfg() se llamaba 20 veces por segundo dentro del enlace (03-3)
+    Fondo { anchors.fill: parent; visible: colorVuelta.opacity < 1 }
     Rectangle {
+        id: colorVuelta
         anchors.fill: parent
-        readonly property bool fondo: Datos.cfg("indicador") !== "marco"
-        color: est.medida && !raiz.recorrido ? Datos.cfg("colMedida") : Datos.cfg("colPractica")
+        readonly property bool fondo: Datos.ajustes.indicador !== "marco"
+        color: est.medida && !raiz.recorrido ? Datos.ajustes.colMedida : Datos.ajustes.colPractica
         opacity: Crono.enCurso && fondo ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
         Behavior on color { ColorAnimation { duration: 250 } }
     }
     Rectangle {   // indicador «marco»: borde interior de 7 px
         anchors.fill: parent; color: "transparent"
-        border { width: Tema.sol ? 11 : 7; color: est.medida && !raiz.recorrido ? Datos.cfg("colMedida") : Datos.cfg("colPractica") }   // en sol 11 px, como la app
-        visible: Crono.enCurso && Datos.cfg("indicador") === "marco"
+        border { width: Tema.sol ? 11 : 7; color: est.medida && !raiz.recorrido ? Datos.ajustes.colMedida : Datos.ajustes.colPractica }   // en sol 11 px, como la app
+        visible: Crono.enCurso && Datos.ajustes.indicador === "marco"
     }
 
     // Línea de arriba: carrera · ideal · distancia | GPS | Terminar / Salir
@@ -161,21 +164,27 @@ Item {
         }
     }
 
-    // Tablero de widgets (el mismo que usa el editor)
-    Tablero {
+    // Tablero de widgets (el mismo que usa el editor) o el del recorrido libre: solo se crea el que se usa
+    // (antes estaban los dos y el escondido igual se recalculaba 20 veces por segundo) (03-2.1)
+    Loader {
         id: tablero
-        visible: !raiz.recorrido
         anchors.fill: parent
-        armado: raiz.armado
-        est: raiz.est
-        velActiva: Datos.ajustes.velActiva !== false
-        onMarcar: Crono.marcar("pantalla")
+        sourceComponent: raiz.recorrido ? tabRecorrido : tabVueltas
     }
-    TableroRecorrido {
-        id: tableroRec
-        visible: raiz.recorrido
-        anchors.fill: parent
-        est: raiz.est
-        onMarcar: raiz.marcar("pantalla")
+    Component {
+        id: tabVueltas
+        Tablero {
+            armado: raiz.armado
+            est: raiz.est
+            velActiva: Datos.ajustes.velActiva !== false
+            onMarcar: Crono.marcar("pantalla")
+        }
+    }
+    Component {
+        id: tabRecorrido
+        TableroRecorrido {
+            est: raiz.est
+            onMarcar: raiz.marcar("pantalla")
+        }
     }
 }

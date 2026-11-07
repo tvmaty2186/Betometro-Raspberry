@@ -32,6 +32,7 @@ Item {
         x: raiz.pos * raiz.width - width / 2
         color: Tema.rally ? "#2a2118" : "#ffffff"; border { width: 1.5; color: Tema.rally ? "#f3e7c8" : "#111" }
         opacity: raiz.valor === null || raiz.valor === undefined ? 0.35 : 1
-        Behavior on x { NumberAnimation { duration: 250 } }
+        // Sin animación: el dato llega 10 a 20 veces por segundo y la animación nunca terminaba (la pantalla se
+        // redibujaba a 60 cuadros por segundo toda la carrera) (03-1.1)
     }
 }
