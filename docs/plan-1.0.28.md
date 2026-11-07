@@ -144,15 +144,33 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 
 1. Fecha mal porque la Pi no tenía hora: **tomar siempre la hora de algún lado, del GPS o de internet** (wifi).
    - [ ] Hora del sistema desde el GPS en cuanto haya lectura válida, y por internet si hay wifi (07-1.4).
+   - **Si no encuentra la hora, no pasa nada malo: LARGAR nunca se bloquea** y la carrera se usa normal.
 2. Si la próxima carrera es hoy: **el botón Carreras queda como ahora** (abre la lista).
-3. Fotos de las pantallas en las pruebas: sin decidir (no quedó claro; volver a explicar con un ejemplo).
+3. Fotos de las pantallas en las pruebas: **Matías no quiere verlas**. Si un cambio es a propósito, Claude acepta
+   la foto nueva solo.
 4. Compilación en ARM: **solo al publicar**; en cada subida, solo la de x86.
-5. Carrera simulada: la corre la máquina sola en segundo plano; **sin circuito real**, uno de ejemplo.
+5. Carrera simulada en GitHub: **sin circuito real**, uno de ejemplo. Además, **simulador en el Chequeo previo**
+   (ver abajo).
 6. ssh: **con clave escrita, como ahora**.
 7. Sistema de la Raspberry (`apt full-upgrade`): **no tocarlo nunca**.
 8. Carrera ya corrida: el botón grande de la ficha dice **«Ver informe»** y lo abre (08-4).
 9. Deportivo: **«Apagar» rojo y «Actualizar» con borde rojo** (fondo oscuro) (08-6).
 10. Título cromado en la barra, solo Avispón: **sí, sin muestra** (08-13).
+
+## 7. Simulador de carrera en el Chequeo previo (pedido de Matías, 07/11/2026)
+
+- [ ] En el Chequeo previo, una fila **«Simulador»**: corre una carrera simulada corta por detrás (GPS simulado,
+      largar, vueltas, MARCAR, Terminar, guardado e informe), sin tocar las carreras de verdad.
+- [ ] Revisa todos los errores y muestra el resultado:
+  - **Verde «Simulador OK»**: pasó todo.
+  - **Naranja, falla leve**: «Revisar». Muestra el detalle y el **QR para mandar el reporte**.
+  - **Rojo, necesita atención**: «Hay errores en la simulación que hay que atender. Comunicate con el
+    desarrollador». Muestra el detalle y el **QR para mandar el reporte**.
+- [ ] El QR abre en el celu el reporte (en «Betómetro en la red» → «Reporte de errores») para mandárselo al
+      desarrollador.
+- [ ] Qué es leve y qué es grave: definirlo al programar (por ejemplo, grave: no guarda, el informe no abre,
+      los tiempos dan mal; leve: tarda más de lo normal).
+- [ ] Mostrar muestra de la pantalla antes de programar.
 
 ## No entra (Matías dijo que no)
 
