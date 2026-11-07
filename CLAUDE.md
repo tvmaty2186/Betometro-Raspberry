@@ -7,6 +7,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/raspios.md](docs/raspios.md) | **Cómo está hecho hoy**: Raspberry Pi OS, instalador, servicios, cómo se publica una versión, actualización, errores ya vistos |
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
+| [docs/conectarse-ssh.md](docs/conectarse-ssh.md) | Cómo entrar a la Raspberry por ssh (IP, atajo `ssh beto`) |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
 | [docs/gps-neo-m8n.md](docs/gps-neo-m8n.md) | El módulo GPS (NEO-M8N-0-10): datos oficiales, configuración y pruebas al recibirlo |
 | [docs/app/lo-aprendido.md](docs/app/lo-aprendido.md) | **Todo lo que hace la app y por qué**: datos, motor, voz, ajustes, pantallas, widgets, informe. Es la especificación a copiar |
@@ -41,7 +42,7 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 - **Estética:** igual a la app en todo lo posible.
 - **Si pregunta, solo contestar.** No programar ni compilar cuando hace una consulta («te dije que te haga una consulta, no que te pongas a programar»).
 - **No compilar ni publicar sin su OK.** Nunca empujar mientras compila una versión: los commits intermedios llevan `[skip ci]`.
-- **Comandos para la Raspberry:** completos, listos para pegar (se conecta con `ssh beto@<IP>` desde Windows).
+- **Comandos para la Raspberry:** completos, listos para pegar (se conecta con `ssh beto@192.168.1.83` desde PowerShell en Windows; ver [docs/conectarse-ssh.md](docs/conectarse-ssh.md)).
 - **Tokens y claves:** nunca pedirlos ni pegarlos en el chat.
 - Las ideas que no le gustan no se anotan. Lo que ya está como en la app, se deja como en la app.
 

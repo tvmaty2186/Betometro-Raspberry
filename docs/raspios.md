@@ -5,7 +5,7 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 ## El equipo
 - Raspberry Pi 3 B+ (1 GB) + **Touch Display 2 de 5"** (720×1280, de pie; se usa acostada: Qt gira la imagen).
 - Raspberry Pi OS Lite 64 bits (Debian **trixie**), Qt 6.8.2 de Debian, `eglfs_kms`, Mesa vc4.
-- Usuario `beto`. En casa la IP fue `192.168.1.83` (`ssh beto@192.168.1.83`; en Windows PowerShell hay que escribir `ssh`).
+- Usuario `beto`. En casa la IP es `192.168.1.83` (`ssh beto@192.168.1.83` desde PowerShell). Paso a paso y atajo: [conectarse-ssh.md](conectarse-ssh.md).
 - La luz de fondo es `/sys/class/backlight/panel_backlight@1`.
 
 ## Qué instala `raspios/instalar.sh`
