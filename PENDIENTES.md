@@ -104,7 +104,7 @@ para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los inf
 **Hechas las 10 (07/11/2026).** Resumen y preguntas para Matías: [docs/auditorias/00-resumen.md](docs/auditorias/00-resumen.md).
 Respuestas de Matías en el resumen. **OK de Matías (07/11): 1.0.28 con todos los arreglos chicos de A y B más
 todas las mejoras de rendimiento** (guardado, barrita, listas del video, tableros, capas, fondo, 480p 800×600).
-Salió en la 1.0.27: **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
+Salió en la 1.0.27 (publicándose 07/11): **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
 a la derecha y la Sugerida abajo, al lado de la velocidad. De pie: abajo, al lado de la última vuelta (`Armado.qml`).
 UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorrido libre queda adentro de Práctica.
 **MARCAR en pantalla opcional** (Matías, 07/11): llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo
