@@ -167,7 +167,7 @@ const C=__DATOS__;
 const NS='http://www.w3.org/2000/svg',$=id=>document.getElementById(id);
 const E=(p,n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);p.append(e);return e};
 const nf=(x,d)=>x.toFixed(d).replace('.',',');
-const tfmt=ms=>{const s=Math.abs(ms)/1000,h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=(s%60).toFixed(1).padStart(4,'0').replace('.',',');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
+const tfmt=ms=>{const s=Math.abs(ms)/1000,h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=(s%60).toFixed(1).padStart(4,'0').replace('.',':');return h?h+':'+String(m).padStart(2,'0')+':'+r:m+':'+r};
 const dur=ms=>Math.abs(ms)<59950?nf(Math.abs(ms)/1000,1)+' s':tfmt(ms);
 const dif=ms=>(ms>0?'+':ms<0?'−':'±')+dur(ms);
 $('tit').textContent=C.nombre;

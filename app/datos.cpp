@@ -40,14 +40,14 @@ static QString durNum(double ms) {
 static QString dur(double ms) { return durNum(ms) + (std::fabs(ms) < 59950 ? " s" : ""); }
 static QString nivelErr(double s) { return s <= 0.2 ? "ok" : s <= 0.5 ? "medio" : "mal"; }
 
-// Tiempo ideal: m:ss,d
+// Tiempo ideal y de vuelta: m:ss:d (Matías, 07/11/2026: «:» en todos los tiempos; las diferencias con coma)
 static QString reloj(int64_t ms) {   // H:MM:SS
     const int64_t s = ms / 1000;
     return QString::number(s / 3600) + ":" + QString::number(s / 60 % 60).rightJustified(2, '0') + ":" + QString::number(s % 60).rightJustified(2, '0');
 }
 static QString tiempo(int64_t ms) {
     int64_t dec = ms / 100, d = dec % 10, sg = dec / 10;
-    return QString::number(sg / 60) + ":" + QString::number(sg % 60).rightJustified(2, '0') + "," + QString::number(d);
+    return QString::number(sg / 60) + ":" + QString::number(sg % 60).rightJustified(2, '0') + ":" + QString::number(d);
 }
 static QString miles(int64_t n) { return QLocale(QLocale::Spanish, QLocale::Argentina).toString(static_cast<qlonglong>(n)); }
 

@@ -117,7 +117,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       Faltan y Última vuelta; **no cambiar nada**), de pie `vertical.png` (la propuesta 2, con reloj). Medidas en `armado.json` (px). Guardarlo como
       segundo armado de fábrica (cfg `widgetsH`/`widgets` siguen siendo los del usuario; el «sin MARCAR» se usa
       cuando la llave está apagada y el usuario no armó uno propio).
-- [ ] **Tiempos con «:» en todos lados: `m:ss:d`** (Matías, opción A): ideal «3:00:0», cronómetro «0:24:8», tiempos de
+- [x] **Tiempos con «:» en todos lados: `m:ss:d`** (Matías, opción A): ideal «3:00:0», cronómetro «0:24:8», tiempos de
       vuelta «3:01:5». **Las diferencias siguen con coma**: error, ± segundos, «+1,5 s».
       Ojo: la página del celu (`recursos/informe-plantilla.html`) y los textos de C++ (`datos.cpp` «tiempo()»)
       también.

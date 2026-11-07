@@ -126,7 +126,7 @@ void Crono::preparar(const QString& id) {
     const QLocale ar(QLocale::Spanish, QLocale::Argentina);
     auto tiempo = [](int64_t ms) {
         int64_t dec = ms / 100, s = dec / 10;
-        return QString::number(s / 60) + ":" + QString::number(s % 60).rightJustified(2, '0') + "," + QString::number(dec % 10);
+        return QString::number(s / 60) + ":" + QString::number(s % 60).rightJustified(2, '0') + ":" + QString::number(dec % 10);
     };
     info_ = {{"nombre", QString::fromStdString(c.nombre)}, {"practica", c.practica}, {"recorrido", recorrido_},
              {"tiempoIdealMs", static_cast<qlonglong>(c.tiempoIdealMs)}, {"distanciaM", static_cast<qlonglong>(c.distanciaM)},

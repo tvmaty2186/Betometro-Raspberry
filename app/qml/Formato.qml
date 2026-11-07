@@ -3,10 +3,11 @@ import QtQuick
 
 // Formatos de números y tiempos como la app.
 QtObject {
-    // Reloj de los widgets: m:ss.d con punto (fmt de la app). `arriba`: redondea hacia arriba (la cuenta en carrera)
+    // Tiempos con «:» en todos lados (Matías, 07/11/2026, opción A): m:ss:d. Las diferencias siguen con coma (+1,5 s).
+    // Reloj de los widgets: m:ss:d. `arriba`: redondea hacia arriba (la cuenta en carrera)
     function reloj(ms, arriba) {
         const dec = arriba ? Math.ceil(ms / 100) : Math.floor(ms / 100), d = dec % 10, s = Math.floor(dec / 10);
-        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "." + d;
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + ":" + d;
     }
     // Diferencia con signo: +1,2 s (tarde) / −1,2 s (temprano) / ±0,0 s
     function dif(ms) {
@@ -14,10 +15,10 @@ QtObject {
         if (a < 59950) return signo + (Math.round(a / 100) / 10).toFixed(1).replace(".", ",") + " s";
         return signo + tiempo(a);
     }
-    // m:ss,d
+    // m:ss:d (ideal, tiempos de vuelta)
     function tiempo(ms) {
         const dec = Math.floor(ms / 100), d = dec % 10, s = Math.floor(dec / 10);
-        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + "," + d;
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + ":" + d;
     }
     // Dígitos tecleados → ms: el último es la décima, los dos anteriores los segundos, el resto minutos.
     // Los segundos de más se reacomodan (0:90,0 → 1:30,0), como la app.

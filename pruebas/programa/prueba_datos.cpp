@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
         c["nombre"] = "Hoy cambiada";
         c["tiempoIdealMs"] = 90000;
         CHEQUEAR(d.guardarCarrera(c)["ok"].toBool());
-        CHEQUEAR(d.carrera(idHoy)["ideal"] == "1:30,0");
+        CHEQUEAR(d.carrera(idHoy)["ideal"] == "1:30:0");
         CHEQUEAR(d.carrera(idHoy)["velocidad"] == "120,0");
 
         // Armado de widgets: una lista de objetos se guarda y vuelve igual

@@ -23,7 +23,7 @@ TPantalla {
                  dato: raiz.proxima ? "Próxima: " + raiz.proxima.nombre + " " + raiz.proxima.fecha.slice(8, 10) + "/" + raiz.proxima.fecha.slice(5, 7) : "Cargar una carrera"
                  onTocado: Navegacion.ir("carreras") }
         TBoton { width: parent.an; height: parent.al; icono: "crono"; nombre: "Práctica"
-                 dato: Formato.tiempo(Datos.ajustes.tiempoIdealMs).replace(/,\d$/, "") + " · " + (Datos.ajustes.distanciaM / 1000).toFixed(1).replace(".", ",") + " km"
+                 dato: Formato.tiempo(Datos.ajustes.tiempoIdealMs).replace(/:\d$/, "") + " · " + (Datos.ajustes.distanciaM / 1000).toFixed(1).replace(".", ",") + " km"
                  onTocado: Navegacion.ir("practica") }
         TBoton { width: parent.an; height: parent.al; icono: "check"; nombre: "Chequeo previo"
                  tipo: Salud.tensionBaja || Salud.calor ? "peligro" : ""
