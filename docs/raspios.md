@@ -50,7 +50,7 @@ Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el
 | `app/pulsador_gpio.cpp` | Pulsador en GPIO17 (pin 11 a GND pin 9), pull-up interna, hora del kernel en cada flanco |
 | `app/salud.cpp` | Tensión baja y calor (`get_throttled`, `thermal_zone0`), vigilante de systemd, procesador al máximo en carrera salvo con calor o tensión baja (vuelve 30 s después) |
 | `app/sistema.h` | Apagar y **brillo** (escribe la luz de fondo; 100 % = máximo de la pantalla) |
-| `app/wifi.cpp` | nmcli. Wifi propia «Betometro-<número>» (clave `betometro`) si en 90 s no hay red guardada cerca |
+| `app/wifi.cpp` | nmcli. Wifi propia «Betometro-<número>» (clave `betometro`) si en 90 s no hay red guardada cerca. **«Conectarse a redes wifi»** (Conectividad, cfg `wifiRedes`): apagado, se desconecta, no se conecta a ninguna red y arma la propia enseguida (si NetworkManager se conecta solo a una guardada, la corta) |
 | `app/servidor.cpp` | «Betómetro en la red»: lista, informes (tema Avispón), zip, reporte de errores, `/drive` (subir el cliente de Google). Puerto 80 en la Pi |
 | `app/reportes.cpp` | `<datos>/reportes/errores.log`. Al prender distingue «se cayó el programa» de «se cortó la corriente o se colgó», y suma errores del sistema (journal) y del pstore. Manda issues a `Betometro-reportes` si existe `/var/lib/betometro/reportes.token` |
 | `app/actualizador.cpp` | Ver arriba |

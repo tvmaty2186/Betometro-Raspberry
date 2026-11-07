@@ -160,8 +160,11 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
-    auto ponerPropia = [&] { wifi.ponerPropia(datos.cfg(QStringLiteral("wifiPropia")).toBool() || !datos.cfg(QStringLiteral("wifiPropia")).isValid(),
-                                              datos.cfg(QStringLiteral("numeroAuto")).toString()); };
+    auto ponerPropia = [&] {
+        auto siONada = [&](const char* k) { const QVariant v = datos.cfg(QLatin1String(k)); return !v.isValid() || v.toBool(); };
+        wifi.ponerPropia(siONada("wifiPropia"), datos.cfg(QStringLiteral("numeroAuto")).toString());
+        wifi.ponerRedes(siONada("wifiRedes"));   // apagado: no se conecta a ninguna red, solo la propia
+    };
     ponerPropia();
     QObject::connect(&datos, &Datos::cfgChanged, &wifi, ponerPropia);
     // Apenas conecta el wifi, se busca si hay versión nueva (para el «· Actualizar» del inicio)

@@ -27,6 +27,8 @@ class Wifi : public QObject {
     Q_PROPERTY(int conectadosPropia READ conectadosPropia NOTIFY cambio)   // celus conectados a la wifi propia
     Q_PROPERTY(QString errorPropia READ errorPropia NOTIFY cambio)         // por qué no se pudo armar (en palabras)
     Q_PROPERTY(bool armandoPropia READ armandoPropia NOTIFY cambio)
+    // «Conectarse a redes wifi» (Conectividad). Apagado: se desconecta, no se conecta a ninguna red y arma la propia
+    Q_PROPERTY(bool redes READ redes NOTIFY cambio)
 
 public:
     explicit Wifi(QObject* padre = nullptr);
@@ -44,6 +46,8 @@ public:
     int conectadosPropia() const { return conectadosPropia_; }
     QString errorPropia() const { return errorPropia_; }
     bool armandoPropia() const { return armandoPropia_; }
+    bool redes() const { return redes_permitidas_; }
+    void ponerRedes(bool permitidas);   // desde la configuración (wifiRedes)
     Q_INVOKABLE void armarPropia();   // ya, sin esperar (botón en Conectividad)
     QString direccion() const;
     QString error() const { return error_; }
@@ -66,6 +70,7 @@ private:
     void refrescar();             // red conectada, señal y redes guardadas
     void revisarPropia();         // ¿hay que armar la wifi propia?
     void apagarPropia();
+    void cortarYArmar();
     void contarConectados();
 
     bool real_ = false;
@@ -81,5 +86,7 @@ private:
     int conectadosPropia_ = 0;
     QString errorPropia_;
     bool armandoPropia_ = false;
+    bool redes_permitidas_ = true;
+    qint64 fallaPropia_ = 0;      // ms de la última vez que no se pudo armar (para no reintentar sin parar)
     QTimer cada_;
 };

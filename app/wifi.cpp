@@ -64,6 +64,35 @@ void Wifi::ponerPropia(bool permitida, const QString& numeroAuto) {
     if (!permitida && propia_) apagarPropia();
 }
 
+// «Conectarse a redes wifi» apagado (Matías, 07/11/2026): la Raspberry no se conecta a ninguna red y
+// arma la propia enseguida. Si NetworkManager se conecta solo a una red guardada (al prender, o si la propia
+// se cae), revisarPropia la corta y vuelve a armar la propia. Al prenderlo de nuevo se apaga la propia y
+// NetworkManager se conecta solo a las guardadas.
+void Wifi::ponerRedes(bool permitidas) {
+    if (permitidas == redes_permitidas_) return;
+    redes_permitidas_ = permitidas;
+    fallaPropia_ = 0;
+    emit cambio();
+    if (!permitidas) {
+        if (!real_) { conectada_.clear(); emit cambio(); armarPropia(); return; }
+        cortarYArmar();
+    } else {
+        if (!real_) { propia_ = false; conectada_ = QStringLiteral("Casa"); emit cambio(); return; }
+        if (propia_) apagarPropia();
+        QTimer::singleShot(4000, this, &Wifi::buscar);
+    }
+}
+
+// Corta la red a la que esté conectada (no la propia) y arma la propia
+void Wifi::cortarYArmar() {
+    if (conectada_.isEmpty() || propia_) { armarPropia(); return; }
+    nmcli({"dev", "disconnect", "wlan0"}, [this](int, const QString&, const QString&) {
+        conectada_.clear();
+        emit cambio();
+        armarPropia();
+    });
+}
+
 void Wifi::apagarPropia() {
     if (!real_) { propia_ = false; emit cambio(); return; }
     nmcli({"connection", "down", kConPropia}, [this](int, const QString&, const QString&) { propia_ = false; sinRedDesde_ = 0; refrescar(); emit cambio(); });
@@ -74,8 +103,15 @@ void Wifi::apagarPropia() {
 // 06/11/2026 (Matías: «la red propia no funciona»): antes decidía con la lista de redes del arranque, que
 // podía quedar vieja; ahora busca de nuevo justo antes. Y si falla, lo dice en Conectividad.
 void Wifi::revisarPropia() {
-    if (!real_ || propia_ || conectando_ || armandoPropia_) return;
+    if (!real_ || conectando_ || armandoPropia_) return;
     const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
+    if (!redes_permitidas_) {   // solo la propia: si se conectó a otra red o la propia se cayó, se arma de nuevo
+        if (propia_ && conectada_.isEmpty()) return;
+        if (!conectada_.isEmpty() && conectada_ != nombrePropia()) { cortarYArmar(); return; }
+        if (!propia_ && (fallaPropia_ == 0 || ahora - fallaPropia_ > 60000)) armarPropia();
+        return;
+    }
+    if (propia_) return;
     if (!conectada_.isEmpty()) { sinRedDesde_ = 0; return; }
     if (sinRedDesde_ == 0) { sinRedDesde_ = ahora; return; }
     if (!propiaPermitida_ || ahora - sinRedDesde_ < 90000) return;
@@ -108,6 +144,7 @@ void Wifi::armarPropia() {
                       errorPropia_ = err.contains(QLatin1String("dnsmasq"), Qt::CaseInsensitive) ? QStringLiteral("Falta un programa del sistema (dnsmasq): actualizá Betómetro con wifi")
                                    : err.isEmpty() ? QStringLiteral("No se pudo armar la red propia") : QStringLiteral("No se pudo armar: ") + err;
                       sinRedDesde_ = 0;
+                      fallaPropia_ = QDateTime::currentMSecsSinceEpoch();
                       emit cambio();
                       return;
                   }
@@ -220,7 +257,7 @@ bool Wifi::tieneClave(const QString& red) const {
 }
 
 void Wifi::buscar() {
-    if (buscando_) return;
+    if (buscando_ || !redes_permitidas_) return;   // con las redes apagadas no se busca (cortaría la propia)
     if (propia_) { apagarPropia(); QTimer::singleShot(3000, this, &Wifi::buscar); return; }
     buscando_ = true;
     emit cambio();
@@ -245,6 +282,7 @@ void Wifi::buscar() {
 
 void Wifi::conectar(const QString& red, const QString& clave) {
     error_.clear();
+    if (!redes_permitidas_) { error_ = QStringLiteral("Prendé «Conectarse a redes wifi»"); emit cambio(); return; }
     const bool guardada = conexion_.contains(red);
     if (!guardada && tieneClave(red) && clave.size() < 8) {
         error_ = QStringLiteral("La clave tiene que tener al menos 8 letras o números");
