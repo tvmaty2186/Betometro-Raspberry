@@ -96,6 +96,7 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   Si estaba en 1080p pasa solo a 720p.
 - **Sin publicar (07/11/2026):** Conectividad → llave «Conectarse a redes wifi». Apagada: no se conecta a
   ninguna red y arma la red propia enseguida (sin internet). Pedido de Matías; falta su OK para publicar.
+  Carrera: REC, GPS y Terminar del mismo alto, borde y letra; el punto del REC parpadea cada 500 ms.
 - **1.0.24 publicada (06/11/2026).** Falta que Matías la pruebe en la Pi.
 - **Menú del engranaje del video (1.0.24, sin probar en la Pi):** las llaves no cambiaban y los datos volvían a
   su lugar al soltarlos. Causa: una versión anterior había guardado «videoDatos» como el texto «[object Object]»

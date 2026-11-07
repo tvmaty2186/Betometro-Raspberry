@@ -66,45 +66,71 @@ Item {
     Sub {
         // Modo Tablet: la franja de arriba más grande (los widgets no cambian)
         x: raiz.h ? 24 : 20; y: Tema.grandes ? 12 : (raiz.h ? 22 : 20)
-        width: parent.width * (raiz.h ? 0.6 : 0.5); elide: Text.ElideRight
+        width: Math.max(80, arriba.x - x - 14); elide: Text.ElideRight   // termina antes de REC / GPS / Terminar
         tam: Tema.grandes ? (raiz.h ? 19 : 16) : (raiz.h ? 15 : 13)
         text: (info.nombre || "") + " · " + (raiz.h ? "ideal " : "") + (info.ideal || "") + (info.distanciaM > 0 ? " · " + info.distancia + " m" : "")
     }
     Row {
+        id: arriba
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: Tema.grandes ? 3 : 6; spacing: 10; z: 5
-        // Cámara: punto rojo «REC» mientras graba; gris con «Cámara» si falló. En «a mano» se toca para grabar.
-        Rectangle {
+        // REC, GPS y Terminar con el mismo alto, borde y letra, alineados (Matías, 07/11/2026)
+        readonly property real alto: Tema.grandes ? 50 : 42   // como Terminar: cuesta tocarlo en movimiento (Matías, 03/11)
+        readonly property int letra: Tema.grandes ? 23 : 17
+        component Pastilla: Rectangle {
+            id: pas
+            property string texto: ""
+            property color punto: "transparent"
+            property bool conPunto: true
+            property alias puntoVisible: bolita.visible
+            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+            height: arriba.alto; radius: height / 2
+            width: filaP.implicitWidth + arriba.letra * 1.6
+            color: Tema.sol ? "#ffffff" : Qt.rgba(0, 0, 0, 0.55)
+            border { width: 2; color: Tema.bordeCromo }
+            Row {
+                id: filaP; anchors.centerIn: parent; spacing: arriba.letra * 0.4
+                Item {   // lugar fijo del punto: no se corre el texto cuando parpadea
+                    visible: pas.conPunto
+                    width: arriba.letra * 0.7; height: width; anchors.verticalCenter: parent.verticalCenter
+                    Rectangle { id: bolita; anchors.fill: parent; radius: width / 2; color: pas.punto }
+                }
+                Text { text: pas.texto; color: Tema.tinta; anchors.verticalCenter: parent.verticalCenter
+                       font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: arriba.letra; letterSpacing: 0.5 } }
+            }
+        }
+        // Cámara: punto rojo «REC» que parpadea mientras graba (cada 500 ms); gris con «Cámara» si falló.
+        // En «a mano» se toca para grabar.
+        Pastilla {
+            id: rec
             visible: !!Datos.ajustes.camara && (Camara.grabando || !!Camara.falla || Datos.ajustes.camaraInicio === "mano")
-            height: 32; radius: 16; width: tRec.implicitWidth + 40
-            color: Qt.rgba(0, 0, 0, 0.6); border { width: 1.5; color: "#c9ced3" }
-            Rectangle { x: 12; anchors.verticalCenter: parent.verticalCenter; width: 11; height: 11; radius: 6
-                        color: Camara.grabando ? "#ff3b30" : "#8a929b" }
-            Text { id: tRec; x: 30; anchors.verticalCenter: parent.verticalCenter; color: Tema.tinta
-                   text: Camara.grabando ? "REC" : Camara.falla ? "Cámara" : "Grabar"
-                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 16; letterSpacing: 1 } }
+            texto: Camara.grabando ? "REC" : Camara.falla ? "Cámara" : "Grabar"
+            punto: Camara.grabando ? "#ff3b30" : "#8a929b"
+            property bool prendido: true
+            puntoVisible: !Camara.grabando || prendido
+            Timer { interval: 500; repeat: true; running: Camara.grabando && rec.visible
+                    onTriggered: rec.prendido = !rec.prendido; onRunningChanged: rec.prendido = true }
             MouseArea { anchors.fill: parent; anchors.margins: -8; enabled: Datos.ajustes.camaraInicio === "mano"; onClicked: Crono.grabarAMano() }
         }
-        Chip {   // tensión baja o calor (Salud): solo antes de largar; en carrera no distrae (Matías, 04/11)
+        Pastilla {   // tensión baja o calor (Salud): solo antes de largar; en carrera no distrae (Matías, 04/11)
             visible: (Salud.tensionBaja || Salud.calor) && !Crono.enCurso
             punto: Tema.alerta
             texto: Salud.tensionBaja ? "⚡ Tensión baja" : "Calor " + Salud.temperatura + " °C"
         }
-        Chip {
-            tam: Tema.grandes ? 23 : 16
+        Pastilla {
             punto: Crono.gps.ok && !est.sinGps ? Tema.bien : Tema.alerta
             texto: Crono.gps.ok ? "GPS " + Crono.gps.hz + " Hz" + (raiz.h ? " · " + Math.round(Crono.gps.precision) + " m" : "") : "Sin GPS"
         }
         Rectangle {
             id: terminar
             property bool armado: false
-            height: Tema.grandes ? 50 : 42; radius: height / 2   // un poco más grande que los chips: cuesta tocarlo en movimiento (Matías, 03/11)
-            width: tt.implicitWidth + 40
-            color: armado ? Tema.acento : Qt.rgba(0, 0, 0, 0.55)
-            border { width: 1.5; color: "#c9ced3" }
+            height: arriba.alto; radius: height / 2
+            width: tt.implicitWidth + arriba.letra * 1.6
+            color: armado ? Tema.acento : Tema.sol ? "#ffffff" : Qt.rgba(0, 0, 0, 0.55)
+            border { width: 2; color: Tema.bordeCromo }
             Text { id: tt; anchors.centerIn: parent; color: terminar.armado ? Tema.acentoTinta : Tema.tinta
                    text: Crono.enCurso ? (terminar.armado ? "Tocá otra vez" : "Terminar") : "Salir"
-                   font { family: Tema.grandes ? Tema.fuente800 : Tema.fuente600; italic: Tema.cursiva; pixelSize: Tema.grandes ? 25 : 16 } }
+                   font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: arriba.letra; letterSpacing: 0.5 } }
             MouseArea {
                 anchors.fill: parent; anchors.margins: -14
                 onClicked: {
