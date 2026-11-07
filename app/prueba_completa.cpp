@@ -567,14 +567,20 @@ void PruebaCompleta::pasoReproduccion() {
         const QString desc = video->descompresor();
         const qint64 pos = video->position();
         video->stop();
+        // Se compara con lo que grabó la cámara: si grabó a 19,8 por s, no se puede ver a 20 (salía naranja «20,0»)
+        const qlonglong cg = camaraMedida_.value("cuadros").toLongLong();
+        const int sg = camaraMedida_.value("segundos").toInt();
+        const double grabado = cg > 0 && sg > 0 ? double(cg) / sg : 0;
+        const double pide = grabado > 0 ? qMin(20.0, grabado * 0.9) : 20.0;
         QStringList d;
         d << QStringLiteral("%1 cuadros por s (%2 cuadros en %3 s)").arg(coma(fps)).arg(video->cuadros()).arg(coma(seg));
+        if (grabado > 0) d << QStringLiteral("se grabó a %1 por s").arg(coma(grabado));
         d << QStringLiteral("descompresor %1%2").arg(desc.isEmpty() ? QStringLiteral("desconocido") : desc, desc == QLatin1String("v4l2h264dec") ? QStringLiteral(" (el chip de la Pi)") : QString());
         d << QStringLiteral("llegó al segundo %1").arg(coma(pos / 1000.0));
         if (!error->isEmpty()) d << QStringLiteral("el reproductor avisó: ") + *error;
         QString e = kOk;
         if (video->cuadros() == 0) e = raspberry() ? kGrave : kLeve;   // en la PC puede faltar el descompresor
-        else if (fps < 20) e = kLeve;
+        else if (fps < pide) e = kLeve;
         // El video de prueba ya no hace falta: no ocupa la tarjeta (como «Borrar pruebas» de la cámara)
         if (p_.camara) QTimer::singleShot(500, p_.camara, [this, archivo] { p_.camara->borrarVideo(QFileInfo(archivo).fileName()); });
         terminarPaso(e, d.join(QStringLiteral(" · ")));
