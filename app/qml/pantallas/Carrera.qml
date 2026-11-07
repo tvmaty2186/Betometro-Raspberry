@@ -21,7 +21,7 @@ Item {
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca(edadMs) { raiz.marcar("pulsador", edadMs); } }
     function volver() {
         if (Crono.enCurso) { Navegacion.avisar("Para salir, terminá la carrera"); return; }
-        const id = Crono.carreraId;
+        const id = Crono.carreraId();   // es una función: sin () daba la función misma y abría «nueva carrera»
         Crono.salir();
         if (id) Navegacion.ir("ficha", { id: id }); else Navegacion.ir("practica");
     }
@@ -31,6 +31,7 @@ Item {
         if (!Crono.enCurso) Crono.preparar(Navegacion.parametros.recorrido || pruebaRec ? "recorrido" : Navegacion.parametros.practica ? "" : (Navegacion.parametros.id || ""));
         if (pruebaRec) { Crono.marcar("pantalla"); tPruebaRec.start(); }
         if (Contexto.prueba === "largar") Crono.marcar("pantalla");
+        if (Contexto.prueba === "salir") Qt.callLater(raiz.volver);   // solo para capturas: Salir sin largar
         if (Contexto.prueba === "largar-60")   // solo para capturas: 59 vueltas cerradas, va por la 60
             for (let i = 60; i > 0; i--) Crono.marcar("pantalla", i * 4000);
         forceActiveFocus();
