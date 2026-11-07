@@ -95,7 +95,12 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
-## 1.0.28 (en preparación)
+## 1.0.28 «sin sorpresas» (publicada 07/11/2026)
+Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta atrás, hora del GPS, cámara, wifi,
+ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
+automática y el arranque.
+
+## 1.0.29 «pantallas y orden» (en preparación)
 Todo lo que entra, con las decisiones de Matías: **[docs/plan-1.0.28.md](docs/plan-1.0.28.md)**. Seguir esa lista.
 **Matías (07/11): entra todo lo de las auditorías**, también lo que era «para después» (engranaje, Drive con la base,
 un archivo por carrera, ordenar el código). Afuera solo Deshacer, carteles grandes y clave distinta.
