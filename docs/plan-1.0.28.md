@@ -7,6 +7,19 @@ auditorías**, también lo que antes quedaba «para después». Solo queda afuer
 informe de su auditoría (`docs/auditorias/NN-…md`, punto entre paréntesis). Programar en este orden, probar con
 capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip ci]` y publicar al final con su OK.
 
+## Reparto (Matías, 07/11/2026): dos versiones
+
+**1.0.28 «sin sorpresas»** (arreglos por dentro, casi sin cambiar pantallas; se lanza apenas esté):
+- Sección 1 entera (seguridad y datos), salvo «un archivo por carrera» y «copia de la base a Drive».
+- Sección 2: no publicar si falla una prueba, compilar solo desde `main`, arreglar el job roto, `probar.sh`,
+  recorrido en `prueba_crono`, cámara de prueba en GitHub.
+- Sección 8 (sistema): **hora del GPS**, `config.txt` en `[all]`, PulseAudio sin HDMI y servicios que sobran
+  (arranque más rápido), ssh cerrado en la red propia, vigilante 15 s, borrar paquetes viejos.
+- El arreglo de «Salir» desde Práctica (abría «nueva carrera»).
+
+**1.0.29 «pantallas y orden»** (la 29 y la 30 juntas): todo lo demás. Lo visual con muestra aprobada antes:
+cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del simulador.
+
 ## 0. Antes de programar: medir en la Pi
 
 - [ ] Pasarle a Matías los comandos para pegar por ssh y anotar los números: peso de la base y procesador de la
