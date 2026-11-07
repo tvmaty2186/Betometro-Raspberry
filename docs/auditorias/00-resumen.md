@@ -48,6 +48,19 @@ Lo más importante de los 10 informes, ordenado por urgencia. El detalle de cada
 **Antes de todo eso**, si podés: medir en la Pi con los comandos del informe 04 (pasos A y B). Así se
 sabe cuánto pesa hoy tu base y cuánto procesador usa la cámara.
 
+## Respuestas de Matías (07/11/2026)
+
+1. Vuelta atrás automática: **sí**.
+2. No publicar si falla una prueba: **sí**.
+3. Terminar → derecho al informe, con el error total grande arriba: **sí**.
+4. Botón «Deshacer» después de cada marca: **no**.
+5. 480p en 800×600: **sí**.
+6. Poco lugar en carrera → parar el video y que la carrera siga: **sí**.
+7. Copia de la base: **sí, subirla a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita.
+8. Clave de la red propia distinta por equipo: **no** (queda «betometro»).
+9. Borrar las 10 pantallas viejas: **sí**.
+10. Compilar solo desde una rama (`main`): **sí**.
+
 ## Las preguntas que te tocan (las más importantes)
 
 1. ¿Si una versión nueva no arranca, que **vuelva sola** a la anterior y te avise? (10)
