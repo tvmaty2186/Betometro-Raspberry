@@ -40,6 +40,7 @@ if(BETO_PROGRAMA)
     # Pantallas para eglfs_kms (la de 5" manda; la tele por HDMI a 1280×720): /usr/share/betometro/kms.json
     install(FILES raspios/kms.json DESTINATION share/betometro)
     target_link_libraries(betometro PRIVATE nucleo Qt6::Quick Qt6::Svg Qt6::Multimedia Qt6::Network betometro_qmlplugin)
+    target_compile_options(betometro PRIVATE -Wall -Wextra)   # también en el programa (02-2)
     # Colores del video por el chip gráfico (app/shaders, ImagenVideo). Para compilar hace falta Qt Shader
     # Tools (qsb; en Debian qt6-shadertools-dev) y las cabeceras de QRhi (qt6-base-private-dev); al equipo no.
     # Los programas llevan variante GLSL ES 100: la Pi 3 solo tiene OpenGL ES 2. Sin eso: por el procesador.
@@ -61,6 +62,7 @@ if(BETO_PROGRAMA)
     endif()
     if(GST_FOUND)
       add_executable(betometro-camara app/camara/betometro_camara.cpp)
+      target_compile_options(betometro-camara PRIVATE -Wall -Wextra -Wno-deprecated-declarations)
       target_link_libraries(betometro-camara PRIVATE PkgConfig::GST)
       # El reproductor del informe también usa GStreamer (para el descompresor de video de la Raspberry)
       target_link_libraries(betometro PRIVATE PkgConfig::GST)
@@ -122,6 +124,11 @@ if(BETO_PRUEBAS)
     target_include_directories(prueba_drive PRIVATE app)
     target_link_libraries(prueba_drive PRIVATE Qt6::Core)
     add_test(NAME drive COMMAND prueba_drive)
+    add_executable(prueba_clima pruebas/programa/prueba_clima.cpp app/clima.cpp app/clima.h)
+    target_include_directories(prueba_clima PRIVATE app)
+    target_compile_definitions(prueba_clima PRIVATE BETO_VERSION="${PROJECT_VERSION}" BETO_PRUEBA_DIR="${CMAKE_SOURCE_DIR}/pruebas/programa")
+    target_link_libraries(prueba_clima PRIVATE Qt6::Core Qt6::Network)
+    add_test(NAME clima COMMAND prueba_clima)
   endif()
 
   find_program(NODE node)
