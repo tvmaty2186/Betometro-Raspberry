@@ -41,6 +41,10 @@ static QString dur(double ms) { return durNum(ms) + (std::fabs(ms) < 59950 ? " s
 static QString nivelErr(double s) { return s <= 0.2 ? "ok" : s <= 0.5 ? "medio" : "mal"; }
 
 // Tiempo ideal: m:ss,d
+static QString reloj(int64_t ms) {   // H:MM:SS
+    const int64_t s = ms / 1000;
+    return QString::number(s / 3600) + ":" + QString::number(s / 60 % 60).rightJustified(2, '0') + ":" + QString::number(s % 60).rightJustified(2, '0');
+}
 static QString tiempo(int64_t ms) {
     int64_t dec = ms / 100, d = dec % 10, sg = dec / 10;
     return QString::number(sg / 60) + ":" + QString::number(sg % 60).rightJustified(2, '0') + "," + QString::number(d);
@@ -136,6 +140,8 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["fechaLarga"] = f.isValid() ? QLocale(QLocale::Spanish, QLocale::Argentina).toString(f, "dddd, d 'de' MMMM 'de' yyyy") : QString();
     r["notas"] = q(c.notas);
     r["practica"] = c.practica;
+    const bool rec = esRecorrido(c);
+    r["recorrido"] = rec;
     r["distanciaM"] = static_cast<qlonglong>(c.distanciaM);
     r["tiempoIdealMs"] = static_cast<qlonglong>(c.tiempoIdealMs);
     r["patron"] = q(c.patron);
@@ -154,8 +160,17 @@ QVariantMap Datos::resumen(const Carrera& c) const {
 
     // Línea de la tarjeta
     QStringList partes;
-    if (!c.vueltas.empty()) partes << QString::number(c.vueltas.size()) + (c.vueltas.size() == 1 ? " vuelta" : " vueltas");
-    if (medidas) {
+    if (rec) {   // recorrido libre: distancia y tiempo, sin vueltas ni error
+        partes << QStringLiteral("RECORRIDO");
+        if (!c.vueltas.empty()) {
+            const Vuelta& v = c.vueltas.front();
+            if (v.distM) partes << QString::number(*v.distM / 1000, 'f', 1).replace('.', ',') + " km";
+            partes << reloj(v.realMs);
+            if (v.velPromKmh) partes << "promedio " + QString::number(*v.velPromKmh, 'f', 1).replace('.', ',') + " km/h";
+        } else partes << QStringLiteral("sin largar");
+    } else if (!c.vueltas.empty()) partes << QString::number(c.vueltas.size()) + (c.vueltas.size() == 1 ? " vuelta" : " vueltas");
+    if (rec) {
+    } else if (medidas) {
         partes << "error total " + dur(suma);
     } else {
         if (c.distanciaM > 0) partes << miles(c.distanciaM) + " m";
@@ -167,6 +182,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     // Chip de estado (estadoCarrera)
     QString txt, nivel = "neutro";
     if (medidas) { txt = "ERROR " + dur(suma); nivel = nivelErr(suma / medidas / 1000); }
+    else if (rec) txt = "RECORRIDO";
     else if (c.practica) txt = "PRÁCTICA";
     else if (fin) txt = "FINALIZADA";
     else if (dias == 0) { txt = "HOY"; nivel = "hoy"; }
@@ -184,6 +200,7 @@ QVariantMap Datos::resumen(const Carrera& c) const {
         motivo = dias > 0 ? "Se larga el " + QLocale(QLocale::Spanish, QLocale::Argentina).toString(f, "d MMM yyyy")
                           : QString("La fecha de la carrera ya pasó");
     }
+    if (rec && !c.vueltas.empty()) { puede = false; motivo = QStringLiteral("Otro: Práctica → Recorrido libre"); }
     r["puedeLargar"] = puede;
     r["motivoNoLargar"] = motivo;
     r["proxima"] = !c.practica && !fin && dias >= 0;
@@ -331,6 +348,36 @@ QString Datos::crearPractica() {
     guardar();
     emit carrerasChanged();
     return q(c.id);
+}
+
+// Recorrido libre (Matías, 07/11/2026): una práctica de una sola «vuelta» abierta, sin tiempo ideal ni
+// distancia. Se graba todo el recorrido; MARCAR deja marcas (extra «marcas») y no corta nada.
+QString Datos::crearRecorrido() {
+    Carrera c;
+    const QDateTime ahora = QDateTime::currentDateTime();
+    c.id = nuevaId(ahora.toMSecsSinceEpoch(), QRandomGenerator::global()->generate());
+    c.nombre = s("Recorrido " + ahora.toString("dd/MM/yy HH:mm"));
+    c.fecha = s(ahora.date().toString(Qt::ISODate));
+    c.practica = true;
+    c.creada = s(ahora.toUTC().toString(Qt::ISODateWithMs));
+    c.tiempoIdealMs = kRecorridoIdealMs;
+    c.distanciaM = 0;
+    c.patron = "todas";
+    c.extra["recorrido"] = true;
+    c.extra["marcas"] = Json::lista();
+    base_.carreras.push_back(c);
+    guardar();
+    emit carrerasChanged();
+    return q(c.id);
+}
+
+bool Datos::ponerExtra(const QString& id, const std::string& clave, const Json& valor) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c) return false;
+    c->extra[clave] = valor;
+    guardar();
+    emit carrerasChanged();
+    return true;
 }
 
 bool Datos::agregarVuelta(const QString& id, const Vuelta& v) {

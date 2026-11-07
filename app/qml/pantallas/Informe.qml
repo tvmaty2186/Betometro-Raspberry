@@ -11,6 +11,18 @@ Item {
     readonly property var c: { rev; return Datos.carrera(id_); }
     readonly property var inf: { rev; return Datos.informe(id_); }
     readonly property var vueltas: inf.vueltas || []
+    readonly property bool rec: !!inf.recorrido          // recorrido libre: resumen y marcas en vez de las vueltas
+    readonly property var marcas: inf.marcas || []
+    function reloj(ms) {
+        const s = Math.max(0, Math.round(ms / 1000));
+        return Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    }
+    function coma(x, d) { return (x === undefined || x === null) ? "–" : Number(x).toFixed(d).replace(".", ","); }
+    function irMarca(mk) {   // con video: a ese momento; si no estaba a la vista, se abre
+        if (!videos.length) return;
+        if (!verVideo) verVideo = true;
+        Qt.callLater(() => raiz.irVideo(mk.vuelta, mk.ms / 1000));
+    }
     // Video de la carrera (E7): botón Informe / Video; a medias, y doble toque → pantalla completa
     readonly property var videos: { rev; return Datos.videos(id_); }
     property bool verVideo: false
@@ -118,7 +130,8 @@ Item {
         Column {
             anchors.verticalCenter: parent.verticalCenter
             TextoCromo { texto: (raiz.c.nombre || "").toUpperCase(); tam: raiz.h ? 36 : 38 }
-            Sub { text: raiz.c.fechaCorta + " · ideal " + raiz.c.ideal + (raiz.dist > 0 ? " · " + raiz.c.distancia + " m" : "") + " · " + raiz.vueltas.length + " vueltas" }
+            Sub { text: raiz.rec ? raiz.c.fechaCorta + " · recorrido libre" + (raiz.marcas.length ? " · " + raiz.marcas.length + (raiz.marcas.length === 1 ? " marca" : " marcas") : "")
+                  : raiz.c.fechaCorta + " · ideal " + raiz.c.ideal + (raiz.dist > 0 ? " · " + raiz.c.distancia + " m" : "") + " · " + raiz.vueltas.length + " vueltas" }
         }
     }
     Row {
@@ -178,7 +191,7 @@ Item {
         y: !raiz.vv ? (raiz.h ? 110 : 180) : (raiz.h ? 110 : 600)
         width: !raiz.vv ? (raiz.h ? 600 : parent.width - 40) : (raiz.h ? 608 : 330)
         height: !raiz.vv ? (raiz.h ? 590 : 470) : (raiz.h ? 230 : 280)
-        Sub { x: 18; y: 16; visible: !raiz.vv || raiz.h; text: raiz.vv ? "Dónde está · tocá y el video va ahí" : raiz.modo === "vel" ? "Recorrido de la vuelta · color = velocidad" : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
+        Sub { x: 18; y: 16; visible: !raiz.vv || raiz.h; text: raiz.vv ? "Dónde está · tocá y el video va ahí" : raiz.modo === "vel" ? (raiz.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : raiz.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
         Row {
             anchors { right: parent.right; rightMargin: 14; top: parent.top; topMargin: 10 }
             spacing: 6
@@ -252,6 +265,24 @@ Item {
                 const izq = X(P[0]) > width * 0.7;   // cerca del borde derecho: el texto va a la izquierda
                 g.fillStyle = Tema.tinta; g.font = "italic " + Math.round(11 * k) + "px '" + Tema.fuente800 + "'"; g.textAlign = izq ? "right" : "left";
                 g.fillText("LARGADA", X(P[0]) + (izq ? -14 : 14) * k, Y(P[0]) + 4 * k);
+                if (raiz.rec) {   // recorrido libre: la llegada (cuadradito) y las marcas numeradas
+                    const F = P[P.length - 1], s = 8 * k;
+                    if (!raiz.inf.cerrada) {
+                        g.fillStyle = "#111111"; g.fillRect(X(F) - s, Y(F) - s, 2 * s, 2 * s);
+                        g.strokeStyle = "#ffffff"; g.lineWidth = 2.5 * k; g.strokeRect(X(F) - s, Y(F) - s, 2 * s, 2 * s);
+                        const izqF = X(F) > width * 0.7;
+                        g.fillStyle = Tema.tinta; g.textAlign = izqF ? "right" : "left";
+                        g.fillText("LLEGADA", X(F) + (izqF ? -14 : 14) * k, Y(F) + 4 * k);
+                    }
+                    g.textAlign = "center";
+                    g.font = "italic " + Math.round(10 * k) + "px '" + Tema.fuente800 + "'";
+                    for (const mk of raiz.marcas) {
+                        if (mk.x === undefined) continue;
+                        g.beginPath(); g.arc(ox + mk.x * k, oy + mk.y * k, 9 * k, 0, Math.PI * 2);
+                        g.fillStyle = Tema.amarillo; g.fill(); g.strokeStyle = "#111111"; g.lineWidth = 2 * k; g.stroke();
+                        g.fillStyle = "#111111"; g.fillText(String(mk.n), ox + mk.x * k, oy + mk.y * k + 3.5 * k);
+                    }
+                }
             }
         }
     }
@@ -263,7 +294,7 @@ Item {
         visible: !raiz.vv
         x: raiz.h ? 648 : 20; y: raiz.h ? 110 : 670
         width: raiz.h ? 608 : parent.width - 40; height: raiz.h ? 230 : 210
-        Sub { x: 18; y: 16; text: "Velocidad km/h" + (raiz.vu ? " · " + raiz.nombreV(raiz.vu) : "") + (raiz.sug > 0 ? " · sugerida " + raiz.sug.toFixed(1).replace(".", ",") : ""); tam: 12 }
+        Sub { x: 18; y: 16; text: raiz.rec ? "Velocidad km/h · a lo largo del recorrido" : "Velocidad km/h" + (raiz.vu ? " · " + raiz.nombreV(raiz.vu) : "") + (raiz.sug > 0 ? " · sugerida " + raiz.sug.toFixed(1).replace(".", ",") : ""); tam: 12 }
         Canvas {
             id: grafico
             anchors { fill: parent; topMargin: 40; margins: 16 }
@@ -285,6 +316,16 @@ Item {
                     g.strokeStyle = Tema.acento; g.lineWidth = 2; g.setLineDash([8, 6]);
                     g.beginPath(); g.moveTo(30, Y(raiz.sug)); g.lineTo(width - 4, Y(raiz.sug)); g.stroke(); g.setLineDash([]);
                 }
+                if (raiz.rec) {   // las marcas, como rayas amarillas con su número
+                    g.strokeStyle = Tema.acento; g.lineWidth = 1.5; g.setLineDash([4, 4]);
+                    g.fillStyle = Tema.acento; g.textAlign = "left"; g.font = "bold 12px '" + Tema.fuente800 + "'";
+                    for (const mk of raiz.marcas) {
+                        const x = X(mk.m || 0);
+                        g.beginPath(); g.moveTo(x, 4); g.lineTo(x, height - 6); g.stroke();
+                        g.fillText(String(mk.n), x + 4, 14);
+                    }
+                    g.setLineDash([]);
+                }
                 g.strokeStyle = Tema.numero; g.lineWidth = 3.5; g.lineJoin = "round";
                 let abierto = false;
                 g.beginPath();
@@ -299,6 +340,7 @@ Item {
 
     // Todas las vueltas
     Tarjeta {
+        visible: !raiz.rec
         z: raiz.menuAbierto ? 20 : 0   // con el menú abierto, la tarjeta queda arriba de la capa que lo cierra
         oscura: true
         x: cajaVel.x; y: raiz.h ? 362 : 900
@@ -425,6 +467,62 @@ Item {
                     Sub { x: 6; y: 40; tam: 12; text: "promedio " + (raiz.c.promedio || "–") + " · mejor " + (raiz.c.mejor || "–") }
                     Text { anchors { right: parent.right; rightMargin: 6; top: parent.top; topMargin: 6 }
                            text: raiz.c.errorTotal || ""; color: Tema.acento; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 } }
+                }
+            }
+        }
+    }
+    // Recorrido libre: resumen y marcas (muestra docs/muestras/recorrido/3-informe.png)
+    Tarjeta {
+        id: tarRec
+        visible: raiz.rec
+        oscura: true
+        x: cajaVel.x; y: raiz.h ? 362 : 900
+        width: cajaVel.width; height: raiz.h ? 338 : 360
+        readonly property var r: raiz.inf.resumen || ({})
+        Grid {
+            id: gridRes
+            x: 22; y: 14; width: parent.width - 44
+            columns: 3; rowSpacing: 2
+            Repeater {
+                model: [
+                    { e: "Tiempo", v: raiz.reloj(tarRec.r.tiempoMs || 0) },
+                    { e: "Distancia", v: raiz.coma((tarRec.r.distM || 0) / 1000, 1) + " km" },
+                    { e: "Promedio", v: raiz.coma(tarRec.r.promKmh, 1) + " km/h" },
+                    { e: "Máxima", v: raiz.coma(tarRec.r.maxKmh, 0) + " km/h" },
+                    { e: "Parado", v: raiz.reloj(tarRec.r.paradoMs || 0).replace(/^0:/, "") },
+                    { e: "Acel. máx.", v: raiz.coma(tarRec.r.acelMax, 1) + " m/s²" }
+                ]
+                Column {
+                    required property var modelData
+                    width: gridRes.width / 3
+                    Sub { text: modelData.e; tam: 11 }
+                    Text { text: modelData.v; color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: raiz.h ? 30 : 28 } }
+                }
+            }
+        }
+        Sub { x: 22; y: gridRes.y + gridRes.height + 12; tam: 12
+              text: raiz.marcas.length ? "Marcas" + (raiz.videos.length ? " · tocá una y el video va ahí" : "") : "Sin marcas" }
+        Flickable {
+            id: listaMarcas
+            x: 22; y: gridRes.y + gridRes.height + 38; width: parent.width - 44; height: parent.height - y - 12
+            contentHeight: colMarcas.height; clip: true; boundsBehavior: Flickable.StopAtBounds
+            Column {
+                id: colMarcas; width: parent.width
+                Repeater {
+                    model: raiz.marcas
+                    Item {
+                        required property var modelData
+                        width: colMarcas.width; height: 40
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter; spacing: 18
+                            Rectangle { width: 30; height: 30; radius: 15; color: Tema.amarillo; anchors.verticalCenter: parent.verticalCenter
+                                        Text { anchors.centerIn: parent; text: modelData.n; color: "#111111"; font { family: Tema.fuente800; pixelSize: 17 } } }
+                            Text { width: 110; text: raiz.reloj(modelData.ms); color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 25 } }
+                            Text { width: 120; text: raiz.coma((modelData.m || 0) / 1000, 1) + " km"; color: Tema.tinta; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 25 } }
+                            Text { text: Math.round(modelData.kmh || 0) + " km/h"; color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 22 } }
+                        }
+                        MouseArea { anchors.fill: parent; enabled: raiz.videos.length > 0; onClicked: raiz.irMarca(modelData) }
+                    }
                 }
             }
         }

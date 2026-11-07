@@ -28,6 +28,10 @@ TPantalla {
                         valor: raiz.patron; onElegido: v => { raiz.patron = v; Datos.ponerCfg("patron", v); } } }
         Text { leftPadding: 8; text: "Promedio " + Formato.velocidad(raiz.distanciaM, raiz.tiempoIdealMs); color: Tema.acento
                font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 27 } }
+        // Recorrido libre (Matías, 07/11/2026): sin vueltas, sin tiempo, sin distancia; graba todo
+        TFila { etiqueta: "Recorrido libre"; detalle: "Sin vueltas, sin tiempo, sin distancia"; height: 110
+                tocable: true; onTocada: Navegacion.ir("carrera", { recorrido: true })
+            TIcono { width: 64; height: 64; nombre: "ruta"; color: Tema.acento } }
     }
     TBoton {
         x: raiz.h ? col.width + 22 : 0

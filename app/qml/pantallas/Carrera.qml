@@ -8,13 +8,14 @@ Item {
     readonly property bool h: Contexto.horizontal
     readonly property var est: Crono.estado
     readonly property var info: Crono.info
+    readonly property bool recorrido: !!info.recorrido   // recorrido libre: sin vueltas (TableroRecorrido)
     focus: true
 
     readonly property var armado: Armado.cargar(h, Datos.ajustes)
 
     function marcar(fuente, edadMs) {
         const r = Crono.marcar(fuente, edadMs || 0);
-        if (r === "largada" || r === "marca") tablero.efectoMarcar();
+        if (r === "largada" || r === "marca") (raiz.recorrido ? tableroRec : tablero).efectoMarcar();
     }
     // Pulsador por cable: la marca vale cuando se apoyó el dedo (edadMs atrás)
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca(edadMs) { raiz.marcar("pulsador", edadMs); } }
@@ -26,11 +27,22 @@ Item {
     }
 
     Component.onCompleted: {
-        if (!Crono.enCurso) Crono.preparar(Navegacion.parametros.practica ? "" : (Navegacion.parametros.id || ""));
+        const pruebaRec = Contexto.prueba.indexOf("recorrido") === 0;   // solo para capturas: recorrido, recorrido-largo
+        if (!Crono.enCurso) Crono.preparar(Navegacion.parametros.recorrido || pruebaRec ? "recorrido" : Navegacion.parametros.practica ? "" : (Navegacion.parametros.id || ""));
+        if (pruebaRec) { Crono.marcar("pantalla"); tPruebaRec.start(); }
         if (Contexto.prueba === "largar") Crono.marcar("pantalla");
         if (Contexto.prueba === "largar-60")   // solo para capturas: 59 vueltas cerradas, va por la 60
             for (let i = 60; i > 0; i--) Crono.marcar("pantalla", i * 4000);
         forceActiveFocus();
+    }
+    Timer {   // solo para capturas: marcas cada 6 s; «recorrido-largo» termina a los 40 s
+        id: tPruebaRec; interval: 6000; repeat: true
+        property int veces: 0
+        onTriggered: {
+            veces++;
+            if (Contexto.prueba === "recorrido-largo" && veces >= 7) { stop(); Crono.terminar(); return; }
+            raiz.marcar("pantalla");
+        }
     }
     Keys.onPressed: e => {   // teclado USB: Enter, espacio o F9 (como la app)
         if (e.isAutoRepeat) return;
@@ -40,7 +52,7 @@ Item {
         target: Crono
         function onAviso(texto) { Navegacion.avisar(texto); }
         function onTerminada(motivo, vueltas, id) {
-            Navegacion.avisar(motivo + ": " + vueltas + (vueltas === 1 ? " vuelta guardada" : " vueltas guardadas"));
+            Navegacion.avisar(raiz.recorrido ? "Recorrido guardado" : motivo + ": " + vueltas + (vueltas === 1 ? " vuelta guardada" : " vueltas guardadas"));
             Crono.salir();
             Navegacion.ir("ficha", { id: id });
         }
@@ -51,14 +63,14 @@ Item {
     Rectangle {
         anchors.fill: parent
         readonly property bool fondo: Datos.cfg("indicador") !== "marco"
-        color: est.medida ? Datos.cfg("colMedida") : Datos.cfg("colPractica")
+        color: est.medida && !raiz.recorrido ? Datos.cfg("colMedida") : Datos.cfg("colPractica")
         opacity: Crono.enCurso && fondo ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
         Behavior on color { ColorAnimation { duration: 250 } }
     }
     Rectangle {   // indicador «marco»: borde interior de 7 px
         anchors.fill: parent; color: "transparent"
-        border { width: Tema.sol ? 11 : 7; color: est.medida ? Datos.cfg("colMedida") : Datos.cfg("colPractica") }   // en sol 11 px, como la app
+        border { width: Tema.sol ? 11 : 7; color: est.medida && !raiz.recorrido ? Datos.cfg("colMedida") : Datos.cfg("colPractica") }   // en sol 11 px, como la app
         visible: Crono.enCurso && Datos.cfg("indicador") === "marco"
     }
 
@@ -68,7 +80,7 @@ Item {
         x: raiz.h ? 24 : 20; y: Tema.grandes ? 12 : (raiz.h ? 22 : 20)
         width: Math.max(80, arriba.x - x - 14); elide: Text.ElideRight   // termina antes de REC / GPS / Terminar
         tam: Tema.grandes ? (raiz.h ? 19 : 16) : (raiz.h ? 15 : 13)
-        text: (info.nombre || "") + " · " + (raiz.h ? "ideal " : "") + (info.ideal || "") + (info.distanciaM > 0 ? " · " + info.distancia + " m" : "")
+        text: raiz.recorrido ? "RECORRIDO LIBRE" + (est.enCurso ? "" : " · tocá LARGAR") : (info.nombre || "") + " · " + (raiz.h ? "ideal " : "") + (info.ideal || "") + (info.distanciaM > 0 ? " · " + info.distancia + " m" : "")
     }
     Row {
         id: arriba
@@ -146,10 +158,18 @@ Item {
     // Tablero de widgets (el mismo que usa el editor)
     Tablero {
         id: tablero
+        visible: !raiz.recorrido
         anchors.fill: parent
         armado: raiz.armado
         est: raiz.est
         velActiva: Datos.ajustes.velActiva !== false
         onMarcar: Crono.marcar("pantalla")
+    }
+    TableroRecorrido {
+        id: tableroRec
+        visible: raiz.recorrido
+        anchors.fill: parent
+        est: raiz.est
+        onMarcar: raiz.marcar("pantalla")
     }
 }

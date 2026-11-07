@@ -114,6 +114,10 @@ Cambian lo que hace la app en estos puntos:
 - **Volumen:** un solo ajuste, en Ajustes → «Voz y sonido» → «Volumen auriculares», con botón ▶ Probar. **De fábrica viene al máximo (100 %).** Es el volumen con que se escucha la voz al largar y durante la carrera. Si el usuario lo cambia, se guarda y se usa siempre el último que eligió. (No se fuerza el máximo al largar.)
 - **Fondo en carrera:** como la app: toda la pantalla roja en vuelta medida y verde en práctica (indicador «fondo»). Decidido el 01/11/2026.
 - **MARCAR en pantalla:** siempre visible, aunque el pulsador esté conectado (por si el pulsador falla en carrera). Los dos marcan.
+- **Recorrido libre (07/11/2026):** en Práctica libre. Una sola «vuelta» abierta y libre, sin tiempo ideal ni distancia
+  (`extra.recorrido`), sin voz. MARCAR deja marcas (`extra.marcas`: `{n, ms, m, kmh}`), no corta. Al terminar no queda
+  «interrumpida». Pantalla: `widgets/TableroRecorrido.qml`; informe: resumen y marcas (`datosInforme` → `resumen`, `marcas`).
+  Muestras: [muestras/recorrido/](muestras/recorrido/).
 - **Simulador:** solo para desarrollo, nunca en el equipo final. Simula **los datos que manda el NEO-M8N** (frases NMEA por el mismo camino que el UART), así se prueba toda la cadena: lectura, motor, voz y pantalla.
 
 ## Pantallas en vertical (720×1280, aprobadas)

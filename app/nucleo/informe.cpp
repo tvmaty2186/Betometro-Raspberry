@@ -170,6 +170,51 @@ std::optional<Recorrido> armarRecorrido(const Carrera& c, double umbralCfg) {
 
 }  // namespace
 
+// Recorrido libre: resumen (tiempo, distancia, promedio, máxima, parado, aceleración máxima) y las marcas,
+// cada una con su lugar en el dibujo (x, y) y en la línea de la vuelta (i: índice de la vuelta)
+static void agregarRecorrido(const Carrera& c, Json& out) {
+    out["recorrido"] = true;
+    Json r = Json::objeto();
+    int iv = -1;
+    for (size_t i = 0; i < c.vueltas.size(); ++i) if (!c.vueltas[i].traza.empty() || iv < 0) iv = static_cast<int>(i);
+    const Json& lista = out["vueltas"];
+    const Json* M = nullptr;
+    if (iv >= 0) {
+        const Vuelta& v = c.vueltas[static_cast<size_t>(iv)];
+        r["tiempoMs"] = v.realMs;
+        r["distM"] = v.distM ? Json(*v.distM) : Json(0.0);
+        r["promKmh"] = v.velPromKmh ? Json(*v.velPromKmh) : Json();
+        r["maxKmh"] = v.velMaxKmh ? Json(*v.velMaxKmh) : Json();
+        double parado = 0;
+        for (size_t k = 1; k < v.traza.size(); ++k)
+            if (v.traza[k][2] < 3) parado += std::min(2.0, v.traza[k][0] - v.traza[k - 1][0]);
+        r["paradoMs"] = redondearJs(parado * 1000);
+        const Json& j = lista.elementos()[static_cast<size_t>(iv)];
+        if (j["m"].esLista()) M = &j["m"];
+        double amax = 0;
+        if (M) for (const auto& p : M->elementos()) if (p.elementos()[7].aNumero() > 0) amax = std::max(amax, p.elementos()[3].aNumero());
+        r["acelMax"] = fijarDecimalesJs(amax, 1);
+        r["vuelta"] = iv;
+    }
+    out["resumen"] = r;
+    Json marcas = Json::lista();
+    if (c.extra["marcas"].esLista())
+        for (const auto& mk : c.extra["marcas"].elementos()) {
+            Json x = mk;
+            const double t = mk["ms"].aNumero() / 1000;
+            if (M && !M->elementos().empty()) {   // la lectura más cercana en el tiempo
+                const Json* mejor = &M->elementos().front();
+                for (const auto& p : M->elementos())
+                    if (std::fabs(p.elementos()[0].aNumero() - t) < std::fabs(mejor->elementos()[0].aNumero() - t)) mejor = &p;
+                x["x"] = mejor->elementos()[5];
+                x["y"] = mejor->elementos()[6];
+            }
+            x["vuelta"] = iv;
+            marcas.agregar(std::move(x));
+        }
+    out["marcas"] = marcas;
+}
+
 Json datosInforme(const Carrera& c, double umbralPrecisionM) {
     const double D = static_cast<double>(c.distanciaM), T = static_cast<double>(c.tiempoIdealMs) / 1000;
     Json out = Json::objeto();
@@ -279,6 +324,7 @@ Json datosInforme(const Carrera& c, double umbralPrecisionM) {
         lista[V.indice]["m"] = m;
         lista[V.indice]["L"] = V.L;
     }
+    if (esRecorrido(c)) agregarRecorrido(c, out);
     return out;
 }
 

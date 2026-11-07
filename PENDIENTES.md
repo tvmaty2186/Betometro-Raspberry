@@ -94,6 +94,11 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 - **Video con la imagen rota (resuelto):** era 1080p a 30 cuadros, la Pi 3 no llegaba. En 720p y 480p salió
   limpio (Matías, 06/11). Desde la 1.0.24 **no hay 1080p** (Matías: rompía muchas imágenes): solo 480p y 720p.
   Si estaba en 1080p pasa solo a 720p.
+- **1.0.26 (07/11/2026, publicándose): Recorrido libre** (Práctica libre → «Recorrido libre»). Sin vueltas, sin tiempo ni
+  distancia; graba GPS (1 lectura por segundo, entran 5 h) y video; MARCAR deja marcas numeradas y no corta nada;
+  sin voz. Informe (Pi y celu): mapa con largada, llegada y marcas, velocidad con las marcas, resumen (tiempo,
+  distancia, promedio, máxima, parado, aceleración máxima) y lista de marcas (tocar una lleva el video ahí).
+  Muestras aprobadas: `docs/muestras/recorrido/`. Falta probarlo en el auto.
 - **1.0.25 publicada (07/11/2026):** Conectividad → llave «Conectarse a redes wifi». Apagada: no se conecta a
   ninguna red y arma la red propia enseguida (sin internet). Pedido de Matías; falta su OK para publicar.
   Carrera: REC, GPS y Terminar del mismo alto, borde y letra; el punto del REC parpadea cada 500 ms.
