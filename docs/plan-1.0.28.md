@@ -121,7 +121,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       vuelta «3:01:5». **Las diferencias siguen con coma**: error, ± segundos, «+1,5 s».
       Ojo: la página del celu (`recursos/informe-plantilla.html`) y los textos de C++ (`datos.cpp` «tiempo()»)
       también.
-- [ ] **Cargar el tiempo por casilleros:** minutos y segundos por separado (cada uno se toca y se escribe de izquierda
+- [x] **Cargar el tiempo por casilleros:** minutos y segundos por separado (cada uno se toca y se escribe de izquierda
       a derecha, con − / +; segundos hasta 59). **Las décimas no se editan** (quedan en 0). En Práctica y en la ficha
       de la carrera. Mostrar muestra antes de programar.
 - [x] Al tocar **Terminar**: ir derecho al **informe**, con el **error total grande arriba** (07-1.1, 2.1).

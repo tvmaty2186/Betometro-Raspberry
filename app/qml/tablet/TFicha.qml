@@ -14,6 +14,23 @@ TPantalla {
     property string fecha: c.fecha
     property int distanciaM: c.distanciaM
     property int tiempoIdealMs: c.tiempoIdealMs
+    // Casilleros del tiempo (muestra aprobada 1.0.29): «m»/«s» y lo que se va escribiendo
+    property string casillero: ""
+    Component.onCompleted: if (Contexto.prueba === "casillero") { casillero = "m"; escribir("5"); }   // solo para capturas
+    property string escrito: ""
+    function escribir(d) {
+        if (escrito.length >= 2) return;
+        const n = escrito + d;
+        if (casillero === "s" && parseInt(n) > 59) { Navegacion.avisar("Los segundos van de 0 a 59"); return; }
+        escrito = n;
+    }
+    function aceptarCasillero() {
+        const m = Math.floor(tiempoIdealMs / 60000), s = Math.floor(tiempoIdealMs / 1000) % 60;
+        const v = escrito === "" ? -1 : parseInt(escrito);
+        const nuevo = ((casillero === "m" && v >= 0 ? v : m) * 60 + (casillero === "s" && v >= 0 ? v : s)) * 1000;   // décimas en 0
+        casillero = ""; escrito = "";
+        if (nuevo >= 5000) tiempoIdealMs = nuevo; else Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos");
+    }
     property string patron: c.patron
     property string lugar: c.lugar || ""
     property var lugarLat: c.lugarLat
@@ -54,9 +71,10 @@ TPantalla {
                             onMenos: raiz.moverDia(-1); onMas: raiz.moverDia(1)
                             onTocado: { raiz.campo = "fecha"; teclado.abrir("fecha", "Fecha de la carrera", Formato.desdeIso(raiz.fecha)); } } }
             TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Tiempo ideal"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
-                TMasMenos { texto: Formato.tiempo(raiz.tiempoIdealMs); anchoTexto: 190
-                            onMenos: raiz.tiempoIdealMs = Math.max(5000, raiz.tiempoIdealMs - 1000); onMas: raiz.tiempoIdealMs = raiz.tiempoIdealMs + 1000
-                            onTocado: { raiz.campo = "tiempo"; teclado.abrir("tiempo", "Tiempo ideal por vuelta", Formato.msADigitos(raiz.tiempoIdealMs), 6); } } }
+                TCasilleros { chico: true; etiquetas: false
+                              ms: raiz.tiempoIdealMs; editando: raiz.casillero; escrito: raiz.escrito
+                              onCambiar: v => raiz.tiempoIdealMs = Math.max(5000, v)
+                              onEditar: que => { raiz.casillero = que; raiz.escrito = ""; } } }
             TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Distancia"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TMasMenos { texto: Formato.miles(raiz.distanciaM) + " m"; anchoTexto: 190
                             onMenos: raiz.distanciaM = Math.max(0, raiz.distanciaM - 50); onMas: raiz.distanciaM = Math.min(1000000, raiz.distanciaM + 50)
@@ -103,6 +121,18 @@ TPantalla {
         }
     }
 
+    TTecladoNum {   // en el lugar de IR A LARGAR mientras se escribe un casillero del tiempo
+        visible: raiz.casillero !== ""
+        x: raiz.h ? izq.width + 18 : 0
+        y: raiz.h ? 0 : izq.height + 16
+        width: raiz.h ? 420 : raiz.area.width
+        height: raiz.h ? raiz.area.height : raiz.area.height - y
+        titulo: raiz.casillero === "m" ? "Minutos" : "Segundos"
+        ayuda: raiz.casillero === "m" ? "de izquierda a derecha" : "de 0 a 59"
+        onDigito: d => raiz.escribir(d)
+        onBorrar: raiz.escrito = raiz.escrito.slice(0, -1)
+        onListo: raiz.aceptarCasillero()
+    }
     BuscadorLugar { id: buscador; parent: raiz
         onElegido: l => { raiz.lugar = l.nombre + (l.detalle ? ", " + l.detalle.split(",")[0] : ""); raiz.lugarLat = l.lat; raiz.lugarLon = l.lon; } }
     Teclado {
