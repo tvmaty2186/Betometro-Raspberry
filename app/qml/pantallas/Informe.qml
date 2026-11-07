@@ -114,12 +114,41 @@ Item {
         auto: raiz.reproductor.e
         onElegirModo: (m) => raiz.modo = m
         onIrVideo: (i, t) => raiz.irVideo(i, t)
+        onAbrir: { mapaC.abrir(); raiz.completoQue = "mapa"; }
     }
 
     // Velocidad de la vuelta elegida, a lo largo de la distancia
     GraficoVelocidad {
         id: grafico
         h: raiz.h; vv: raiz.vv; rec: raiz.rec; inf: raiz.inf; vu: raiz.vu; lap: raiz.lap; marcas: raiz.marcas; sug: raiz.sug
+        onAbrir: { graficoC.modo = "vel"; graficoC.abrir(raiz.lap); raiz.completoQue = "grafico"; }
+    }
+    // Doble toque sobre el gráfico o el mapa: a pantalla completa, acostado (de pie se ve girado) (1.0.30)
+    property string completoQue: ""      // "", grafico, mapa
+    Item {
+        id: capaCompleta
+        visible: raiz.completoQue !== ""
+        z: 60
+        anchors.centerIn: parent
+        width: raiz.h ? parent.width : parent.height
+        height: raiz.h ? parent.height : parent.width
+        rotation: raiz.h ? 0 : 90
+        Fondo { anchors.fill: parent }
+        GraficoCompleto {
+            id: graficoC
+            visible: raiz.completoQue === "grafico"
+            anchors.fill: parent; anchors.margins: 12
+            inf: raiz.inf; nombre: raiz.c.nombre || ""; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug
+            onCerrar: raiz.completoQue = ""
+        }
+        MapaCompleto {
+            id: mapaC
+            visible: raiz.completoQue === "mapa"
+            anchors.fill: parent; anchors.margins: 12
+            inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug; modo: raiz.modo
+            onElegirModo: (m) => raiz.modo = m
+            onCerrar: raiz.completoQue = ""
+        }
     }
 
     // Todas las vueltas
@@ -201,10 +230,31 @@ Item {
         id: tPruebaTele; interval: 1500
         onTriggered: raiz.reproductor.irA(raiz.lap, raiz.vueltas.length > 20 ? 5 : 134.6)
     }
+    Timer {   // solo para capturas: el gráfico o el mapa a pantalla completa, con zoom y un punto tocado
+        id: tPruebaCompleto; interval: 300
+        onTriggered: {
+            if (Contexto.prueba === "grafico") {
+                graficoC.abrir(-1);
+                const T = graficoC.tramos;
+                if (raiz.rec) graficoC.ver(0, Math.min(graficoC.total, 15000));                 // los primeros 15 km
+                else if (T.length >= 4) graficoC.ver(T[2].d0, T[2].L + T[3].L);                 // vueltas 3 y 4
+                graficoC.elegir(graficoC.x0 + (graficoC.x1 - graficoC.x0) * 0.94);
+                raiz.completoQue = "grafico";
+            } else {
+                mapaC.abrir();
+                const P = raiz.inf.pista || [];
+                if (raiz.rec) mapaC.verTramo(0, 15000);                                             // los primeros 15 km
+                else if (P.length) mapaC.acercar(mapaC.ex(P[0][0]), mapaC.ey(P[0][1]), 2.5);        // la largada, ×2,5
+                if (P.length) mapaC.elegir(mapaC.ex(P[Math.floor(P.length * 0.2)][0]), mapaC.ey(P[Math.floor(P.length * 0.2)][1]));
+                raiz.completoQue = "mapa";
+            }
+        }
+    }
     Component.onCompleted: {   // solo para capturas
         // con muchas vueltas (BETO_MUESTRA_LARGA), una de las últimas
         const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
-        if (Contexto.prueba === "libre") cambiarMedida(1);
+        if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa") tPruebaCompleto.start();
+        else if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") tabla.fila = 3;
         else if (Contexto.prueba === "menu") tabla.menuAbierto = true;
         else if (Contexto.prueba === "cortado") verVideo = true;   // con --prueba cortado: el aviso del video cortado

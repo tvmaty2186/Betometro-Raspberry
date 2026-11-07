@@ -128,6 +128,7 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
                         danados = cuadros_.value("avisosJpeg").toLongLong();
         if (n > 0 && (malos > 0 || danados > 0))
             qWarning("Cámara: de %lld cuadros, %lld llegaron cortados (salteados) y %lld con daños", n, malos, danados);
+        ultimosCuadros_ = cuadros_;
         cuadros_.clear();
     });
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
@@ -287,8 +288,8 @@ void Camara::probarMicrofono() {
                                            QDir::tempPath() + QStringLiteral("/betometro-prueba-mic.wav")} + base());
 }
 
-void Camara::probarGrabacion() {
-    if (empezar(QStringLiteral("prueba-") + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss")))) detener(10);
+void Camara::probarGrabacion(int segundos) {
+    if (empezar(QStringLiteral("prueba-") + QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-HHmmss")))) detener(qMax(1, segundos));
 }
 
 bool Camara::empezar(const QString& nombreBase) {

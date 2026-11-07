@@ -4,6 +4,14 @@ Lo que quedó sin hacer de las 1.0.28 y 1.0.29 (todo aprobado por Matías). El d
 [plan-1.0.28.md](plan-1.0.28.md) y en el informe de su auditoría (`docs/auditorias/NN-…md`).
 Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
 
+- [x] **Prueba completa** (Matías, 07/11/2026): la Pi se revisa sola de punta a punta y manda el resultado. Hecho:
+      `app/prueba_completa.h/.cpp` (objeto `PruebaCompleta`, 12 pasos sin trabar la pantalla: sistema, simulador,
+      voz con «¿Se escuchó?», pulsador con 20 s, GPS, cámara 30 s con video+sonido y MP4, rendimiento grabando,
+      reproducción con `VideoGst` contando cuadros, tarjeta con `dd` de 50 MB, wifi e internet, Drive, pantallas con
+      `QQmlComponent`), pantalla `tablet/TPrueba.qml` (mismo estilo que el Simulador), botón en Ajustes (11 botones:
+      2 filas de 4 y una de 3), resultado en `<datos>/prueba-completa.json` y `.txt`, al reporte de errores (y se manda
+      si hay llave), y `/prueba` en «Betómetro en la red» con «Empezar» (`POST /prueba/empezar`, docs/conectarse-ssh.md).
+      No corre en carrera. En la PC los pasos de hardware dicen «no se puede en la PC» (naranja).
 - [ ] Pasarle a Matías los comandos para pegar por ssh y anotar los números: peso de la base y procesador de la
       cámara (04, sección 4, pasos A y B); arranque, servicios y lugar ocupado (10, «Para mirar en la Pi»).
 - [ ] Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
@@ -60,6 +68,15 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
 - [x] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
       (Matías: sí) (A-1.4).
 - [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
+- [x] **Gráficos del informe a pantalla completa (Pi y celu)** (muestras aprobadas en `docs/muestras/1.0.30/graficos/`).
+      Doble toque sobre el gráfico de velocidad o el mapa del informe → pantalla completa acostada (de pie se ve girada):
+      cuadrícula cada 100 m y 5 km/h, todas las lecturas con color por tramo, raya por vuelta con tiempo y error,
+      MÁX/MÍN/PROM de lo visible, Vel./Acel./Adel., toque = globito, doble toque = acercar, pellizco = zoom, arrastrar,
+      barrita de toda la carrera, X. El mapa: zoom/arrastre, rayitas cada km, marcas con km y hora, escala de colores,
+      mapita. Sin sugerida (recorrido libre) el color de la velocidad es contra el promedio, también en el mapa normal.
+      Pi: `app/qml/pantallas/informe/GraficoCompleto.qml` y `MapaCompleto.qml` (Canvas, solo QtQuick). Celu:
+      `recursos/informe-zoom.js` (pegado en la plantilla por `armar-informe.py`). Capturas: `--prueba grafico | mapa`;
+      `BETO_MUESTRA_RECORRIDO=1` suma un recorrido libre de muestra.
 
 ## Medido en la Pi con la 1.0.29 (07/11/2026)
 

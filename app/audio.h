@@ -21,6 +21,7 @@ public:
     Q_INVOKABLE void ponerVolumen(double porcentaje);       // 0 a 100
     Q_INVOKABLE void ponerVoz(const QString& voz);          // elena, tomas
     Q_INVOKABLE void probar() { reproducir(QStringLiteral("prueba")); }
+    bool tiene(const QString& nombre) const { return efectos_.contains(nombre); }   // está ese audio (Prueba completa)
     // «Vuelta 3, medida» → el archivo que corresponde
     static QString archivoDeFrase(const QString& frase);
 

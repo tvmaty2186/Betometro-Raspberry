@@ -1,0 +1,58 @@
+<!doctype html><html lang=es><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Betómetro · Prueba completa</title><link rel=icon href=/r/icono.png><meta name=theme-color content="#0d2a18"><style>
+@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}
+@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;min-height:100vh;
+background:linear-gradient(180deg,rgba(11,42,23,0) 0,#0b2a17 260px),repeating-conic-gradient(#ffffff09 0 25%,transparent 0 50%) 0 0/22px 22px,
+radial-gradient(140% 70% at 50% 0%,#2f7a49,#0b2a17 70%);background-color:#0b2a17}
+main{max-width:620px;margin:auto;padding:0 16px 30px}
+.cab{display:flex;align-items:center;gap:10px;padding:14px 0 12px;border-bottom:3px solid #f4c531}
+.cab img{height:44px;filter:drop-shadow(0 2px 2px #0008)}
+.cab div{flex:1;min-width:0}.cab small{display:block;font:800 italic 12px Barlow;letter-spacing:.18em;color:#b9cdb8}
+.cab b{display:block;font:800 italic 24px/1.1 Barlow}
+.f{border:3px solid #cfd4d8;background:#08190ecc;color:#f7f7f2;border-radius:24px;font:800 italic 16px Barlow;letter-spacing:.12em;
+text-transform:uppercase;padding:12px 16px;cursor:pointer;width:100%;margin-top:12px}
+.f:active{transform:scale(.97)}.f:disabled{opacity:.35}.f.am{background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);border-color:#f4c531;color:#14240f}
+.res{margin-top:14px;border-radius:20px;padding:14px 16px;border:3px solid #cfd4d8;background:#08190ecc}
+.res.ok{background:linear-gradient(#3fa34d,#1d5233);border-color:#9ff5bb}.res.leve{background:linear-gradient(#f5a13c,#a8520c);border-color:#ffd29a}
+.res.grave{background:linear-gradient(#e0473a,#8f130b);border-color:#ffb3aa}
+.res b{display:block;font:800 italic 22px/1.15 Barlow}.res span{display:block;color:#fff;opacity:.9;margin-top:4px}
+.barra{height:14px;border-radius:7px;background:#ffffff33;margin-top:10px;overflow:hidden}.barra div{height:100%;background:#f4c531;width:0;transition:width .4s}
+.p{display:flex;gap:12px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:16px;background:#08190ecc;border:2px solid #cfd4d8}
+.p .n{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 italic 17px Barlow;border:2px solid #fff;color:#fff;background:#4b5258}
+.p.ok .n{background:#3fa34d}.p.leve .n{background:#d9741a}.p.grave .n{background:#d23b2c}.p.corriendo .n{background:#f4c531;color:#14240f}.p.saltado .n{opacity:.5}
+.p .x{flex:1;min-width:0}.p .x b{display:block;font:800 italic 18px/1.15 Barlow}.p .x span{display:block;color:#d6e6d2;font-size:14px;margin-top:2px;word-break:break-word}
+.v{color:#b9cdb8;font-style:italic;font-size:14px}
+#aviso{position:fixed;left:16px;right:16px;bottom:20px;background:#8f130b;border-radius:14px;padding:12px 14px;font-size:16px;z-index:9}
+[hidden]{display:none!important}
+</style></head><body><main>
+<div class=cab><img alt="" src="/r/leon.png"><div><small>BETÓMETRO</small><b>Prueba completa</b></div></div>
+<div id=sinred class=v hidden style="margin-top:10px">Sin conexión con el Betómetro. ¿Estás en la misma wifi?</div>
+<div id=res class=res><b id=titulo>Todavía no se corrió</b><span id=sub></span><div class=barra id=barra hidden><div id=lleno></div></div></div>
+<button class="f am" id=bEmpezar>Empezar la prueba (3 a 5 min)</button>
+<p class=v id=ayuda>En la Pi se abre la pantalla de la prueba: ahí hay que contestar «¿Se escuchó?» y apretar el pulsador cuando lo pida.</p>
+<div id=pasos></div>
+<p class=v style="margin-top:18px"><a href="/prueba/texto?descargar=1" style="color:#f4c531">Bajar el resultado (.txt)</a> · <a href="/reportes?descargar=1" style="color:#f4c531">Reporte de errores</a> · <a href="/" style="color:#f4c531">Volver</a></p>
+</main><div id=aviso hidden></div>
+<script>
+const $=i=>document.getElementById(i);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let tAviso=0;
+function aviso(t){$('aviso').textContent=t;$('aviso').hidden=false;clearTimeout(tAviso);tAviso=setTimeout(()=>$('aviso').hidden=true,3000)}
+const NOMBRE={ok:'BIEN',leve:'AVISO',grave:'ERROR',saltado:'sin probar',corriendo:'…',espera:''};
+function pintar(E){
+  const r=$('res');r.className='res '+(E.estado==='ok'||E.estado==='leve'||E.estado==='grave'?E.estado:'');
+  const corre=E.estado==='corriendo';
+  $('titulo').textContent=E.estado==='ok'?'Todo bien':E.estado==='leve'?'Revisar: hay avisos':E.estado==='grave'?'Hay errores: avisar al desarrollador':corre?'Probando…':'Todavía no se corrió';
+  $('sub').textContent=(E.resumen||'')+(E.cuando?' · '+E.cuando:'')+(E.version?' · v'+E.version:'')+(corre&&E.haciendo?' · '+E.haciendo:'')
+    +(E.pregunta==='voz'?' · EN LA PI: ¿se escuchó? ('+E.segundos+' s)':E.pregunta==='pulsador'?' · APRETÁ EL PULSADOR ('+E.segundos+' s)':'');
+  $('barra').hidden=!corre;if(corre)$('lleno').style.width=Math.round(100*Math.max(0,E.paso-1)/Math.max(1,E.total))+'%';
+  $('bEmpezar').disabled=corre;$('bEmpezar').textContent=corre?'Probando… paso '+E.paso+' de '+E.total:(E.estado?'Probar de nuevo (3 a 5 min)':'Empezar la prueba (3 a 5 min)');
+  $('pasos').innerHTML=(E.pasos||[]).map((p,i)=>'<div class="p '+esc(p.estado)+'"><div class=n>'+(p.estado==='ok'?'✓':p.estado==='leve'||p.estado==='grave'?'!':p.estado==='corriendo'?'…':(i+1))+'</div><div class=x><b>'+esc(p.nombre)+(NOMBRE[p.estado]?' · '+NOMBRE[p.estado]:'')+'</b><span>'+esc(p.detalle||'')+'</span></div></div>').join('');
+}
+async function estado(){try{const r=await fetch('/prueba/estado',{cache:'no-store'});pintar(await r.json());$('sinred').hidden=true}catch(e){$('sinred').hidden=false}}
+$('bEmpezar').onclick=async()=>{try{const r=await fetch('/prueba/empezar',{method:'POST'});const j=await r.json();if(!j.ok)aviso(j.error||'No se pudo empezar');estado()}catch(e){aviso('No se pudo empezar')}};
+estado();setInterval(estado,2000);
+</script></body></html>

@@ -61,6 +61,8 @@ public:
 
     // Le da prioridad al chip de la Raspberry sobre los descompresores de procesador (una vez al empezar)
     static void preferirChip();
+    // Cuadros descomprimidos desde que se abrió el video (la Prueba completa mide cuadros por segundo sin pantalla)
+    qint64 cuadros() const { return cuadros_; }
 
     // Para los avisos de GStreamer (otros hilos)
     void entregar(GstSample* muestra);               // un cuadro: al videoSink
@@ -99,4 +101,5 @@ private:
     bool listo_ = false, quiereAndar_ = false, sonidoTele_ = false;
     QString descompresor_;
     std::atomic<bool> rangoCompleto_{false};
+    std::atomic<qint64> cuadros_{0};
 };

@@ -106,6 +106,56 @@ void Datos::cargarMuestra() {
         agregar("Práctica larga", h.addDays(-2), 40, 25000, 600, "todas", e40, true);
         conVideo(3590000);   // el video empezó una hora antes: horas en «▸ 1:00:10»
     }
+    // Solo para las capturas del informe (BETO_MUESTRA_RECORRIDO=1): un recorrido libre de 40,3 km con 7 marcas,
+    // una lectura por segundo. La ruta va y viene suave; la velocidad baja en las curvas y sube en las rectas.
+    if (qEnvironmentVariableIntValue("BETO_MUESTRA_RECORRIDO") == 1) {
+        Carrera c;
+        c.id = nuevaId(1730000000000 + static_cast<int64_t>(base_.carreras.size()), 7);
+        c.nombre = "Recorrido 02/11/26 14:05";
+        c.fecha = s(h.addDays(-5).toString(Qt::ISODate));
+        c.practica = true;
+        c.creada = s(QDateTime(h.addDays(-5), QTime(14, 5)).toString(Qt::ISODate));
+        c.tiempoIdealMs = kRecorridoIdealMs;
+        c.distanciaM = 0;
+        c.patron = "todas";
+        c.extra["recorrido"] = true;
+        Vuelta v;
+        v.n = 1; v.medida = false; v.idealMs = kRecorridoIdealMs;
+        auto rumbo = [](double d) { return 0.15 + 0.9 * std::sin(d / 5200) + 0.55 * std::sin(d / 1700 + 1) + 0.3 * std::sin(d / 620 + 2) + 0.12 * std::sin(d / 230 + 0.5); };
+        double d = 0, x = 0, y = 0, vmax = 0;
+        const double largo = 40300;
+        const std::vector<double> marcasKm{5.1, 10.3, 14.8, 20.2, 25.0, 30.6, 35.9};
+        Json marcas = Json::lista();
+        size_t proxMarca = 0;
+        for (int t = 0; d < largo; ++t) {
+            const double hd = rumbo(d), curv = std::fabs(rumbo(d + 20) - rumbo(d - 20)) / 40;
+            const double kmh = std::max(8.0, std::min(98.0, 74 - 26000 * curv + 7 * std::sin(d / 2100) + 1.5 * std::sin(t * 1.7)));
+            FilaTraza p{static_cast<double>(t), redondearJs(d * 10) / 10, fijarDecimalesJs(kmh, 1),
+                        fijarDecimalesJs(-31.74 + y / 110540, 6), fijarDecimalesJs(-60.52 + x / (111320 * std::cos(31.74 * M_PI / 180)), 6),
+                        static_cast<double>(2 + (t * 7) % 4)};
+            v.traza.push_back(p);
+            vmax = std::max(vmax, kmh);
+            if (proxMarca < marcasKm.size() && d >= marcasKm[proxMarca] * 1000) {
+                Json m = Json::objeto();
+                m["n"] = static_cast<int>(proxMarca + 1);
+                m["ms"] = static_cast<int64_t>(t) * 1000;
+                m["m"] = redondearJs(d);
+                m["kmh"] = fijarDecimalesJs(kmh, 1);
+                m["fuente"] = std::string("pantalla");
+                marcas.agregar(std::move(m));
+                ++proxMarca;
+            }
+            const double paso = kmh / 3.6;
+            x += std::cos(hd) * paso; y += std::sin(hd) * paso; d += paso;
+        }
+        v.realMs = static_cast<int64_t>(v.traza.size()) * 1000;
+        v.distM = redondearJs(d);
+        v.velPromKmh = fijarDecimalesJs(d / (v.realMs / 1000.0) * 3.6, 1);
+        v.velMaxKmh = fijarDecimalesJs(vmax, 1);
+        c.vueltas.push_back(v);
+        c.extra["marcas"] = marcas;
+        base_.carreras.push_back(c);
+    }
     cfg_ = armarConfig(base_.config);
     emit carrerasChanged();
 }

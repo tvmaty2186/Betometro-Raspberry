@@ -136,6 +136,23 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
 .vbajar a{flex:1;min-width:150px;text-align:center;text-decoration:none;padding:10px;border-radius:12px;border:2px solid var(--ama);color:var(--ama);font:800 italic 14px var(--ui)}
 .sinjs{margin:10px 0 0;padding:14px 16px;border-radius:14px;border:2px solid #f4c531;background:#08190e;color:#f4f1e6;font-size:17px;line-height:1.35}
 .sinjs b{color:#f4c531}
+/* Gráficos a pantalla completa con zoom (1.0.30, recursos/informe-zoom.js): la tarjeta ocupa toda la pantalla, acostada;
+   de pie se gira la página entera (.gira) */
+.gz{position:fixed;left:0;top:0;z-index:50;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#1f4a2f,#08190e);
+ box-shadow:inset 0 0 0 2px var(--borde),inset 0 0 0 3px #4b5258,inset 0 1px 0 #ffffff4d;transform-origin:0 0;touch-action:none;user-select:none}
+.gz.gira{transform:rotate(90deg) translateY(-100%)}
+.gz.no{display:none}
+.gz canvas{position:absolute;left:0;top:0}
+.gz .t{position:absolute;left:12px;top:12px;margin:0;white-space:nowrap}.gz .t.t2{top:32px;color:var(--ama)}
+.gz .chips{position:absolute;left:50%;top:9px;transform:translateX(-50%);margin:0;flex-wrap:nowrap}.gz .chip{padding:4px 10px;font-size:12px}
+.gzx{position:absolute;right:10px;top:8px;width:34px;height:34px;border-radius:50%;background:#0f3b20;border:1.5px solid #cfd4d8aa;box-shadow:0 2px 4px #0006;display:grid;place-items:center;padding:0;cursor:pointer}
+.gzx svg{width:18px;height:18px}
+.gz .pie{position:absolute;left:0;right:0;margin:0}
+.gzG{position:absolute;border-radius:10px;background:#08190eee;border:1.5px solid var(--borde);padding:5px 9px;box-shadow:0 4px 10px #0008;pointer-events:none}
+.gzG.no{display:none}
+.gzG .f1{display:flex;align-items:baseline;gap:6px}.gzG .f1 b{font:700 italic 22px/1 var(--num);color:var(--crema)}.gzG .f1 small{font-size:12px}
+.gzG .f1 .chip{margin-left:auto;padding:1px 7px;font-size:10px;cursor:default}
+.gzG .f2{font:600 10px var(--ui);color:var(--ink);margin-top:3px}.gzG .f3{font:800 italic 11px var(--ui)}
 /* /RASPBERRY */
 </style></head><body><main>
 <!-- RASPBERRY: aviso para cuando el informe se abre en una vista previa (Google Drive) -->
@@ -180,7 +197,9 @@ const vSug=C.distanciaM?C.distanciaM/(C.idealMs/1000)*3.6:null;
 const conT=C.vueltas.map((v,i)=>i).filter(i=>C.vueltas[i].m);
 let lap=conT.length?conT[0]:-1,modo='vel',sel=null;
 const MODOS={vel:'Velocidad',ace:'Aceleración',ade:'Adelanto'};
-const colVel=v=>{if(!vSug)return'var(--verde)';const d=v-vSug;return d>6?'var(--rojo)':d>2?'var(--ama)':d<-6?'var(--azul)':d<-2?'var(--celeste)':'var(--verde)'};
+// RASPBERRY: recorrido libre (sin sugerida): el color es contra el promedio del recorrido (Matías, 07/11/2026)
+const vProm=C.recorrido&&C.resumen&&C.resumen.promKmh?C.resumen.promKmh:null;
+const colVel=v=>{if(!vSug&&!vProm)return'var(--verde)';const d=v-(vSug||vProm);return d>6?'var(--rojo)':d>2?'var(--ama)':d<-6?'var(--azul)':d<-2?'var(--celeste)':'var(--verde)'};
 const colAce=a=>a>0.8?'var(--verde)':a>0.25?'#8fe3b0':a<-0.8?'var(--rojo)':a<-0.25?'#f08a96':'#9aa3ad';
 const colAde=s=>{const a=Math.abs(s);return a<1?'var(--verde)':a<3?'var(--ama)':'var(--rojo)'};
 const LEY={vel:[['var(--azul)','muy lento'],['var(--verde)','en sugerida'],['var(--ama)','rápido'],['var(--rojo)','muy rápido'],['#555','sin señal']],
@@ -274,6 +293,11 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
   const fin=()=>{b.classList.remove('activa');y0=null};b.addEventListener('pointerup',fin);b.addEventListener('pointercancel',fin);})();
 // RASPBERRY: el video de la cámara. Está en recursos/informe-video.js; herramientas/armar-informe.py lo pega acá
 __VIDEO_JS__
+// /RASPBERRY
+
+// RASPBERRY: los gráficos a pantalla completa con zoom. Está en recursos/informe-zoom.js; armar-informe.py lo pega acá
+let abrirZoom=null;   // para probar desde afuera (capturas)
+__ZOOM_JS__
 // /RASPBERRY
 
 // RASPBERRY: recorrido libre: resumen y marcas en vez de la tabla de vueltas

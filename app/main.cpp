@@ -142,6 +142,8 @@ int main(int argc, char* argv[]) {
                 datos.agregarVideo(QString::fromStdString(c.id), {{"archivo", "muestra-2.mkv"}, {"largada", 1}, {"desdeLargadaMs", -240000}});
                 break;
             }
+    // --prueba prueba-completa con la cámara de prueba: la cámara prendida, para que la prueba la grabe (capturas)
+    if (op.value(oPrueba) == QStringLiteral("prueba-completa") && qEnvironmentVariableIsSet("BETO_CAMARA_PRUEBA")) datos.ponerCfg(QStringLiteral("camara"), true);
     if (op.isSet(oCarrera)) {
         for (const auto& c : datos.base().carreras)
             if (QString::fromStdString(c.nombre) == op.value(oCarrera)) contexto.setIdInicial(QString::fromStdString(c.id));

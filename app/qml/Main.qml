@@ -35,7 +35,7 @@ Window {
             // Las 10 versiones viejas de esas pantallas se borraron en la 1.0.29 (auditoría 01-1.1).
             readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara", drive: "TDrive",
                                               ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
-                                              ficha: "TFicha", chequeo: "TChequeo", simulador: "TSimulador", conectividad: "TConectividad", actualizar: "TActualizar" })
+                                              ficha: "TFicha", chequeo: "TChequeo", simulador: "TSimulador", prueba: "TPrueba", conectividad: "TConectividad", actualizar: "TActualizar" })
             source: {
                 if ((Navegacion.actual !== "inicio" || Tema.tablet) && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
                 switch (Navegacion.actual) {
@@ -52,6 +52,8 @@ Window {
         }
         Aviso { id: aviso }
         Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
+        // La Prueba completa arrancada desde el celu (/prueba): se abre su pantalla, que es donde se contesta «¿Se escuchó?»
+        Connections { target: PruebaCompleta; function onEmpezo() { if (Navegacion.actual !== "prueba") Navegacion.ir("prueba"); } }
         // Al prender: cómo salió la última actualización («Se instaló la 1.0.28» o que volvió a la anterior)
         Component.onCompleted: if (Actualizador.resultado) Qt.callLater(() => aviso.mostrar(Actualizador.resultado))
     }

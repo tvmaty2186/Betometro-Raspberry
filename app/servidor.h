@@ -11,6 +11,7 @@
 class ControlRemoto;
 class Datos;
 class Drive;
+class PruebaCompleta;
 class Reportes;
 class QTcpSocket;
 
@@ -26,12 +27,13 @@ public:
     void ponerReportes(Reportes* r) { reportes_ = r; }
     void ponerDrive(Drive* d) { drive_ = d; }
     void ponerControl(ControlRemoto* c) { control_ = c; }   // el celu como control de la tele (/control)
+    void ponerPrueba(PruebaCompleta* p) { prueba_ = p; }    // la Prueba completa: verla y arrancarla desde el celu (/prueba)
 
     // POST /drive: el JSON del cliente de Google (desde la página /drive). Devuelve la página de respuesta.
     QByteArray recibirDrive(const QByteArray& cuerpo);
 
     // Para probar sin red: arma la respuesta HTTP completa de un pedido «GET ruta»
-    QByteArray responder(const QByteArray& ruta, bool post = false) const;   // post: llegó por POST (/control/accion solo así)
+    QByteArray responder(const QByteArray& ruta, bool post = false) const;   // post: llegó por POST (/control/accion y /prueba/empezar solo así)
     // .zip sin comprimir (los HTML ya son chicos); público para probarlo
     static QByteArray zip(const QList<QPair<QString, QByteArray>>& archivos);
     // «Range: bytes=a-b» de un archivo de `tam` bytes → [desde, hasta] (inclusive). false si no se puede cumplir.
@@ -50,6 +52,7 @@ private:
     Reportes* reportes_ = nullptr;
     Drive* drive_ = nullptr;
     ControlRemoto* control_ = nullptr;
+    PruebaCompleta* prueba_ = nullptr;
     quint16 puerto_;
     QTcpServer tcp_;
 };

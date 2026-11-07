@@ -4,6 +4,7 @@
 #include "datos.h"
 #include "drive.h"
 #include "reportes.h"
+#include "prueba_completa.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -119,8 +120,9 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                     enviarVideo(s, url.path(QUrl::FullyDecoded).mid(7), rangoPedido, url.query().contains(QLatin1String("descargar")));
                     return;
                 }
-                // POST solo para los botones del celu (/control/accion): todo va en la dirección, sin cuerpo
-                const bool postControl = linea.size() >= 2 && linea[0] == "POST" && QUrl(QString::fromUtf8(linea[1])).path() == QLatin1String("/control/accion");
+                // POST solo para los botones del celu (/control/accion y /prueba/empezar): todo va en la dirección, sin cuerpo
+                const QString rutaPost = linea.size() >= 2 && linea[0] == "POST" ? QUrl(QString::fromUtf8(linea[1])).path() : QString();
+                const bool postControl = rutaPost == QLatin1String("/control/accion") || rutaPost == QLatin1String("/prueba/empezar");
                 s->write(linea.size() >= 2 && (linea[0] == "GET" || postControl) ? responder(linea[1], postControl) : respuesta(400, "text/plain", "Solo se puede mirar"));
                 s->disconnectFromHost();
             });
@@ -191,6 +193,22 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda, bool post) const {
         return respuesta(200, "application/json; charset=utf-8", QJsonDocument(r).toJson(QJsonDocument::Compact));
     }
     if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
+    // La Prueba completa: la página, cómo va (JSON), el resultado legible y el botón «Empezar» (solo por POST, como /control/accion)
+    if (ruta == QLatin1String("/prueba")) return respuesta(200, "text/html; charset=utf-8", pagina_web("prueba").toUtf8());
+    if (ruta == QLatin1String("/prueba/estado"))
+        return respuesta(200, "application/json; charset=utf-8", prueba_ ? prueba_->json() : QByteArray("{\"estado\":\"\",\"pasos\":[]}"));
+    if (ruta == QLatin1String("/prueba/texto")) {
+        QByteArray t = prueba_ ? prueba_->texto() : QByteArray();
+        if (t.isEmpty()) t = "Todavía no se corrió la prueba completa.\n";
+        return respuesta(200, "text/plain; charset=utf-8", t, descargar ? adjunto(QStringLiteral("betometro-prueba-completa.txt")) : QByteArray());
+    }
+    if (ruta == QLatin1String("/prueba/empezar")) {
+        if (!post) return respuesta(405, "text/plain; charset=utf-8", "Solo por POST");
+        const QString problema = prueba_ ? (prueba_->correr() ? QString() : prueba_->porQueNo()) : QStringLiteral("No está la prueba");
+        QJsonObject r{{QStringLiteral("ok"), problema.isEmpty()}};
+        if (!problema.isEmpty()) r[QStringLiteral("error")] = problema;
+        return respuesta(200, "application/json; charset=utf-8", QJsonDocument(r).toJson(QJsonDocument::Compact));
+    }
     if (ruta == QLatin1String("/reportes")) {   // errores anotados (para mandarlos y mejorar Betómetro)
         QByteArray t = reportes_ ? reportes_->texto() : QByteArray();
         if (t.isEmpty()) t = "Sin errores anotados.\n";

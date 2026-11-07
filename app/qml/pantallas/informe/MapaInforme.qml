@@ -19,15 +19,22 @@ Tarjeta {
     property var auto: ({ lap: -1, x: 0, y: 0 })    // reproductor.e: dónde está el auto en el video
     signal elegirModo(string m)
     signal irVideo(int lap, real t)
+    signal abrir()                                  // doble toque: el mapa a pantalla completa (1.0.30)
     function repintar() { mapa.requestPaint(); }
     onLapChanged: repintar()
     onModoChanged: repintar()
+    // Sin sugerida (recorrido libre, vuelta sin distancia) el color es contra el promedio de la vuelta (Matías, 07/11/2026)
+    readonly property real prom: {
+        const M = vu && vu.m ? vu.m : [];
+        let s = 0, n = 0;
+        for (const p of M) if (p[7]) { s += p[2]; n++; }
+        return n ? s / n : 0;
+    }
     function colorPunto(p) {
         if (!p[7]) return "#555555";
         if (modo === "acel") { const a = p[3]; return a > 0.8 ? Tema.bien : a > 0.25 ? "#8fe3b0" : a < -0.8 ? "#d23b2c" : a < -0.25 ? "#f08a96" : "#9aa3ad"; }
         if (modo === "ade") { const s = Math.abs(p[4]); return s < 1 ? Tema.bien : s < 3 ? Tema.acento : "#d23b2c"; }
-        if (!(sug > 0)) return Tema.bien;
-        const d = p[2] - sug;
+        const d = p[2] - (sug > 0 ? sug : prom);
         return d > 6 ? "#d23b2c" : d > 2 ? Tema.acento : d >= -2 ? Tema.bien : d >= -6 ? "#7fd3ff" : "#3a8de0";
     }
 
@@ -71,18 +78,29 @@ Tarjeta {
             x: mapa.ox + caja.auto.x * mapa.k - 11; y: mapa.oy + caja.auto.y * mapa.k - 11
             color: Tema.amarillo; border { width: 3; color: "#111111" }
         }
+        // Un toque (con video): el video va a ese lugar. Doble toque: el mapa a pantalla completa.
         MouseArea {
+            id: zonaMapa
             anchors.fill: parent
-            enabled: caja.vv
+            property real xT: 0
+            property real yT: 0
             onClicked: (m) => {
-                const M = caja.vu && caja.vu.m ? caja.vu.m : [];
-                let mejor = null, dm = 1e9;
-                for (const p of M) {
-                    if (!p[7]) continue;
-                    const dx = mapa.ox + p[5] * mapa.k - m.x, dy = mapa.oy + p[6] * mapa.k - m.y, dd = dx * dx + dy * dy;
-                    if (dd < dm) { dm = dd; mejor = p; }
+                if (unToque.running) { unToque.stop(); caja.abrir(); return; }
+                xT = m.x; yT = m.y; unToque.restart();
+            }
+            Timer {
+                id: unToque; interval: 280
+                onTriggered: {
+                    if (!caja.vv) return;
+                    const M = caja.vu && caja.vu.m ? caja.vu.m : [];
+                    let mejor = null, dm = 1e9;
+                    for (const p of M) {
+                        if (!p[7]) continue;
+                        const dx = mapa.ox + p[5] * mapa.k - zonaMapa.xT, dy = mapa.oy + p[6] * mapa.k - zonaMapa.yT, dd = dx * dx + dy * dy;
+                        if (dd < dm) { dm = dd; mejor = p; }
+                    }
+                    if (mejor && dm < 40 * 40) caja.irVideo(caja.lap, mejor[0]);
                 }
-                if (mejor && dm < 40 * 40) caja.irVideo(caja.lap, mejor[0]);
             }
         }
         onPaint: {

@@ -2,7 +2,7 @@
 """Arma recursos/informe-plantilla.html desde recursos/informe/fuente.html:
 mete adentro (en base64) las tipografías de Betómetro y el león, para que el informe se vea igual
 en cualquier celular y sin internet, y pega el JS del video (recursos/informe-video.js, propio de la
-Raspberry) donde dice __VIDEO_JS__, así el informe descargado sigue siendo un solo archivo.
+Raspberry) donde dice __VIDEO_JS__ y el de los gráficos con zoom (informe-zoom.js) donde dice __ZOOM_JS__, así el informe descargado sigue siendo un solo archivo.
 Uso: python3 herramientas/armar-informe.py"""
 import base64, io, os
 from PIL import Image
@@ -19,6 +19,7 @@ for marca, valor in {
     '__F_BC700__': b64('fuentes/barlow-condensed-latin-700-normal.woff2'),
     '__LEON__': base64.b64encode(buf.getvalue()).decode(),
     '__VIDEO_JS__': open(os.path.join(R, 'informe-video.js'), encoding='utf-8').read().rstrip('\n'),
+    '__ZOOM_JS__': open(os.path.join(R, 'informe-zoom.js'), encoding='utf-8').read().rstrip('\n'),
 }.items():
     assert marca in s, marca
     s = s.replace(marca, valor)

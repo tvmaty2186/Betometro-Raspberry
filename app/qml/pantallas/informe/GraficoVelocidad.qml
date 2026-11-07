@@ -13,6 +13,7 @@ Tarjeta {
     property int lap: -1
     property var marcas: []
     property real sug: 0             // velocidad sugerida (km/h), 0 si no hay distancia
+    signal abrir()                   // doble toque: el gráfico a pantalla completa (1.0.30)
     function nombreV(v) { return "V" + v.n + (inf.largadas > 1 ? " L" + v.largada : ""); }
     function repintar() { grafico.requestPaint(); }
     onLapChanged: repintar()
@@ -22,6 +23,11 @@ Tarjeta {
     x: caja.h ? 648 : 20; y: caja.h ? 110 : 670
     width: caja.h ? 608 : parent.width - 40; height: caja.h ? 230 : 210
     Sub { x: 18; y: 16; text: caja.rec ? "Velocidad km/h · a lo largo del recorrido" : "Velocidad km/h" + (caja.vu ? " · " + caja.nombreV(caja.vu) : "") + (caja.sug > 0 ? " · sugerida " + caja.sug.toFixed(1).replace(".", ",") : ""); tam: 12 }
+    MouseArea {
+        anchors.fill: parent
+        onClicked: { if (unToque.running) { unToque.stop(); caja.abrir(); } else unToque.restart(); }
+        Timer { id: unToque; interval: 280 }
+    }
     Canvas {
         id: grafico
         anchors { fill: parent; topMargin: 40; margins: 16 }

@@ -53,3 +53,27 @@ celu en «Betómetro en la red» → «Copia de la base», o con:
 ```
 scp -r beto@betometro.local:/var/lib/betometro/carreras "$HOME\Desktop\carreras-copia"
 ```
+
+## Prueba completa desde la terminal (desde la 1.0.30)
+
+La **Prueba completa** (Ajustes → Prueba completa) la Pi la corre sola: sistema, simulador, voz, pulsador, GPS,
+cámara, rendimiento, reproducción, tarjeta, wifi, Drive y pantallas. Tarda 3 a 5 minutos y el resultado llega
+solo al desarrollador si hay llave de reportes. También se puede arrancar y leer por ssh (el programa ya corre
+como servicio, por eso no hay un `betometro --prueba-completa`; se le pide al servidor de «Betómetro en la red»):
+
+```
+curl -X POST http://localhost/prueba/empezar
+```
+
+Contesta `{"ok":true}` (o el motivo: hay una carrera en curso, o ya está corriendo). En la pantalla de la Pi se
+abre la prueba: ahí hay que contestar **«¿Se escuchó?»** y **apretar el pulsador** cuando lo pida (si no, a los
+20 s quedan como «sin probar»).
+
+Para ver el resultado:
+
+```
+cat /var/lib/betometro/prueba-completa.txt
+```
+
+(También en JSON: `/var/lib/betometro/prueba-completa.json`.) Desde el celu, en la misma wifi:
+`http://<IP de la Pi>/prueba` muestra lo mismo, con el botón «Empezar» y la descarga del .txt.

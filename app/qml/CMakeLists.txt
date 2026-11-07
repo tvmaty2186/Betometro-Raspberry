@@ -69,6 +69,7 @@ qt_add_qml_module(betometro_qml
     tablet/TCasilleros.qml
     tablet/TTecladoNum.qml
     tablet/TSimulador.qml
+    tablet/TPrueba.qml
     tablet/TFila.qml
     tablet/TMasMenos.qml
     tablet/TLlave.qml
@@ -93,6 +94,8 @@ qt_add_qml_module(betometro_qml
     pantallas/informe/CabeceraInforme.qml
     pantallas/informe/MapaInforme.qml
     pantallas/informe/GraficoVelocidad.qml
+    pantallas/informe/GraficoCompleto.qml
+    pantallas/informe/MapaCompleto.qml
     pantallas/informe/TablaVueltas.qml
     pantallas/informe/RecorridoLibre.qml
     pantallas/informe/VideoInforme.qml

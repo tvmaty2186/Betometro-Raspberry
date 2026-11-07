@@ -61,7 +61,7 @@ public:
     Q_INVOKABLE void empezarNivel();
     Q_INVOKABLE void pararNivel();
     Q_INVOKABLE void probarMicrofono();       // graba 5 s y los reproduce
-    Q_INVOKABLE void probarGrabacion();       // 10 s de video, para ver que anda
+    Q_INVOKABLE void probarGrabacion(int segundos = 10);   // unos segundos de video, para ver que anda (la Prueba completa pide 30)
     // Borra un video (archivo y lo de la carrera) y actualiza el lugar. Nunca mientras graba.
     Q_INVOKABLE bool borrarVideo(const QString& archivo);
     Q_INVOKABLE int borrarPruebas();          // borra los prueba-*; devuelve cuántos
@@ -76,6 +76,10 @@ public:
 
     QString ayudante() const;
     QString dispositivoAudio() const;         // según el ajuste camaraSonido; "no" si no hay
+    // Para la Prueba completa: el proceso del ayudante que graba (0 si no graba) y el último conteo de cuadros
+    // de la grabación que terminó ({cuadros, cortados, avisosJpeg})
+    qint64 pidGrabacion() const { return grabando() ? grab_.processId() : 0; }
+    QVariantMap ultimosCuadros() const { return ultimosCuadros_; }
 
 signals:
     void enProcesoChanged();
@@ -114,4 +118,5 @@ private:
     double nivel_ = 0, primerCuadro_ = 0;
     QVariantMap lugar_;
     QVariantMap cuadros_;                     // conteo de cuadros de la grabación (cortados, dañados)
+    QVariantMap ultimosCuadros_;              // el conteo final de la última grabación (Prueba completa)
 };

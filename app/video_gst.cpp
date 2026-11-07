@@ -160,6 +160,7 @@ void VideoGst::setSonidoTele(bool si) {
 }
 
 void VideoGst::abrir() {
+    cuadros_ = 0;
     const QString ruta = source_.toLocalFile();
     QFile a(ruta);
     if (ruta.isEmpty() || !a.open(QIODevice::ReadOnly)) {
@@ -352,6 +353,7 @@ void VideoGst::ponerMedio(int m) {
 }
 
 void VideoGst::entregar(GstSample* muestra) {
+    ++cuadros_;
     QMutexLocker l(&mutexSink_);
     if (!imagen_ && !sink_) return;
     GstVideoInfo info;
