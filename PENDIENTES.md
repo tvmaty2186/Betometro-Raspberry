@@ -95,16 +95,16 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
-## 1.0.27 (en preparación)
-Todo lo que entra, con las decisiones de Matías: **[docs/plan-1.0.27.md](docs/plan-1.0.27.md)**. Seguir esa lista.
+## 1.0.28 (en preparación)
+Todo lo que entra, con las decisiones de Matías: **[docs/plan-1.0.28.md](docs/plan-1.0.28.md)**. Seguir esa lista.
 
 ## Auditorías (plan aprobado 07/11/2026)
 Diez revisiones del proyecto por dentro, de a una, en sesiones nuevas. Lista, modelo de cada una y el prompt
 para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los informes van a `docs/auditorias/`.
 **Hechas las 10 (07/11/2026).** Resumen y preguntas para Matías: [docs/auditorias/00-resumen.md](docs/auditorias/00-resumen.md).
-Respuestas de Matías en el resumen. **OK de Matías (07/11): 1.0.27 con todos los arreglos chicos de A y B más
+Respuestas de Matías en el resumen. **OK de Matías (07/11): 1.0.28 con todos los arreglos chicos de A y B más
 todas las mejoras de rendimiento** (guardado, barrita, listas del video, tableros, capas, fondo, 480p 800×600).
-Ya hecho para la 1.0.27 (sin publicar): **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
+Salió en la 1.0.27: **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
 a la derecha y la Sugerida abajo, al lado de la velocidad. De pie: abajo, al lado de la última vuelta (`Armado.qml`).
 UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorrido libre queda adentro de Práctica.
 **MARCAR en pantalla opcional** (Matías, 07/11): llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo

@@ -1,6 +1,8 @@
-# Plan de la 1.0.27 (aprobado por Matías, 07/11/2026)
+# Plan de la 1.0.28 (aprobado por Matías, 07/11/2026)
 
-Todo lo que entra en la 1.0.27, con las decisiones de Matías. El detalle técnico de cada arreglo está en el
+(La 1.0.27 salió antes, solo con ± segundos y la pantalla de carrera de fábrica nueva.)
+
+Todo lo que entra en la 1.0.28, con las decisiones de Matías. El detalle técnico de cada arreglo está en el
 informe de su auditoría (`docs/auditorias/NN-…md`, punto entre paréntesis). Programar en este orden, probar con
 capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip ci]` y publicar al final con su OK.
 
@@ -41,7 +43,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 ## 4. Pantallas y uso (decididos por Matías)
 
 - [x] ± segundos grande (`WDelta.qml`) y nueva pantalla de fábrica (`Armado.qml`): acostada ± arriba a la derecha
-      y la Sugerida al lado de la velocidad; de pie ± abajo al lado de la última vuelta. **Hecho.**
+      y la Sugerida al lado de la velocidad; de pie ± abajo al lado de la última vuelta. **Salió en la 1.0.27.**
 - [ ] **MARCAR en pantalla opcional:** llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo
       (prendida de fábrica). Apagada: sin botón; larga y marca solo el pulsador; **nada en pantalla como plan B**.
       Armado sin MARCAR (aprobado): [muestras/sin-marcar/](muestras/sin-marcar/) — acostada `horizontal.png`
@@ -67,7 +69,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] Compartir con la red propia: mostrar la clave de la wifi (07).
 - [ ] Borrar las 10 pantallas viejas que no se usan (Matías: sí) (01-1.1).
 
-## 5. Para después (no entra en la 1.0.27)
+## 5. Para después (no entra en la 1.0.28)
 
 - Engranaje de verdad (con muestra antes).
 - Copia de la base a Drive **junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
