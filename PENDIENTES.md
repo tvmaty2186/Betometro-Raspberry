@@ -87,6 +87,11 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
 Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [docs/modo-tablet.md](docs/modo-tablet.md).
 **Programado completo (1.0.16):** se prende en Ajustes → Pantalla y tema → «Modo Tablet».
 
+## Para la próxima (pedidos de Matías)
+- **Borrar carrera = borrar su video** (07/11/2026). Hoy `Datos::borrarCarrera` saca la carrera pero el video
+  (`extra.videos`, archivo en `<datos>/videos/`, y su .mp4) queda en la tarjeta ocupando lugar. Al borrar: borrar
+  también esos archivos (solo si ninguna otra carrera usa el mismo archivo). Avisarlo en el «Tocá otra vez».
+
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
   en la Pi): busca redes de nuevo antes de decidir, botón «Armar la red propia ahora», el motivo si falla
