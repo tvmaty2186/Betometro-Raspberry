@@ -49,13 +49,13 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [ ] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
       Si se hace, el punto 05-2.2 (escribir sin el árbol `Json`) no hace falta.
 - [x] Números del JSON sin depender del idioma del sistema (`std::to_chars` / `from_chars`) (02-2).
-- [ ] Al prender: no avisar «base dañada» si lo roto es `.nuevo`, y borrar el `.danado` viejo (05-3).
-- [ ] Base leída sin carreras y `.anterior` con carreras: avisar y usar `.anterior` (05-3).
-- [ ] Pendrive (`mount`/`umount`), espera de la cámara y `journalctl` al prender: con tiempo límite y sin trabar
+- [x] Al prender: no avisar «base dañada» si lo roto es `.nuevo`, y borrar el `.danado` viejo (05-3).
+- [x] Base leída sin carreras y `.anterior` con carreras: avisar y usar `.anterior` (05-3).
+- [x] Pendrive (`mount`/`umount`), espera de la cámara y `journalctl` al prender: con tiempo límite y sin trabar
       la pantalla (02-1.4, 10-3).
-- [ ] Descarga de la actualización con tiempo límite (02-3).
+- [x] Descarga de la actualización con tiempo límite (02-3).
 - [ ] Servidor web: tiempo límite para pedidos a medias y no juntar de más (02-3).
-- [ ] Nombre del archivo del pendrive sin pasar por el shell (10-3).
+- [x] Nombre del archivo del pendrive sin pasar por el shell (10-3).
 - [x] Instalador: no pisar la copia buena si se instala la misma versión (10-3).
 - [ ] Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
       probándolo en la Pi (10-1.5 b).

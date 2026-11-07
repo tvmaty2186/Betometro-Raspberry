@@ -349,6 +349,18 @@ static void almacen() {
         auto l = a.cargar();
         IGUAL(l.origen, a.archivo());
         IGUAL(l.base.carreras[0].nombre, std::string("Tercera"));
+        CHEQUEAR(!l.habiaDanado);                                 // un guardado cortado no es un daño
+        CHEQUEAR(!std::ifstream(a.archivo() + ".nuevo").good());  // se borró
+        CHEQUEAR(!std::ifstream(a.archivo() + ".nuevo.danado").good());
+    }
+    // Base sana pero vacía y la anterior con carreras: se usa la anterior y se avisa
+    CHEQUEAR(a.guardar(b));
+    CHEQUEAR(a.guardar(Base{}));
+    {
+        auto l = a.cargar();
+        CHEQUEAR(l.habiaDanado);
+        IGUAL(l.origen, a.archivo() + ".anterior");
+        IGUAL(l.base.carreras.size(), size_t(1));
     }
     std::string limpiar = "rm -rf '" + dir + "'";
     if (std::system(limpiar.c_str()) != 0) std::cerr << "no pude borrar " << dir << "\n";

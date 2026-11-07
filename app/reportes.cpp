@@ -9,6 +9,7 @@
 #include <QNetworkReply>
 #include <QProcess>
 #include <QSysInfo>
+#include <QTimer>
 
 namespace {
 Reportes* gReportes = nullptr;
@@ -60,7 +61,8 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
         const bool mismo = !arranque.isEmpty() && arranquePrevio == arranque;
         anotar(QStringLiteral("cierre"), mismo ? QStringLiteral("La vez anterior Betómetro se cerró solo (se cayó o se trabó) y se volvió a abrir")
                                                : QStringLiteral("La vez anterior no se apagó bien (se cortó el contacto o se colgó la Raspberry)"));
-        if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) juntarSistema(!mismo);
+        // Después de abrir: journalctl puede tardar segundos y frenaba el arranque (02-1.4, 10-3)
+        if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) QTimer::singleShot(15000, this, [this, mismo] { juntarSistema(!mismo); });
     }
     QFile v(marcaVivo_);
     if (v.open(QIODevice::WriteOnly)) v.write(QDateTime::currentDateTime().toString(Qt::ISODate).toUtf8() + '\n' + arranque + '\n');
@@ -86,7 +88,8 @@ void Reportes::juntarSistema(bool arranqueAnterior) {
     QProcess j;
     j.start(QStringLiteral("journalctl"), {arranqueAnterior ? QStringLiteral("-b-1") : QStringLiteral("-b"), QStringLiteral("-p"), QStringLiteral("err"),
                                             QStringLiteral("-n"), QStringLiteral("20"), QStringLiteral("--no-pager"), QStringLiteral("-o"), QStringLiteral("short")});
-    if (j.waitForFinished(4000)) {
+    if (!j.waitForFinished(4000)) { j.kill(); j.waitForFinished(1000); }
+    else {
         const QStringList lineas = QString::fromUtf8(j.readAllStandardOutput()).split('\n', Qt::SkipEmptyParts);
         // Lo que ya se anotó no se repite: si Betómetro se cae varias veces en el mismo arranque, el sistema
         // devuelve las mismas líneas cada vez

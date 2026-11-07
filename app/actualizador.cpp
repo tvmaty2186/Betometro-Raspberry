@@ -33,7 +33,7 @@ Actualizador::Actualizador(const QString& carpetaDatos, QObject* padre)
     }
     connect(&rauc_, &QProcess::readyReadStandardOutput, this, [this] { rauc_.readAllStandardOutput(); });
     connect(&rauc_, &QProcess::finished, this, [this](int codigo, QProcess::ExitStatus s) {
-        if (!archivoPendrive_.isEmpty()) { QProcess::execute(QStringLiteral("umount"), {kPendrive}); archivoPendrive_.clear(); }
+        if (!archivoPendrive_.isEmpty()) { QProcess::execute(QStringLiteral("timeout"), {QStringLiteral("10"), QStringLiteral("umount"), kPendrive}); archivoPendrive_.clear(); }
         if (s == QProcess::NormalExit && codigo == 0) {
             // El instalador corre aparte (systemd-run) y al terminar reinicia el equipo solo
             poner(QStringLiteral("lista"), 100, QStringLiteral("Instalando… no la apagues: se reinicia sola"));
@@ -162,12 +162,13 @@ void Actualizador::buscarPagina() {
 
 bool Actualizador::buscarPendrive() {
     if (!raspberry_) return false;
-    // Primera partición de cada pendrive (o el disco entero si no tiene particiones)
+    // Primera partición de cada pendrive (o el disco entero si no tiene particiones). mount/umount con tiempo
+    // límite: un pendrive malo trababa la pantalla más de 30 s y el vigilante reiniciaba Betómetro (02-1.4)
     QDir().mkpath(kPendrive);
-    QProcess::execute(QStringLiteral("umount"), {kPendrive});
+    QProcess::execute(QStringLiteral("timeout"), {QStringLiteral("10"), QStringLiteral("umount"), kPendrive});
     const QStringList discos = QDir(QStringLiteral("/dev")).entryList({QStringLiteral("sd?1"), QStringLiteral("sd?")}, QDir::System);
     for (const QString& d : discos) {
-        if (QProcess::execute(QStringLiteral("mount"), {QStringLiteral("-o"), QStringLiteral("ro"), "/dev/" + d, kPendrive}) != 0) continue;
+        if (QProcess::execute(QStringLiteral("timeout"), {QStringLiteral("10"), QStringLiteral("mount"), QStringLiteral("-o"), QStringLiteral("ro"), "/dev/" + d, kPendrive}) != 0) continue;
         QString mejor, mejorV;
         for (const QString& f : QDir(kPendrive).entryList({kPatron}, QDir::Files)) {
             const QString v = versionDeNombre(f);
@@ -181,7 +182,7 @@ bool Actualizador::buscarPendrive() {
             emit cambio();
             return true;
         }
-        QProcess::execute(QStringLiteral("umount"), {kPendrive});
+        QProcess::execute(QStringLiteral("timeout"), {QStringLiteral("10"), QStringLiteral("umount"), kPendrive});
     }
     poner(QStringLiteral("error"), 0, QStringLiteral("No hay ninguna actualización (betometro-pi-….tar.gz) en el pendrive"));
     return false;
@@ -204,6 +205,7 @@ void Actualizador::actualizar() {
     q.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     q.setRawHeader("Accept", "application/octet-stream");
     q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);
+    q.setTransferTimeout(30000);   // si el wifi se cae a mitad, a los 30 s sin datos se corta (no queda «descargando») (02-3)
     respuesta_ = red_.get(q);
     poner(QStringLiteral("descargando"), 0);
     connect(respuesta_, &QNetworkReply::readyRead, this, [this] { destino_->write(respuesta_->readAll()); });
@@ -234,10 +236,10 @@ void Actualizador::instalar(const QString& archivo) {
     const QString dir = carpeta_ + QStringLiteral("/nueva");
     QDir(dir).removeRecursively();
     QDir().mkpath(dir);
-    const QString orden = QStringLiteral("tar -xzf '%1' -C '%2' && f=$(ls -d '%2'/*/instalar.sh | head -1) && "
-                                         "systemd-run --unit=betometro-actualizar --collect bash \"$f\"")
-                              .arg(archivo, dir);
-    rauc_.start(QStringLiteral("/bin/sh"), {QStringLiteral("-c"), orden});
+    // Los nombres van como argumentos ($1, $2), no dentro del texto: un nombre con «'» no rompe la orden (10-3)
+    const QString orden = QStringLiteral("tar -xzf \"$1\" -C \"$2\" && f=$(ls -d \"$2\"/*/instalar.sh | head -1) && "
+                                         "systemd-run --unit=betometro-actualizar --collect bash \"$f\"");
+    rauc_.start(QStringLiteral("/bin/sh"), {QStringLiteral("-c"), orden, QStringLiteral("sh"), archivo, dir});
 }
 
 void Actualizador::reiniciar() {

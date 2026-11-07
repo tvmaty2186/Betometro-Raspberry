@@ -64,19 +64,40 @@ Almacen::Lectura Almacen::cargar() const {
     const std::string base = archivo();
     // «.nuevo» primero: si está sano es lo último que se guardó (se cortó la luz antes de reemplazar).
     // Si se cortó mientras se escribía, está incompleto, no se puede leer y se pasa al siguiente.
-    for (const std::string& ruta : {base + ".nuevo", base, base + ".anterior"}) {
+    std::remove((base + ".nuevo.danado").c_str());   // de versiones anteriores: un guardado cortado no es un daño
+    auto leer = [&](const std::string& ruta, Base& b) -> int {   // 1 bien, 0 no está, -1 roto
         std::string texto;
-        if (!existe(ruta) || !leerTodo(ruta, texto)) continue;
+        if (!existe(ruta) || !leerTodo(ruta, texto)) return 0;
         try {
             Json j = Json::leer(texto);
             if (!j.esObjeto()) throw ErrorJson("no es un objeto");
-            r.base = Base::desdeJson(j);
-            r.origen = ruta;
-            return r;
+            b = Base::desdeJson(j);
+            return 1;
         } catch (const ErrorJson&) {
+            return -1;
+        }
+    };
+    for (const std::string& ruta : {base + ".nuevo", base, base + ".anterior"}) {
+        const int l = leer(ruta, r.base);
+        if (l == 0) continue;
+        if (l < 0) {
+            // «.nuevo» a medias es lo normal si se cortó la luz guardando: se borra sin avisar (05-3)
+            if (ruta == base + ".nuevo") { std::remove(ruta.c_str()); continue; }
             r.habiaDanado = true;
             std::rename(ruta.c_str(), (ruta + ".danado").c_str());   // se guarda aparte, por las dudas
+            continue;
         }
+        r.origen = ruta;
+        // Base sana pero sin carreras y la copia anterior con carreras: algo raro pasó, se usa la anterior (05-3)
+        if (r.base.carreras.empty() && ruta != base + ".anterior") {
+            Base ant;
+            if (leer(base + ".anterior", ant) == 1 && !ant.carreras.empty()) {
+                r.base = std::move(ant);
+                r.origen = base + ".anterior";
+                r.habiaDanado = true;
+            }
+        }
+        return r;
     }
     return r;   // base vacía
 }
