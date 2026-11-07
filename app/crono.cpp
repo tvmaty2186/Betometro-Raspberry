@@ -147,6 +147,7 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         paradoMs_ = 0;
         ultMuestraT_ = 0;
         ultTrazaT_ = ultMarcaT_ = -1e12;
+        ultParcialT_ = t;
         ultima_.clear();
         emit ultimaChanged();
         if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
@@ -233,6 +234,7 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
             Vuelta g = Vuelta::desdeMotor(v, largada_, &traza_);
             if (recorrido_) { g.interrumpida = false; g.medida = false; }   // terminar es lo normal en un recorrido
             if (!carreraId_.isEmpty()) datos_->agregarVuelta(carreraId_, g);
+            if (recorrido_ && !carreraId_.isEmpty()) datos_->quitarExtra(carreraId_, "enCurso");   // ya está la definitiva
             if (e == Evento::Cerrada) {
                 ++vueltasGuardadas_;
                 const double dif = v.difMs ? *v.difMs : 0;
@@ -270,7 +272,27 @@ void Crono::alMuestra(const Muestra& m) {
         }
         const Estado e = motor_->estado(m.t);   // como grabarTraza() de la app
         traza_.agregar(m, datosLargada_->distanciaM, e.restanteM);
+        if (recorrido_ && m.t - ultParcialT_ >= 60000) guardarParcial(m.t);
     }
+}
+
+// Recorrido libre: cada minuto se guarda lo andado como extra["enCurso"]. Si se corta la luz antes de Terminar,
+// al prender queda como la vuelta del recorrido, marcada «interrumpida» («se cortó» en el informe).
+void Crono::guardarParcial(double t) {
+    ultParcialT_ = t;
+    if (carreraId_.isEmpty() || !motor_) return;
+    const Estado e = motor_->estado(t);
+    VueltaMotor v;
+    v.n = e.n > 0 ? e.n : 1;
+    v.medida = false;
+    v.realMs = e.transMs;
+    v.fuente = "corte";
+    v.fin = QDateTime::currentMSecsSinceEpoch();
+    v.distM = std::max(0.0, -e.restanteM);
+    if (e.transMs > 1000) v.velPromKmh = *v.distM / (e.transMs / 1000) * 3.6;
+    v.velMaxKmh = velMaxVuelta_;
+    v.interrumpida = true;
+    datos_->ponerExtra(carreraId_, "enCurso", Vuelta::desdeMotor(v, largada_, &traza_).aJson());
 }
 
 void Crono::refrescar() {

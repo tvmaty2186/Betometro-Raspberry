@@ -85,6 +85,25 @@ int main(int argc, char** argv) {
         CHEQUEAR(d.ajustes()["widgetsH"].toList().size() == 2);
     }
     {
+        // Recorrido libre cortado (luz) antes de Terminar: lo guardado cada minuto vuelve como su vuelta
+        QTemporaryDir rec;
+        QString id;
+        {
+            Datos d(rec.path());
+            id = d.crearRecorrido();
+            beto::Vuelta v;
+            v.n = 1; v.medida = false; v.realMs = 120000; v.distM = 1500; v.interrumpida = true; v.fuente = "corte";
+            for (int i = 0; i < 12; ++i) v.traza.push_back({i * 10.0, i * 125.0, 45, -34.6 + i * 1e-4, -58.38, 4});
+            CHEQUEAR(d.ponerExtra(id, "enCurso", v.aJson()));
+        }
+        {
+            Datos d(rec.path());
+            const beto::Carrera* c = d.buscar(id);
+            CHEQUEAR(c && c->vueltas.size() == 1 && c->vueltas[0].interrumpida && c->vueltas[0].traza.size() == 12);
+            CHEQUEAR(c && !c->extra.tiene("enCurso"));
+        }
+    }
+    {
         // Muestra: Santa Clara corrida, con error total 9,6 s y finalizada
         QTemporaryDir otro;
         Datos d(otro.path());

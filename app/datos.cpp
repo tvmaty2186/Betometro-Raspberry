@@ -58,6 +58,20 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
     cfg_ = armarConfig(base_.config);
     if (l.habiaDanado) qWarning("La base estaba dañada: se usó %s", l.origen.c_str());
     hilo_ = std::thread([this] { hiloGuardar(); });
+    // Recorrido libre que se cortó (luz, vigilante) antes de Terminar: lo andado queda como su vuelta
+    bool recuperado = false;
+    for (Carrera& c : base_.carreras) {
+        if (!c.extra.tiene("enCurso")) continue;
+        if (c.extra["enCurso"].esObjeto()) {
+            Vuelta v = Vuelta::desdeJson(c.extra["enCurso"]);
+            v.interrumpida = true;
+            c.vueltas.push_back(std::move(v));
+            qWarning("Recorrido «%s» cortado antes de Terminar: se recuperó lo andado", c.nombre.c_str());
+        }
+        c.extra.sacar("enCurso");
+        recuperado = true;
+    }
+    if (recuperado) guardar();
 }
 
 Datos::~Datos() {
@@ -375,6 +389,15 @@ bool Datos::ponerExtra(const QString& id, const std::string& clave, const Json& 
     Carrera* c = base_.buscar(s(id));
     if (!c) return false;
     c->extra[clave] = valor;
+    guardar();
+    emit carrerasChanged();
+    return true;
+}
+
+bool Datos::quitarExtra(const QString& id, const std::string& clave) {
+    Carrera* c = base_.buscar(s(id));
+    if (!c || !c->extra.tiene(clave)) return false;
+    c->extra.sacar(clave);
     guardar();
     emit carrerasChanged();
     return true;

@@ -67,7 +67,7 @@ std::optional<Recorrido> armarRecorrido(const Carrera& c, double umbralCfg) {
         double base = v.distM && *v.distM != 0 ? *v.distM : (T.back()[1] != 0 ? T.back()[1] : 1);
         VueltaR V{idx, std::max(50.0, base), {}};
         for (const auto& p : T)
-            V.pts.push_back({&p, V.L, std::min(1.0, p[1] / V.L), (p[4] - (*p0)[4]) * kx, (p[3] - (*p0)[3]) * ky, p[5] <= umbral});
+            V.pts.push_back({&p, V.L, std::max(0.0, std::min(1.0, p[1] / V.L)), (p[4] - (*p0)[4]) * kx, (p[3] - (*p0)[3]) * ky, p[5] <= umbral});
         const Pt* prev = nullptr;
         for (auto& o : V.pts) {
             if (!o.ok) continue;

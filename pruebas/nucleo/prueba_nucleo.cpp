@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 #include <functional>
@@ -13,6 +14,7 @@
 #include <unistd.h>
 
 #include "almacen.h"
+#include "informe.h"
 #include "json.h"
 #include "modelo.h"
 #include "motor.h"
@@ -668,7 +670,58 @@ static void restablecerCarrera() {
     CHEQUEAR(c.aJson()["vueltas"] == antes);
 }
 
+// Informe con datos raros (base dañada o de afuera): distancia negativa, de más, posición rara.
+// Antes se escribía fuera de la memoria y el programa se cerraba (auditoría 02-1.1).
+static void informeDanado() {
+    for (int caso = 0; caso < 4; ++caso) {
+        Carrera c;
+        c.tiempoIdealMs = 60000;
+        for (int n = 1; n <= 3; ++n) {
+            Vuelta v;
+            v.n = n; v.idealMs = 60000; v.realMs = 60000; v.difMs = 0; v.distM = 1000;
+            for (int i = 0; i < 60; ++i) {
+                double d = i * 1000.0 / 59;
+                if (caso == 0 && i == 30) d = -500;          // distancia negativa
+                if (caso == 1 && i == 10) d = -1e9;
+                if (caso == 2 && i == 20) d = 1e12;          // mucho más larga que la vuelta
+                double lat = -34.6 + d * 1e-6, lon = -58.38;
+                if (caso == 3 && i == 5) lat = 1e6;          // posición imposible
+                v.traza.push_back({i * 1.0, d, 50, lat, lon, 4});
+            }
+            c.vueltas.push_back(v);
+        }
+        const Json j = datosInforme(c, 20);
+        CHEQUEAR(j.esObjeto());
+    }
+}
+
+// Números al guardar: el camino rápido (to_chars) da el mismo texto que el de siempre (05-2.1)
+static void numerosRapidos() {
+    uint64_t z = 88172645463325252ull;
+    auto azar = [&]() { z ^= z << 13; z ^= z >> 7; z ^= z << 17; return z; };
+    int distintos = 0;
+    for (int i = 0; i < 300000; ++i) {
+        double x;
+        switch (i % 5) {
+            case 0: x = -34.6 + (azar() % 2000000) / 1e6; break;                         // latitud
+            case 1: x = std::round((azar() % 3000000) / 10.0) / 10.0; break;              // un decimal
+            case 2: x = static_cast<double>(azar() % 100000000); break;                   // ms
+            case 3: { uint64_t b = azar(); std::memcpy(&x, &b, 8); if (!std::isfinite(x)) x = 1; break; }   // cualquiera
+            default: x = (azar() % 1000000) / 1e9; break;                                // chiquitos
+        }
+        if (numeroComoJs(x) != numeroComoJsLento(x)) ++distintos;
+    }
+    IGUAL(distintos, 0);
+    IGUAL(numeroComoJs(1e21), std::string("1e+21"));
+    IGUAL(numeroComoJs(-0.5), std::string("-0.5"));
+    IGUAL(numeroComoJs(1e-7), std::string("1e-7"));
+    IGUAL(Json::leer("[1e999]").elementos()[0].aNumero(), HUGE_VAL);
+    IGUAL(Json::leer("-58.3815911").aNumero(), -58.3815911);
+}
+
 int main() {
+    numerosRapidos();
+    informeDanado();
     unirVueltas();
     informeReal();
     restablecerCarrera();

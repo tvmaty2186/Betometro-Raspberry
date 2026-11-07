@@ -41,6 +41,7 @@ public:
     QString crearPractica();                                   // práctica nueva con los valores de cfg; devuelve el id
     QString crearRecorrido();                                  // «Recorrido libre»: sin vueltas, sin tiempo ni distancia
     bool ponerExtra(const QString& id, const std::string& clave, const beto::Json& valor);   // p. ej. las marcas del recorrido
+    bool quitarExtra(const QString& id, const std::string& clave);
     bool agregarVuelta(const QString& id, const beto::Vuelta& v);
     // Video de una largada: {archivo, largada, desdeLargadaMs, girar}. Va en «videos» de la carrera.
     bool agregarVideo(const QString& id, const QVariantMap& video);

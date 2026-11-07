@@ -14,10 +14,10 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 
 ## 1. Seguridad y datos (no cambia pantallas)
 
-- [ ] Recorrido libre: guardar la traza en curso cada tanto, para no perderla si se corta la luz; en el informe,
+- [x] Recorrido libre: guardar la traza en curso cada tanto, para no perderla si se corta la luz; en el informe,
       «se cortó» si no llegó a Terminar (05-1.1).
-- [ ] Informe: no caerse con distancia negativa en la traza, más prueba de bases dañadas en `ctest` (02-1.1).
-- [ ] Guardado: números a texto con `std::to_chars` (mismo archivo, 10 a 40 veces más rápido) (05-2.1, 04-2.1).
+- [x] Informe: no caerse con distancia negativa en la traza, más prueba de bases dañadas en `ctest` (02-1.1).
+- [x] Guardado: números a texto con `std::to_chars` (mismo archivo, 10 a 40 veces más rápido) (05-2.1, 04-2.1).
 - [ ] Guardado: no copiar la base en el hilo principal; no guardar la base entera cuando no hace falta (04-2.2, 2.3).
 - [ ] Avisar si no se puede guardar y «Poco lugar» en el Chequeo previo (05-1.2, UX 2.4). **Sin carteles grandes en
       carrera** (Matías: no).
@@ -31,7 +31,7 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 - [ ] **Copia de la base a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
 - [ ] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
       Si se hace, el punto 05-2.2 (escribir sin el árbol `Json`) no hace falta.
-- [ ] Números del JSON sin depender del idioma del sistema (`std::to_chars` / `from_chars`) (02-2).
+- [x] Números del JSON sin depender del idioma del sistema (`std::to_chars` / `from_chars`) (02-2).
 - [ ] Al prender: no avisar «base dañada» si lo roto es `.nuevo`, y borrar el `.danado` viejo (05-3).
 - [ ] Base leída sin carreras y `.anterior` con carreras: avisar y usar `.anterior` (05-3).
 - [ ] Pendrive (`mount`/`umount`), espera de la cámara y `journalctl` al prender: con tiempo límite y sin trabar

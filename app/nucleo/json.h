@@ -89,5 +89,6 @@ struct ErrorJson : std::runtime_error {
 
 // Números como JavaScript: el texto más corto que vuelve al mismo número; enteros sin «.0».
 std::string numeroComoJs(double x);
+std::string numeroComoJsLento(double x);   // el camino largo (casos raros y prueba)
 
 }  // namespace beto

@@ -81,6 +81,8 @@ private:
     double ultMuestraT_ = 0;
     double ultTrazaT_ = -1e12;
     double ultMarcaT_ = -1e12;
+    double ultParcialT_ = -1e12;   // recorrido libre: última vez que se guardó lo andado (por si se corta la luz)
+    void guardarParcial(double t);
     std::optional<beto::DatosLargada> datosLargada_;
     std::unique_ptr<beto::Motor> motor_;
     int largada_ = 1;

@@ -130,7 +130,7 @@ Item {
         Column {
             anchors.verticalCenter: parent.verticalCenter
             TextoCromo { texto: (raiz.c.nombre || "").toUpperCase(); tam: raiz.h ? 36 : 38 }
-            Sub { text: raiz.rec ? raiz.c.fechaCorta + " · recorrido libre" + (raiz.marcas.length ? " · " + raiz.marcas.length + (raiz.marcas.length === 1 ? " marca" : " marcas") : "")
+            Sub { text: raiz.rec ? raiz.c.fechaCorta + " · recorrido libre" + (raiz.marcas.length ? " · " + raiz.marcas.length + (raiz.marcas.length === 1 ? " marca" : " marcas") : "") + (raiz.vueltas.some(v => v.interrumpida) ? " · se cortó" : "")
                   : raiz.c.fechaCorta + " · ideal " + raiz.c.ideal + (raiz.dist > 0 ? " · " + raiz.c.distancia + " m" : "") + " · " + raiz.vueltas.length + " vueltas" }
         }
     }
