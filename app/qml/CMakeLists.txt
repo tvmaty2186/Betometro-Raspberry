@@ -52,16 +52,8 @@ qt_add_qml_module(betometro_qml
     componentes/TituloTarjeta.qml
     componentes/Velocimetro.qml
     componentes/Volver.qml
-    pantallas/Actualizar.qml
-    pantallas/Ajustes.qml
-    pantallas/AjustesCamara.qml
-    pantallas/AjustesDrive.qml
     pantallas/Carrera.qml
-    pantallas/Carreras.qml
-    pantallas/Chequeo.qml
     pantallas/Compartir.qml
-    pantallas/Conectividad.qml
-    pantallas/Pronostico.qml
     video/Reproductor.qml
     video/DatoVideo.qml
     video/Pista.qml
@@ -93,10 +85,8 @@ qt_add_qml_module(betometro_qml
     tablet/TConectividad.qml
     pantallas/Editor.qml
     pantallas/EnConstruccion.qml
-    pantallas/Ficha.qml
     pantallas/Informe.qml
     pantallas/Inicio.qml
-    pantallas/Practica.qml
     pantallas/WifiClave.qml
     widgets/Barra.qml
     widgets/Caja.qml

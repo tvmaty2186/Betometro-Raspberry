@@ -31,7 +31,8 @@ Window {
         Loader {
             anchors.fill: parent
             // Las pantallas que tienen versión grande (carpeta tablet/) van siempre así. El Modo Tablet solo
-            // cambia el inicio (Matías, 06/11/2026: «lo único que cambia entre normal y tablet es el inicio»)
+            // cambia el inicio (Matías, 06/11/2026: «lo único que cambia entre normal y tablet es el inicio»).
+            // Las 10 versiones viejas de esas pantallas se borraron en la 1.0.29 (auditoría 01-1.1).
             readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara", drive: "TDrive",
                                               ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
                                               ficha: "TFicha", chequeo: "TChequeo", conectividad: "TConectividad", actualizar: "TActualizar" })
@@ -39,21 +40,10 @@ Window {
                 if ((Navegacion.actual !== "inicio" || Tema.tablet) && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
                 switch (Navegacion.actual) {
                 case "inicio": return "pantallas/Inicio.qml";
-                case "carreras": return "pantallas/Carreras.qml";
-                case "ficha": return "pantallas/Ficha.qml";
-                case "practica": return "pantallas/Practica.qml";
                 case "carrera": return "pantallas/Carrera.qml";
-                case "ajustes": return "pantallas/Ajustes.qml";
-                case "ajustesSeccion": return "pantallas/Ajustes.qml";
-                case "conectividad": return "pantallas/Conectividad.qml";
-                case "clima": return "pantallas/Pronostico.qml";
-                case "camara": return "pantallas/AjustesCamara.qml";
-                case "drive": return "pantallas/AjustesDrive.qml";
                 case "wifi": return "pantallas/WifiClave.qml";
-                case "chequeo": return "pantallas/Chequeo.qml";
                 case "informe": return "pantallas/Informe.qml";
                 case "compartir": return "pantallas/Compartir.qml";
-                case "actualizar": return "pantallas/Actualizar.qml";
                 case "editor": return "pantallas/Editor.qml";
                 default: return "pantallas/EnConstruccion.qml";
                 }
