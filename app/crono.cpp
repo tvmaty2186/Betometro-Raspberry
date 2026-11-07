@@ -30,12 +30,10 @@ Crono::Crono(Datos* datos, FuenteGps* gps, QObject* padre) : QObject(padre), dat
     });
     reloj_.setTimerType(Qt::PreciseTimer);
     reloj_.setInterval(50);   // pantalla: 20 veces por segundo (la voz va aparte, cada 15 ms)
-    connect(&reloj_, &QTimer::timeout, this, &Crono::refrescar);
-    reloj_.start();
+    connect(&reloj_, &QTimer::timeout, this, &Crono::refrescar);   // se prenden con una carrera preparada (02-2)
     relojVoz_.setTimerType(Qt::PreciseTimer);
     relojVoz_.setInterval(15);   // como la app
     connect(&relojVoz_, &QTimer::timeout, this, &Crono::voz);
-    relojVoz_.start();
 }
 
 // ---------- Video de la carrera ----------
@@ -119,6 +117,8 @@ void Crono::preparar(const QString& id) {
         recorrido_ = esRecorrido(c);
     }
     datosLargada_ = datosLargada(c, cfg);
+    reloj_.start();      // pantalla y voz solo con una carrera abierta: sin carrera no despiertan 86 veces por segundo
+    relojVoz_.start();
     largada_ = c.proximaLargada();
     if (auto* sim = qobject_cast<GpsSimulado*>(fuenteGps_)) {
         if (recorrido_) sim->ponerVuelta(3000, 240000);   // en la PC: andar a 45 km/h
@@ -221,6 +221,8 @@ void Crono::salir() {
     if (camara_ && camara_->grabando()) camara_->detener(0);
     motor_.reset();
     datosLargada_.reset();
+    reloj_.stop();
+    relojVoz_.stop();
     emit carreraChanged();
 }
 

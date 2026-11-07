@@ -194,7 +194,10 @@ void GpsNeo::leer() {
     uint8_t b[1024];
     const ssize_t n = ::read(fd_, b, sizeof b);
     if (n == 0 || (n < 0 && errno != EAGAIN && errno != EINTR)) {   // desenchufado (USB)
-        if (automatico_) { cerrar(); ultimoDato_ = 0; }
+        // Desenchufado: se cierra (con puerto fijo también: si no, el aviso quedaba prendido y el procesador al 100 %)
+        // y se vuelve a probar a los 2 s (02-2)
+        cerrar(); ultimoDato_ = 0;
+        if (!automatico_) QTimer::singleShot(2000, this, [this] { if (fd_ < 0) abrir(dispositivo_); });
         return;
     }
     if (n < 0) return;
