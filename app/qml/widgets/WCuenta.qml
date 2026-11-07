@@ -62,11 +62,17 @@ Caja {
             valor: raiz.est.deltaS === undefined ? null : raiz.est.deltaS
         }
     }
-    // Anillo: aro con el avance de la vuelta y el número en el medio (app: r=86 en 200×200, trazo 12)
-    Item {
-        visible: raiz.anillo
+    // Anillo: aro con el avance de la vuelta y el número en el medio (app: r=86 en 200×200, trazo 12).
+    // Solo se crea si se usa el estilo anillo: antes existía siempre y se recalculaba (03-3)
+    Loader {
+        active: raiz.anillo
         anchors.centerIn: parent
         width: Math.min(parent.width, parent.height) * 0.88; height: width
+        sourceComponent: anilloComp
+    }
+    Component {
+        id: anilloComp
+    Item {
         Canvas {
             id: aro
             anchors.fill: parent
@@ -104,5 +110,6 @@ Caja {
                 font { family: Tema.fuente600; pixelSize: Math.max(13, Math.min(20, raiz.height * 0.06)) }
             }
         }
+    }
     }
 }
