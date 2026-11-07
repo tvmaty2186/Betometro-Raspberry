@@ -49,7 +49,7 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 ## Ramas y versiones
 
 - Todas las ramas están unidas (06/11/2026): `main`, `claude/adoring-bell-disf3a` y las `ccr-*` apuntan a lo mismo. Trabajá sobre la rama que te asignen, partiendo de lo último.
-- **Publicar** (llega sola a la Raspberry): subir la versión en `CMakeLists.txt` y poner `[publicar]` en el mensaje, o correr `programa.yml` con «publicar». Detalle en `docs/raspios.md`.
+- **Publicar** (llega sola a la Raspberry): subir la versión en `CMakeLists.txt` y poner `[publicar]` en el mensaje **en `main`**, o correr `programa.yml` con «publicar». Desde la 1.0.28 `programa.yml` compila **solo desde `main`**, corre antes todas las pruebas (`raspios/pruebas.sh`) y **no publica si una falla**; el ARM (lento) solo al publicar. Detalle en `docs/raspios.md`.
 - Commits intermedios con `[skip ci]`. **Nunca empujar mientras compila una versión.**
 - Última publicada: ver «Siguiente» en `PENDIENTES.md`.
 

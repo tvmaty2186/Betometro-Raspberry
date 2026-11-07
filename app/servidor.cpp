@@ -10,6 +10,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTcpSocket>
+#include <QTimer>
 #include <QUrl>
 #include <QUrlQuery>
 
@@ -75,7 +76,11 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
     connect(&tcp_, &QTcpServer::newConnection, this, [this] {
         while (QTcpSocket* s = tcp_.nextPendingConnection()) {
             connect(s, &QTcpSocket::disconnected, s, &QObject::deleteLater);
+            // Un pedido a medias no queda abierto para siempre: a los 30 s se corta (02-3). Los videos que se
+            // están mandando tienen su propio ritmo: solo se corta si todavía no se atendió.
+            QTimer::singleShot(30000, s, [s] { if (!s->property("atendido").toBool()) s->abort(); });
             connect(s, &QTcpSocket::readyRead, s, [this, s] {
+                if (s->property("atendido").toBool()) { s->readAll(); return; }   // ya se contestó: no se junta de más
                 const QByteArray pedido = s->property("pedido").toByteArray() + s->readAll();
                 s->setProperty("pedido", pedido);
                 if (!pedido.contains("\r\n\r\n") && pedido.size() < 8192) return;   // todavía no llegó entero

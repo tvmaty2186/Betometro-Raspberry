@@ -10,7 +10,8 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 ## Reparto (Matías, 07/11/2026): dos versiones
 
 **1.0.28 «sin sorpresas»** (arreglos por dentro, casi sin cambiar pantallas; se lanza apenas esté):
-- Sección 1 entera (seguridad y datos), salvo «un archivo por carrera» y «copia de la base a Drive».
+- Sección 1 entera (seguridad y datos), salvo «un archivo por carrera», «copia de la base a Drive», la copia de la
+  base al guardar (sale con un archivo por carrera), blindar el servicio y firmar paquetes (hay que probarlos en la Pi): 1.0.29.
 - Sección 2: no publicar si falla una prueba, compilar solo desde `main`, arreglar el job roto, `probar.sh`,
   recorrido en `prueba_crono`, cámara de prueba en GitHub.
 - Sección 8 (sistema): **hora del GPS**, `config.txt` en `[all]`, PulseAudio sin HDMI y servicios que sobran
@@ -54,7 +55,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [x] Pendrive (`mount`/`umount`), espera de la cámara y `journalctl` al prender: con tiempo límite y sin trabar
       la pantalla (02-1.4, 10-3).
 - [x] Descarga de la actualización con tiempo límite (02-3).
-- [ ] Servidor web: tiempo límite para pedidos a medias y no juntar de más (02-3).
+- [x] Servidor web: tiempo límite para pedidos a medias y no juntar de más (02-3).
 - [x] Nombre del archivo del pendrive sin pasar por el shell (10-3).
 - [x] Instalador: no pisar la copia buena si se instala la misma versión (10-3).
 - [ ] Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
