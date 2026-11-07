@@ -124,7 +124,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [ ] **Cargar el tiempo por casilleros:** minutos y segundos por separado (cada uno se toca y se escribe de izquierda
       a derecha, con − / +; segundos hasta 59). **Las décimas no se editan** (quedan en 0). En Práctica y en la ficha
       de la carrera. Mostrar muestra antes de programar.
-- [ ] Al tocar **Terminar**: ir derecho al **informe**, con el **error total grande arriba** (07-1.1, 2.1).
+- [x] Al tocar **Terminar**: ir derecho al **informe**, con el **error total grande arriba** (07-1.1, 2.1).
 - [x] **«IR A LARGAR»** en los botones de Práctica, Carreras y Ficha que solo llevan al crono (07-1.2).
 - [x] «Práctica libre» pasa a **«Práctica»** (Recorrido libre queda adentro de Práctica, con ese nombre).
 - [x] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).

@@ -60,7 +60,7 @@ Item {
         function onTerminada(motivo, vueltas, id) {
             Navegacion.avisar(raiz.recorrido ? "Recorrido guardado" : motivo + ": " + vueltas + (vueltas === 1 ? " vuelta guardada" : " vueltas guardadas"));
             Crono.salir();
-            Navegacion.ir("ficha", { id: id });
+            Navegacion.ir("informe", { id: id });   // derecho al informe: cómo le fue (07-1.1, Matías: sí)
         }
     }
 

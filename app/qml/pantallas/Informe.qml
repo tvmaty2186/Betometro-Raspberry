@@ -134,7 +134,27 @@ Item {
                   : raiz.c.fechaCorta + " · ideal " + raiz.c.ideal + (raiz.dist > 0 ? " · " + raiz.c.distancia + " m" : "") + " · " + raiz.vueltas.length + " vueltas" }
         }
     }
+    // Lo que el navegante quiere saber apenas para: el error total, grande y arriba (07-2.1)
+    Column {
+        id: errorArriba
+        readonly property var med: raiz.vueltas.filter(v => v.medida && v.difMs !== undefined)
+        visible: !raiz.rec && med.length > 0
+        readonly property real promS: med.length ? med.reduce((a, v) => a + Math.abs(v.difMs), 0) / med.length / 1000 : 0
+        anchors { right: raiz.h ? derecha.left : undefined; rightMargin: 28 }
+        x: raiz.h ? 0 : 84
+        y: raiz.h ? 14 : 12
+        spacing: 0
+        Sub { text: "Error total · " + errorArriba.med.length + (errorArriba.med.length === 1 ? " medida" : " medidas"); tam: 13
+              anchors.right: raiz.h ? parent.right : undefined }
+        Text { anchors.right: raiz.h ? parent.right : undefined
+               text: raiz.c.errorTotal || ""
+               color: errorArriba.promS <= 0.2 ? Tema.bien : errorArriba.promS <= 0.5 ? Tema.acento : Tema.mal
+               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 46 } }
+        Sub { visible: raiz.h; text: "promedio " + (raiz.c.promedio || "–") + " · mejor " + (raiz.c.mejor || "–"); tam: 12
+              anchors.right: parent.right }
+    }
     Row {
+        id: derecha
         anchors { right: parent.right; rightMargin: raiz.h ? 24 : 20 }
         y: raiz.h ? 20 : 20; spacing: 16
         // 📺 Ver en la tele: con la tele enchufada tiene que notarse (Matías, 06/11/2026). Botón del tema (cromo,
