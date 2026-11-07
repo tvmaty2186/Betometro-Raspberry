@@ -40,13 +40,23 @@ faltan=0
 cap() { n=$1; shift
   QT_QPA_PLATFORM=offscreen LANG=C.UTF-8 XDG_RUNTIME_DIR=/tmp/run BETO_VOZ=/usr/share/betometro/voz \
     timeout 120 /usr/bin/betometro --datos /tmp/cap --muestra --orientacion h --captura "salida-pi/capturas/$n.png" "$@" \
-    >/dev/null 2>&1
-  [ -s "salida-pi/capturas/$n.png" ] || { echo "MAL: no salió la captura $n"; faltan=1; }; }
+    >"/tmp/cap-$n.log" 2>&1
+  [ -s "salida-pi/capturas/$n.png" ] || { echo "MAL: no salió la captura $n"; faltan=1; }
+  # Una pantalla que no carga (por ejemplo un módulo de QML que no está en paquetes.txt) sale en negro:
+  # en la 1.0.29 pasó con QtQuick.Shapes y todas las pantallas tablet quedaron negras en la Pi
+  if grep -qiE "is not installed|module .* not found|failed to load component|Type .* unavailable|Cannot load library" "/tmp/cap-$n.log"; then
+    echo "MAL: la pantalla $n no carga:"; grep -iE "is not installed|not found|failed|unavailable|Cannot load" "/tmp/cap-$n.log" | head -5; faltan=1
+  fi; }
 cap inicio --pantalla inicio
 cap informe --pantalla informe --carrera "Santa Clara"
 cap informe-unir --pantalla informe --carrera "Santa Clara" --prueba unir
 cap informe-menu --pantalla informe --carrera "Santa Clara" --prueba menu
 cap ajustes --pantalla ajustes
+# Las pantallas tablet (las que se ven después del inicio) y la carrera
+for p in practica carreras chequeo conectividad actualizar camara clima simulador; do cap "tablet-$p" --pantalla "$p"; done
+cap ficha --pantalla ficha --carrera "Santa Clara"
+cap carrera --pantalla carrera --carrera "Gualeguaychú" --prueba largar
+cap inicio-tablet --pantalla inicio --prueba tablet
 cap salir-de-practica --pantalla carrera --prueba salir   # Salir sin largar vuelve a Práctica (no a «nueva carrera»)
 ls -la salida-pi/capturas
 [ "$faltan" = 0 ] || { echo "MAL: faltan capturas (una pantalla no abre)"; exit 1; }

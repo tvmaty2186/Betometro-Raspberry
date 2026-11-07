@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Shapes
 import Betometro
 
 // Botón grande del Modo Tablet (como una app de tablet): ícono, nombre y un dato útil abajo.
@@ -25,14 +24,19 @@ Rectangle {
     property color colorDato: Tema.acento   // el dato de un botón normal (verde para «Simulador OK»)
     color: Tema.apagadoFondo
     gradient: activo ? degrade : null
-    Shape {   // borde punteado del apagado
+    // Borde punteado del apagado, con Canvas: QtQuick.Shapes no viene instalado en la Pi (en la 1.0.29 dejó
+    // todas las pantallas tablet en negro). Solo módulos que estén en raspios/paquetes.txt.
+    Canvas {
+        id: punteado
         visible: !raiz.activo
         anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-            strokeColor: Tema.apagadoBorde; strokeWidth: 3; fillColor: "transparent"
-            strokeStyle: ShapePath.DashLine; dashPattern: [3, 2.5]
-            PathRectangle { x: 1.5; y: 1.5; width: raiz.width - 3; height: raiz.height - 3; radius: raiz.radius - 1.5 }
+        onWidthChanged: requestPaint(); onHeightChanged: requestPaint(); onVisibleChanged: if (visible) requestPaint()
+        Connections { target: Tema; function onNombreChanged() { punteado.requestPaint(); } function onSolChanged() { punteado.requestPaint(); } }
+        onPaint: {
+            const g = getContext("2d"); g.reset();
+            if (!visible) return;
+            g.strokeStyle = String(Tema.apagadoBorde); g.lineWidth = 3; g.setLineDash([9, 7.5]);
+            g.beginPath(); g.roundedRect(1.5, 1.5, width - 3, height - 3, raiz.radius - 1.5, raiz.radius - 1.5); g.stroke();
         }
     }
     Gradient {
