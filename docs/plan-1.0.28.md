@@ -134,7 +134,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
       «MARCA 1 · solo deja una marca» en el recorrido (07-2.5); hora «--:--» sin hora válida (07-1.4).
 - [ ] Compartir con la red propia: mostrar la clave de la wifi (07).
 - [x] Borrar las 10 pantallas viejas que no se usan (Matías: sí) (01-1.1).
-- [ ] **Engranaje de verdad** en el inicio, `TIcono.qml`, `ajustes.svg` y el video (`Engranaje.qml`). **Mostrar 2 o 3
+- [x] **Engranaje de verdad** en el inicio, `TIcono.qml`, `ajustes.svg` y el video (`Engranaje.qml`). **Mostrar 2 o 3
       dibujos antes** (08-1).
 - [ ] Modo sol, Cámara: el aviso «No se encontró la cámara» se ve (08-2).
 - [x] Carrera ya corrida: el botón grande dice «Ver informe» y abre el informe (Matías: sí) (08-4).

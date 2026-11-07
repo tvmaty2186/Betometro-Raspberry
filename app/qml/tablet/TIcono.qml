@@ -31,9 +31,22 @@ Canvas {
         case "pantalla": R(8, 12, 20, 18, 4); R(34, 12, 22, 18, 4); R(8, 36, 48, 16, 4); break;
         case "camara": R(6, 18, 38, 28, 6); L([44, 28, 58, 20, 58, 44, 44, 36]); break;
         case "red": A(32, 50, 30, 220, 320); A(32, 50, 19, 220, 320); A(32, 50, 8, 220, 320); C(32, 50, 3, true); break;
-        case "ajustes": C(32, 32, 9);
-            for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; L([32 + Math.cos(a) * 16, 32 + Math.sin(a) * 16, 32 + Math.cos(a) * 25, 32 + Math.sin(a) * 25]); }
+        case "ajustes": {
+            // Engranaje de verdad (A, 8 dientes; muestra aprobada 1.0.29): rueda con dientes y agujero al medio
+            const n = 8, ro = 27, ri = 20, ht = 0.17, hb = 0.30, paso = 2 * Math.PI / n;
+            const P = (r, a) => [32 + r * Math.cos(a), 32 + r * Math.sin(a)];
+            c.beginPath();
+            for (let i = 0; i < n; i++) {
+                const a = i * paso - Math.PI / 2;
+                const p0 = P(ri, a - paso * hb), p1 = P(ro, a - paso * ht), p2 = P(ro, a + paso * ht);
+                if (i === 0) c.moveTo(p0[0], p0[1]); else c.arc(32, 32, ri, a - paso + paso * hb, a - paso * hb, false);
+                c.lineTo(p1[0], p1[1]); c.lineTo(p2[0], p2[1]); const p3 = P(ri, a + paso * hb); c.lineTo(p3[0], p3[1]);
+            }
+            c.arc(32, 32, ri, -Math.PI / 2 + paso * (n - 1) + paso * hb, -Math.PI / 2 - paso * hb + 2 * Math.PI, false);
+            c.closePath(); c.stroke();
+            C(32, 32, 8);
             break;
+        }
         case "voz": L([10, 26, 20, 26, 34, 14, 34, 50, 20, 38, 10, 38, 10, 26]); A(34, 32, 12, -45, 45); A(34, 32, 20, -45, 45); break;
         case "tema": C(32, 32, 24); C(22, 24, 4); C(36, 18, 4); C(44, 30, 4); break;
         case "auto": L([8, 42, 8, 32, 14, 20, 50, 20, 56, 32, 56, 42, 8, 42]); C(18, 42, 5); C(46, 42, 5); break;
