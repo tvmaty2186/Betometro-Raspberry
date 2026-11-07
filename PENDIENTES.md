@@ -104,6 +104,9 @@ todas las mejoras de rendimiento** (guardado, barrita, listas del video, tablero
 Ya hecho para la 1.0.27 (sin publicar): **± segundos** grande (`WDelta.qml`) en la pantalla de fábrica. Acostada: arriba
 a la derecha y la Sugerida abajo, al lado de la velocidad. De pie: abajo, al lado de la última vuelta (`Armado.qml`).
 UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorrido libre queda adentro de Práctica.
+**MARCAR en pantalla opcional** (Matías, 07/11): llave «MARCAR en pantalla» en Ajustes → Pulsador y en el Chequeo previo
+(prendida de fábrica). Apagada: sin botón, larga y marca solo el pulsador; **nada en pantalla como plan B**. El lugar
+libre muestra más datos, sumando Faltan y Tiempo ideal. Armado de esa pantalla: el diseñador hace 2 propuestas desde cero.
 
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
