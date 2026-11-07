@@ -14,7 +14,8 @@ on:
         type: boolean
         default: false
   push:
-    branches: ['**']
+    # Solo desde main (Matías, 07/11/2026): las otras ramas no compilan (10, pregunta 4)
+    branches: ['main']
     tags: ['v*']
     paths:
       - 'app/**'
@@ -24,18 +25,29 @@ on:
       - 'CMakeLists.txt'
       - '.github/workflows/programa.yml'
 
+# Un empuje nuevo cancela la compilación anterior, salvo si esa era para publicar: cada [publicar] va en
+# su propio grupo y nada la corta (10-2.2)
 concurrency:
-  group: programa-${{ github.ref }}
+  group: programa-${{ github.ref }}-${{ (contains(github.event.head_commit.message, '[publicar]') || inputs.publicar || startsWith(github.ref, 'refs/tags/v')) && github.run_id || 'x' }}
   cancel-in-progress: true
 
 jobs:
   programa:
     runs-on: ubuntu-24.04
     timeout-minutes: 150
+    env:
+      PUBLICAR: ${{ startsWith(github.ref, 'refs/tags/v') || inputs.publicar || contains(github.event.head_commit.message, '[publicar]') }}
     steps:
       - uses: actions/checkout@v4
 
+      # Primero todas las pruebas (PC, Debian trixie): si una falla, se corta acá y no se publica (09-1.1)
+      - name: Pruebas (si una falla, no se publica)
+        timeout-minutes: 40
+        run: docker run --rm -v "$PWD:/src" debian:trixie bash /src/raspios/pruebas.sh
+
+      # El paquete para la Raspberry (ARM, emulado: lo lento) solo cuando se publica (Matías, 07/11/2026)
       - name: Caché (voz y compilación)
+        if: env.PUBLICAR == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -45,6 +57,7 @@ jobs:
           restore-keys: programa-
 
       - name: Voz (Elena y Tomás)
+        if: env.PUBLICAR == 'true'
         # Normalmente menos de 1 minuto. El 06/11/2026 apt se quedó colgado 17 min sin decir nada:
         # ahora cada parte tiene tiempo límite, se reintenta y se ve lo que hace.
         timeout-minutes: 15
@@ -59,17 +72,21 @@ jobs:
           timeout 600 python3 voz/grabar.py salida-pi/voz
 
       - name: Simulador de ARM (la Raspberry es arm64)
+        if: env.PUBLICAR == 'true'
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
 
       - name: Compilar (Debian trixie arm64, como Raspberry Pi OS)
+        if: env.PUBLICAR == 'true'
         run: docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie bash /src/raspios/compilar.sh
 
       - name: Probar en un sistema limpio
+        if: env.PUBLICAR == 'true'
         run: docker run --rm --platform linux/arm64 -v "$PWD:/src" debian:trixie bash /src/raspios/probar.sh
 
       - name: Armar el paquete
+        if: env.PUBLICAR == 'true'
         run: |
           V=$(grep -oP 'project\(betometro VERSION \K[0-9.]+' CMakeLists.txt)
           echo "V=$V" >> "$GITHUB_ENV"
@@ -84,13 +101,15 @@ jobs:
           # Paquete para Ajustes → Actualizar (internet o pendrive)
           tar -C salida-pi -czf "salida-pi/betometro-pi-$V.tar.gz" "betometro-pi-$V"
 
-      - uses: actions/upload-artifact@v4
+      - if: env.PUBLICAR == 'true'
+        uses: actions/upload-artifact@v4
         with:
           name: betometro-pi-${{ env.V }}
           path: salida-pi/betometro-pi-${{ env.V }}
           retention-days: 30
 
-      - uses: actions/upload-artifact@v4
+      - if: env.PUBLICAR == 'true'
+        uses: actions/upload-artifact@v4
         with:
           name: capturas-${{ env.V }}
           path: salida-pi/capturas

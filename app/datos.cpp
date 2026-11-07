@@ -564,7 +564,18 @@ bool Datos::borrarCarrera(const QString& id) {
     auto& v = base_.carreras;
     auto it = std::find_if(v.begin(), v.end(), [&](const Carrera& c) { return q(c.id) == id; });
     if (it == v.end()) return false;
+    // Sus videos también (Matías, 07/11): si no, quedaban en la tarjeta ocupando lugar. Solo los que no usa otra carrera.
+    QStringList videos;
+    if (it->extra["videos"].esLista())
+        for (const auto& x : it->extra["videos"].elementos()) videos << q(x["archivo"].aTexto());
     v.erase(it);
+    for (const QString& a : videos) {
+        bool otra = false;
+        for (const auto& c : v)
+            if (c.extra["videos"].esLista())
+                for (const auto& x : c.extra["videos"].elementos()) otra = otra || q(x["archivo"].aTexto()) == a;
+        if (!otra && nombreVideoValido(a)) QFile::remove(carpetaVideos() + '/' + a);
+    }
     guardar();
     emit carrerasChanged();
     return true;

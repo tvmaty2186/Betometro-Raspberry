@@ -88,4 +88,4 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
 - El brillo solo se guardaba y no se aplicaba. Arreglado en 1.0.10.
 - 06/11/2026: la compilación se colgó 17 min en «apt-get install ffmpeg» (paso Voz) sin decir nada. Ahora ese paso tiene tiempo límite y reintentos.
 - 06/11/2026: el video del informe salía negro en la Pi 3. El VideoOutput de Qt usa un programa del chip gráfico que la VideoCore IV (OpenGL ES 2) no arma («Failed to build graphics pipeline state»). Ahora el video se dibuja como imagen (`app/imagen_video.*`): el procesador pasa cada cuadro a RGB.
-- Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` quedan guardados sin usar).
+- Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` se borraron el 07/11/2026; quedan en el historial de git).

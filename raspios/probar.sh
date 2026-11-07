@@ -17,7 +17,7 @@ codigo=$?
 set -e
 grep -v "soundeffect: Failed to update audio output" /tmp/log.txt | head -40 || true
 if [ "$codigo" != 124 ]; then echo "MAL: Betómetro terminó solo (código $codigo)"; exit 1; fi
-if grep -qiE "No pude cargar la fuente|is not installed|module .* not found|Cannot load library|failed to load component|QQmlApplicationEngine failed" /tmp/log.txt; then
+if grep -qiE "No pude cargar la fuente|is not installed|module .* not found|Cannot load library|failed to load component|QQmlApplicationEngine failed|Unsupported image format" /tmp/log.txt; then
   echo "MAL: faltan piezas (ver arriba)"; exit 1
 fi
 echo "BIEN: Betómetro anduvo 40 s sin problemas"
@@ -36,14 +36,18 @@ kill %1 2>/dev/null || true
 
 # Capturas de pantallas (para mirarlas antes de entregar): quedan en salida-pi/capturas
 mkdir -p salida-pi/capturas /tmp/cap
+faltan=0
 cap() { n=$1; shift
   QT_QPA_PLATFORM=offscreen LANG=C.UTF-8 XDG_RUNTIME_DIR=/tmp/run BETO_VOZ=/usr/share/betometro/voz \
     timeout 120 /usr/bin/betometro --datos /tmp/cap --muestra --orientacion h --captura "salida-pi/capturas/$n.png" "$@" \
-    >/dev/null 2>&1 || echo "OJO: no salió la captura $n"; }
+    >/dev/null 2>&1
+  [ -s "salida-pi/capturas/$n.png" ] || { echo "MAL: no salió la captura $n"; faltan=1; }; }
 cap inicio --pantalla inicio
 cap informe --pantalla informe --carrera "Santa Clara"
 cap informe-unir --pantalla informe --carrera "Santa Clara" --prueba unir
 cap informe-menu --pantalla informe --carrera "Santa Clara" --prueba menu
 cap ajustes --pantalla ajustes
+cap salir-de-practica --pantalla carrera --prueba salir   # Salir sin largar vuelve a Práctica (no a «nueva carrera»)
 ls -la salida-pi/capturas
+[ "$faltan" = 0 ] || { echo "MAL: faltan capturas (una pantalla no abre)"; exit 1; }
 

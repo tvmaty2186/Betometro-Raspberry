@@ -19,6 +19,9 @@ capturas en Docker (`debian:trixie`, ver `raspios/compilar.sh`), commits `[skip 
 
 **1.0.29 «pantallas y orden»** (la 29 y la 30 juntas): todo lo demás. Lo visual con muestra aprobada antes:
 cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del simulador.
+**Muestras aprobadas por Matías (07/11/2026):** [muestras/1.0.29/](muestras/1.0.29/) — tiempo por casilleros (teclado
+en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones apagados con borde punteado y
+«VER INFORME» en la carrera corrida, Chequeo con TODO LISTO como barra abajo y la casilla Simulador, detalle con QR.
 
 ## 0. Antes de programar: medir en la Pi
 
@@ -41,7 +44,7 @@ cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del s
 - [x] Instalador: no tocar `cmdline.txt` si no cambia, `sync`, `trap` si falla a mitad, `Type=notify` (10-1.2 a 1.4).
 - [x] **Vuelta atrás automática** si la versión nueva no arranca, y avisar en pantalla (Matías: sí) (10-1.1).
 - [x] Borrar los paquetes de actualización viejos (10).
-- [ ] Borrar una carrera también borra su video (si ningún otro la usa) (pedido de Matías).
+- [x] Borrar una carrera también borra su video (si ningún otro la usa) (pedido de Matías).
 - [ ] **Copia de la base a Drive junto con el video y el informe**, cuando se conecta a la wifi favorita (Matías).
 - [ ] **Un archivo por carrera** en vez de `betometro.json` único, sin romper el formato de la app (05, sección 4).
       Si se hace, el punto 05-2.2 (escribir sin el árbol `Json`) no hace falta.
@@ -61,21 +64,22 @@ cargar el tiempo por casilleros, engranaje, botones apagados y la pantalla del s
 
 ## 2. GitHub y pruebas
 
-- [ ] **No publicar si falla una prueba** (Matías: sí). Compilar con las pruebas y arreglar el job roto (09-1.1, 2.a–c).
-- [ ] **Compilar solo desde `main`** (Matías: sí). Que un push no cancele una compilación con `[publicar]` (10-2.2).
+- [x] **No publicar si falla una prueba** (Matías: sí). Compilar con las pruebas y arreglar el job roto (09-1.1, 2.a–c).
+- [x] **Compilar solo desde `main`** (Matías: sí). Que un push no cancele una compilación con `[publicar]` (10-2.2).
 - [ ] Carrera y recorrido libre de punta a punta con `simular_neo` en las pruebas (09 P3).
 - [ ] Probar compilar en ARM de verdad (`ubuntu-24.04-arm`) para bajar de 20 a ~5 min (10-2.1). ARM **solo al
-      publicar**; en cada subida, solo x86 (Matías).
-- [ ] Arreglar el job «Programa Qt» en `debian:trixie` x86 y correr `ctest` entero (datos, crono con video,
+      publicar**; en cada subida, solo x86 (Matías). Hecho: el ARM (emulado) corre solo al publicar; el ARM de
+      verdad (`ubuntu-24.04-arm`) queda para la 1.0.29.
+- [x] Arreglar el job «Programa Qt» en `debian:trixie` x86 y correr `ctest` entero (datos, crono con video,
       videos, drive) (09-2.b).
-- [ ] `probar.sh` falla si una captura no sale (09-2.c).
-- [ ] Recorrido libre en `prueba_crono` (09-2.d).
+- [x] `probar.sh` falla si una captura no sale (09-2.c).
+- [x] Recorrido libre en `prueba_crono` (09-2.d).
 - [ ] Capturas comparadas contra referencias: primero Avispón h/v, después los 4 temas (09-1.2, P2).
 - [ ] Dobles de wifi y cámara para que corran en GitHub (09-1.5, P4). La cámara de prueba necesita
       `gstreamer1.0-plugins-ugly` (x264enc): con eso `prueba_crono` y `prueba_videos` pasan en Docker.
 - [ ] Una biblioteca `betometro_base` para que las pruebas no recompilen el programa (01-2.2).
 - [ ] `-Wall -Wextra` también en el programa y la cámara (02-2).
-- [ ] **Borrar Buildroot** (Matías, 07/11): la carpeta `sistema/` (4,9 MB) e `imagen.yml`. Queda en el historial de git
+- [x] **Borrar Buildroot** (Matías, 07/11): la carpeta `sistema/` (4,9 MB) e `imagen.yml`. Queda en el historial de git
       por si algún día se quiere volver (10-3).
 - [ ] Borrar las fotos de referencia viejas de `docs/capturas/` (02/11); las nuevas salen de las capturas comparadas (09-1.2).
 

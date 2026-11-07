@@ -207,7 +207,7 @@ referencia/      copia del código de la app 2.1.1 (no se edita)
 
 **Entrega:** `betometro-raspberry-X.Y.Z.img.xz` en la *release* + guía para grabarla con Raspberry Pi Imager.
 
-**Avance (01/11/2026):** árbol externo en [`sistema/`](../sistema/LEEME.md).
+**Avance (01/11/2026):** árbol externo en `sistema/` (borrado el 07/11/2026: se pasó a Raspberry Pi OS, ver raspios.md).
 - Buildroot **2026.02.3** (LTS), Qt **6.9.1**, kernel de la Raspberry **6.12.61** (ya trae la Touch Display 2: `vc4-kms-dsi-ili9881-7inch`), toolchain Bootlin aarch64 glibc.
 - Placa de 64 bits (`raspberrypi3_64`). Mesa VC4 + GBM, Qt EGLFS sobre KMS, sonido por ALSA, `libgpiod` 1.x (el toolchain trae cabeceras 5.4; libgpiod 2 pide 5.10).
 - Tarjeta: arranque 64 MB (vfat), sistema A y B de 600 MB (squashfs zstd, solo lectura), datos ext4 que se agranda sola al primer arranque. `/var` en memoria, registro en memoria.

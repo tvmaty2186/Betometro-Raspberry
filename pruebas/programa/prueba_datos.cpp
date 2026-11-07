@@ -1,6 +1,7 @@
 // Pruebas de las reglas de Carreras (Datos): orden, cuándo se larga, validaciones, borrar y guardado.
 #include <QCoreApplication>
 #include <QDate>
+#include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
 #include <iostream>
@@ -102,6 +103,22 @@ int main(int argc, char** argv) {
             CHEQUEAR(c && c->vueltas.size() == 1 && c->vueltas[0].interrumpida && c->vueltas[0].traza.size() == 12);
             CHEQUEAR(c && !c->extra.tiene("enCurso"));
         }
+    }
+    {
+        // Borrar una carrera borra también su video, salvo que lo use otra carrera (Matías, 07/11)
+        QTemporaryDir vd;
+        Datos d(vd.path());
+        QDir().mkpath(vd.path() + "/videos");
+        auto archivo = [&](const QString& n) { QFile f(vd.path() + "/videos/" + n); f.open(QIODevice::WriteOnly); f.write("x"); };
+        archivo("carrera-1.mp4"); archivo("carrera-2.mp4");
+        const QString a = d.guardarCarrera(carreraNueva("A", QDate::currentDate()))["id"].toString();
+        const QString b = d.guardarCarrera(carreraNueva("B", QDate::currentDate().addDays(1)))["id"].toString();
+        d.agregarVideo(a, {{"archivo", "carrera-1.mp4"}, {"largada", 1}});
+        d.agregarVideo(a, {{"archivo", "carrera-2.mp4"}, {"largada", 2}});
+        d.agregarVideo(b, {{"archivo", "carrera-2.mp4"}, {"largada", 1}});
+        CHEQUEAR(d.borrarCarrera(a));
+        CHEQUEAR(!QFile::exists(vd.path() + "/videos/carrera-1.mp4"));   // solo era de A
+        CHEQUEAR(QFile::exists(vd.path() + "/videos/carrera-2.mp4"));    // B lo usa todavía
     }
     {
         // Muestra: Santa Clara corrida, con error total 9,6 s y finalizada

@@ -40,24 +40,12 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
   programa:
-    name: Programa Qt y capturas
+    # En debian:trixie (mismo Qt 6.8.2 y GStreamer que la Raspberry): antes usaba Qt 6.8.3 de afuera y estaba
+    # roto hace 9 versiones (09-2.b). Corre todas las pruebas, también la cámara de prueba y el video.
+    name: Programa Qt (Debian trixie, todas las pruebas)
     runs-on: ubuntu-24.04
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-      - uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.8.3
-          modules: qtmultimedia
-          cache: true
-      - name: Compilar
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build build -j 4
-      - name: Pruebas del programa
-        run: ctest --test-dir build --output-on-failure -R "datos|crono"
-      - name: Capturas
-        run: herramientas/capturas.sh build/betometro capturas
-      - uses: actions/upload-artifact@v4
-        with:
-          name: capturas
-          path: capturas
+      - name: Pruebas
+        run: docker run --rm -v "$PWD:/src" debian:trixie bash /src/raspios/pruebas.sh

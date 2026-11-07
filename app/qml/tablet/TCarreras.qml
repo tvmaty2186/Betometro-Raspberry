@@ -123,7 +123,7 @@ TPantalla {
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter; spacing: 24
                 TBoton { width: 260; height: 120; nombre: "Cancelar"; onTocado: raiz.borrando = null }
-                TBoton { width: 260; height: 120; tipo: "peligro"; nombre: "Borrar"; dato: "y sus vueltas"
+                TBoton { width: 260; height: 120; tipo: "peligro"; nombre: "Borrar"; dato: raiz.borrando && Datos.videos(raiz.borrando.id).length ? "vueltas y video" : "y sus vueltas"
                          onTocado: { Datos.borrarCarrera(raiz.borrando.id); raiz.borrando = null; } }
             }
         }

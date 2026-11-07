@@ -4,6 +4,7 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QTemporaryDir>
+#include <cmath>
 #include <iostream>
 
 #include "camara.h"
@@ -106,6 +107,40 @@ int main(int argc, char** argv) {
     CHEQUEAR(crono2.marcar() == "marca");
     const beto::Carrera* s = datos2.buscar(crono2.carreraId());
     CHEQUEAR(s && s->vueltas.size() == 1 && !s->vueltas[0].distM.has_value());
+
+    // 3b) Recorrido libre (1.0.26): sin vueltas; MARCAR deja marcas numeradas y no corta nada; traza a 1 por
+    //     segundo; cada minuto guarda lo andado (por si se corta la luz); Terminar deja una sola vuelta, no
+    //     interrumpida, y sin frases de voz (09-2.d, 05-1.1)
+    {
+        QTemporaryDir dirR;
+        Datos datosR(dirR.path());
+        GpsDePrueba gpsR;
+        Crono cR(&datosR, &gpsR);
+        cR.ponerReloj([&] { return ahora; });
+        QStringList frasesR;
+        QObject::connect(&cR, &Crono::frase, [&](const QString& f) { frasesR << f; });
+        auto andarR = [&](double hasta, double v) { while (ahora < hasta) { ahora += 100; gpsR.dar(ahora, v); } };
+        cR.preparar("recorrido");
+        CHEQUEAR(datosR.corridas().isEmpty());            // no existe hasta largar
+        CHEQUEAR(cR.marcar() == "largada");
+        const QString idR = cR.carreraId();
+        CHEQUEAR(!idR.isEmpty());
+        andarR(ahora + 20000, 12.5);                       // 45 km/h
+        CHEQUEAR(cR.marcar() == "marca");
+        CHEQUEAR(cR.marcar() == "ignorada");              // dos marcas en menos de 1 s
+        andarR(ahora + 50000, 12.5);
+        CHEQUEAR(cR.marcar() == "marca");
+        andarR(ahora + 15000, 12.5);                       // pasa el minuto: se guardó lo andado
+        const beto::Carrera* r = datosR.buscar(idR);
+        CHEQUEAR(r && r->extra.tiene("enCurso") && r->vueltas.empty());
+        CHEQUEAR(r && r->extra["marcas"].tamano() == 2);
+        CHEQUEAR(r && std::abs(r->extra["marcas"].elementos()[0]["m"].aNumero() - 250) < 15);
+        cR.terminar();
+        r = datosR.buscar(idR);
+        CHEQUEAR(r && r->vueltas.size() == 1 && !r->vueltas[0].interrumpida && !r->extra.tiene("enCurso"));
+        CHEQUEAR(r && r->vueltas[0].traza.size() >= 80 && r->vueltas[0].traza.size() <= 90);   // ~85 s a 1 por segundo
+        CHEQUEAR(frasesR.isEmpty());
+    }
 
     // 4) Video (si está el ayudante betometro-camara y GStreamer): cámara de prueba, empieza al abrir
     //    la carrera, se anota en qué momento del video fue la largada y para unos segundos después.

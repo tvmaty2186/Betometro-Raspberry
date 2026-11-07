@@ -6,7 +6,7 @@ Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieri
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
   Motivo: cada imagen de Buildroot tardaba 2–3 h y fallaba por piezas del sistema. Ahora se compila solo el programa (~15 min con caché).
 - Se pierde: copias A/B (queda la versión anterior guardada para volver a mano) y unos segundos de arranque.
-- Buildroot (`sistema/`, `imagen.yml`) queda guardado sin usar.
+- Buildroot (`sistema/`, `imagen.yml`) se borró el 07/11/2026 (queda en el historial de git).
 - Cómo se arma e instala: `raspios/` y `.github/workflows/programa.yml`.
 
 ## Hecho

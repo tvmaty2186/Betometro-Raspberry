@@ -1,1 +1,0 @@
-source "$BR2_EXTERNAL_BETOMETRO_PATH/package/betometro/Config.in"

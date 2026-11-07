@@ -25,7 +25,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 
 Betómetro para Raspberry Pi: un equipo **autónomo** para el navegante de carreras de regularidad. Hace lo mismo que la app Android Betómetro (cuenta regresiva en voz, velocidad sugerida con GPS, adelantado/atrasado, historial e informes), pero como **sistema propio**: se prende y arranca directo en Betómetro.
 
-- **Sistema:** Raspberry Pi OS Lite 64 bits (trixie) con Betómetro instalado como programa que arranca solo (decisión de Matías del 03/11/2026; Buildroot quedó guardado sin usar). Se actualiza por wifi. Ver [docs/raspios.md](docs/raspios.md).
+- **Sistema:** Raspberry Pi OS Lite 64 bits (trixie) con Betómetro instalado como programa que arranca solo (decisión de Matías del 03/11/2026; Buildroot se borró el 07/11/2026, queda en el historial de git). Se actualiza por wifi. Ver [docs/raspios.md](docs/raspios.md).
 - **Programa:** nativo en Qt 6 / QML, hecho de cero. El motor se pasa a C++ con la misma lógica que el `Motor` de la app.
 - **App Android:** está en otro repo, [tvmaty2186/Betometro](https://github.com/tvmaty2186/Betometro). **Prohibido tocarla desde acá**; funciona bien. Se puede leer para copiar la lógica (por ejemplo `www/index.html`, sección MOTOR).
 

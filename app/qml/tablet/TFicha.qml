@@ -90,6 +90,7 @@ TPantalla {
                                  if (raiz.guardar()) Navegacion.avisar("Carrera guardada"); } }
             TBoton { width: (largar.width - 16) / 2; height: 120; tamNombre: 27; icono: ""; tipo: raiz.borrarArmado ? "peligro" : ""
                      nombre: raiz.borrarArmado ? "Tocá otra vez" : "Borrar"; activo: !raiz.nueva
+                     dato: raiz.borrarArmado && !raiz.nueva && Datos.videos(c.id).length ? "borra también el video" : ""
                      onTocado: { if (raiz.borrarArmado) { Datos.borrarCarrera(c.id); Navegacion.ir("carreras"); } else { raiz.borrarArmado = true; desarmar.restart(); } } }
         }
     }

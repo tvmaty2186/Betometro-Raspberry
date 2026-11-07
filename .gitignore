@@ -1,8 +1,7 @@
 build/
-sistema/cache/
-sistema/voz-grabada/
-sistema/salida/
 build-pi/
+build-pruebas/
 salida-pi/
 .ccache/
 __pycache__/
+cap-tmp/
