@@ -261,11 +261,13 @@ Item {
         WNumero {
             // Si pasa el máximo del velocímetro (160), queda trabada en 160 y en rojo, sin el ■ (Matías, 04/11/2026)
             readonly property bool pasada: raiz.est.vNecKmh > 160
+            // Sin GPS en carrera: que diga qué hacer, no un «–» (07-2.3)
+            readonly property bool sinGps: !!raiz.est.enCurso && !!raiz.est.sinGps && Datos.ajustes.velActiva !== false
             ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"
             etiqueta: "Sugerida"
-            colorNumero: pasada ? "#d23b2c" : Tema.numero
-            numero: raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : pasada ? "160" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
-            extra: parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
+            colorNumero: pasada || sinGps ? "#d23b2c" : Tema.numero
+            numero: sinGps ? "SIN GPS" : raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : pasada ? "160" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
+            extra: sinGps ? "seguí por tiempo" : parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
         }
     }
     Component { id: cVelocidad; WVelocidad { est: raiz.est; barra: parent.def.barra !== false; extra: !!parent.def.extra; ancho: parent.def.ancho || 1 } }

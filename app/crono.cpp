@@ -333,6 +333,14 @@ void Crono::refrescar() {
                {"marcas", static_cast<int>(marcas_.elementos().size())},
                {"tiempoIdealMs", datosLargada_->tiempoIdealMs}, {"distanciaM", datosLargada_->distanciaM}};
     emit estadoChanged();
+    // Pitido cuando el GPS se corta en carrera (largo) y cuando vuelve (tic), si sigue así 2 s (no por un instante)
+    const bool sinGps = motor_ && motor_->enCurso() && e.sinGps && !recorrido_ && datos_->config()["velActiva"].aBool(true);
+    if (sinGps == sinGpsAvisado_) sinGpsCambioT_ = t;
+    else if (t - sinGpsCambioT_ >= 2000) {
+        sinGpsAvisado_ = sinGps;
+        sinGpsCambioT_ = t;
+        if (motor_ && motor_->enCurso()) emit sonido(sinGps ? QStringLiteral("largo") : QStringLiteral("tic"));
+    }
 }
 
 void Crono::voz() {

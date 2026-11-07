@@ -130,7 +130,7 @@ en el lugar de LARGAR), engranaje (**A**, 8 dientes, si no elige otro), botones 
 - [x] **«IR A LARGAR»** en los botones de Práctica, Carreras y Ficha que solo llevan al crono (07-1.2).
 - [x] «Práctica libre» pasa a **«Práctica»** (Recorrido libre queda adentro de Práctica, con ese nombre).
 - [x] En Carreras, LARGAR gris con el motivo («Se larga el 21 nov») (07-2.2).
-- [ ] Sin GPS en carrera: «SIN GPS · seguí por tiempo» en la Sugerida y un pitido al cortarse (07-2.3).
+- [x] Sin GPS en carrera: «SIN GPS · seguí por tiempo» en la Sugerida y un pitido al cortarse (07-2.3).
 - [x] Chequeo previo: cámara prendida sin cámara en rojo; «Poco lugar» (07-2.4).
 - [ ] Textos: ~~«undefined satélites»~~ (hecho), banderita «?» en el nombre del informe, línea de práctica de pie cortada,
       «MARCA 1 · solo deja una marca» en el recorrido (07-2.5); hora «--:--» sin hora válida (07-1.4).

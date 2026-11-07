@@ -81,7 +81,9 @@ private:
     double ultMuestraT_ = 0;
     double ultTrazaT_ = -1e12;
     double ultMarcaT_ = -1e12;
-    double ultParcialT_ = -1e12;   // recorrido libre: última vez que se guardó lo andado (por si se corta la luz)
+    double ultParcialT_ = -1e12;
+    bool sinGpsAvisado_ = false;           // pitido al cortarse el GPS en carrera y al volver (07-2.3)
+    double sinGpsCambioT_ = 0;   // recorrido libre: última vez que se guardó lo andado (por si se corta la luz)
     void guardarParcial(double t);
     std::optional<beto::DatosLargada> datosLargada_;
     std::unique_ptr<beto::Motor> motor_;
