@@ -73,7 +73,7 @@ Item {
             DobleToque { width: parent.ancho; height: 42; textoNormal: "De fábrica"
                          onConfirmado: { raiz.poner(Armado.fabrica(raiz.h, Datos.ajustes.marcarPantalla === false)); tablero.elegido = -1; } }
             BotonAmarillo { width: raiz.h ? 140 : parent.ancho; height: 42; tamTexto: 18; texto: "Guardar"
-                onTocado: { Datos.ponerCfg(raiz.h ? "widgetsH" : "widgets", raiz.armado); raiz.cambiado = false; Navegacion.avisar("Pantalla guardada"); } }
+                onTocado: { Datos.ponerCfg(Armado.clave(raiz.h, Datos.ajustes), raiz.armado); raiz.cambiado = false; Navegacion.avisar("Pantalla guardada"); } }
         }
     }
     property bool ayudaVista: false   // el cartel se va solo a los 5 s o al primer toque, como la app

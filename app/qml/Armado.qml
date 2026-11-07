@@ -73,15 +73,21 @@ QtObject {
         if (sinMarcar) return horizontal ? aFracciones(pxHSinMarcar, 1280, 720) : aFracciones(pxVSinMarcar, 720, 1280);
         return horizontal ? aFracciones(pxH, 1280, 720) : aFracciones(pxV, 720, 1280);
     }
+    // Con «MARCAR en pantalla» apagado se usa la pantalla sin MARCAR (la aprobada, o la que se acomodó con el
+    // editor estando apagada), guardada aparte: la pantalla con MARCAR del usuario queda intacta (Matías, 07/11/2026)
+    function sinMarcar(ajustes) { return ajustes.marcarPantalla === false || Contexto.prueba.indexOf("sin-marcar") >= 0; }
+    function clave(horizontal, ajustes) {
+        return (horizontal ? "widgetsH" : "widgets") + (sinMarcar(ajustes) ? "SinMarcar" : "");
+    }
     function cargar(horizontal, ajustes) {
-        const sinMarcar = ajustes.marcarPantalla === false || Contexto.prueba.indexOf("sin-marcar") >= 0;   // «--prueba largar-sin-marcar»: capturas
+        const sm = sinMarcar(ajustes);
         // Ojo: la lista guardada llega de C++ como lista de Qt, no como Array de JavaScript
         // (Array.isArray da false): se recorre por índice. Antes se ignoraba y siempre quedaba la de fábrica.
-        const g = ajustes[horizontal ? "widgetsH" : "widgets"];
-        if (!g || typeof g !== "object" || !(g.length > 0)) return fabrica(horizontal, sinMarcar);
+        const g = ajustes[clave(horizontal, ajustes)];
+        if (!g || typeof g !== "object" || !(g.length > 0)) return fabrica(horizontal, sm);
         const l = [];
-        // Con la llave apagada no hay botón MARCAR aunque el armado propio lo tenga (nada en pantalla como plan B)
-        for (let i = 0; i < g.length; i++) if (g[i] && g[i].t && !(sinMarcar && g[i].t === "marcar")) l.push(Object.assign({}, g[i]));
-        return l.length ? l : fabrica(horizontal, sinMarcar);
+        for (let i = 0; i < g.length; i++) if (g[i] && g[i].t && !(sm && g[i].t === "marcar")) l.push(Object.assign({}, g[i]));
+        return l.length ? l : fabrica(horizontal, sm);
     }
+
 }
