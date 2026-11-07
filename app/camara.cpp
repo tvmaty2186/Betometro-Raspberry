@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #endif
 
@@ -95,7 +96,21 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     connect(this, &Camara::grabandoChanged, this, &Camara::enProcesoChanged);
     connect(this, &Camara::convirtiendoChanged, this, &Camara::enProcesoChanged);
     detenerTimer_.setSingleShot(true);
-    connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) { grab_.terminate(); matarTimer_.start(); } });
+    connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) { aMano_ = true; grab_.terminate(); matarTimer_.start(); } });
+    reintento_.setSingleShot(true);
+    reintento_.setInterval(2000);
+    connect(&reintento_, &QTimer::timeout, this, [this] {
+        if (grabando() || !hay() || !datos_->config()["camara"].aBool(false)) { emit grabandoChanged(); return; }
+        ++reintentos_;
+        const QString nombre = nombreBase_ + '-' + QChar('a' + reintentos_);
+        qWarning("Cámara: no arrancó, se vuelve a probar (%d de 2) en %s", reintentos_, qPrintable(nombre));
+        if (arrancar(nombre)) {
+            if (quedabanMs_ > 0) detenerTimer_.start(quedabanMs_);
+            emit reintento();
+        } else {
+            emit grabandoChanged();
+        }
+    });
     matarTimer_.setSingleShot(true);
     matarTimer_.setInterval(12000);
     connect(&matarTimer_, &QTimer::timeout, this, [this] {
@@ -134,6 +149,15 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     connect(&grab_, &QProcess::stateChanged, this, [this](QProcess::ProcessState s) {
         if (s == QProcess::NotRunning) matarTimer_.stop();
         if (s == QProcess::NotRunning && grab_.exitCode() != 0 && falla_.isEmpty()) falla_ = QStringLiteral("La cámara dejó de grabar");
+        // Falló antes del primer cuadro («failed during initialization», el USB que se reinicia): a los 2 s se
+        // vuelve a probar sola, en otro archivo. Pasaba en una de cada dos pruebas completas (07/11/2026).
+        if (s == QProcess::NotRunning && !aMano_ && primerCuadro_ <= 0 && reintentos_ < 2 && !falla_.startsWith(QLatin1String("Poco lugar"))) {
+            quedabanMs_ = detenerTimer_.isActive() ? detenerTimer_.remainingTime() : 0;
+            detenerTimer_.stop();
+            const QFileInfo f(archivo_);   // el que no llegó a tener cuadros
+            if (f.exists() && f.size() < 1024 * 1024) QFile::remove(f.absoluteFilePath());
+            reintento_.start();
+        }
         emit grabandoChanged();
         if (s != QProcess::Starting) actualizarLugar();   // la lista de videos marca el que se está grabando
     });
@@ -159,7 +183,7 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
             }
         } else {
             QFile::remove(parte);
-            // Cortado por la carrera: se reintenta después. Si falló solo, no (queda el .mkv, que igual se ve)
+            // Falló en carrera: se reintenta después. Si falló fuera de carrera, no (queda el .mkv, que igual se ve)
             if (!enCarrera_) mp4Fallados_ << mkv;
         }
         emit convirtiendoChanged();
@@ -294,6 +318,16 @@ void Camara::probarGrabacion(int segundos) {
 
 bool Camara::empezar(const QString& nombreBase) {
     if (!hay() || grabando()) return false;
+    reintento_.stop();
+    reintentos_ = 0;
+    quedabanMs_ = 0;
+    nombreBase_ = nombreBase;
+    return arrancar(nombreBase);
+}
+
+bool Camara::arrancar(const QString& nombreBase) {
+    if (!hay() || grabando()) return false;
+    aMano_ = false;
     pararVista();
     pararNivel();
     // La vista previa y la barra del micrófono tienen tomados la cámara y el micrófono: hay que esperar a
@@ -333,14 +367,16 @@ bool Camara::empezar(const QString& nombreBase) {
 }
 
 void Camara::detener(int retrasoS) {
+    if (reintento_.isActive()) { reintento_.stop(); emit grabandoChanged(); }   // iba a volver a probar: ya no
     if (!grabando()) return;
-    if (retrasoS <= 0) { grab_.terminate(); matarTimer_.start(); return; }
+    if (retrasoS <= 0) { aMano_ = true; grab_.terminate(); matarTimer_.start(); return; }
     detenerTimer_.start(retrasoS * 1000);
 }
 
 void Camara::cortar(const QString& motivo) {
     qWarning("Cámara: %s", qPrintable(motivo));
     falla_ = motivo;
+    aMano_ = true;
     detenerTimer_.stop();
     grab_.terminate();
     matarTimer_.start();
@@ -374,7 +410,9 @@ QVariantList Camara::videos() const {
 
 void Camara::ponerEnCarrera(bool enCarrera) {
     enCarrera_ = enCarrera;
-    if (enCarrera_ && convirtiendo()) mp4_.kill();   // la carrera primero
+    // La carrera primero, pero el pase que ya estaba no se corta (se perdía y volvía a empezar de cero): sigue con
+    // la prioridad más baja; al terminar la carrera vuelve a la de siempre (1.0.31)
+    if (convirtiendo()) { [[maybe_unused]] const int r = ::setpriority(PRIO_PROCESS, static_cast<id_t>(mp4_.processId()), enCarrera_ ? 19 : 15); }
     if (!enCarrera_) QTimer::singleShot(5000, this, &Camara::revisarMp4);
 }
 

@@ -110,6 +110,7 @@ private:
     void pasoPulsador();
     void pasoGps();
     void pasoCamara();
+    void grabarCamara();        // la grabación de 30 s, cuando la cámara ya está suelta
     void pasoRendimiento();
     void pasoReproduccion();
     void pasoTarjeta();

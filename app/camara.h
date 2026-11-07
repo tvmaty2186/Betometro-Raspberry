@@ -45,8 +45,11 @@ public:
     bool grabando() const { return grab_.state() != QProcess::NotRunning; }
     bool convirtiendo() const { return mp4_.state() != QProcess::NotRunning; }
     QStringList enProceso() const;
-    // En carrera no se pasa nada a MP4 (y si estaba pasando uno, se corta y se sigue después)
+    QString pasandoAMp4() const { return convirtiendo() ? mp4Entrada_ : QString(); }   // el .mkv que se está pasando
+    // En carrera no empieza ningún pase a MP4; si ya había uno, sigue con la prioridad más baja (no se corta)
     void ponerEnCarrera(bool enCarrera);
+    // Falló al arrancar (antes del primer cuadro): en 2 s vuelve a probar sola, hasta 2 veces (1.0.31)
+    bool reintentando() const { return reintento_.isActive(); }
     QString falla() const { return falla_; }
     QUrl vista() const { return vista_; }
     bool viendo() const { return vistaProc_.state() != QProcess::NotRunning; }
@@ -91,6 +94,7 @@ signals:
     void lugarChanged();
     void convirtiendoChanged();
     void primerCuadroListo(double ahora);    // hora del primer cuadro, en el reloj de la carrera
+    void reintento();                         // volvió a arrancar sola en otro archivo (la carrera lo anota)
 
 private:
     void leer(QProcess& p, const std::function<void(const QVariantMap&)>& f);
@@ -110,6 +114,12 @@ private:
     bool mp4Error_ = false, enCarrera_ = false;
     QStringList mp4Fallados_;                 // no se reintentan hasta reiniciar
     QTimer detenerTimer_;
+    QTimer reintento_;                        // los 2 s antes de volver a probar
+    bool arrancar(const QString& nombreBase);
+    QString nombreBase_;                      // el nombre que pidieron (el reintento le suma -b, -c)
+    int reintentos_ = 0;
+    bool aMano_ = false;                      // la pararon (Terminar, el tiempo de la prueba, un corte): no se reintenta
+    int quedabanMs_ = 0;                      // lo que le faltaba para parar sola (la prueba de 30 s)
     QTimer matarTimer_;                       // si 12 s después de terminate() sigue vivo, kill() (02-1.2)
     qlonglong cuadrosAntes_ = -1;             // para ver si la cámara se colgó (no suben los cuadros)
     void cortar(const QString& motivo);       // corta la grabación por un problema (queda en falla())

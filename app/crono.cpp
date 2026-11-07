@@ -41,10 +41,12 @@ void Crono::ponerCamara(Camara* c) {
     camara_ = c;
     if (!camara_) return;
     connect(camara_, &Camara::primerCuadroListo, this, [this] { asociarVideo(); });
+    // La cámara no arrancó y volvió a probar sola en otro archivo: si la carrera ya largó, ese es su video
+    connect(camara_, &Camara::reintento, this, [this] { if (enCurso()) { videoPendiente_ = true; asociarVideo(); } });
     // Se cortó sola en carrera (no por Terminar ni a mano): se vuelve a grabar en otro archivo. Con poco lugar, no.
     reintentoVideo_.setInterval(10000);
     connect(camara_, &Camara::grabandoChanged, this, [this] {
-        if (enCurso() && !camara_->grabando() && !camara_->falla().isEmpty() && !camara_->falla().startsWith(QLatin1String("Poco lugar"))
+        if (enCurso() && !camara_->grabando() && !camara_->reintentando() && !camara_->falla().isEmpty() && !camara_->falla().startsWith(QLatin1String("Poco lugar"))
             && !reintentoVideo_.isActive())
             reintentoVideo_.start();
     });

@@ -393,12 +393,42 @@ void PruebaCompleta::pasoCamara() {
     const bool prendida = p_.datos && p_.datos->cfg(QStringLiteral("camara")).toBool();
     if (!prendida) { terminarPaso(kSaltado, QStringLiteral("apagada en Ajustes: no se probó")); return; }
     if (!p_.camara || !p_.camara->hay()) { terminarPaso(kGrave, QStringLiteral("prendida en Ajustes pero no se encontró: %1").arg(p_.camara ? p_.camara->problema() : QString())); return; }
-    if (p_.camara->grabando() || p_.camara->convirtiendo()) { terminarPaso(kLeve, QStringLiteral("la cámara estaba ocupada (grabando o pasando a MP4): no se probó")); return; }
+    // Antes de grabar se espera a que la cámara se suelte (la vista previa, una grabación que termina) y 3 s más:
+    // grabar enseguida daba «failed during initialization» en una de cada dos pruebas (1.0.31). Un pase a MP4
+    // no molesta: sigue aparte.
+    p_.camara->pararVista();
+    p_.camara->pararNivel();
+    haciendo_ = QStringLiteral("Esperando que se suelte la cámara…");
+    emit cambio();
+    auto* suelta = new QTimer(vivo_);
+    auto* libreDesde = new QElapsedTimer;
+    connect(suelta, &QObject::destroyed, this, [libreDesde] { delete libreDesde; });
+    QElapsedTimer* esperando = new QElapsedTimer;
+    connect(suelta, &QObject::destroyed, this, [esperando] { delete esperando; });
+    esperando->start();
+    const int pausa = rapida() ? 300 : 3000;
+    connect(suelta, &QTimer::timeout, this, [this, suelta, libreDesde, esperando, pausa] {
+        const bool ocupada = p_.camara->grabando() || p_.camara->reintentando() || p_.camara->viendo();
+        if (ocupada) {
+            libreDesde->invalidate();
+            if (esperando->elapsed() < 60000) return;
+            suelta->stop();
+            terminarPaso(kLeve, QStringLiteral("la cámara estaba ocupada (grabando) más de 1 minuto: no se probó"));
+            return;
+        }
+        if (!libreDesde->isValid()) libreDesde->start();
+        if (libreDesde->elapsed() < pausa) return;
+        suelta->stop();
+        grabarCamara();
+    });
+    suelta->start(100);
+}
+
+void PruebaCompleta::grabarCamara() {
     const int seg = rapida() ? 4 : 30;
     p_.camara->probarGrabacion(seg);
     if (!p_.camara->grabando()) { terminarPaso(kGrave, QStringLiteral("la grabación no arrancó")); return; }
     tope_.start(rapida() ? 60000 : 300000);
-    const QString mkv = p_.camara->archivo();
     carga_m_ = Carga{};
     carga_.start();
     medirCarga();
@@ -407,9 +437,14 @@ void PruebaCompleta::pasoCamara() {
     reloj->start(1000);
     haciendo_ = QStringLiteral("Grabando… 0 de %1 s").arg(seg);
     emit cambio();
-    espera_ = connect(p_.camara, &Camara::grabandoChanged, this, [this, mkv, seg, reloj] {
-        if (p_.camara->grabando()) return;
+    auto* reintentos = new int(0);
+    connect(reloj, &QObject::destroyed, this, [reintentos] { delete reintentos; });
+    connect(p_.camara, &Camara::reintento, reloj, [reintentos] { ++*reintentos; });
+    espera_ = connect(p_.camara, &Camara::grabandoChanged, this, [this, seg, reloj, reintentos] {
+        if (p_.camara->grabando() || p_.camara->reintentando()) return;   // si no arrancó, vuelve a probar sola
         disconnect(espera_);
+        const QString mkv = p_.camara->archivo();   // el último (si se reintentó, es otro)
+        const int veces = *reintentos;
         carga_.stop();
         reloj->stop();
         const QByteArray cabeza = leerArchivo(mkv, 512 * 1024);
@@ -419,7 +454,7 @@ void PruebaCompleta::pasoCamara() {
         const qlonglong n = c.value("cuadros").toLongLong(), cortados = c.value("cortados").toLongLong(), danados = c.value("avisosJpeg").toLongLong();
         const QString falla = p_.camara->falla();
         const bool quiereSonido = p_.camara->dispositivoAudio() != QLatin1String("no");
-        camaraMedida_ = {{"segundos", seg}, {"bytes", tam}, {"video", video}, {"sonido", sonido}, {"cuadros", n}, {"cortados", cortados}, {"danados", danados}, {"falla", falla}};
+        camaraMedida_ = {{"segundos", seg}, {"bytes", tam}, {"video", video}, {"sonido", sonido}, {"cuadros", n}, {"cortados", cortados}, {"danados", danados}, {"falla", falla}, {"reintentos", veces}};
         haciendo_ = QStringLiteral("Pasando el video a MP4…");
         emit cambio();
         // El pase a MP4 empieza solo 3 s después de grabar: se espera a que empiece y termine (o a que ya esté)
@@ -430,9 +465,14 @@ void PruebaCompleta::pasoCamara() {
         QElapsedTimer* desde = new QElapsedTimer;
         connect(vigila, &QObject::destroyed, this, [desde] { delete desde; });
         desde->start();
-        connect(vigila, &QTimer::timeout, this, [this, vigila, vio, desde, mkv, mp4, seg, tam, video, sonido, n, cortados, danados, falla, quiereSonido] {
-            const bool convirtiendo = p_.camara->convirtiendo();
-            if (convirtiendo) { *vio = true; return; }
+        connect(vigila, &QTimer::timeout, this, [this, vigila, vio, desde, mkv, mp4, seg, tam, video, sonido, n, cortados, danados, falla, quiereSonido, veces] {
+            // Si está pasando otro video (uno viejo), se espera: el nuestro va después. Antes eso salía como «falló».
+            const QString pasando = p_.camara->pasandoAMp4();
+            if (!pasando.isEmpty()) {
+                if (pasando == mkv) *vio = true;
+                else if (!*vio) desde->start();
+                return;
+            }
             const bool hayMp4 = QFileInfo::exists(mp4), hayMkv = QFileInfo::exists(mkv);
             if (!*vio && !hayMp4 && hayMkv && desde->elapsed() < 20000) return;   // todavía no empezó
             vigila->stop();
@@ -449,10 +489,11 @@ void PruebaCompleta::pasoCamara() {
             d << QStringLiteral("sonido: %1").arg(sonido ? QStringLiteral("sí") : quiereSonido ? QStringLiteral("NO") : QStringLiteral("apagado en Ajustes"));
             d << (hayMp4 ? QStringLiteral("MP4 listo en %1 s (%2)").arg(desde->elapsed() / 1000).arg(mb(QFileInfo(mp4).size()))
                          : *vio ? QStringLiteral("el pase a MP4 falló (queda el .mkv)") : QStringLiteral("el pase a MP4 no empezó"));
+            if (veces > 0) d << QStringLiteral("no arrancó de entrada: se volvió a probar sola %1 %2").arg(veces).arg(veces == 1 ? QStringLiteral("vez") : QStringLiteral("veces"));
             if (!falla.isEmpty()) d << QStringLiteral("la cámara avisó: ") + falla;
             QString e = kOk;
             if (!video || tam < 10 * 1024 || !falla.isEmpty() || (!hayMp4 && !hayMkv)) e = kGrave;
-            else if ((quiereSonido && !sonido) || !hayMp4 || (n > 0 && (cortados * 50 > n || fps < 15))) e = kLeve;
+            else if ((quiereSonido && !sonido) || !hayMp4 || veces > 0 || (n > 0 && (cortados * 50 > n || fps < 15))) e = kLeve;
             terminarPaso(e, d.join(QStringLiteral(" · ")));
         });
         vigila->start(1000);
