@@ -53,15 +53,15 @@ TPantalla {
                 TMasMenos { texto: Qt.formatDate(Formato.desdeIso(raiz.fecha), "dd/MM/yy"); anchoTexto: 190
                             onMenos: raiz.moverDia(-1); onMas: raiz.moverDia(1)
                             onTocado: { raiz.campo = "fecha"; teclado.abrir("fecha", "Fecha de la carrera", Formato.desdeIso(raiz.fecha)); } } }
-            TFila { height: raiz.h ? 90 : 96; etiqueta: "Tiempo ideal"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
+            TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Tiempo ideal"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TMasMenos { texto: Formato.tiempo(raiz.tiempoIdealMs); anchoTexto: 190
                             onMenos: raiz.tiempoIdealMs = Math.max(5000, raiz.tiempoIdealMs - 1000); onMas: raiz.tiempoIdealMs = raiz.tiempoIdealMs + 1000
                             onTocado: { raiz.campo = "tiempo"; teclado.abrir("tiempo", "Tiempo ideal por vuelta", Formato.msADigitos(raiz.tiempoIdealMs), 6); } } }
-            TFila { height: raiz.h ? 90 : 96; etiqueta: "Distancia"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
+            TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Distancia"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TMasMenos { texto: Formato.miles(raiz.distanciaM) + " m"; anchoTexto: 190
                             onMenos: raiz.distanciaM = Math.max(0, raiz.distanciaM - 50); onMas: raiz.distanciaM = Math.min(1000000, raiz.distanciaM + 50)
                             onTocado: { raiz.campo = "distancia"; teclado.abrir("numero", "Distancia por vuelta, en metros", raiz.distanciaM, 7); } } }
-            TFila { height: raiz.h ? 90 : 96; etiqueta: "Medidas"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
+            TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Medidas"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TOpciones { opciones: [{ texto: "Impares", valor: "alt1" }, { texto: "Pares", valor: "alt2" }, { texto: "Todas", valor: "todas" }]
                             valor: raiz.patron; onElegido: v => raiz.patron = v } }
         }
@@ -77,7 +77,7 @@ TPantalla {
             id: largar
             width: parent.width; height: parent.height - 136
             tipo: "acento"; icono: raiz.h ? "bandera" : ""; tamIcono: 90
-            nombre: c.finalizada ? "FINALIZADA" : "LARGAR"; tamNombre: 70
+            nombre: c.recorrido && c.tieneVueltas ? "RECORRIDO" : c.finalizada ? "FINALIZADA" : "LARGAR"; tamNombre: 70
             dato: !raiz.nueva && !c.puedeLargar ? c.motivoNoLargar : "Promedio " + Formato.velocidad(raiz.distanciaM, raiz.tiempoIdealMs)
             activo: raiz.nueva || c.puedeLargar
             onTocado: { const id = raiz.cambiada || raiz.nueva ? raiz.guardar() : c.id; if (id && Datos.carrera(id).puedeLargar) Navegacion.ir("carrera", { id: id }); }

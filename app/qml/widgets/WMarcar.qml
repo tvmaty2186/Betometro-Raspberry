@@ -5,6 +5,7 @@ import Betometro
 Item {
     id: raiz
     property var est: ({})
+    property string subtitulo: ""        // en carrera, en vez de «FIN DE VUELTA n» (recorrido libre)
     signal marcar()
     readonly property bool enCurso: !!est.enCurso
     function efecto() { golpe.restart(); }
@@ -22,7 +23,7 @@ Item {
         }
         Text {
             width: parent.width; horizontalAlignment: Text.AlignHCenter
-            text: raiz.enCurso ? "FIN DE VUELTA " + raiz.est.n : "TOCÁ EN LA LARGADA"; color: Tema.acentoTinta
+            text: raiz.enCurso ? (raiz.subtitulo || "FIN DE VUELTA " + raiz.est.n) : "TOCÁ EN LA LARGADA"; color: Tema.acentoTinta
             font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: Math.max(14, Math.min(24, raiz.height * 0.095)); letterSpacing: 3 }
         }
     }

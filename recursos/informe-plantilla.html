@@ -156,7 +156,8 @@ tr.sel td{background:#f4c5312e}tr.clic{cursor:pointer}
   <div class="lg"><span><i style="background:var(--verde)"></i>acelera</span><span><i style="background:var(--rojo)"></i>frena</span></div></div>
 <div class="pie" style="margin:0 0 12px">tocá o deslizá el dedo sobre el mapa o los gráficos</div>
 </div>
-<div class="card"><div class="t">Todas las vueltas<b id="totInfo"></b></div><div id="tabla"></div></div>
+<div class="card" id="cajaRec" style="display:none"><div class="t">Recorrido libre<b id="recInfo"></b></div><div class="k" id="recKpi"></div><div id="recMarcas"></div></div>
+<div class="card" id="cajaVueltas"><div class="t">Todas las vueltas<b id="totInfo"></b></div><div id="tabla"></div></div>
 <div class="pie">Generado con Betómetro · Avispón Verde #101</div>
 </main>
 <div class="barra" id="barra"><i></i></div>
@@ -170,7 +171,7 @@ const tfmt=ms=>{const s=Math.abs(ms)/1000,h=Math.floor(s/3600),m=Math.floor(s%36
 const dur=ms=>Math.abs(ms)<59950?nf(Math.abs(ms)/1000,1)+' s':tfmt(ms);
 const dif=ms=>(ms>0?'+':ms<0?'−':'±')+dur(ms);
 $('tit').textContent=C.nombre;
-$('fecha').textContent=new Date(C.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · ideal '+tfmt(C.idealMs)+(C.distanciaM?' · '+C.distanciaM.toLocaleString('es-AR')+' m':'');
+$('fecha').textContent=new Date(C.fecha+'T12:00').toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+(C.recorrido?' · recorrido libre':' · ideal '+tfmt(C.idealMs))+(C.distanciaM?' · '+C.distanciaM.toLocaleString('es-AR')+' m':'');
 const vSug=C.distanciaM?C.distanciaM/(C.idealMs/1000)*3.6:null;
 const conT=C.vueltas.map((v,i)=>i).filter(i=>C.vueltas[i].m);
 let lap=conT.length?conT[0]:-1,modo='vel',sel=null;
@@ -218,11 +219,15 @@ function dibujar(){
   E(m,'polyline',{points:C.pista.map(p=>p.join(',')).join(' ')+(C.cerrada?' '+C.pista[0].join(','):''),fill:'none',stroke:'#3a3f45','stroke-width':11,'stroke-linecap':'round','stroke-linejoin':'round'});
   for(let i=1;i<M.length;i++){if(!M[i][7]||!M[i-1][7])continue;E(m,'line',{x1:M[i-1][5],y1:M[i-1][6],x2:M[i][5],y2:M[i][6],stroke:color(M[i]),'stroke-width':8,'stroke-linecap':'round'})}
   const p0=C.pista[0];E(m,'circle',{cx:p0[0],cy:p0[1],r:6,fill:'#fff'});const der=p0[0]>364-70;const tl=E(m,'text',{x:der?p0[0]-10:p0[0]+10,y:p0[1]-8,fill:'#fff','font-size':10,'font-weight':700,'text-anchor':der?'end':'start'});tl.textContent='LARGADA';
+  if(C.recorrido){   // recorrido libre: la llegada y las marcas numeradas
+    const pf=C.pista[C.pista.length-1];if(!C.cerrada){E(m,'rect',{x:pf[0]-6,y:pf[1]-6,width:12,height:12,fill:'#111',stroke:'#fff','stroke-width':2});const dF=pf[0]>364-70,tF=E(m,'text',{x:dF?pf[0]-10:pf[0]+10,y:pf[1]-8,fill:'#fff','font-size':10,'font-weight':700,'text-anchor':dF?'end':'start'});tF.textContent='LLEGADA'}
+    (C.marcas||[]).forEach(k=>{if(k.x==null)return;E(m,'circle',{cx:k.x,cy:k.y,r:8,fill:'#f4c531',stroke:'#111','stroke-width':2});const t=E(m,'text',{x:k.x,y:k.y+3.5,fill:'#111','font-size':10,'font-weight':800,'text-anchor':'middle'});t.textContent=k.n})}
   if(as.length){let iF=-1;M.forEach((p,i)=>{if(p[7]&&(iF<0||p[3]<M[iF][3]))iF=i});if(M[iF][3]<-0.3){E(m,'circle',{cx:M[iF][5],cy:M[iF][6],r:8,fill:'none',stroke:'#fff','stroke-width':2});const tf=E(m,'text',{x:M[iF][5]>250?M[iF][5]-12:M[iF][5]+12,y:M[iF][6]+4,fill:'#fff','font-size':10,'text-anchor':M[iF][5]>250?'end':'start'});tf.textContent='frenada '+nf(M[iF][3],1);}}
   // velocidad
   const g=$('gVel'),W=364,H=160;g.innerHTML='';const vmax=Math.max(20,Math.ceil(Math.max(...vs,(vSug||0)+10)/10)*10),yv=v=>H-14-(v/vmax)*(H-24);
   for(let k=0;k<=vmax+.1;k+=vmax/4){E(g,'line',{x1:30,x2:W-6,y1:yv(k),y2:yv(k),stroke:'#262a2f'});const t=E(g,'text',{x:2,y:yv(k)+3,class:'eje'});t.textContent=Math.round(k)}
   if(vSug)E(g,'line',{x1:30,x2:W-6,y1:yv(vSug),y2:yv(vSug),stroke:'#fff','stroke-dasharray':'4 4','stroke-width':1});
+  if(C.recorrido)(C.marcas||[]).forEach(k=>{const x=X(k.m||0,W);E(g,'line',{x1:x,x2:x,y1:4,y2:H-14,stroke:'#f4c531','stroke-dasharray':'3 3'});const t=E(g,'text',{x:x+3,y:12,fill:'#f4c531','font-size':10,'font-weight':800});t.textContent=k.n});
   for(let i=1;i<M.length;i++){const a=M[i-1],b=M[i];if(!a[7]||!b[7]){E(g,'line',{x1:X(a[1],W),y1:H-14,x2:X(b[1],W),y2:H-14,stroke:'#555','stroke-width':3});continue}
     E(g,'line',{x1:X(a[1],W),y1:yv(a[2]),x2:X(b[1],W),y2:yv(b[2]),stroke:color(b),'stroke-width':3,'stroke-linecap':'round'})}
   // aceleración
@@ -408,4 +413,14 @@ tocar($('mapa'),ev=>{const {x,y}=local($('mapa'),ev),M=C.vueltas[lap].m;let b=0,
   const ms=v.videoMs+(t||0)*1000;if(vv.readyState>=1)ir(ms);else vv.addEventListener('loadedmetadata',()=>ir(ms),{once:true})};
  $('vEng').innerHTML=ENG;mostrar();elegir(0);estado();setTimeout(ponerPos,0);
 })();
+
+// Recorrido libre: resumen y marcas en vez de la tabla de vueltas
+if(C.recorrido){(function(){
+  const r=C.resumen||{},h=ms=>{const s=Math.round((ms||0)/1000);return Math.floor(s/3600)+':'+String(Math.floor(s/60)%60).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+  const n1=(x,d)=>x==null?'–':nf(x,d);
+  $('cajaVueltas').style.display='none';$('cajaRec').style.display='';
+  $('recKpi').innerHTML=[[h(r.tiempoMs),'TIEMPO'],[n1((r.distM||0)/1000,1)+' km','DISTANCIA'],[n1(r.promKmh,1),'PROMEDIO KM/H'],[n1(r.maxKmh,0),'MÁXIMA KM/H'],[h(r.paradoMs).replace(/^0:/,''),'PARADO'],[n1(r.acelMax,1),'ACEL. MÁX. M/S²']].map(([b,t])=>`<div><b>${b}</b><span>${t}</span></div>`).join('');
+  const M=C.marcas||[];$('recInfo').textContent=M.length?M.length+(M.length===1?' marca':' marcas'):'sin marcas';
+  $('recMarcas').innerHTML=M.map(k=>`<div style="display:flex;gap:14px;align-items:center;padding:6px 2px;border-top:1px solid #ffffff1a"><b style="width:26px;height:26px;border-radius:50%;background:#f4c531;color:#111;display:grid;place-items:center">${k.n}</b><span>${h(k.ms)}</span><span>${n1((k.m||0)/1000,1)} km</span><span style="color:#f4c531">${Math.round(k.kmh||0)} km/h</span></div>`).join('');
+})()}
 </script></body></html>

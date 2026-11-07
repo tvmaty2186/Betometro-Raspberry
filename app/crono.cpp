@@ -76,7 +76,16 @@ void Crono::preparar(const QString& id) {
     emit ultimaChanged();
     const Json& cfg = datos_->config();
     Carrera c;
-    if (id.isEmpty()) {   // práctica: se guarda recién al largar
+    recorrido_ = id == QLatin1String("recorrido");
+    if (recorrido_) {   // recorrido libre: se guarda recién al largar
+        practicaSinGuardar_ = true;
+        carreraId_.clear();
+        c.practica = true;
+        c.nombre = "Recorrido libre";
+        c.tiempoIdealMs = kRecorridoIdealMs;
+        c.distanciaM = 0;
+        c.patron = "todas";
+    } else if (id.isEmpty()) {   // práctica: se guarda recién al largar
         practicaSinGuardar_ = true;
         carreraId_.clear();
         c.practica = true;
@@ -90,17 +99,21 @@ void Crono::preparar(const QString& id) {
         practicaSinGuardar_ = false;
         carreraId_ = id;
         c = *g;
+        recorrido_ = esRecorrido(c);
     }
     datosLargada_ = datosLargada(c, cfg);
     largada_ = c.proximaLargada();
-    if (auto* sim = qobject_cast<GpsSimulado*>(fuenteGps_)) sim->ponerVuelta(static_cast<double>(c.distanciaM), static_cast<double>(c.tiempoIdealMs));
+    if (auto* sim = qobject_cast<GpsSimulado*>(fuenteGps_)) {
+        if (recorrido_) sim->ponerVuelta(3000, 240000);   // en la PC: andar a 45 km/h
+        else sim->ponerVuelta(static_cast<double>(c.distanciaM), static_cast<double>(c.tiempoIdealMs));
+    }
 
     const QLocale ar(QLocale::Spanish, QLocale::Argentina);
     auto tiempo = [](int64_t ms) {
         int64_t dec = ms / 100, s = dec / 10;
         return QString::number(s / 60) + ":" + QString::number(s % 60).rightJustified(2, '0') + "," + QString::number(dec % 10);
     };
-    info_ = {{"nombre", QString::fromStdString(c.nombre)}, {"practica", c.practica},
+    info_ = {{"nombre", QString::fromStdString(c.nombre)}, {"practica", c.practica}, {"recorrido", recorrido_},
              {"tiempoIdealMs", static_cast<qlonglong>(c.tiempoIdealMs)}, {"distanciaM", static_cast<qlonglong>(c.distanciaM)},
              {"ideal", tiempo(c.tiempoIdealMs)},
              {"distancia", ar.toString(static_cast<qlonglong>(c.distanciaM))}, {"patron", QString::fromStdString(c.patron)}};
@@ -115,7 +128,7 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
     if (!motor_ || !motor_->enCurso()) {
         // LARGADA: motor nuevo para esta largada
         if (practicaSinGuardar_) {
-            carreraId_ = datos_->crearPractica();
+            carreraId_ = recorrido_ ? datos_->crearRecorrido() : datos_->crearPractica();
             practicaSinGuardar_ = false;
             if (const Carrera* c = datos_->buscar(carreraId_)) info_["nombre"] = QString::fromStdString(c->nombre);
             largada_ = 1;
@@ -130,6 +143,10 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         d.calibrar = cfg["calibrar"].aBool(true);
         motor_ = std::make_unique<Motor>(d, [this](Evento e, const DatosEvento& x) { alEvento(e, x); });
         vueltasGuardadas_ = 0;
+        marcas_ = Json::lista();
+        paradoMs_ = 0;
+        ultMuestraT_ = 0;
+        ultTrazaT_ = ultMarcaT_ = -1e12;
         ultima_.clear();
         emit ultimaChanged();
         if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
@@ -149,6 +166,23 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         asociarVideo();
         refrescar();
         return QStringLiteral("largada");
+    }
+    if (recorrido_) {   // recorrido libre: la marca no corta nada, queda anotada con dónde y a cuánto iba
+        if (t - ultMarcaT_ < 1000) { emit marcado(QStringLiteral("ignorada")); return QStringLiteral("ignorada"); }
+        ultMarcaT_ = t;
+        const Estado e = motor_->estado(t);
+        Json m = Json::objeto();
+        m["n"] = static_cast<int>(marcas_.elementos().size()) + 1;
+        m["ms"] = static_cast<int64_t>(std::llround(e.transMs));
+        m["m"] = redondearJs(std::max(0.0, -e.restanteM));
+        m["kmh"] = e.vActKmh ? fijarDecimalesJs(*e.vActKmh, 1) : 0.0;
+        m["fuente"] = fuente.toStdString();
+        marcas_.agregar(std::move(m));
+        if (!carreraId_.isEmpty()) datos_->ponerExtra(carreraId_, "marcas", marcas_);
+        emit marcado(QStringLiteral("marca"));
+        if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
+        refrescar();
+        return QStringLiteral("marca");
     }
     const ResultadoMarca r = motor_->marcar(t, fuente.toStdString());
     if (r == ResultadoMarca::Ignorada) {
@@ -187,6 +221,7 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
             velMaxVuelta_ = 0;
             traza_.empezar(d.inicio);
             programador_.reiniciarVuelta();
+            if (recorrido_) break;   // sin voz
             // sin «Última vuelta»: no hay cantidad fija (en la carrera pueden agregar vueltas)
             if (datos_->config()["avisoInicio"].aBool(true))
                 if (auto f = anuncioVuelta(d.n, d.medida, 0)) emit frase(QString::fromStdString(*f));
@@ -196,6 +231,7 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
         case Evento::Interrumpida: {
             const VueltaMotor& v = *d.vuelta;
             Vuelta g = Vuelta::desdeMotor(v, largada_, &traza_);
+            if (recorrido_) { g.interrumpida = false; g.medida = false; }   // terminar es lo normal en un recorrido
             if (!carreraId_.isEmpty()) datos_->agregarVuelta(carreraId_, g);
             if (e == Evento::Cerrada) {
                 ++vueltasGuardadas_;
@@ -226,6 +262,12 @@ void Crono::alMuestra(const Muestra& m) {
     const bool valida = motor_->muestra(m);
     if (motor_->enCurso()) {
         if (valida) velMaxVuelta_ = std::max(velMaxVuelta_, m.velMs * 3.6);
+        if (recorrido_) {
+            if (ultMuestraT_ > 0 && m.velMs * 3.6 < 3) paradoMs_ += std::min(2000.0, m.t - ultMuestraT_);
+            ultMuestraT_ = m.t;
+            if (m.t - ultTrazaT_ < 1000) return;   // 1 por segundo: un recorrido largo entra entero
+            ultTrazaT_ = m.t;
+        }
         const Estado e = motor_->estado(m.t);   // como grabarTraza() de la app
         traza_.agregar(m, datosLargada_->distanciaM, e.restanteM);
     }
@@ -247,12 +289,17 @@ void Crono::refrescar() {
                {"vActKmh", opt(e.vActKmh)}, {"vBaseKmh", opt(e.vBaseKmh)}, {"vNecKmh", opt(e.vNecKmh)},
                {"congelada", e.congelada}, {"restanteM", e.restanteM}, {"deltaS", opt(e.deltaS)},
                {"velMaxVuelta", velMaxVuelta_},
+               {"recorrido", recorrido_},
+               {"distM", recorrido_ ? std::max(0.0, -e.restanteM) : 0.0},
+               {"promKmh", recorrido_ && e.transMs > 1000 ? std::max(0.0, -e.restanteM) / (e.transMs / 1000) * 3.6 : 0.0},
+               {"paradoMs", paradoMs_},
+               {"marcas", static_cast<int>(marcas_.elementos().size())},
                {"tiempoIdealMs", datosLargada_->tiempoIdealMs}, {"distanciaM", datosLargada_->distanciaM}};
     emit estadoChanged();
 }
 
 void Crono::voz() {
-    if (!enCurso()) return;
+    if (!enCurso() || recorrido_) return;   // el recorrido libre va en silencio
     const Json& cfg = datos_->config();
     AjustesVoz a;
     a.cuentaN = static_cast<int>(cfg["cuentaN"].aNumero(20));

@@ -88,6 +88,12 @@ struct Carrera {
     static Carrera desdeJson(const Json& j);
 };
 
+// Recorrido libre (solo Raspberry, 07/11/2026): práctica sin vueltas, sin tiempo ideal ni distancia.
+// Se guarda como una sola vuelta abierta (libre) con extra["recorrido"] = true y las marcas en extra["marcas"]
+// ([{n, ms, m, kmh}]: ms desde la largada, metros y velocidad en ese momento).
+constexpr int64_t kRecorridoIdealMs = 359999000;   // 99:59:59, para que el motor nunca «llegue»
+inline bool esRecorrido(const Carrera& c) { return c.extra.tiene("recorrido") && c.extra["recorrido"].aBool(false); }
+
 // 'c' + ms en base 36 + 4 caracteres al azar (`nuevaId`)
 std::string nuevaId(int64_t ahoraMs, uint32_t azar);
 

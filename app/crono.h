@@ -36,7 +36,7 @@ public:
     QVariantMap ultima() const { return ultima_; }
     QVariantMap gps() const { return gpsInfo_; }
 
-    // Elegir la carrera (id) o una práctica nueva (id vacío) antes de largar
+    // Elegir la carrera (id), una práctica nueva (id vacío) o un recorrido libre («recorrido») antes de largar
     Q_INVOKABLE void preparar(const QString& id);
     // Marca: la hora se toma lo primero de todo. `edadMs`: cuánto hace que se apretó (pulsador)
     Q_INVOKABLE QString marcar(const QString& fuente = QStringLiteral("pantalla"), double edadMs = 0);
@@ -74,6 +74,13 @@ private:
     FuenteGps* fuenteGps_;
     QString carreraId_;
     bool practicaSinGuardar_ = false;
+    // Recorrido libre: sin vueltas; MARCAR deja marcas; GPS a 1 lectura por segundo en la traza (entran 5 h)
+    bool recorrido_ = false;
+    beto::Json marcas_ = beto::Json::lista();
+    double paradoMs_ = 0;          // tiempo con menos de 3 km/h
+    double ultMuestraT_ = 0;
+    double ultTrazaT_ = -1e12;
+    double ultMarcaT_ = -1e12;
     std::optional<beto::DatosLargada> datosLargada_;
     std::unique_ptr<beto::Motor> motor_;
     int largada_ = 1;

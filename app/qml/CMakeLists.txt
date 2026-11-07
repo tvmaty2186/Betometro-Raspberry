@@ -103,6 +103,7 @@ qt_add_qml_module(betometro_qml
     widgets/Etiq.qml
     widgets/Numero.qml
     widgets/Tablero.qml
+    widgets/TableroRecorrido.qml
     widgets/WCuenta.qml
     widgets/WDelta.qml
     widgets/WMarcar.qml
