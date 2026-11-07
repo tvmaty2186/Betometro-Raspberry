@@ -33,6 +33,7 @@ namespace {
 GMainLoop* bucle = nullptr;
 GstElement* tubo = nullptr;
 bool primerVisto = false;
+GstClockTime ptsPrimero = GST_CLOCK_TIME_NONE;   // del primer cuadro que se graba (para tirar el sonido de antes)
 // Cuadros de la webcam (MJPEG): cuántos llegaron y cuántos llegaron cortados (se saltean, no se graban rotos)
 long cuadrosTotal = 0, cuadrosMalos = 0, avisosJpeg = 0;
 std::string formatoGrabar;
@@ -134,10 +135,21 @@ GstPadProbeReturn alCuadro(GstPad*, GstPadProbeInfo* info, gpointer) {
         }
     }
     primerVisto = true;
+    if (b && GST_BUFFER_PTS_IS_VALID(b)) ptsPrimero = GST_BUFFER_PTS(b);
     char t[96];
     std::snprintf(t, sizeof t, "{\"primerCuadro\":%.1f}", ms);
     decir(t);
     return GST_PAD_PROBE_REMOVE;
+}
+
+// Sonido: lo que llega antes del primer cuadro se tira. El micrófono arranca enseguida y la webcam tarda 0,3 a 1 s:
+// el archivo empezaba con el sonido y el primer cuadro quedaba corrido (todo el video adelantado respecto de los
+// datos). Así el archivo (con offset-to-zero) empieza en el primer cuadro, en .mkv y en .mp4 (06-1.1).
+GstPadProbeReturn alSonido(GstPad*, GstPadProbeInfo* info, gpointer) {
+    GstBuffer* b = GST_PAD_PROBE_INFO_BUFFER(info);
+    if (!primerVisto || ptsPrimero == GST_CLOCK_TIME_NONE) return GST_PAD_PROBE_DROP;
+    if (b && GST_BUFFER_PTS_IS_VALID(b) && GST_BUFFER_PTS(b) < ptsPrimero) return GST_PAD_PROBE_DROP;
+    return GST_PAD_PROBE_REMOVE;   // ya empezó el video: el resto pasa sin mirar
 }
 
 // Webcam MJPEG: cada foto tiene que empezar con FFD8 y terminar con FFD9 (a veces con ceros después).
@@ -279,10 +291,10 @@ int main(int argc, char** argv) {
         else
             fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
         desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=3000000000 ! "
-               "matroskamux name=m streamable=true ! filesink location=\"" + salida + "\" sync=false";
+               "matroskamux name=m streamable=true offset-to-zero=true ! filesink location=\"" + salida + "\" sync=false";
         if (audio != "no")
             desc += " " + fuenteAudio(audio, prueba) + " ! queue ! audioconvert ! audioresample ! audio/x-raw,rate=48000,channels=1 ! "
-                    "opusenc bitrate=48000 ! queue ! m.";
+                    "identity name=sonido ! opusenc bitrate=48000 ! queue ! m.";
     } else if (modo == "vista") {
         if (salida.empty()) return 2;
         salidaVista = salida;
@@ -330,10 +342,18 @@ int main(int argc, char** argv) {
         // La hora se toma a la salida de la cámara (antes de cualquier codificador, que corre los tiempos)
         if (GstElement* c = gst_bin_get_by_name(GST_BIN(tubo), "fuente")) {
             GstPad* p = gst_element_get_static_pad(c, "src");
-            gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alCuadro, nullptr, nullptr);
+            // Primero se tiran los JPEG cortados y después se toma la hora: así el primer cuadro anotado es uno que
+            // se graba de verdad (06-1.1)
             if (formatoGrabar == "mjpeg" && !prueba) gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alFotoCamara, nullptr, nullptr);
+            gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alCuadro, nullptr, nullptr);
             gst_object_unref(p);
             gst_object_unref(c);
+        }
+        if (GstElement* s = gst_bin_get_by_name(GST_BIN(tubo), "sonido")) {
+            GstPad* p = gst_element_get_static_pad(s, "src");
+            gst_pad_add_probe(p, GST_PAD_PROBE_TYPE_BUFFER, alSonido, nullptr, nullptr);
+            gst_object_unref(p);
+            gst_object_unref(s);
         }
         g_timeout_add_seconds(30, alContar, nullptr);
     } else if (modo == "vista") {
