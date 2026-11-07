@@ -95,6 +95,10 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## Auditorías (plan aprobado 07/11/2026)
+Diez revisiones del proyecto por dentro, de a una, en sesiones nuevas. Lista, modelo de cada una y el prompt
+para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los informes van a `docs/auditorias/`.
+
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
   en la Pi): busca redes de nuevo antes de decidir, botón «Armar la red propia ahora», el motivo si falla
