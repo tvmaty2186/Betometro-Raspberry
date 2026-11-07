@@ -86,6 +86,8 @@ void Crono::grabarAMano() {
 
 void Crono::preparar(const QString& id) {
     if (enCurso()) return;
+    // Hacer lugar para el video al abrir la carrera: borrar un video de 2 GB en la largada trababa voz y pantalla (06-2.5)
+    if (camara_ && datos_->config()["camara"].aBool(false) && !camara_->grabando()) camara_->hacerLugar();
     motor_.reset();
     ultima_.clear();
     emit ultimaChanged();

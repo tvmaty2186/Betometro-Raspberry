@@ -31,6 +31,7 @@ class Camara : public QObject {
     Q_PROPERTY(bool convirtiendo READ convirtiendo NOTIFY convirtiendoChanged)   // pasando un video a MP4   // los de Datos::videosGuardados, + «grabando»
 
 public:
+    void hacerLugar();                       // borra videos viejos si falta lugar (al abrir la carrera, no al largar)
     Camara(Datos* datos, const QString& carpetaDatos, QObject* padre = nullptr);
     ~Camara() override;
 
@@ -84,7 +85,6 @@ signals:
 
 private:
     void leer(QProcess& p, const std::function<void(const QVariantMap&)>& f);
-    void hacerLugar();
     void revisarMp4();                       // pasa a MP4 el .mkv más viejo, si se puede ahora
     void actualizarLugar();
     QStringList base() const;                // opciones comunes (prueba en la PC)

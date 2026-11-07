@@ -82,6 +82,7 @@ gboolean alBus(GstBus*, GstMessage* m, gpointer) {
             g_main_loop_quit(bucle);
             break;
         case GST_MESSAGE_ERROR: {
+            if (cuadrosTotal) alContar(nullptr);   // también al cortarse: cuántos cuadros vinieron rotos (06-3.3)
             GError* e = nullptr;
             gst_message_parse_error(m, &e, nullptr);
             decir(std::string("{\"error\":\"") + escapar(e ? e->message : "?") + "\"}");
@@ -244,7 +245,7 @@ std::string compresorMjpeg(const std::string& escala, int alto) {
     }
     const int kbps = alto <= 600 ? 2000 : 4000;   // 480p y 800×600: 2 Mbit/s
     if (hay("v4l2h264enc"))
-        d += " ! v4l2h264enc extra-controls=controls,video_bitrate=" + std::to_string(kbps * 1000) + ",repeat_sequence_header=1 ! video/x-h264,level=(string)4";
+        d += " ! v4l2h264enc extra-controls=controls,video_bitrate=" + std::to_string(kbps * 1000) + ",repeat_sequence_header=1,h264_i_frame_period=30 ! video/x-h264,level=(string)4";   // un cuadro clave por segundo: saltar a una vuelta es rápido (06-2.4)
     else if (hay("x264enc"))
         d += " ! x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + std::to_string(kbps) + " key-int-max=30";
     else
@@ -286,15 +287,15 @@ int main(int argc, char** argv) {
             // 1080p: la Pi 3 no llega a descomprimir y comprimir 30 por segundo y el video salía con cuadros
             // dañados; se graban 15 (se tiran antes de descomprimir). 720p y menos: 30.
             fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! image/jpeg," + tam + ",framerate=30/1"
-                     + (alto > 720 && escala.empty() ? " ! videorate drop-only=true ! image/jpeg,framerate=15/1" : "")
                      + " ! " + compresorMjpeg(escala, alto);
         else
             fuente = "v4l2src name=fuente device=" + video + " do-timestamp=true ! video/x-h264," + tam + ",framerate=30/1";
-        desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=3000000000 ! "
+        // Colas de 10 s: la SD se traba 1 a 3 s al escribir y con 3 s se perdían cuadros (06-2.2). Nada de leaky.
+        desc = fuente + " ! h264parse name=cuadros config-interval=-1 ! queue max-size-time=10000000000 max-size-buffers=0 max-size-bytes=0 ! "
                "matroskamux name=m streamable=true offset-to-zero=true ! filesink location=\"" + salida + "\" sync=false";
         if (audio != "no")
             desc += " " + fuenteAudio(audio, prueba) + " ! queue ! audioconvert ! audioresample ! audio/x-raw,rate=48000,channels=1 ! "
-                    "identity name=sonido ! opusenc bitrate=48000 ! queue ! m.";
+                    "identity name=sonido ! opusenc bitrate=48000 ! queue max-size-time=10000000000 max-size-buffers=0 max-size-bytes=0 ! m.";
     } else if (modo == "vista") {
         if (salida.empty()) return 2;
         salidaVista = salida;
@@ -313,7 +314,7 @@ int main(int argc, char** argv) {
         if (entrada.empty() || salida.empty()) return 2;
         const bool sonido = std::strcmp(arg(argc, argv, "--sonido", "si"), "no") != 0;
         desc = "filesrc location=\"" + entrada + "\" ! matroskademux name=d "
-               "mp4mux name=m faststart=true ! filesink location=\"" + salida + "\" "
+               "mp4mux name=m faststart=false ! filesink location=\"" + salida + "\" "
                "d.video_0 ! queue ! h264parse ! m.";
         if (sonido) {
             const auto hay = [](const char* e) { GstElementFactory* f = gst_element_factory_find(e); if (f) gst_object_unref(f); return f != nullptr; };

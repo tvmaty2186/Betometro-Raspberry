@@ -89,7 +89,8 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     : QObject(padre), datos_(datos), carpeta_(carpetaDatos + QStringLiteral("/videos")),
       prueba_(qEnvironmentVariableIsSet("BETO_CAMARA_PRUEBA")) {
     // La cámara después del GPS, el cronómetro y el pulsador
-    for (QProcess* p : {&grab_, &vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
+    for (QProcess* p : {&vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
+    grab_.setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(10); });
     QDir().mkpath(carpeta_);
     detenerTimer_.setSingleShot(true);
     connect(&detenerTimer_, &QTimer::timeout, this, [this] { if (grabando()) { grab_.terminate(); matarTimer_.start(); } });
@@ -312,9 +313,10 @@ bool Camara::empezar(const QString& nombreBase) {
                   QStringLiteral("--ancho"), QString::number(tam.width()), QStringLiteral("--alto"), QString::number(tam.height()),
                   QStringLiteral("--audio"), dispositivoAudio(), QStringLiteral("--salida"), archivo_};
     if (!escala.isEmpty()) a << QStringLiteral("--escala") << escala;
-    // Prioridad baja de procesador y de disco: la carrera primero
-    grab_.setProgram(QStringLiteral("nice"));
-    grab_.setArguments(QStringList{QStringLiteral("-n"), QStringLiteral("15"), ayudante()} + a + base());
+    // Prioridad: la carrera primero. Un solo nice (el 5 del ayudante, sumado al «nice -n 15» de antes, daba 19 y en
+    // carrera se quedaba sin procesador y perdía cuadros) (06-3.1)
+    grab_.setProgram(ayudante());
+    grab_.setArguments(a + base());
     grab_.start();
     emit grabandoChanged();
     return true;
@@ -343,6 +345,7 @@ void Camara::hacerLugar() {
     QFileInfoList l = QDir(carpeta_).entryInfoList({QStringLiteral("*.mkv"), QStringLiteral("*.mp4")}, QDir::Files, QDir::Time | QDir::Reversed);
     for (const QFileInfo& f : l) {
         if (QStorageInfo(carpeta_).bytesAvailable() >= 2 * kMinimoLibre) break;
+        if (convirtiendo() && f.absoluteFilePath() == mp4Entrada_) continue;   // el que se está pasando a MP4, no (06-3.2)
         // También se saca de su carrera: si no, el informe muestra «Video» de un archivo que ya no está
         if (QFile::remove(f.absoluteFilePath())) datos_->olvidarVideo(f.fileName());
     }
