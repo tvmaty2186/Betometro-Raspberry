@@ -99,7 +99,8 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 Diez revisiones del proyecto por dentro, de a una, en sesiones nuevas. Lista, modelo de cada una y el prompt
 para la sesión: [docs/auditorias/README.md](docs/auditorias/README.md). Los informes van a `docs/auditorias/`.
 **Hechas las 10 (07/11/2026).** Resumen y preguntas para Matías: [docs/auditorias/00-resumen.md](docs/auditorias/00-resumen.md).
-Propuesta: 1.0.27 «sin sorpresas» con los arreglos chicos (sin cambiar pantallas); falta su OK.
+Respuestas de Matías en el resumen. **OK de Matías (07/11): 1.0.27 con todos los arreglos chicos de A y B más
+todas las mejoras de rendimiento** (guardado, barrita, listas del video, tableros, capas, fondo, 480p 800×600).
 
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
