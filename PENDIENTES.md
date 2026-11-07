@@ -91,6 +91,9 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 - **Borrar carrera = borrar su video** (07/11/2026). Hoy `Datos::borrarCarrera` saca la carrera pero el video
   (`extra.videos`, archivo en `<datos>/videos/`, y su .mp4) queda en la tarjeta ocupando lugar. Al borrar: borrar
   también esos archivos (solo si ninguna otra carrera usa el mismo archivo). Avisarlo en el «Tocá otra vez».
+- **Engranaje de verdad** (07/11/2026): el ícono de Ajustes parece un sol (círculo con rayitas). Dibujar un
+  engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
+  **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
 ## Siguiente
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
