@@ -100,6 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.31 «cámara firme» (publicada 07/11/2026)
+Si la cámara falla al arrancar, prueba sola de nuevo a los 2 s (también en carrera). La Prueba completa espera a
+que la cámara se suelte, marca la hora de cada paso y no dice «falló» si hay otro video pasando a MP4. El pase a
+MP4 no se corta al largar. **Falta probar en la Pi:** correr la Prueba completa varias veces seguidas.
+
 ## 1.0.30 (publicada 07/11/2026)
 Gráficos a pantalla completa (Pi y celu), Prueba completa (Ajustes), arreglo de pantallas en negro, sin MARCAR
 con la pantalla diseñada, video «procesando», Drive por HTTP/1.1, arranque sin esperar al sonido, hora en el
