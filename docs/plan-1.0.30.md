@@ -60,3 +60,11 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
 - [x] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
       (Matías: sí) (A-1.4).
 - [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
+
+## Medido en la Pi con la 1.0.29 (07/11/2026)
+
+- [x] Pantallas tablet en negro: QtQuick.Shapes no está en la Pi → Canvas; probar.sh abre todas las pantallas.
+- [x] Drive «Sin internet» con «Unknown protocol specified»: pedidos a Google por HTTP/1.1.
+- [x] Arranque 33 s, PulseAudio 13 s: probaba el micrófono de la webcam y esperaba hasta 10 s para elegir los
+      auriculares. Ahora ignora todo el sonido USB y elige los auriculares por detrás (pulseaudio-auriculares.service).
+- [ ] Calor: 62 °C quieta y frenada (`throttled=0x80008`). Revisar disipador y aire de la caja (Matías).

@@ -98,7 +98,7 @@ sync
 # Si viniera suelto al lado del instalador, también se usa.
 [ -f kms.json ] && install -D -m 0644 kms.json /usr/share/betometro/kms.json
 [ -f /usr/share/betometro/kms.json ] || echo "OJO: falta kms.json: el modo tele no anda (lo demás sí)"
-install -m 0644 betometro.service betometro-volver.service pulseaudio-sistema.service despertar-touch.service /etc/systemd/system/
+install -m 0644 betometro.service betometro-volver.service pulseaudio-sistema.service pulseaudio-auriculares.service despertar-touch.service /etc/systemd/system/
 # Sonido: un solo PulseAudio para todo el equipo (el de las sesiones de usuario no)
 usermod -aG pulse-access root
 systemctl --global disable pulseaudio.service pulseaudio.socket 2>/dev/null || true
@@ -220,7 +220,8 @@ for s in NetworkManager-wait-online rpi-eeprom-update udisks2 sshswitch bluetoot
 done
 # PulseAudio tardaba 10 s en arrancar probando el sonido por HDMI (y fallaba igual): que no lo mire
 mkdir -p /etc/udev/rules.d
-printf 'SUBSYSTEM=="sound", ATTRS{id}=="vc4hdmi*", ENV{PULSE_IGNORE}="1"\n' > /etc/udev/rules.d/80-betometro-sin-hdmi.rules
+# Ni la tele ni el micrófono de la webcam (Betómetro lo graba directo por ALSA; PulseAudio lo probaba y fallaba)
+printf 'SUBSYSTEM=="sound", ATTRS{id}=="vc4hdmi*", ENV{PULSE_IGNORE}="1"\nSUBSYSTEM=="sound", ENV{ID_BUS}=="usb", ENV{PULSE_IGNORE}="1"\n' > /etc/udev/rules.d/80-betometro-sin-hdmi.rules
 # El núcleo de la Pi 5 no se usa en la Pi 3: ocupa lugar y alarga cada actualización del núcleo
 if ! uname -r | grep -q 2712; then
   k5=$(dpkg -l 'linux-image-*' 2>/dev/null | awk '/^ii/ && $2 ~ /rpi-2712/ {print $2}' || true)   # sin ninguno, dpkg sale con 1 (pipefail)

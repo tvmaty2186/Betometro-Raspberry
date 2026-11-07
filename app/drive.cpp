@@ -163,6 +163,9 @@ QString Drive::guardarCliente(const QByteArray& json) {
 
 QNetworkRequest Drive::req(const QString& u, bool conToken) const {
     QNetworkRequest r{QUrl(u)};
+    // HTTP/1.1: con HTTP/2, en la Pi Qt 6.8 cortaba los pedidos a Google con «Unknown protocol specified» y Drive
+    // decía «Sin internet» (medido en la Pi con la 1.0.29, 07/11/2026)
+    r.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
     if (conToken && !access_.isEmpty()) r.setRawHeader("Authorization", "Bearer " + access_.toUtf8());
     return r;
 }
