@@ -100,6 +100,14 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.47 (publicada 08/11/2026)
+- **Pulsador virtual (GPS)** en el informe, solo de referencia (`app/nucleo/marca_gps.cpp`): tiempo y error al lado
+  del manual, «dudosa» si el GPS andaba mal, y al pie cuánto se marcó tarde en promedio (incluye la demora del GPS).
+- **Comp.** como cuarto modo del informe: la vuelta elegida contra la modelo ★ (la más cerca del ideal); doble toque
+  abre el tiempo ganado/perdido y 4 sectores.
+- La pantalla de Cámara ya no se traba (~8 s): la lista de GStreamer se guarda con los datos (GST_REGISTRY_1_0).
+- El vigilante lee la tensión de Salud. Capturas: los nombres con espacio ya no se cortan.
+
 ## 1.0.46 (publicada 08/11/2026)
 - Tema propio: al guardar colores desde el celu la pantalla se vuelve a armar (los acentos quedaban viejos).
 - Personalizar → Colores: sin botones; los círculos de Fondo y Acento de abajo eligen qué se pinta (Matías).
