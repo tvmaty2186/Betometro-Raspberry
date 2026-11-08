@@ -26,7 +26,7 @@ Item {
     }
 
     // Video a medias: arriba a la izquierda; abajo, «En este momento»
-    Tarjeta {
+    Tarjeta { datos: true
         id: cajaVideo
         visible: vid.vv
         oscura: true
@@ -35,7 +35,7 @@ Item {
     }
     Sub { visible: vid.vv && vid.videoCortado && !vid.completo; x: cajaVideo.x + 4; y: cajaVideo.y - (vid.h ? 22 : 17); width: cajaVideo.width - 8; elide: Text.ElideRight
           color: Tema.warn; tam: 12; text: "Video cortado: se cortó la cámara y falta un pedazo" }
-    Tarjeta {
+    Tarjeta { datos: true
         visible: vid.vv
         oscura: true
         x: vid.h ? 24 : 370; y: vid.h ? 530 : 600
