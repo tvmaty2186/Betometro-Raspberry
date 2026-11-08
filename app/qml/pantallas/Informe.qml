@@ -67,6 +67,7 @@ Item {
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
     property string modo: "vel"      // vel, acel, ade, comp
+    property string ladoVideo: "mapa"  // con el video: al lado va el mapa o el gráfico (Matías, 08/11/2026)
     // La vuelta modelo (la medida más cerca del ideal), para el modo «Comp.» (08/11/2026)
     readonly property int modelo: tabla.modelo
     readonly property var vm: modelo >= 0 ? vueltas[modelo] : null
@@ -116,6 +117,8 @@ Item {
         h: raiz.h; vv: raiz.vv; inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas
         dist: raiz.dist; sug: raiz.sug; lap: raiz.lap; modo: raiz.modo; vm: raiz.vm; nombreModelo: raiz.vm ? "V" + raiz.vm.n : ""; esModelo: raiz.lap === raiz.modelo
         auto: raiz.reproductor.e
+        visible: !(raiz.vv && raiz.ladoVideo === "grafico")
+        onElegirLado: (l) => raiz.ladoVideo = l
         onElegirModo: (m) => raiz.modo = m
         onIrVideo: (i, t) => raiz.irVideo(i, t)
         onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } raiz.completoQue = "mapa"; cargaMapa.item.abrir(); }
@@ -126,6 +129,10 @@ Item {
         id: grafico
         h: raiz.h; vv: raiz.vv; rec: raiz.rec; inf: raiz.inf; vu: raiz.vu; lap: raiz.lap; marcas: raiz.marcas; sug: raiz.sug
         modo: raiz.modo; vm: raiz.vm; nombreModelo: raiz.vm ? "V" + raiz.vm.n : ""; esModelo: raiz.lap === raiz.modelo
+        dist: raiz.dist; lado: raiz.ladoVideo; auto: raiz.reproductor.e
+        onElegirModo: (m) => raiz.modo = m
+        onElegirLado: (l) => raiz.ladoVideo = l
+        onIrVideo: (i, t) => raiz.irVideo(i, t)
         onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } raiz.completoQue = "grafico"; cargaGrafico.item.modo = "vel"; cargaGrafico.item.abrir(raiz.lap); }
     }
     // Doble toque sobre el gráfico o el mapa: a pantalla completa, acostado (de pie se ve girado) (1.0.30)
@@ -283,6 +290,9 @@ Item {
         const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
         if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa" || Contexto.prueba === "comparar") tPruebaCompleto.start();
         else if (Contexto.prueba === "comp") { lap = 3; modo = "comp"; }   // el modo «Comp.» con la V4 contra la modelo
+        else if (Contexto.prueba === "video-grafico" || Contexto.prueba === "video-acel") {   // el gráfico al lado del video
+            verVideo = true; ladoVideo = "grafico"; if (Contexto.prueba === "video-acel") modo = "acel";
+        }
         else if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") tabla.fila = 3;
         else if (Contexto.prueba === "menu") tabla.menuAbierto = true;

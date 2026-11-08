@@ -26,6 +26,7 @@ Tarjeta { datos: true;
     signal elegirModo(string m)
     signal irVideo(int lap, real t)
     signal abrir()                                  // doble toque: el mapa a pantalla completa (1.0.30)
+    signal elegirLado(string l)                     // con el video: pasar al gráfico
     function repintar() { mapa.requestPaint(); }
     onLapChanged: repintar()
     onModoChanged: repintar()
@@ -50,29 +51,25 @@ Tarjeta { datos: true;
     width: !caja.vv ? (caja.h ? 600 : parent.width - 40) : (caja.h ? 608 : 330)
     height: !caja.vv ? (caja.h ? 590 : 470) : (caja.h ? 230 : 280)
     // Hasta los botones Vel./Acel./Adel. y con «…» si no entra (Deportivo y Cabina, 08-5)
-    Sub { x: 18; y: 16; width: botonesModo.x - 18 - 10; elide: Text.ElideRight
-          visible: !caja.vv || caja.h; text: caja.vv ? "Dónde está · tocá y el video va ahí" : caja.modo === "comp" ? "Rojo perdió · verde ganó contra " + caja.nombreModelo : caja.modo === "vel" ? (caja.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : caja.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
-    Row {
+    Sub { x: caja.vv ? lado.x + lado.width + 12 : 18; y: 16; width: botonesModo.x - x - 10; elide: Text.ElideRight
+          visible: !caja.vv || caja.h; text: caja.vv ? "Tocá y el video va ahí" : caja.modo === "comp" ? "Rojo perdió · verde ganó contra " + caja.nombreModelo : caja.modo === "vel" ? (caja.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : caja.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
+    ModosInforme {
         id: botonesModo
         anchors { right: parent.right; rightMargin: 14; top: parent.top; topMargin: 10 }
-        spacing: 6
-        Repeater {
-            model: [{ t: "Vel.", m: "vel" }, { t: "Acel.", m: "acel" }].concat(caja.dist > 0 ? [{ t: "Adel.", m: "ade" }] : [])
-                   .concat(caja.vm && !caja.rec ? [{ t: "Comp.", m: "comp" }] : [])
-            Rectangle {
-                required property var modelData
-                width: tm.implicitWidth + 18; height: 26; radius: 13
-                color: caja.modo === modelData.m ? Tema.acento : Qt.rgba(0, 0, 0, 0.4)
-                border { width: 1; color: Tema.bordeCromo }
-                Text { id: tm; anchors.centerIn: parent; text: modelData.t; color: caja.modo === modelData.m ? Tema.acentoTinta : Tema.tinta
-                       font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 16 } }
-                MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: caja.elegirModo(modelData.m) }
-            }
-        }
+        modo: caja.modo; dist: caja.dist; conComp: !!caja.vm && !caja.rec
+        onElegirModo: (m) => caja.elegirModo(m)
+    }
+    // Con el video: Mapa | Gráfico (de pie va en un segundo renglón, no entra al lado de los modos)
+    LadoVideo {
+        id: lado
+        visible: caja.vv
+        x: 14; y: caja.h ? 9 : 42
+        lado: "mapa"
+        onElegir: (l) => caja.elegirLado(l)
     }
     Canvas {
         id: mapa
-        anchors { fill: parent; topMargin: 44; margins: 14 }
+        anchors { fill: parent; topMargin: caja.vv && !caja.h ? 76 : 44; margins: 14 }
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
         readonly property real k: Math.min(width / 364, height / 330)
