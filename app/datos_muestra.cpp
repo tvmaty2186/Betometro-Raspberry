@@ -36,16 +36,19 @@ void Datos::cargarMuestra() {
             // recorrido de ejemplo: un circuito con curvas, a 1 lectura por segundo
             const double L = static_cast<double>(D), seg = (T + e) / 1000.0;
             double d = 0, vmax = 0;
-            for (int t = 0; t <= static_cast<int>(seg); ++t) {
+            // BETO_MUESTRA_HZ=5: lecturas como el GPS de verdad (para medir pantallas con carreras pesadas)
+            const int hz = std::max(1, qEnvironmentVariableIntValue("BETO_MUESTRA_HZ"));
+            for (int i = 0; i <= static_cast<int>(seg * hz); ++i) {
+                const double t = static_cast<double>(i) / hz;
                 const double fr = d / L, a = 2 * M_PI * fr;
                 const double kmh = L / seg * 3.6 * (1 + 0.28 * std::sin(a * 3 + n) - 0.1 * std::cos(a * 5));
                 const double R = L / (2 * M_PI), x = R * 1.5 * std::cos(a) + R * 0.25 * std::cos(3 * a), y = R * 0.8 * std::sin(a) + R * 0.15 * std::sin(2 * a);
-                FilaTraza p{static_cast<double>(t), redondearJs(d * 10) / 10, fijarDecimalesJs(kmh, 1),
+                FilaTraza p{t, redondearJs(d * 10) / 10, fijarDecimalesJs(kmh, 1),
                             fijarDecimalesJs(-32.97 + y / 110540, 6), fijarDecimalesJs(-60.65 + x / (111320 * std::cos(32.97 * M_PI / 180)), 6),
-                            static_cast<double>(2 + (t * 7 + n) % 4)};
+                            static_cast<double>(2 + (i * 7 + n) % 4)};
                 v.traza.push_back(p);
                 vmax = std::max(vmax, kmh);
-                d += kmh / 3.6;
+                d += kmh / 3.6 / hz;
             }
             v.distM = redondearJs(d);
             v.velPromKmh = fijarDecimalesJs(d / seg * 3.6, 1);

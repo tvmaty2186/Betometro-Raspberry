@@ -70,7 +70,7 @@ Item {
     // La vuelta modelo (la medida más cerca del ideal), para el modo «Comp.» (08/11/2026)
     readonly property int modelo: tabla.modelo
     readonly property var vm: modelo >= 0 ? vueltas[modelo] : null
-    function abrirComparar() { comparar.abrir(raiz.lap); raiz.completoQue = "comparar"; }
+    function abrirComparar() { raiz.completoQue = "comparar"; cargaComparar.item.abrir(raiz.lap); }
     function restablecer() {   // ya confirmado en la tabla
         if (Datos.restablecer(id_)) { rev++; tabla.fila = -1; lap = conTraza.length ? conTraza[0] : -1; Navegacion.avisar("Carrera restablecida"); }
     }
@@ -118,7 +118,7 @@ Item {
         auto: raiz.reproductor.e
         onElegirModo: (m) => raiz.modo = m
         onIrVideo: (i, t) => raiz.irVideo(i, t)
-        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } mapaC.abrir(); raiz.completoQue = "mapa"; }
+        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } raiz.completoQue = "mapa"; cargaMapa.item.abrir(); }
     }
 
     // Velocidad de la vuelta elegida, a lo largo de la distancia
@@ -126,7 +126,7 @@ Item {
         id: grafico
         h: raiz.h; vv: raiz.vv; rec: raiz.rec; inf: raiz.inf; vu: raiz.vu; lap: raiz.lap; marcas: raiz.marcas; sug: raiz.sug
         modo: raiz.modo; vm: raiz.vm; nombreModelo: raiz.vm ? "V" + raiz.vm.n : ""; esModelo: raiz.lap === raiz.modelo
-        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } graficoC.modo = "vel"; graficoC.abrir(raiz.lap); raiz.completoQue = "grafico"; }
+        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } raiz.completoQue = "grafico"; cargaGrafico.item.modo = "vel"; cargaGrafico.item.abrir(raiz.lap); }
     }
     // Doble toque sobre el gráfico o el mapa: a pantalla completa, acostado (de pie se ve girado) (1.0.30)
     property string completoQue: ""      // "", grafico, mapa, comparar
@@ -139,28 +139,35 @@ Item {
         height: raiz.h ? parent.height : parent.width
         rotation: raiz.h ? 0 : 90
         Fondo { anchors.fill: parent }
-        GraficoCompleto {
-            id: graficoC
-            visible: raiz.completoQue === "grafico"
+        // Se arman recién al abrirlas: armadas de entrada, el informe tardaba ~2 s en abrir en la Pi (08/11/2026)
+        Loader {
+            id: cargaGrafico
+            active: raiz.completoQue === "grafico"
             anchors.fill: parent; anchors.margins: 12
-            inf: raiz.inf; nombre: raiz.c.nombre || ""; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug
-            onCerrar: raiz.completoQue = ""
+            sourceComponent: GraficoCompleto {
+                inf: raiz.inf; nombre: raiz.c.nombre || ""; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug
+                onCerrar: raiz.completoQue = ""
+            }
         }
         // Comparar una vuelta contra la modelo (la más cerca del ideal) (08/11/2026)
-        CompararVueltas {
-            id: comparar
-            visible: raiz.completoQue === "comparar"
+        Loader {
+            id: cargaComparar
+            active: raiz.completoQue === "comparar"
             anchors.fill: parent; anchors.margins: 12
-            inf: raiz.inf; nombre: raiz.c.nombre || ""; modelo: tabla.modelo
-            onCerrar: raiz.completoQue = ""
+            sourceComponent: CompararVueltas {
+                inf: raiz.inf; nombre: raiz.c.nombre || ""; modelo: tabla.modelo
+                onCerrar: raiz.completoQue = ""
+            }
         }
-        MapaCompleto {
-            id: mapaC
-            visible: raiz.completoQue === "mapa"
+        Loader {
+            id: cargaMapa
+            active: raiz.completoQue === "mapa"
             anchors.fill: parent; anchors.margins: 12
-            inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug; modo: raiz.modo
-            onElegirModo: (m) => raiz.modo = m
-            onCerrar: raiz.completoQue = ""
+            sourceComponent: MapaCompleto {
+                inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug; modo: raiz.modo
+                onElegirModo: (m) => raiz.modo = m
+                onCerrar: raiz.completoQue = ""
+            }
         }
     }
 
@@ -251,6 +258,8 @@ Item {
                 raiz.lap = 3; raiz.modo = "comp";
                 raiz.abrirComparar();
             } else if (Contexto.prueba === "grafico") {
+                raiz.completoQue = "grafico";
+                const graficoC = cargaGrafico.item;
                 graficoC.abrir(-1);
                 const T = graficoC.tramos;
                 if (raiz.rec) graficoC.ver(0, Math.min(graficoC.total, 15000));                 // los primeros 15 km
@@ -258,6 +267,8 @@ Item {
                 graficoC.elegir(graficoC.x0 + (graficoC.x1 - graficoC.x0) * 0.94);
                 raiz.completoQue = "grafico";
             } else {
+                raiz.completoQue = "mapa";
+                const mapaC = cargaMapa.item;
                 mapaC.abrir();
                 const P = raiz.inf.pista || [];
                 if (raiz.rec) mapaC.verTramo(0, 15000);                                             // los primeros 15 km
