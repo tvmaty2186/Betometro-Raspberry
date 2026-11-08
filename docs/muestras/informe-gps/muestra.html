@@ -20,7 +20,7 @@ body{background:#111;font-family:B;color:#f7f7f2}
 .nuevo{outline:3px dashed #29b6f6;outline-offset:4px;border-radius:10px}
 .flecha{position:absolute;font:800 16px BX;color:#29b6f6;background:#06223a;border:2px solid #29b6f6;border-radius:10px;padding:4px 10px}
 table{border-collapse:collapse;width:100%}
-td{padding:4px 4px;font:800 21px BX;white-space:nowrap}
+td{padding:3px 3px;font:800 21px BX;white-space:nowrap}
 </style></head><body>
 
 <!-- ===================== A · INFORME ===================== -->
@@ -57,10 +57,11 @@ td{padding:4px 4px;font:800 21px BX;white-space:nowrap}
    <span class=tit>TODAS LAS VUELTAS</span>
    <span class=nuevo style="background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;border-radius:14px;padding:3px 16px;font:800 18px BX">Comparar</span></div>
   <table style="margin-top:6px">
-   <tr class=gris style="font:600 12px B;letter-spacing:1.5px"><td style="font:600 12px B"></td><td style="font:600 12px B"></td><td style="font:600 12px B">PULSADOR</td><td style="font:600 12px B">ERROR</td><td style="font:600 12px B" class=nuevo>&nbsp;GPS (REF.)</td><td style="font:600 12px B;text-align:right">KM/H</td></tr>
+   <tr class=gris><td></td><td></td><td colspan=2 style="font:600 11px B;letter-spacing:1.5px;text-align:center;color:#f3ecd8;border-bottom:2px solid #f3ecd855">PULSADOR MANUAL</td><td style="width:14px"></td><td colspan=2 style="background:#29b6f61f;font:600 11px B;letter-spacing:1.5px;text-align:center;color:#7fd0ff;border-bottom:2px solid #7fd0ff55">PULSADOR VIRTUAL (GPS)</td><td></td></tr>
+   <tr class=gris><td></td><td></td><td style="font:600 11px B;letter-spacing:1.5px">TIEMPO</td><td style="font:600 11px B;letter-spacing:1.5px">ERROR</td><td></td><td style="font:600 11px B;letter-spacing:1.5px;background:#29b6f61f">TIEMPO</td><td style="font:600 11px B;letter-spacing:1.5px;background:#29b6f61f">ERROR</td><td style="font:600 11px B;letter-spacing:1.5px;text-align:right">KM/H</td></tr>
    <tbody id=filas></tbody>
   </table>
-  <div class=nuevo style="margin-top:8px;padding:6px 8px;font:600 15px BI;color:#d6e6d2;border-top:1px solid #ffffff33">Pulsador contra GPS: marcaste en promedio <b class=am>0,10 s tarde</b> · 1 marca GPS dudosa</div>
+  <div class=nuevo style="margin-top:6px;padding:5px 8px;font:600 14px BI;color:#d6e6d2;border-top:1px solid #ffffff33">Error total: manual <b class=rojo>9,6 s</b> · virtual <b style="color:#7fd0ff">9,1 s</b> (sin la dudosa) · marcaste en promedio <b class=am>0,10 s tarde</b></div>
  </div>
  <div class=flecha style="left:700px;top:668px;display:none"></div>
 </div>
@@ -98,8 +99,8 @@ const vel=(d,k=0)=>50+17*Math.sin(d/2500*2*Math.PI*3+0.3+k*0.18)+4*Math.sin(d/25
  let d='';for(let i=0;i<=200;i++){const m=i/200*2500;d+=(i?'L':'M')+(x0+i/200*w).toFixed(1)+' '+y(vel(m,1)).toFixed(1);}
  p+=`<line x1=${x0} x2=${x0+w} y1=${y(50)} y2=${y(50)} stroke="#f4c531" stroke-width=2 stroke-dasharray="10 7"/><path d="${d}" fill=none stroke="#f3ecd8" stroke-width="3"/>`;g.innerHTML=p;})();
 // --- A: filas
-(()=>{const f=[['V1','3:01:5','+1,5 s','+0,12'],['V2','2:57:9','−2,1 s','+0,08'],['V3','3:00:8','+0,8 s','+0,11','modelo'],['V4','3:01:9','+1,9 s','+0,09'],['V5','2:58:3','−1,7 s','¿?','dudosa'],['V6','3:01:6','+1,6 s','+0,10']],kmh=['47,2','47,7','47,2','47,6','49,1','47,8'];
- document.getElementById('filas').innerHTML=f.map((r,i)=>`<tr style="${r[4]==='modelo'?'background:#f4c53122':''}"><td style="width:44px">${r[0]}</td><td><span class=badge>MEDIDA</span>${r[4]==='modelo'?' <span class=am style="font:800 13px BX">★ MODELO</span>':''}</td><td>${r[1]}</td><td class=rojo>${r[2]}</td><td class=nuevo style="font:700 18px BC;color:${r[4]==='dudosa'?'#9fb5a3':'#7fd0ff'}">${r[4]==='dudosa'?'dudosa':r[3]+' s'}</td><td style="text-align:right;font-size:18px">${kmh[i]}</td></tr>`).join('');})();
+(()=>{const f=[['V1','3:01:5','+1,5 s','3:01:4','+1,4 s'],['V2','2:57:9','−2,1 s','2:57:8','−2,2 s'],['V3','3:00:8','+0,8 s','3:00:7','+0,7 s','modelo'],['V4','3:01:9','+1,9 s','3:01:8','+1,8 s'],['V5','2:58:3','−1,7 s','—','dudosa','dudosa'],['V6','3:01:6','+1,6 s','3:01:5','+1,5 s']],kmh=['47,2','47,7','47,2','47,6','49,1','47,8'];
+ document.getElementById('filas').innerHTML=f.map((r,i)=>`<tr style="${r[5]==='modelo'?'background:#f4c53122':''}"><td style="width:40px">${r[0]}${r[5]==='modelo'?'<span class=am style="font-size:15px"> ★</span>':''}</td><td><span class=badge style="font-size:13px;padding:0 7px">MEDIDA</span></td><td>${r[1]}</td><td class=rojo>${r[2]}</td><td></td><td style="background:#29b6f61f;color:${r[5]==='dudosa'?'#9fb5a3':'#7fd0ff'}">${r[3]}</td><td style="background:#29b6f61f;color:${r[5]==='dudosa'?'#9fb5a3':'#7fd0ff'};font-size:${r[5]==='dudosa'?'16px':'21px'}">${r[4]}</td><td style="text-align:right;font-size:18px">${kmh[i]}</td></tr>`).join('');})();
 // --- B: dos gráficos (velocidades superpuestas y tiempo ganado/perdido)
 (()=>{const g=document.getElementById('grafB');let p='';const x0=60,w=740,X=m=>x0+m/2500*w;
  const yv=v=>40+(75-v)/45*240;               // arriba: velocidad 30..75
