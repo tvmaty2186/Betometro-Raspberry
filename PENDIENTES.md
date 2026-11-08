@@ -100,8 +100,12 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.35 (publicada 08/11/2026)
+Manual del navegante (Prueba completa → Manual; celu /ayuda y /manual.pdf), botón Tienda en los dos inicios con
+lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en construcción» con salida.
+
 ## Tienda de herramientas (decidido con Matías, 08/11/2026)
-- Botón **Tienda** en los dos inicios y pantalla con 8 lugares punteados vacíos (hecho, va en la 1.0.35). Sin brújula por ahora.
+- Botón **Tienda** en los dos inicios y pantalla con 8 lugares punteados vacíos (publicado en la 1.0.35). Sin brújula por ahora.
 - Cada herramienta es un programa Qt para la Pi, en un paquete `.tar.gz` con su ícono y su ficha (nombre, versión, descripción).
 - **Un solo repositorio `Betometro-tienda`**: una carpeta por herramienta + el catálogo `tienda.json`. GitHub arma cada paquete.
 - En la Pi: baja el catálogo, Instalar (comprueba el hash), Abrir → Betómetro se cierra y abre la herramienta; al salir o si se
