@@ -1,3 +1,5 @@
+#include <mutex>
+#include <thread>
 #include "video_gst.h"
 
 #include "imagen_video.h"
@@ -37,16 +39,21 @@ VideoGst::VideoGst(QObject* padre) : QObject(padre) {
 VideoGst::~VideoGst() { cerrar(); }
 
 void VideoGst::preferirChip() {
-    static bool hecho = false;
-    if (hecho) return;
-    hecho = true;
+    static std::once_flag una;
+    std::call_once(una, [] {
     if (!gst_is_initialized()) gst_init(nullptr, nullptr);
     // El descompresor del chip de la Raspberry primero; los de procesador quedan de repuesto
     if (GstPluginFeature* f = gst_registry_find_feature(gst_registry_get(), "v4l2h264dec", GST_TYPE_ELEMENT_FACTORY)) {
         gst_plugin_feature_set_rank(f, GST_RANK_PRIMARY + 100);
         gst_object_unref(f);
     }
+    });
 }
+
+// GStreamer se prepara en otro hilo al rato de prender. La primera vez (y después de cada actualización) arma la
+// lista de complementos y en la Pi tarda varios segundos: si pasaba al abrir un informe (el reproductor está
+// adentro), la pantalla quedaba trabada (vigilante: 8,5 s, 08/11/2026). Si se abre antes, espera a que termine.
+void VideoGst::precalentar() { std::thread([] { preferirChip(); }).detach(); }
 
 void VideoGst::setSource(const QUrl& url) {
     if (url == source_) return;

@@ -65,6 +65,7 @@ public:
 
     // Le da prioridad al chip de la Raspberry sobre los descompresores de procesador (una vez al empezar)
     static void preferirChip();
+    static void precalentar();   // GStreamer listo en otro hilo, antes de que haga falta
     // Cuadros descomprimidos desde que se abrió el video (la Prueba completa mide cuadros por segundo sin pantalla)
     qint64 cuadros() const { return cuadros_; }
 

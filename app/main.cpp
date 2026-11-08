@@ -357,6 +357,7 @@ int main(int argc, char* argv[]) {
     motor.loadFromModule("Betometro", "Main");
     if (motor.rootObjects().isEmpty()) return 1;
     salud.listo();
+    QTimer::singleShot(10000, &app, [] { VideoGst::precalentar(); });   // ver video_gst.cpp
 
     if (op.isSet(oCaptura) || op.isSet(oCapturaTele)) {
         auto* ventana = qobject_cast<QQuickWindow*>(motor.rootObjects().first());
