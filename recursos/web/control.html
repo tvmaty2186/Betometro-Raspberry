@@ -82,7 +82,7 @@ async function estado(){
   pintar();
 }
 async function hacer(tipo,valor){
-  try{const r=await fetch('/control/accion?tipo='+tipo+(valor===undefined?'':'&valor='+encodeURIComponent(valor)),{method:'POST'});
+  try{const r=await fetch('/control/accion?tipo='+tipo+(valor===undefined?'':'&valor='+encodeURIComponent(valor)),{method:'POST',headers:{'X-Betometro':'1'}});
     const j=await r.json();if(!j.ok)aviso(j.error||'No se pudo')}
   catch(e){aviso('Sin conexión con el Betómetro')}
   estado();

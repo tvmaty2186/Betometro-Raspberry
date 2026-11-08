@@ -78,7 +78,7 @@ Item {
             c.beginPath();
             c.moveTo(cx + Math.cos(a) * (r + 4 * k), cy - Math.sin(a) * (r + 4 * k));
             c.lineTo(cx + Math.cos(a) * (r - 26 * k), cy - Math.sin(a) * (r - 26 * k));
-            c.strokeStyle = pasada ? "#d23b2c" : String(Tema.sugerida); c.lineWidth = 7 * k; c.stroke();
+            c.strokeStyle = pasada ? String(Tema.rojo) : String(Tema.sugerida); c.lineWidth = 7 * k; c.stroke();
         }
     }
 

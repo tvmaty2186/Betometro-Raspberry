@@ -163,7 +163,7 @@ Item {
             id: tAde
             readonly property real a: vista.e.ade
             readonly property bool enTiempo: Math.abs(a) < 0.2
-            readonly property color col: Math.abs(a) < 1 ? Tema.bien : Math.abs(a) < 3 ? Tema.acento : "#d23b2c"
+            readonly property color col: Math.abs(a) < 1 ? Tema.bien : Math.abs(a) < 3 ? Tema.acento : Tema.rojo
             Num { visible: !tAde.enTiempo; text: Formato.dif(tAde.a * 1000); color: tAde.col }
             Etiq { text: tAde.enTiempo ? "en tiempo" : tAde.a < 0 ? "atrasado" : "adelantado"; color: tAde.col }
         }

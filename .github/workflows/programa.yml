@@ -123,7 +123,8 @@ jobs:
           retention-days: 30
 
       - name: Publicar en Betometro-actualizaciones
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.publicar || contains(github.event.head_commit.message, '[publicar]')
+        # Solo desde main (o una etiqueta v*): «publicar» a mano desde otra rama no publica (auditoría 12)
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && (startsWith(github.ref, 'refs/tags/v') || inputs.publicar || contains(github.event.head_commit.message, '[publicar]'))
         env:
           GH_TOKEN: ${{ secrets.ACTUALIZACIONES_TOKEN }}
         run: |
@@ -134,5 +135,7 @@ jobs:
             echo "La versión $V ya está publicada: subí el número en CMakeLists.txt"; exit 1
           fi
           git log -1 --format=%B | grep -v -e '^Co-Authored-By' -e '^Claude-Session' | sed 's/ *\[publicar\]//' > notas.txt
-          gh release create "v$V" "salida-pi/betometro-pi-$V.tar.gz" \
+          # La huella del paquete: la Pi la compara antes de instalar (auditoría 12)
+          (cd salida-pi && sha256sum "betometro-pi-$V.tar.gz" > "betometro-pi-$V.tar.gz.sha256")
+          gh release create "v$V" "salida-pi/betometro-pi-$V.tar.gz" "salida-pi/betometro-pi-$V.tar.gz.sha256" \
             --repo tvmaty2186/Betometro-actualizaciones --title "Betómetro $V" --notes-file notas.txt

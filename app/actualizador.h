@@ -54,6 +54,8 @@ signals:
 private:
     void poner(const QString& estado, int progreso, const QString& mensaje = {});
     void instalar(const QString& archivo);
+    // Baja el «.sha256» que publica GitHub junto al paquete y lo compara antes de instalar (auditoría 12)
+    void comprobarEInstalar(const QString& archivo, const QString& urlSha);
     void simular();
 
     QString carpeta_;                      // /datos/actualizacion

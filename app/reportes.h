@@ -35,7 +35,15 @@ private:
     QString carpeta_, archivo_, enviadoHasta_, marcaVivo_;
     QNetworkAccessManager red_;
     QTimer cada_;
+    // Los avisos se juntan en memoria y se escriben de a tandas cada 2 s (y al leer o mandar el registro): antes
+    // cada aviso abría y escribía el archivo en el hilo de la pantalla, y con la tarjeta lenta trababa (auditoría 12).
+    // Uno igual al anterior no se repite: queda «(se repitió N veces más)».
+    void volcar() const;
+    QTimer tanda_;
+    mutable QByteArray pendiente_;
+    mutable QString ultimo_;
+    mutable int repetidas_ = 0;
     bool carrera_ = false, llaveRechazada_ = false, mandando_ = false;
     QString problema_;
-    qint64 recortado_ = 0;   // bytes sacados del registro al recortarlo (para correr «enviado hasta»)
+    mutable qint64 recortado_ = 0;   // bytes sacados del registro al recortarlo (para correr «enviado hasta»)
 };

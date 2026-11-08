@@ -8,6 +8,7 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/plan-ingenieria.md](docs/plan-ingenieria.md) | **El plan:** etapas E1 a E6, especificación técnica y criterio de aceptación de cada una. Seguilo en orden |
 | [docs/diseno-sistema.md](docs/diseno-sistema.md) | **Lo principal:** sistema, cableado, pantallas aprobadas, decisiones |
 | [docs/conectarse-ssh.md](docs/conectarse-ssh.md) | Cómo entrar a la Raspberry por ssh (IP, atajo `ssh beto`) |
+| [docs/sd-nueva.md](docs/sd-nueva.md) | Tarjeta SD nueva desde cero y recuperar las carreras de la copia |
 | [docs/hardware.md](docs/hardware.md) | Piezas compradas y lo que falta comprar |
 | [docs/gps-neo-m8n.md](docs/gps-neo-m8n.md) | El módulo GPS (NEO-M8N-0-10): datos oficiales, configuración y pruebas al recibirlo |
 | [docs/app/lo-aprendido.md](docs/app/lo-aprendido.md) | **Todo lo que hace la app y por qué**: datos, motor, voz, ajustes, pantallas, widgets, informe. Es la especificación a copiar |

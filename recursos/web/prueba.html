@@ -53,6 +53,6 @@ function pintar(E){
   $('pasos').innerHTML=(E.pasos||[]).map((p,i)=>'<div class="p '+esc(p.estado)+'"><div class=n>'+(p.estado==='ok'?'✓':p.estado==='leve'||p.estado==='grave'?'!':p.estado==='corriendo'?'…':(i+1))+'</div><div class=x><b>'+esc(p.nombre)+(NOMBRE[p.estado]?' · '+NOMBRE[p.estado]:'')+'</b><span>'+esc(p.detalle||'')+'</span></div></div>').join('');
 }
 async function estado(){try{const r=await fetch('/prueba/estado',{cache:'no-store'});pintar(await r.json());$('sinred').hidden=true}catch(e){$('sinred').hidden=false}}
-$('bEmpezar').onclick=async()=>{try{const r=await fetch('/prueba/empezar',{method:'POST'});const j=await r.json();if(!j.ok)aviso(j.error||'No se pudo empezar');estado()}catch(e){aviso('No se pudo empezar')}};
+$('bEmpezar').onclick=async()=>{try{const r=await fetch('/prueba/empezar',{method:'POST',headers:{'X-Betometro':'1'}});const j=await r.json();if(!j.ok)aviso(j.error||'No se pudo empezar');estado()}catch(e){aviso('No se pudo empezar')}};
 estado();setInterval(estado,2000);
 </script></body></html>

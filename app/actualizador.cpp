@@ -1,5 +1,6 @@
 #include "actualizador.h"
 
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -106,7 +107,9 @@ void Actualizador::buscar() {
             return;
         }
         const QJsonObject o = QJsonDocument::fromJson(r->readAll()).object();
-        const QString v = o.value(QStringLiteral("tag_name")).toString().remove(QLatin1Char('v'));
+        QString v = o.value(QStringLiteral("tag_name")).toString().remove(QLatin1Char('v'));
+        // Solo números de versión (va a un nombre de archivo): «1.0.36» (auditoría 12)
+        if (!QRegularExpression(QStringLiteral("^\\d+\\.\\d+\\.\\d+$")).match(v).hasMatch()) v.clear();
         ultima_ = v;
         busqueda_ = QStringLiteral("aldia");
         emit cambio();
@@ -140,7 +143,7 @@ void Actualizador::buscarPagina() {
         r->deleteLater();
         const QString destino = r->header(QNetworkRequest::LocationHeader).toUrl().toString();
         const QString v = destino.section(QLatin1String("/tag/v"), 1, 1).section('/', 0, 0);
-        if (v.isEmpty() || QVersionNumber::fromString(v).isNull()) {   // ahora sí: sin internet. De nuevo en un minuto
+        if (v.isEmpty() || !QRegularExpression(QStringLiteral("^\\d+\\.\\d+\\.\\d+$")).match(v).hasMatch()) {   // ahora sí: sin internet. De nuevo en un minuto
             qWarning("Actualizar: no pude buscar (%s)", qPrintable(r->errorString()));
             busqueda_ = QStringLiteral("sinred");
             emit cambio();
@@ -224,7 +227,36 @@ void Actualizador::actualizar() {
         }
         QFile::remove(archivo);
         destino_->rename(archivo);
+        const QString urlSha = descarga_ + QStringLiteral(".sha256");
         descarga_ = archivo;   // desde ahora, la ruta del archivo bajado
+        comprobarEInstalar(archivo, urlSha);
+    });
+}
+
+void Actualizador::comprobarEInstalar(const QString& archivo, const QString& urlSha) {
+    QNetworkRequest q{QUrl(urlSha)};
+    q.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    q.setRawHeader("User-Agent", "Betometro/" BETO_VERSION);
+    q.setTransferTimeout(30000);
+    QNetworkReply* r = red_.get(q);
+    connect(r, &QNetworkReply::finished, this, [this, r, archivo] {
+        r->deleteLater();
+        const QByteArray esperado = r->readAll().trimmed().left(64).toLower();
+        QFile f(archivo);
+        QCryptographicHash h(QCryptographicHash::Sha256);
+        const bool leido = f.open(QIODevice::ReadOnly) && h.addData(&f);
+        f.close();
+        if (r->error() != QNetworkReply::NoError || esperado.size() != 64) {
+            QFile::remove(archivo);
+            poner(QStringLiteral("error"), 0, QStringLiteral("No se pudo comprobar la actualización. Probá de nuevo."));
+            return;
+        }
+        if (!leido || h.result().toHex() != esperado) {
+            QFile::remove(archivo);
+            qWarning("Actualizar: el paquete bajado no coincide con el publicado (sha256)");
+            poner(QStringLiteral("error"), 0, QStringLiteral("La actualización llegó dañada. Probá de nuevo."));
+            return;
+        }
         instalar(archivo);
     });
 }

@@ -35,6 +35,10 @@ TPantalla {
             Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 18
                    text: raiz.urlPagina || "Conectá el Betómetro a la wifi"
                    color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 36 } }
+            // El código que pide la página (que nadie de la wifi cambie el cliente sin ver esta pantalla)
+            Text { visible: raiz.urlPagina !== ""; width: parent.width; horizontalAlignment: Text.AlignHCenter
+                   text: "Código: <b>" + Servidor.codigoDrive + "</b>"; textFormat: Text.StyledText
+                   color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 30; letterSpacing: 2 } }
             Rectangle {
                 visible: raiz.urlPagina !== ""
                 anchors.horizontalCenter: parent.horizontalCenter; width: 230; height: 230; radius: 16; color: "#fff"
@@ -142,6 +146,11 @@ TPantalla {
                     TLlave { prendida: raiz.wifis.indexOf(modelData.nombre) >= 0; onCambiada: v => raiz.elegirWifi(modelData.nombre, v) }
                 }
             }
+            // Para cambiar el cliente de Google más adelante: la página y el código (auditoría 12)
+            Text { visible: raiz.urlPagina !== "" && Drive.estado !== "falta"; width: parent.width; wrapMode: Text.WordWrap; topPadding: 8
+                   color: Tema.tintaSuave; textFormat: Text.StyledText
+                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: 21 }
+                   text: "Cambiar el cliente de Google: " + raiz.urlPagina + " · código <b>" + Servidor.codigoDrive + "</b>" }
         }
     }
 

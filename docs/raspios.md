@@ -57,6 +57,7 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
 - Primero pregunta a la API (`…/releases/latest`). **La API deja 60 consultas por hora por casa**; pasado eso contesta 403 y antes se veía «sin internet». Ahora, si falla, lee la redirección de `https://github.com/…/releases/latest` y baja `…/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz`.
 - Instala con `systemd-run --unit=betometro-actualizar bash instalar.sh` (no se corta si se cierra Betómetro). Sin botón REINICIAR: cortaba la instalación.
 - Pantalla Actualizar: botón **BUSCAR** por internet y «Buscar en pendrive»; dice «Sin internet» o «la última publicada es la X».
+- **Tarjeta nueva desde cero** (y recuperar las carreras): [sd-nueva.md](sd-nueva.md).
 - **Instalar a mano** (si la Pi tiene una versión vieja que no encuentra la nueva):
   ```bash
   cd /tmp && curl -LO https://github.com/tvmaty2186/Betometro-actualizaciones/releases/download/vX.Y.Z/betometro-pi-X.Y.Z.tar.gz && tar xzf betometro-pi-X.Y.Z.tar.gz && sudo bash betometro-pi-X.Y.Z/instalar.sh

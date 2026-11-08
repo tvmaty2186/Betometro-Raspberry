@@ -1,5 +1,7 @@
 #include "servidor.h"
 
+#include <QRandomGenerator>
+
 #include "control_remoto.h"
 #include "datos.h"
 #include "drive.h"
@@ -19,7 +21,8 @@ namespace {
 constexpr qint64 kPedazo = 256 * 1024;   // de a cuánto se manda un video (y cuánto puede esperar en el socket)
 
 QByteArray respuesta(int codigo, const QByteArray& tipo, const QByteArray& cuerpo, const QByteArray& extra = {}) {
-    const QByteArray estado = codigo == 200 ? "200 OK" : codigo == 404 ? "404 Not Found" : codigo == 416 ? "416 Range Not Satisfiable" : "400 Bad Request";
+    const QByteArray estado = codigo == 200 ? "200 OK" : codigo == 403 ? "403 Forbidden" : codigo == 404 ? "404 Not Found" : codigo == 405 ? "405 Method Not Allowed"
+                            : codigo == 416 ? "416 Range Not Satisfiable" : "400 Bad Request";
     return "HTTP/1.1 " + estado + "\r\nContent-Type: " + tipo + "\r\nContent-Length: " + QByteArray::number(cuerpo.size()) +
            "\r\nCache-Control: no-store\r\nConnection: close\r\n" + extra + "\r\n" + cuerpo;
 }
@@ -80,6 +83,7 @@ QByteArray Servidor::zip(const QList<QPair<QString, QByteArray>>& archivos) {
 }
 
 Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre), datos_(datos), puerto_(puerto) {
+    nuevoCodigoDrive();
     connect(&tcp_, &QTcpServer::newConnection, this, [this] {
         while (QTcpSocket* s = tcp_.nextPendingConnection()) {
             connect(s, &QTcpSocket::disconnected, s, &QObject::deleteLater);
@@ -123,6 +127,18 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                 // POST solo para los botones del celu (/control/accion y /prueba/empezar): todo va en la dirección, sin cuerpo
                 const QString rutaPost = linea.size() >= 2 && linea[0] == "POST" ? QUrl(QString::fromUtf8(linea[1])).path() : QString();
                 const bool postControl = rutaPost == QLatin1String("/control/accion") || rutaPost == QLatin1String("/prueba/empezar");
+                // Botones del celu: solo desde nuestras páginas, que mandan la cabecera «X-Betometro». Un formulario de
+                // otra página no puede ponerla (y un fetch de otra página con ella lo frena el navegador) (auditoría 12)
+                if (postControl) {
+                    bool nuestra = false;
+                    for (const QByteArray& c : pedido.left(pedido.indexOf("\r\n\r\n")).split('\n'))
+                        if (c.trimmed().toLower().startsWith("x-betometro:")) nuestra = true;
+                    if (!nuestra) {
+                        s->write(respuesta(403, "text/plain; charset=utf-8", "Solo desde las páginas del Betómetro"));
+                        s->disconnectFromHost();
+                        return;
+                    }
+                }
                 s->write(linea.size() >= 2 && (linea[0] == "GET" || postControl) ? responder(linea[1], postControl) : respuesta(400, "text/plain", "Solo se puede mirar"));
                 s->disconnectFromHost();
             });
@@ -327,8 +343,23 @@ QByteArray Servidor::pagina() const {
 // ---------- Google Drive (docs/google-drive.md) ----------
 // Página para subir el JSON del cliente de Google desde la compu o el celu. Nunca muestra lo que hay adentro.
 
+void Servidor::nuevoCodigoDrive() {
+    codigoDrive_ = QString::number(QRandomGenerator::system()->bounded(1000, 10000));
+    emit codigoDriveChanged();
+}
+
 QByteArray Servidor::recibirDrive(const QByteArray& cuerpo) {
     if (!drive_) return paginaDrive(QStringLiteral("Google Drive no está en este equipo"));
+    // El código que muestra la Pi (campo «codigo» del formulario)
+    QByteArray codigo;
+    const int k = cuerpo.indexOf("name=\"codigo\"");
+    if (k >= 0) {
+        const int v = cuerpo.indexOf("\r\n\r\n", k);
+        if (v >= 0) codigo = cuerpo.mid(v + 4, cuerpo.indexOf("\r\n", v + 4) - v - 4).trimmed();
+    }
+    if (codigo.isEmpty() || QString::fromLatin1(codigo) != codigoDrive_)
+        return paginaDrive(QStringLiteral("El código no es el que muestra el Betómetro (Ajustes → Google Drive)."));
+    nuevoCodigoDrive();
     // Llega como formulario (multipart) o el archivo solo: el JSON va de la primera «{» a la última «}»
     const int a = cuerpo.indexOf('{'), b = cuerpo.lastIndexOf('}');
     if (a < 0 || b < a) return paginaDrive(QStringLiteral("No llegó ningún archivo. Elegí el JSON y tocá «Subir»."));

@@ -146,7 +146,7 @@ Tarjeta {
                         Item { width: parent.u * 3; height: 30
                             Rectangle {
                                 id: etiq
-                                readonly property color col: modelData.interrumpida ? "#8a929b" : modelData.medida ? "#d23b2c" : Tema.bien
+                                readonly property color col: modelData.interrumpida ? "#8a929b" : modelData.medida ? Tema.rojo : Tema.bien
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: tEtiq.implicitWidth + 22; height: 28; radius: 14
                                 color: Qt.rgba(col.r, col.g, col.b, 0.18); border { width: 1.5; color: col }

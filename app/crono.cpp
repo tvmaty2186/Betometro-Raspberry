@@ -118,6 +118,9 @@ void Crono::preparar(const QString& id) {
         c = *g;
         recorrido_ = esRecorrido(c);
     }
+    // Nunca menos de 5 s de tiempo ideal (la pantalla no lo deja, pero la configuración se puede tocar desde el
+    // celu): con 0 la cuenta dividía por cero y la voz no sonaba (auditoría 12)
+    if (c.tiempoIdealMs < 5000) c.tiempoIdealMs = 5000;
     datosLargada_ = datosLargada(c, cfg);
     reloj_.start();      // pantalla y voz solo con una carrera abierta: sin carrera no despiertan 86 veces por segundo
     relojVoz_.start();
@@ -171,8 +174,9 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
         emit ultimaChanged();
         if (datos_->config()["clicMarca"].aBool(true)) emit sonido(QStringLiteral("clic"));
         motor_->marcar(t, fuente.toStdString());
-        // la distancia arranca justo en la largada: la última lectura con la hora de la marca
-        if (ultimaMuestra_) {
+        // la distancia arranca justo en la largada: la última lectura con la hora de la marca. Solo si es fresca
+        // (menos de 3 s): con el GPS perdido hace rato, la vuelta 1 arrancaba con una velocidad vieja (auditoría 12)
+        if (ultimaMuestra_ && t - ultimaMuestra_->t <= 3000) {
             Muestra m = *ultimaMuestra_;
             m.t = t;
             motor_->muestra(m);

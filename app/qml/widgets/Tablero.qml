@@ -265,7 +265,7 @@ Item {
             readonly property bool sinGps: !!raiz.est.enCurso && !!raiz.est.sinGps && Datos.ajustes.velActiva !== false
             ancho: parent.def.ancho || 1; redondo: parent.def.forma === "redondo"
             etiqueta: "Sugerida"
-            colorNumero: pasada || sinGps ? "#d23b2c" : Tema.numero
+            colorNumero: pasada || sinGps ? Tema.rojo : Tema.numero
             numero: sinGps ? "SIN GPS" : raiz.est.vNecKmh === undefined || raiz.est.vNecKmh === null ? "–" : pasada ? "160" : Math.round(raiz.est.vNecKmh) + (raiz.est.congelada ? "■" : "")
             extra: sinGps ? "seguí por tiempo" : parent.def.extra ? "base " + Math.round(raiz.est.vBaseKmh || 0) : ""
         }

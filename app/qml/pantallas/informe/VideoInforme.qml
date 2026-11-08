@@ -63,7 +63,7 @@ Item {
             DatoAhora { e: "Velocidad"; v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–"; u: "km/h"; c: Tema.numero }
             DatoAhora { e: "Sugerida"; v: vid.sug > 0 ? vid.sug.toFixed(1).replace(".", ",") : "–"; u: ""; c: Tema.tinta }
             DatoAhora { e: "Adelanto"; v: reproductor.e.lap >= 0 && vid.dist > 0 ? Formato.dif(reproductor.e.ade * 1000) : "–"; u: ""
-                        c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : "#d23b2c" }
+                        c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : Tema.rojo }
         }
     }
     Reproductor {

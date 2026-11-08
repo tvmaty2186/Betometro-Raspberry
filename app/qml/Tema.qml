@@ -88,6 +88,10 @@ QtObject {
     // Brillo alrededor de los widgets (0 0 20px 5px var(--glow) de la app); Avispón y sol no tienen
     readonly property color glow: sol ? "transparent" : de("transparent", Qt.rgba(1, 170 / 255, 40 / 255, 0.5), Qt.rgba(1, 40 / 255, 20 / 255, 0.55), Qt.rgba(79 / 255, 195 / 255, 247 / 255, 0.32), "transparent")
     readonly property color warn: de("#f4c531", "#ffb000", "#ffd400", "#ffd23f", "#a33a00")
+    // Rojo y naranja de estado (pasada, grave, revisar). Iguales en los temas oscuros; más oscuros en sol, para que se
+    // lean sobre blanco (auditoría 12: estaban escritos a mano en 8 archivos)
+    readonly property color rojo: de("#d23b2c", "#d23b2c", "#d23b2c", "#d23b2c", "#b3261e")
+    readonly property color naranja: de("#d9741a", "#d9741a", "#d9741a", "#d9741a", "#a34f00")
     readonly property color mal: de("#ff6b5a", "#c0162c", "#e10600", "#ff4d5e", "#c4001a")
 
     // Colores que estaban fijos en las pantallas (08-8, 1.0.29)

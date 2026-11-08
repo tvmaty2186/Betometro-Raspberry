@@ -49,7 +49,7 @@ TPantalla {
                         gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(Tema.caja1, 1.15) } GradientStop { position: 1; color: Tema.caja2 } }
                         Rectangle {
                             x: 24; anchors.verticalCenter: parent.verticalCenter; width: 44; height: 44; radius: 22
-                            color: modelData.ok ? Tema.bien : modelData.grave ? "#d23b2c" : "#d9741a"
+                            color: modelData.ok ? Tema.bien : modelData.grave ? Tema.rojo : Tema.naranja
                             border { width: 2; color: "#ffffff" }
                             Text { anchors.centerIn: parent; text: modelData.ok ? "✓" : "!"; color: "#ffffff"; font { family: Tema.fuente800; pixelSize: 26 } }
                         }

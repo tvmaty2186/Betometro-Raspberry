@@ -19,10 +19,14 @@ class Servidor : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool activo READ activo NOTIFY cambio)
     Q_PROPERTY(int puerto READ puerto CONSTANT)
+    // Código de 4 cifras que muestra la Pi (Ajustes → Google Drive) y hay que escribir en /drive para subir el cliente
+    // de Google: así nadie de la wifi lo puede cambiar sin ver la pantalla (auditoría 12). Cambia después de cada uso.
+    Q_PROPERTY(QString codigoDrive READ codigoDrive NOTIFY codigoDriveChanged)
 public:
     Servidor(Datos* datos, quint16 puerto, QObject* padre = nullptr);
     bool activo() const { return tcp_.isListening(); }
     int puerto() const { return puerto_; }
+    QString codigoDrive() const { return codigoDrive_; }
     void prender(bool si);
     void ponerReportes(Reportes* r) { reportes_ = r; }
     void ponerDrive(Drive* d) { drive_ = d; }
@@ -41,6 +45,7 @@ public:
 
 signals:
     void cambio();
+    void codigoDriveChanged();
 
 private:
     QByteArray pagina() const;
@@ -54,5 +59,7 @@ private:
     ControlRemoto* control_ = nullptr;
     PruebaCompleta* prueba_ = nullptr;
     quint16 puerto_;
+    QString codigoDrive_;
+    void nuevoCodigoDrive();
     QTcpServer tcp_;
 };

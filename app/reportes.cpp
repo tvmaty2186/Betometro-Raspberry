@@ -52,6 +52,9 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
     archivo_ = carpeta_ + QStringLiteral("/errores.log");
     enviadoHasta_ = carpeta_ + QStringLiteral("/enviado");
     marcaVivo_ = carpeta_ + QStringLiteral("/corriendo");
+    tanda_.setInterval(2000);
+    connect(&tanda_, &QTimer::timeout, this, [this] { volcar(); });
+    tanda_.start();
     // Si quedó la marca de la vez anterior, no se cerró bien: se cayó o se cortó el contacto.
     // La marca guarda el número del arranque del sistema: si es otro, se apagó toda la Raspberry
     // (corte o cuelgue) y se suma lo último que anotó el sistema antes de caerse.
@@ -86,6 +89,7 @@ Reportes::Reportes(const QString& carpetaDatos, QObject* padre)
 
 Reportes::~Reportes() {
     if (gReportes == this) { qInstallMessageHandler(gAnterior); gReportes = nullptr; }
+    volcar();
     QFile::remove(marcaVivo_);   // se cerró bien
 }
 
@@ -137,7 +141,36 @@ void Reportes::instalar() {
 }
 
 void Reportes::anotar(const QString& tipo, const QString& texto) {
+    // Solo memoria, sin tocar archivos: se puede llamar desde cualquier hilo y desde adentro de un aviso de Qt
+    const QString clave = tipo + QStringLiteral(" · ") + QString(texto).replace('\n', ' ');
     QMutexLocker l(&gMutex);
+    if (clave == ultimo_) { ++repetidas_; return; }
+    if (repetidas_ > 0) {
+        pendiente_ += QStringLiteral("%1 · v%2 · %3 (se repitió %4 veces más)\n")
+                          .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")), QStringLiteral(BETO_VERSION), ultimo_)
+                          .arg(repetidas_).toUtf8();
+        repetidas_ = 0;
+    }
+    ultimo_ = clave;
+    pendiente_ += QStringLiteral("%1 · v%2 · %3\n")
+                      .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")), QStringLiteral(BETO_VERSION), clave)
+                      .toUtf8();
+}
+
+void Reportes::volcar() const {
+    QByteArray tanda;
+    {
+        QMutexLocker l(&gMutex);
+        if (repetidas_ > 0) {
+            pendiente_ += QStringLiteral("%1 · v%2 · %3 (se repitió %4 veces más)\n")
+                              .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")), QStringLiteral(BETO_VERSION), ultimo_)
+                              .arg(repetidas_).toUtf8();
+            repetidas_ = 0;
+            ultimo_.clear();
+        }
+        tanda.swap(pendiente_);
+    }
+    if (tanda.isEmpty()) return;
     QFile f(archivo_);
     if (f.size() > kMaxBytes && f.open(QIODevice::ReadOnly)) {   // se recorta: queda la mitad más nueva (líneas enteras)
         const QByteArray d = f.readAll();
@@ -156,14 +189,11 @@ void Reportes::anotar(const QString& tipo, const QString& texto) {
             if (e.open(QIODevice::WriteOnly | QIODevice::Truncate)) e.write(QByteArray::number(std::max<qint64>(0, desde - corte)));
         }
     }
-    if (!f.open(QIODevice::Append)) return;
-    const QString linea = QStringLiteral("%1 · v%2 · %3 · %4\n")
-                              .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")),
-                                   QStringLiteral(BETO_VERSION), tipo, QString(texto).replace('\n', ' '));
-    f.write(linea.toUtf8());
+    if (f.open(QIODevice::Append)) f.write(tanda);
 }
 
 QByteArray Reportes::texto() const {
+    volcar();   // lo que estaba esperando la tanda también
     QFile f(archivo_);
     return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
 }

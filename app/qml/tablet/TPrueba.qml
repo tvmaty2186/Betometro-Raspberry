@@ -20,7 +20,7 @@ TPantalla {
         if (ev.key === Qt.Key_Return || ev.key === Qt.Key_Enter || ev.key === Qt.Key_Space || ev.key === Qt.Key_F9) { PruebaCompleta.pulsadorRecibido("el teclado"); ev.accepted = true; }
     }
     onCorreChanged: if (!corre) lista.contentY = 0   // terminó: la lista vuelve arriba
-    function colorPaso(s) { return s === "ok" ? Tema.bien : s === "grave" ? "#d23b2c" : s === "leve" ? "#d9741a" : s === "corriendo" ? Tema.acento : Tema.bordeCromoOscuro; }
+    function colorPaso(s) { return s === "ok" ? Tema.bien : s === "grave" ? Tema.rojo : s === "leve" ? Tema.naranja : s === "corriendo" ? Tema.acento : Tema.bordeCromoOscuro; }
 
     Item {
         id: izq

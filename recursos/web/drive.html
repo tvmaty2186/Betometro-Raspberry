@@ -26,6 +26,8 @@ button{width:100%;border:0;border-radius:14px;padding:14px;font:800 italic 18px 
 <div class=c>
 <p>Elegí el archivo <b>.json</b> que bajaste de Google Cloud (cliente «TVs y dispositivos de entrada limitada»).</p>
 <form method=post action=/drive enctype=multipart/form-data>
+<p>Escribí el <b>código</b> que muestra el Betómetro (Ajustes → Google Drive):</p>
+<input name=codigo inputmode=numeric pattern="[0-9]{4}" maxlength=4 placeholder="Código" required style="font-size:22px;width:7em;letter-spacing:.2em">
 <input type=file name=cliente accept=".json,application/json" required>
 <button>Subir</button></form>
 <p class=v>Queda guardado solo en el Betómetro. Nunca lo mandes por chat ni lo subas a otro lado.</p></div>
