@@ -79,10 +79,11 @@ Item {
             required property var modelData
             required property int index
             // Siete botones en el arco (con la Tienda, 08/11/2026): con aire entre botones (Matías: «muy apretados»), en un arco un poco más largo
-            readonly property real ang: (raiz.h ? 230 - index * 21 : 150 + index * 20) * Math.PI / 180
+            // Carreras arriba y Ajustes abajo (Matías, 08/11/2026: «invertí todos»)
+            readonly property real ang: (raiz.h ? 104 + index * 21 : 272 - index * 21.5) * Math.PI / 180
             readonly property real cx: raiz.h ? 1090 + Math.cos(ang) * 310 : 629 + Math.cos(ang) * 397
             readonly property real cy: raiz.h ? 436 - Math.sin(ang) * 310 : 918 + Math.sin(ang) * 397
-            d: raiz.h ? 76 : 104   // 76 con siete botones (antes 86 con seis), en un arco más grande
+            d: raiz.h ? 76 : 96   // con siete botones (antes 86 y 104 con seis), en un arco más grande
             x: cx - d / 2; y: cy - d / 2
             icono: modelData.icono
             texto: modelData.texto
