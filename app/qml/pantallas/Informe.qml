@@ -286,7 +286,6 @@ Item {
         else if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") tabla.fila = 3;
         else if (Contexto.prueba === "menu") tabla.menuAbierto = true;
-        else if (Contexto.prueba === "cortado") verVideo = true;   // con --prueba cortado: el aviso del video cortado
         else if (Contexto.prueba === "tele-reiniciar") verEnTele();
         else if (Contexto.prueba.indexOf("tele") === 0) {   // tele, tele-datos, tele-qr, tele-carreras, tele-remoto (con dos pantallas)
             if (conTraza.indexOf(lapP) >= 0) lap = lapP;

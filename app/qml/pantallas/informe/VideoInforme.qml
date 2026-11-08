@@ -2,7 +2,7 @@ import QtQuick
 import Betometro
 
 // Video de la carrera en el informe (E7): el reproductor a medias (arriba a la izquierda) o en pantalla completa
-// (doble toque), el aviso de «video cortado» y la tarjeta «En este momento». Ocupa toda la pantalla; el
+// (doble toque) y la tarjeta «En este momento». Ocupa toda la pantalla; el
 // reproductor se comparte con el informe (`reproductor`) para la tele, la tabla y el mapa.
 Item {
     id: vid
@@ -17,14 +17,6 @@ Item {
     signal dobleToque()
     anchors.fill: parent
     z: vid.completo ? 50 : 1
-    // El video quedó cortado (se desenchufó la cámara): hay más de un video de la misma largada, o uno que
-    // empieza después de la largada. Un texto chico arriba del video (07-3.3).
-    readonly property bool videoCortado: {
-        const vistas = {}; let cortado = false;
-        for (const v of videos) { if (vistas[v.largada]) cortado = true; vistas[v.largada] = true; if ((v.desdeLargadaMs || 0) < 0) cortado = true; }
-        return cortado;
-    }
-
     // Video a medias: arriba a la izquierda; abajo, «En este momento»
     Tarjeta { datos: true
         id: cajaVideo
@@ -33,8 +25,6 @@ Item {
         x: vid.h ? 24 : 20; y: vid.h ? 110 : 180
         width: vid.h ? 600 : parent.width - 40; height: 400
     }
-    Sub { visible: vid.vv && vid.videoCortado && !vid.completo; x: cajaVideo.x + 4; y: cajaVideo.y - (vid.h ? 22 : 17); width: cajaVideo.width - 8; elide: Text.ElideRight
-          color: Tema.warn; tam: 12; text: "Video cortado: se cortó la cámara y falta un pedazo" }
     Tarjeta { datos: true
         visible: vid.vv
         oscura: true
