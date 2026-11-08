@@ -29,6 +29,7 @@ Window {
         clip: true
 
         Loader {
+            id: pantalla
             anchors.fill: parent
             // Las pantallas que tienen versión grande (carpeta tablet/) van siempre así. El Modo Tablet solo
             // cambia el inicio (Matías, 06/11/2026: «lo único que cambia entre normal y tablet es el inicio»).
@@ -51,6 +52,12 @@ Window {
             onLoaded: if (item && item.hasOwnProperty("pantallaNombre")) item.pantallaNombre = Navegacion.actual
         }
         Aviso { id: aviso }
+        // Tema propio: al cambiar los colores desde el celu, la pantalla se vuelve a armar. Los dibujos (botones,
+        // velocímetro, fondo) se pintan una vez y quedaban con el acento viejo hasta cambiar de pantalla (Matías, 08/11/2026)
+        Connections {
+            target: Tema
+            function onFirmaPropioChanged() { Qt.callLater(() => { pantalla.active = false; pantalla.active = true; }); }
+        }
         Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
         // El vigilante anota las últimas pantallas, para el reporte si algo se traba
         Connections { target: Navegacion; function onActualChanged() { Vigilante.pantalla(Navegacion.actual); } }

@@ -17,6 +17,8 @@ QtObject {
     readonly property color pFondo: pp.fondo || "#1a1c1f"
     readonly property color pAcento: pp.acento || "#e10600"
     readonly property color pLetras: pp.letras === "negro" ? "#0b0d0c" : pp.letras === "crema" ? "#f3ecd8" : "#ffffff"
+    // Cambia solo si cambia algún color del tema propio (Main.qml vuelve a armar la pantalla)
+    readonly property string firmaPropio: propio ? pFondo + "|" + pAcento + "|" + pLetras : ""
     function oscuro(c) { return 0.299 * c.r + 0.587 * c.g + 0.114 * c.b < 0.55; }
     readonly property bool cabina: nombre === "cabina" && !sol
     // Modo Tablet (05/11/2026): botones grandes, dentro de cualquier tema (Ajustes → Pantalla y tema).
