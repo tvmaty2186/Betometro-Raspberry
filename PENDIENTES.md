@@ -100,6 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.39 (publicada 08/11/2026)
+Modo tele: el sonido del video vuelve a salir por la tele (directo por ALSA, `hdmi:CARD=vc4hdmi`). Desde la 1.0.28
+PulseAudio no mira la tele y la búsqueda de la salida fallaba: el sonido iba a los auriculares. Fuera del modo tele,
+auriculares como siempre.
+
 ## 1.0.38 (publicada 08/11/2026)
 Prueba completa: el wifi prueba la ANTENA (sin wifi o sin internet no es falla; falla solo si no está la placa o no
 ve ninguna red). Las pruebas abren 10 pantallas más (compartir, wifi, editor, Drive, ajustes, recorrido, gráfico y

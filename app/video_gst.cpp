@@ -119,6 +119,16 @@ namespace {
 // La salida de sonido del HDMI (la tele), si el sistema la tiene: en la Pi 3 la placa «vc4hdmi»
 // (por PulseAudio o directo). Si no hay, nullptr (queda la de siempre).
 GstElement* salidaHdmi() {
+    // La Pi 3: directo a la placa de la tele por ALSA («hdmi:» convierte al formato que pide la tele). Desde la 1.0.28
+    // PulseAudio no mira la tele (arranque más rápido) y la búsqueda de abajo fallaba («gst_alsa_device_new:
+    // assertion 'caps' failed»): el sonido se iba a los auriculares y la tele quedaba muda (Matías, 08/11/2026).
+    if (QFile::exists(QStringLiteral("/proc/asound/vc4hdmi"))) {
+        if (GstElement* a = gst_element_factory_make("alsasink", nullptr)) {
+            g_object_set(a, "device", "hdmi:CARD=vc4hdmi,DEV=0", nullptr);
+            qWarning("Video: sonido por la tele (hdmi:CARD=vc4hdmi)");
+            return a;
+        }
+    }
     GstDeviceMonitor* m = gst_device_monitor_new();
     gst_device_monitor_add_filter(m, "Audio/Sink", nullptr);
     GstElement* r = nullptr;
