@@ -31,15 +31,15 @@ TPantalla {
                 TIcono { width: 44; height: 44; nombre: "auto" } }
 
             // ---- Pantalla y tema
-            // Personalizar desde el celu (08/11/2026): foto del inicio, número y nombre, colores y velocímetro
-            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Personalizar desde el celu"; detalle: "Foto del inicio, auto, colores y velocímetro"
-                    tocable: true; onTocada: Navegacion.ir("personalizar")
-                TIcono { width: 44; height: 44; nombre: "qr" } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Inicio con botones"; detalle: "Apagado: el inicio con la foto del auto"
                 TLlave { prendida: !!raiz.a.modoTablet; onCambiada: v => raiz.poner("modoTablet", v) } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Tema"
                 TOpciones { opciones: [{ texto: "Avispón", valor: "avispon" }, { texto: "Rally", valor: "rally" }, { texto: "Deportivo", valor: "sport" }, { texto: "Cabina", valor: "cabina" }, { texto: "Propio", valor: "propio" }]
                             valor: raiz.a.tema || "avispon"; onElegido: v => { raiz.poner("tema", v); Contexto.tema = v; } } }
+            // Personalizar desde el celu: solo con el tema Propio (Matías, 08/11/2026)
+            TFila { visible: raiz.sec === "pantalla" && raiz.a.tema === "propio"; etiqueta: "Personalizar desde el celu"; detalle: "Foto del inicio, auto, colores y velocímetro"
+                    tocable: true; onTocada: Navegacion.ir("personalizar")
+                TIcono { width: 44; height: 44; nombre: "qr" } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Orientación"
                 TOpciones { opciones: [{ texto: "Acostada", valor: "horizontal" }, { texto: "Parada", valor: "vertical" }]
                             valor: Contexto.horizontal ? "horizontal" : "vertical"
