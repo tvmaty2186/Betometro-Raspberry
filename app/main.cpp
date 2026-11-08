@@ -121,6 +121,11 @@ int main(int argc, char* argv[]) {
     QString carpeta = op.value(oDatos);
     if (carpeta.isEmpty()) carpeta = qEnvironmentVariable("BETO_DATOS");
     if (carpeta.isEmpty()) carpeta = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    // La lista de complementos de GStreamer (video): se guarda con los datos. En la Pi el servicio no puede escribir
+    // en /root (ProtectHome) y GStreamer la volvía a armar cada vez: la pantalla de Cámara quedaba trabada unos 8 s
+    // la primera vez (vigilante, 08/11/2026). Los ayudantes (betometro-camara) la heredan.
+    if (!qEnvironmentVariableIsSet("GST_REGISTRY_1_0") && !carpeta.isEmpty())
+        qputenv("GST_REGISTRY_1_0", QFile::encodeName(carpeta + QStringLiteral("/gstreamer-registro.bin")));
     Datos datos(carpeta);
     // Reporte de errores: desde acá se anota todo lo que falle (también las pantallas QML)
     Reportes reportes(carpeta);
@@ -279,6 +284,12 @@ int main(int argc, char* argv[]) {
     // Vigilante de memoria y trabas: si algo se pone pesado, manda un reporte con quién lo está usando
     Vigilante vigilante(carpeta, &reportes);
     vigilante.enCarrera = [&] { return crono.enCurso(); };
+    vigilante.tension = [&] {
+        if (!salud.sabe()) return QStringLiteral("no se sabe");
+        QString t = salud.tensionBaja() ? QStringLiteral("BAJA ahora") : salud.huboTensionBaja() ? QStringLiteral("bajó desde que prendió") : QStringLiteral("bien");
+        if (salud.calor()) t += QStringLiteral(" · se frena por calor");
+        return t;
+    };
     vigilante.andando = [&] {
         QStringList a;
         if (crono.enCurso()) a << QStringLiteral("carrera en curso");

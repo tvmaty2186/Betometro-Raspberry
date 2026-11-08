@@ -160,11 +160,7 @@ void Vigilante::escribirReporte(const QString& titulo, const QHash<int, Proceso>
     l << QStringLiteral("⚠ %1 · pantalla: %2 · prendida hace %3").arg(titulo, pantallaActual_.isEmpty() ? QStringLiteral("?") : pantallaActual_, duracion(prendida));
     // Equipo
     const QByteArray t = leer(QStringLiteral("/sys/class/thermal/thermal_zone0/temp")).trimmed();
-    const QByteArray e = leer(QStringLiteral("/sys/devices/platform/soc/soc:firmware/get_throttled")).trimmed();
-    bool okE = false;
-    const unsigned est = (e.startsWith("throttled=") ? e.mid(10) : e).toUInt(&okE, 16);
-    QString tension = !okE ? QStringLiteral("¿?") : (est & 0x1) ? QStringLiteral("BAJA ahora") : (est & 0x10000) ? QStringLiteral("bajó desde que prendió") : QStringLiteral("bien");
-    if (okE && (est & 0x8)) tension += QStringLiteral(" · se frena por calor");
+    const QString tension = this->tension ? this->tension() : QStringLiteral("¿?");
     l << QStringLiteral("Equipo: memoria %1 de %2 (%3 %) · swap %4 · carga %5 · %6 · tensión %7")
              .arg(mb(m.total - m.disponible), mb(m.total)).arg(porcentaje(m))
              .arg(mb(m.swapTotal - m.swapLibre), QString::fromLatin1(leer(QStringLiteral("/proc/loadavg")).split(' ').value(0)),

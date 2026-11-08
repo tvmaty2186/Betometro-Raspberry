@@ -40,6 +40,7 @@ public:
 
     std::function<QStringList()> andando;   // qué está haciendo: carrera, cámara, Drive…
     std::function<bool()> enCarrera;
+    std::function<QString()> tension;       // lo que dice Salud (la misma lectura que el Chequeo previo)
 
 signals:
     void cambio();
