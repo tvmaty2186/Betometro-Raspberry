@@ -69,7 +69,7 @@ Item {
     function xDe(clave, w) { return margen + rep.lugar(clave).x * Math.max(0, width - 2 * margen - w); }
     // La X de cerrar, arriba a la derecha (Matías, 08/11/2026): ningún dato queda encima, cae al lado (a la
     // izquierda). También en la tele, aunque ahí no se vea la X, así los datos quedan en el mismo lugar.
-    readonly property real tamX: 76 * s
+    readonly property real tamX: 52 * s   // del alto de las tiras de los datos
     readonly property real xX: width - margen - tamX
     function fueraDeX(nx, ny, w, h) {
         const sep = 10 * s;
@@ -443,15 +443,17 @@ Item {
     }
 
     // ---------- X para cerrar la pantalla completa, arriba a la derecha (Matías, 08/11/2026) ----------
+    // Como una tira de los datos: mismo alto, fondo, borde y tinta; alineada con la fila de arriba
     Rectangle {
         visible: vista.tocable && vista.completo && !!vista.rep.vid
         x: vista.xX; y: vista.arriba
         width: vista.tamX; height: width; radius: width / 2
-        color: Qt.rgba(0, 0, 0, 0.6); border { width: 3; color: "#ffffff" }
+        color: Qt.rgba(Tema.caja2.r, Tema.caja2.g, Tema.caja2.b, 0.8)
+        border { width: 2; color: Tema.bordeCromo }
         z: 6
-        Rectangle { anchors.centerIn: parent; width: 38 * vista.s; height: 6 * vista.s; radius: 3; color: "#ffffff"; rotation: 45 }
-        Rectangle { anchors.centerIn: parent; width: 38 * vista.s; height: 6 * vista.s; radius: 3; color: "#ffffff"; rotation: -45 }
-        MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: { vista.rep.menuVolumen = false; vista.rep.editando = false; vista.rep.dobleToque(); } }
+        Rectangle { anchors.centerIn: parent; width: 22 * vista.s; height: 3.5 * vista.s; radius: 2; color: Tema.tinta; rotation: 45 }
+        Rectangle { anchors.centerIn: parent; width: 22 * vista.s; height: 3.5 * vista.s; radius: 2; color: Tema.tinta; rotation: -45 }
+        MouseArea { anchors.fill: parent; anchors.margins: -14; onClicked: { vista.rep.menuVolumen = false; vista.rep.editando = false; vista.rep.dobleToque(); } }
     }
 
     // ---------- Panel del volumen: − / barra / +, y el parlante para el silencio. Se cierra solo a los 4 s ----------
