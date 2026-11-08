@@ -6,7 +6,8 @@ Canvas {
     id: lienzo
     onWidthChanged: requestPaint()
     onHeightChanged: requestPaint()
-    Connections { target: Tema; function onNombreChanged() { lienzo.requestPaint(); } function onSolChanged() { lienzo.requestPaint(); } }
+    Connections { target: Tema; function onNombreChanged() { lienzo.requestPaint(); } function onSolChanged() { lienzo.requestPaint(); }
+                                     function onFondo2Changed() { lienzo.requestPaint(); } }   // tema propio: color nuevo desde el celu
 
     onPaint: {
         const c = getContext("2d");

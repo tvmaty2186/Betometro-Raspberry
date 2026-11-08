@@ -12,8 +12,16 @@ Canvas {
     // El Avispón Verde siempre con su foto original (Matías, 08/11/2026: es de su auto)
     readonly property string propia: Tema.avispon ? "" : (Contexto.horizontal ? Contexto.fotoH : Contexto.fotoV)
     readonly property string archivo: propia || "qrc:/recursos/img/inicio.jpg"
-    onArchivoChanged: { loadImage(archivo); requestPaint(); }
-    Component.onCompleted: loadImage(archivo)
+    // Cada vez que se guarda desde el celu la foto cambia de dirección (?v=N). El Canvas guarda cada imagen que
+    // carga y no la suelta: ~12 MB por guardado, y la Pi se ponía lenta (Matías, 08/11/2026). Se suelta la anterior.
+    property string cargada: ""
+    function cargar() {
+        if (cargada && cargada !== archivo) unloadImage(cargada);
+        cargada = archivo; loadImage(archivo);
+    }
+    onArchivoChanged: { cargar(); requestPaint(); }
+    Component.onCompleted: cargar()
+    Component.onDestruction: if (cargada) unloadImage(cargada)
     onImageLoaded: requestPaint()
     onPaint: {
         const c = getContext("2d"), W = width, H = height;
