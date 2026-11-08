@@ -94,6 +94,9 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
 | `app/actualizador.cpp` | Ver arriba |
 | `app/clima.cpp` | Pronóstico de Open-Meteo (16 días) y buscador de localidades (Open-Meteo, si no OpenStreetMap). Guarda el último en `<datos>/clima.json` para sin wifi. Pantalla `Pronostico.qml` (no se llama `Clima.qml` porque chocaba con el objeto `Clima`) |
 | `app/drive.cpp` | **Google Drive**: sube solo informes (HTML) y videos a «Betómetro/AAAA-MM-DD Nombre», y una copia de la base (`Betómetro/betometro.json`, se pisa cuando cambia alguna carrera), con wifi, sin carrera y sin la cámara grabando. Videos solo con las wifi elegidas. Subida de a 4 MB con `curl` en prioridad baja; si se corta sigue. Se conecta con un código (google.com/device); el cliente de Google se sube en `http://IP/drive`. Usa `curl` (viene en Raspberry Pi OS). Ver [google-drive.md](google-drive.md) |
+| `app/vigilante.cpp` | Memoria cada 10 s, pantalla congelada (tic cada 0,5 s), tirones en carrera: reporte con procesos, crecimiento, pantallas y la última media hora. **Despejar** (Chequeo previo): `despejar.json` + `systemctl reset-failed` + salir; systemd lo vuelve a arrancar y abre el Chequeo |
+| `app/nucleo/marca_gps.cpp` | Pulsador virtual (GPS) del informe, desde el recorrido grabado. Prueba en `prueba_nucleo` |
+| `app/servidor.cpp` `/personalizar` | Página del celu (`recursos/web/personalizar.html`): POST con llave y cabecera `X-Betometro`; fotos `inicio-h.jpg`/`inicio-v.jpg` en los datos |
 | `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
 
 ## Cosas de la pantalla y del arranque (lo que costó)
@@ -117,6 +120,18 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
   `herramientas/comparar-capturas.sh build/betometro build/comparar_capturas /tmp/cap --aceptar`.
 - Simulador de GPS: `simular_neo --enlace /tmp/betometro-gps` y `betometro --gps /tmp/betometro-gps` (con `--enlace /dev/ttyACM0` se prueba el modo USB).
 - Con `BETO_RASPBERRY=1` se activan las partes de la Raspberry (sin sensores en la PC).
+- **Desde el 08/11/2026 se compila en un contenedor Docker «beto»** (Qt de Debian trixie, igual que la Pi), con el repo
+  en `/src` y la compilación en `/build-t`: `(dockerd &) ; docker start beto ; docker exec beto cmake --build /build-t -j8`.
+  Si `dockerd` no arranca por un pid viejo: `dockerd --pidfile /tmp/otro.pid`.
+- Variables para probar: `BETO_FIJO=1` (hora, GPS y memoria quietos), `BETO_MUESTRA_HZ=5` (recorridos de ejemplo con
+  5 lecturas por segundo), `BETO_MUESTRA_LARGA=1` (carreras de 60 vueltas), `BETO_VIGILANTE_UMBRAL=1` (el vigilante
+  avisa en la PC). Video de ejemplo: `<datos>/videos/muestra.mkv` (con `gst-launch-1.0 videotestsrc … x264enc …
+  matroskamux`).
+- `--prueba` útiles: `comp`, `comparar`, `grafico`, `mapa`, `video-grafico`, `video-acel`, `apagar` (ventana de
+  Apagar), `tablet-pantalla`. En `comparar-capturas.sh`, los nombres con espacio van entre comillas dobles adentro de
+  simples: `--carrera '"Santa Clara"'` (si no, se cortaban y el informe salía vacío).
+- Medir: tiempos de arranque hasta `--captura` (promedio de 5), memoria con `/proc/<pid>/status` y procesador con
+  `/proc/<pid>/stat`; la página del celu se prueba con Playwright contra `http://172.17.0.2:8080/personalizar?c=fija`.
 
 ## Errores que ya pasaron (para no repetirlos)
 - Actualizar volvía a la 1.0.3: la instalación se cortaba (apt + initramfs tardan minutos; el botón REINICIAR la mataba). Arreglado.
@@ -124,4 +139,16 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
 - El brillo solo se guardaba y no se aplicaba. Arreglado en 1.0.10.
 - 06/11/2026: la compilación se colgó 17 min en «apt-get install ffmpeg» (paso Voz) sin decir nada. Ahora ese paso tiene tiempo límite y reintentos.
 - 06/11/2026: el video del informe salía negro en la Pi 3. El VideoOutput de Qt usa un programa del chip gráfico que la VideoCore IV (OpenGL ES 2) no arma («Failed to build graphics pipeline state»). Ahora el video se dibuja como imagen (`app/imagen_video.*`): el procesador pasa cada cuadro a RGB.
+- 08/11/2026: **la Pi se ponía lenta** después de guardar muchas veces desde el celu. El `Canvas` de la foto del
+  inicio guardaba cada imagen cargada (cada guardado cambia la dirección `?v=N`): ~12 MB por guardado. Ahora suelta la
+  anterior (`unloadImage`). Lo encontró una medición de memoria; desde la 1.0.45 lo avisa el vigilante.
+- 08/11/2026: **la pantalla de Cámara y el informe se trababan** (8,5 s). GStreamer arma la lista de complementos la
+  primera vez y el servicio no podía guardarla en `/root` (`ProtectHome`): la rearmaba siempre. Ahora va en
+  `<datos>/gstreamer-registro.bin` (`GST_REGISTRY_1_0`) y se prepara en otro hilo a los 10 s de prender.
+- 08/11/2026: el informe armaba de entrada sus tres pantallas completas (gráfico, mapa, Comparar): ~2 s en la Pi.
+  Ahora van en `Loader` y se arman al abrirlas.
+- 08/11/2026: zoom del mapa grande con tirones: redibujaba a cada movimiento. Ahora durante el gesto solo se escala y
+  corre el dibujo (transform) y se redibuja al soltar.
+- 08/11/2026: el tema «propio» no se guardaba: `modelo.cpp` valida la lista de temas (hay que sumar cada tema nuevo).
+- Un comentario `//` en medio de una expresión QML de varias líneas se come el resto de la línea (pasó con `* Math.PI`).
 - Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` se borraron el 07/11/2026; quedan en el historial de git).

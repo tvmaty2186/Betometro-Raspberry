@@ -132,6 +132,40 @@ Las mismas 12 pantallas que en horizontal, apiladas en una columna. Diferencias:
 - **Carrera:** armado de fábrica de la app reacomodado para que entre: velocímetro redondo de 420 px arriba; V3 a la izquierda y Sugerida a la derecha, montados sobre el borde del velocímetro; la cuenta abajo, sin tocarlo; Última vuelta en una franja; MARCAR abajo a todo el ancho.
 - **Informe:** la tabla muestra la **vuelta interrumpida** (sin error).
 
+## Decisiones del 08/11/2026 (1.0.40 a 1.0.48)
+
+**Personalizar y temas**
+- **Personalizar desde el celu** (QR con llave que cambia en cada arranque): foto del inicio (acostada y parada por
+  separado, se mueve y se pellizca), número y nombre del auto, colores y velocímetro del inicio. El botón del QR
+  aparece **solo con el tema Propio** (Ajustes → Pantalla y tema, debajo de Tema).
+- **Tema propio:** parte del Deportivo y cambia solo fondo, acento y letras (blanco, crema o negro). Paleta de **127
+  colores en panal + 9 grises**; los **círculos de Fondo y Acento** (abajo del panal) eligen qué se pinta, sin botones.
+  Avisa si hay poco contraste. **No cambian:** barra (verde/amarillo/rojo), adelantado/atrasado, medida/libre
+  (rojo/verde), avisos y modo sol. Se conserva la bandera a cuadros.
+- **Gráficos, mapas y tablas de datos** (informe y video): en el tema propio siempre sobre el **gris oscuro del
+  Deportivo** (`Tarjeta { datos: true }`); el error total del informe sobre una pastilla oscura.
+- **El Avispón Verde es el 101 de Matías:** siempre su foto, el 101 y «Avispón Verde», aunque se haya personalizado.
+  Los otros temas usan lo personalizado (no se borra).
+- **Velocímetro del inicio:** 6 estilos (clásico, deportivo, digital, rally, aviación, anillo); el elegido vale
+  **solo en el tema propio** (de fábrica, Deportivo). Cada tema de fábrica usa el suyo.
+- Cursor de las barras: **triángulo blanco con borde negro**, centrado sobre la barra (negro en modo sol).
+
+**Informe**
+- **Pulsador virtual (GPS)**, solo de referencia, nunca cambia las marcas: la línea es donde se largó; tiempo y error al
+  lado del manual, «dudosa» si el GPS andaba mal, y al pie cuánto se marcó tarde en promedio. **Solo en el informe.**
+- **Vuelta modelo ★** = la medida más cerca del ideal. **Comp.** es el cuarto modo (Vel. · Acel. · Adel. · Comp.):
+  la vuelta elegida contra la modelo; doble toque abre el tiempo ganado/perdido y 4 sectores.
+- Con el video: **Mapa | Gráfico** al lado (el gráfico con los modos, raya donde va el video, toque para saltar).
+- Sin el aviso de «video cortado» (no aporta).
+
+**Equipo**
+- **Apagar** abre una ventana: Apagar, Reiniciar, Cancelar.
+- **Chequeo previo → Memoria** con semáforo (verde < 60 %, naranja < 80 %, rojo) y **Despejar** (dos toques: reinicia
+  Betómetro, no la Raspberry, y vuelve al Chequeo diciendo cuánto liberó).
+- **Vigilante:** reporte solo si la memoria pasa del 70 %, la pantalla se congela más de 1,5 s o hay tirones en carrera;
+  con procesos, crecimiento, últimas pantallas y la memoria de la última media hora. Un aviso por motivo cada 10 min.
+- Prueba completa: la falta de wifi no es una falla (se prueba la antena).
+
 ## Pendiente de definir
 
 - Después: empezar a programar (imagen Buildroot, motor en C++, pantallas en Qt).

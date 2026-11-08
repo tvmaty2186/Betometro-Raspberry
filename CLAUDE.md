@@ -19,9 +19,10 @@ Leé esto al empezar cualquier sesión en este repositorio.
 | [docs/video.md](docs/video.md) | E7 (para después de la 1.0.0): grabar la carrera con cámara y verla en el informe |
 | [docs/modo-tablet.md](docs/modo-tablet.md) | Modo Tablet: botones grandes dentro de cada tema (plan y muestras aprobadas) |
 | [docs/auditorias/README.md](docs/auditorias/README.md) | Las 10 auditorías del proyecto (lista, modelo y prompt de cada una) |
-| [docs/plan-1.0.30.md](docs/plan-1.0.30.md) | **Lo próximo:** la lista de la 1.0.30 (lo que quedó) |
+| [docs/plan-1.0.30.md](docs/plan-1.0.30.md) | La lista de la 1.0.30 (histórica; lo próximo está en PENDIENTES.md) |
 | [docs/plan-1.0.28.md](docs/plan-1.0.28.md) | Plan de las 1.0.28 y 1.0.29 con las decisiones de Matías |
-| [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer |
+| [PENDIENTES.md](PENDIENTES.md) | Lo que falta hacer y qué trajo cada versión (arriba, la última) |
+| [.claude/skills/](.claude/skills/) | Skills: `publicar-version`, `probar-pantallas` (contenedor, capturas, medir), `leer-reportes` (vigilante) |
 
 ## Qué es
 
@@ -79,6 +80,9 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 ## Compilar y probar
 
 `cmake -S . -B build && cmake --build build -j && ctest --test-dir build --output-on-failure` (necesita Node para comparar con la app).
+En la sesión de Claude se compila en el contenedor Docker «beto» (`/src`, `/build-t`): ver la skill `probar-pantallas`
+y «Probar en la PC» en `docs/raspios.md`. Decisiones recientes de Matías: «Decisiones del 08/11/2026» en
+`docs/diseno-sistema.md`.
 
 ## Muestras
 
