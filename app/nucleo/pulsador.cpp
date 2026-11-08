@@ -3,7 +3,8 @@
 namespace beto {
 
 void FiltroPulsador::flanco(double t, bool apretado) {
-    revisar(t);   // primero resolver lo que venció antes de este flanco
+    // Primero resolver lo que venció antes de este flanco. Si eso confirma una marca, no se tira: queda pendiente.
+    if (auto m = evaluar(t)) pendientes_.push_back(*m);
     bajo_ = apretado;
     tUltimo_ = t;
     switch (estado_) {
@@ -23,6 +24,15 @@ void FiltroPulsador::flanco(double t, bool apretado) {
 }
 
 std::optional<double> FiltroPulsador::revisar(double ahora) {
+    if (!pendientes_.empty()) {   // las que se confirmaron en un flanco: primero esas, en orden
+        const double m = pendientes_.front();
+        pendientes_.erase(pendientes_.begin());
+        return m;
+    }
+    return evaluar(ahora);
+}
+
+std::optional<double> FiltroPulsador::evaluar(double ahora) {
     switch (estado_) {
         case Estado::Candidato:
             if (bajo_ && ahora - tUltimo_ >= confirmarMs_) {   // quedó apretado lo suficiente: vale
@@ -44,6 +54,7 @@ std::optional<double> FiltroPulsador::revisar(double ahora) {
 }
 
 std::optional<double> FiltroPulsador::proximoVencimiento() const {
+    if (!pendientes_.empty()) return tUltimo_;   // hay una marca para entregar ya
     switch (estado_) {
         case Estado::Candidato: return tUltimo_ + (bajo_ ? confirmarMs_ : reboteMs_);
         case Estado::Soltando: return tUltimo_ + soltarMs_;

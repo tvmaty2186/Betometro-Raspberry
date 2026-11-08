@@ -1,6 +1,6 @@
 # Betómetro Raspberry — Pendientes
 
-Actualizado el 05/11/2026 (última versión: 1.0.17). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
+Actualizado el 08/11/2026 (última versión: 1.0.34). Lo que falta para entregar: [docs/auditorias/12-final.md](docs/auditorias/12-final.md). Plan: [docs/plan-ingenieria.md](docs/plan-ingenieria.md).
 
 ## Decisión del 03/11/2026: Raspberry Pi OS Lite en vez de Buildroot
 - Betómetro se instala como **programa** en Raspberry Pi OS Lite 64 bits (Debian trixie), no como sistema propio.
@@ -99,6 +99,12 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
 Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta atrás, hora del GPS, cámara, wifi,
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
+
+## 1.0.34 «auditoría final» (publicada 08/11/2026)
+Arreglos de la auditoría 12: el pulsador ya no pierde una marca si el programa estaba ocupado; si una versión
+nueva se traba al abrir, vuelve sola a la anterior (con sus servicios); el instalador no queda en negro si
+falla adentro de una función; la hora no se corrige con la carrera en curso; documentos al día.
+**Falta:** el manual del navegante (página en la Pi y PDF, Matías 08/11) y la guía de SD nueva.
 
 ## 1.0.33 (publicada 08/11/2026)
 Los videos MP4 vuelven a tener sonido en el informe de la Pi (el reproductor buscaba el sonido solo al principio).

@@ -43,6 +43,10 @@ private:
     double tUltimo_ = 0;         // último flanco
     double confirmarMs_, soltarMs_, reboteMs_;
     int descartados_ = 0;
+    // Una marca que se confirmó adentro de flanco() (apretar y soltar llegaron juntos porque el programa estaba
+    // ocupado): se guarda para que la devuelva el próximo revisar(). Antes se perdía (auditoría 12, 08/11/2026).
+    std::vector<double> pendientes_;
+    std::optional<double> evaluar(double ahora);   // decide con el estado (lo que antes hacía revisar)
 };
 
 }  // namespace beto

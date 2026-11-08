@@ -1,7 +1,8 @@
 #!/bin/bash
 # Instala (o actualiza) Betómetro en Raspberry Pi OS Lite 64 bits.
 # Uso, en la Raspberry:  sudo bash instalar.sh
-set -euo pipefail
+# -E: el trap de ERR también vale adentro de las funciones (si no, una falla ahí dejaba la pantalla negra; auditoría 12)
+set -Eeuo pipefail
 cd "$(dirname "$0")"
 if [ "$(id -u)" != 0 ]; then echo "Hay que correrlo con sudo:  sudo bash instalar.sh"; exit 1; fi
 VERSION=$(cut -d' ' -f1 version.txt 2>/dev/null || echo '?')
@@ -60,7 +61,9 @@ systemctl stop betometro 2>/dev/null || true
 INSTALADA=$(cat /usr/share/betometro/version 2>/dev/null || echo '')
 if [ -x /usr/bin/betometro ] && [ "$INSTALADA" != "$VERSION" ]; then
   rm -rf "$ANTERIOR" && mkdir -p "$ANTERIOR"
-  tar -C / -czf "$ANTERIOR/betometro.tar.gz" usr/bin/betometro usr/bin/betometro-camara usr/share/betometro 2>/dev/null || true
+  # También los servicios: si la nueva cambia cómo se lanza, la anterior vuelve con los suyos (auditoría 12)
+  svc=$(cd / && ls etc/systemd/system/betometro.service etc/systemd/system/betometro-volver.service etc/systemd/system/pulseaudio-sistema.service etc/systemd/system/pulseaudio-auriculares.service etc/systemd/system/despertar-touch.service 2>/dev/null || true)
+  tar -C / -czf "$ANTERIOR/betometro.tar.gz" usr/bin/betometro usr/bin/betometro-camara usr/share/betometro $svc 2>/dev/null || true
   echo "${INSTALADA:-?}" > "$ANTERIOR/version"
 fi
 if [ -f "$ANTERIOR/betometro.tar.gz" ]; then
@@ -72,6 +75,7 @@ systemctl stop betometro 2>/dev/null || true
 rm -rf /usr/share/betometro.viejo; mv /usr/share/betometro /usr/share/betometro.viejo 2>/dev/null
 tar -C / -xzf /var/lib/betometro-anterior/betometro.tar.gz || { mv /usr/share/betometro.viejo /usr/share/betometro; exit 1; }
 rm -rf /usr/share/betometro.viejo
+systemctl daemon-reload 2>/dev/null || true   # por si volvieron los servicios de la anterior
 mkdir -p /var/lib/betometro/actualizacion
 echo "La versión nueva no arrancaba: se volvió a la $(cat /var/lib/betometro-anterior/version 2>/dev/null)" > /var/lib/betometro/actualizacion/resultado
 sync

@@ -1,6 +1,6 @@
 # Betómetro en Raspberry Pi OS — cómo está hecho, cómo se publica y lo aprendido
 
-Actualizado el 04/11/2026 (versión 1.0.12). Leelo antes de tocar el sistema, el instalador o las versiones.
+Actualizado el 08/11/2026 (versión 1.0.34). Leelo antes de tocar el sistema, el instalador o las versiones.
 
 ## El equipo
 - Raspberry Pi 3 B+ (1 GB) + **Touch Display 2 de 5"** (720×1280, de pie; se usa acostada: Qt gira la imagen).
@@ -34,7 +34,7 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
    - `cmdline.txt`: sin consola serie (el puerto es del GPS), `console=tty3 quiet splash … video=Composite-1:d fsck.repair=yes`.
 4. 3c, menos escrituras: journald guarda en la tarjeta solo avisos y errores (`MaxLevelStore=warning`); sin `apt-daily` ni `man-db`; memoria de reserva en zram (sin `dphys-swapfile`).
 5. 3b, pantalla de arranque Plymouth (`raspios/arranque/`): si cambió la foto, rearma el initramfs. **Tarda varios minutos en la Pi 3 y la pantalla queda negra con un guión parpadeando: es normal, no apagar.**
-6. Servicios: `betometro`, `pulseaudio-sistema` (el Qt de Debian solo suena por PulseAudio) y `despertar-touch` (el touch aparece antes que la pantalla). `getty@tty1` apagado. Reinicia.
+6. Servicios: `betometro`, `betometro-volver` (vuelta atrás si la nueva no arranca), `pulseaudio-sistema` (el Qt de Debian solo suena por PulseAudio), `pulseaudio-auriculares` (salida y volumen, por detrás) y `despertar-touch` (el touch aparece antes que la pantalla). Reglas de udev: PulseAudio no mira la tele ni el sonido USB (`80-betometro-sin-hdmi.rules`) y nada USB se duerme (`81-betometro-usb-despierto.rules`, la cámara fallaba al despertar). `getty@tty1` apagado. Reinicia.
 
 ## `betometro.service`
 - `BETO_RASPBERRY=1`, `BETO_DATOS=/var/lib/betometro`, `BETO_GPS=auto`, `BETO_VOZ=/usr/share/betometro/voz`.
@@ -44,7 +44,7 @@ Probado en Docker con el `config.txt` y el `cmdline.txt` reales de la Pi (07/11/
 
 ## Cómo se arma y se publica una versión
 - El número está en `CMakeLists.txt` (`project(betometro VERSION x.y.z)`). Las versiones son propias de este repo y empezaron en 1.0.0.
-- Push a `claude/adoring-bell-disf3a`. El workflow `.github/workflows/programa.yml` compila en un Debian trixie arm64 (QEMU), corre `raspios/probar.sh` (40 s sin pantalla, servidor web, capturas) y arma `betometro-pi-X.Y.Z.tar.gz`.
+- Push a **`main`** (desde la 1.0.28 compila solo desde `main`). El workflow `.github/workflows/programa.yml` corre primero todas las pruebas (`raspios/pruebas.sh`; si una falla no publica), compila en ARM y arma `betometro-pi-X.Y.Z.tar.gz`.
 - **Publicar:** el mensaje del commit tiene que tener `[publicar]` (los tags no se pueden empujar desde la sesión: 403). Sube el paquete al repo público `tvmaty2186/Betometro-actualizaciones` con el secreto `ACTUALIZACIONES_TOKEN`. Falla si esa versión ya existe.
 - **Commits intermedios con `[skip ci]`**, para no lanzar compilaciones. Nunca empujar mientras compila una (Matías se enojó mucho con los reinicios).
 - Tarda unos 15 minutos con caché. Para ver el estado:

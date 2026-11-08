@@ -643,6 +643,25 @@ static void pulsador() {
         CHEQUEAR(m.has_value() && *m == 1000.0);
         CHEQUEAR(!f.proximoVencimiento().has_value());   // apretado: no hay nada pendiente
     }
+    {   // Apretar y soltar llegan juntos (el programa estaba ocupado 60 ms): la marca no se pierde (auditoría 12)
+        FiltroPulsador f;
+        f.flanco(1000, true);
+        f.flanco(1060, false);
+        CHEQUEAR(f.proximoVencimiento().has_value());
+        auto m = f.revisar(1061);
+        CHEQUEAR(m.has_value() && *m == 1000.0);
+        CHEQUEAR(!f.revisar(1062).has_value());   // una sola
+    }
+    {   // Dos toques en el mismo paquete: llegan los dos, en orden
+        FiltroPulsador f;
+        f.flanco(1000, true);
+        f.flanco(1060, false);
+        f.flanco(1200, true);
+        f.flanco(1260, false);
+        auto a = f.revisar(1261), b = f.revisar(1262);
+        CHEQUEAR(a.has_value() && *a == 1000.0);
+        CHEQUEAR(b.has_value() && *b == 1200.0);
+    }
 }
 
 // Marca doble (caso real del 31/10/2026, ideal 1:50,0): la V5 duró 4,1 s y la V6 106,3 s.

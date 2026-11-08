@@ -6,16 +6,18 @@ Wants=pulseaudio-sistema.service
 Conflicts=getty@tty1.service
 After=getty@tty1.service
 # Si se cae 4 veces en 5 minutos queda «fallado» y entra betometro-volver: si es una versión recién
-# instalada, vuelve a la anterior y avisa; si no, espera y prueba de nuevo (auditoría 10-1.1 y 1.4)
-StartLimitIntervalSec=300
+# instalada, vuelve a la anterior y avisa; si no, espera y prueba de nuevo (auditoría 10-1.1 y 1.4).
+# 10 minutos: si la versión nueva se TRABA al abrir (no se cae), cada intento dura 92 s y 4 intentos tienen que
+# entrar en la ventana; con 5 minutos nunca entraban y no volvía atrás (auditoría 12)
+StartLimitIntervalSec=600
 StartLimitBurst=4
 OnFailure=betometro-volver.service
 
 [Service]
 # notify: el vigilante empieza a contar cuando Betómetro avisa que abrió (READY=1), no al lanzarlo; con una
-# base grande la Pi 3 puede tardar en abrir más que los 30 s del vigilante (10-1.4)
+# base grande la Pi 3 puede tardar en abrir más que los 30 s del vigilante (10-1.4). Hoy abre en ~9 s.
 Type=notify
-TimeoutStartSec=180
+TimeoutStartSec=90
 Environment=LANG=C.UTF-8
 Environment=QT_QPA_PLATFORM=eglfs
 Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms

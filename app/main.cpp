@@ -175,8 +175,11 @@ int main(int argc, char* argv[]) {
         auto* relojHora = new QTimer(&app);
         QObject::connect(relojHora, &QTimer::timeout, &app, revisarHora);
         relojHora->start(10000);
-        QObject::connect(gps, &FuenteGps::datos, &app, [&datos, revisarHora](int, const QDateTime& utc) {
+        QObject::connect(gps, &FuenteGps::datos, &app, [&datos, &crono, revisarHora](int, const QDateTime& utc) {
             if (!utc.isValid() || utc.date().year() < 2025) return;
+            // Con la carrera en curso no se toca la hora: las vueltas ya cerradas quedarían con otra fecha que las
+            // nuevas. Se corrige con la primera lectura después de Terminar (auditoría 12, 08/11/2026)
+            if (crono.enCurso()) return;
             timex tx{};
             if (::adjtimex(&tx) >= 0 && !(tx.status & STA_UNSYNC)) return;   // internet ya la puso: manda NTP
             const qint64 dif = utc.toMSecsSinceEpoch() - QDateTime::currentMSecsSinceEpoch();

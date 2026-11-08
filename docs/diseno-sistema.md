@@ -1,6 +1,6 @@
 # Betómetro para Raspberry Pi — diseño del sistema
 
-> **Ojo (03/11/2026):** el sistema ya no es Buildroot sino Raspberry Pi OS Lite con Betómetro como programa. Lo de Buildroot de abajo queda como historia; lo vigente está en [raspios.md](raspios.md). El cableado, las pantallas y las decisiones siguen valiendo.
+> **Ojo (03/11/2026, repasado el 08/11):** el sistema ya no es Buildroot sino Raspberry Pi OS Lite con Betómetro como programa. Lo de Buildroot, las copias A/B, Piper y el amplificador I2S de abajo quedan como historia: hoy la voz está grabada (edge-tts) y sale por los auriculares, y el simulador está en el Chequeo previo. Lo vigente está en [raspios.md](raspios.md). El cableado, las pantallas y las decisiones siguen valiendo.
 
 Estado: **diseño acordado con Matías (01/11/2026). Muestras horizontales y verticales aprobadas («están preciosas», «perfectas»). Todavía no se programó nada.**
 
