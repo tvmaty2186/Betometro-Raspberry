@@ -100,6 +100,14 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.48 (publicada 08/11/2026)
+- El informe abre más rápido: las pantallas completas (gráfico, mapa, Comparar) se arman al abrirlas.
+- GStreamer se prepara en segundo plano a los 10 s de prender (el informe se trabó 8,5 s la primera vez).
+- Mapa a pantalla completa: zoom y arrastre sin tirones (se redibuja al soltar).
+- Tema propio: gráficos, mapas, tablas y tarjetas del video sobre gris fijo; el error total sobre pastilla oscura.
+- Sin el aviso de «video cortado».
+- Con el video: **Mapa | Gráfico** al lado (el gráfico con los modos, raya donde va el video, toque para saltar).
+
 ## 1.0.47 (publicada 08/11/2026)
 - **Pulsador virtual (GPS)** en el informe, solo de referencia (`app/nucleo/marca_gps.cpp`): tiempo y error al lado
   del manual, «dudosa» si el GPS andaba mal, y al pie cuánto se marcó tarde en promedio (incluye la demora del GPS).
