@@ -100,6 +100,15 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## Tienda de herramientas (decidido con Matías, 08/11/2026)
+- Botón **Tienda** en los dos inicios y pantalla con 8 lugares punteados vacíos (hecho, va en la 1.0.35). Sin brújula por ahora.
+- Cada herramienta es un programa Qt para la Pi, en un paquete `.tar.gz` con su ícono y su ficha (nombre, versión, descripción).
+- **Un solo repositorio `Betometro-tienda`**: una carpeta por herramienta + el catálogo `tienda.json`. GitHub arma cada paquete.
+- En la Pi: baja el catálogo, Instalar (comprueba el hash), Abrir → Betómetro se cierra y abre la herramienta; al salir o si se
+  traba, Betómetro vuelve solo. Nunca con una carrera en curso.
+- Falta: que Matías cree el repositorio y elija la primera herramienta (ideas: brújula, registrador de viaje, calculadora de
+  regularidad, velocímetro grande, visor de videos, música, un juego).
+
 ## 1.0.34 «auditoría final» (publicada 08/11/2026)
 Arreglos de la auditoría 12: el pulsador ya no pierde una marca si el programa estaba ocupado; si una versión
 nueva se traba al abrir, vuelve sola a la anterior (con sus servicios); el instalador no queda en negro si
