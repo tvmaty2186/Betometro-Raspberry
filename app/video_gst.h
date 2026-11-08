@@ -33,6 +33,8 @@ class VideoGst : public QObject {
     Q_PROPERTY(QString descompresor READ descompresor NOTIFY descompresorChanged)   // «v4l2h264dec» = el chip
     // Modo tele: el sonido por el HDMI (la tele) en vez de la salida de la Pi
     Q_PROPERTY(bool sonidoTele READ sonidoTele WRITE setSonidoTele NOTIFY sonidoTeleChanged)
+    // Volumen del video, de 0 a 1 (Matías, 08/11/2026: control de volumen en el reproductor)
+    Q_PROPERTY(double volumen READ volumen WRITE setVolumen NOTIFY volumenChanged)
 
 public:
     // Los mismos números que MediaPlayer (así el QML compara con MediaPlayer.LoadedMedia, etc.)
@@ -47,6 +49,8 @@ public:
     QObject* videoOutput() const { return salida_; }
     void setVideoOutput(QObject* o);
     bool sonidoTele() const { return sonidoTele_; }
+    double volumen() const { return volumen_; }
+    void setVolumen(double v);
     void setSonidoTele(bool si);
     qint64 position() const { return posicion_; }
     void setPosition(qint64 ms);
@@ -78,6 +82,7 @@ signals:
     void mediaStatusChanged();
     void descompresorChanged();
     void sonidoTeleChanged();
+    void volumenChanged();
     void errorOccurred(int error, const QString& errorString);
 
 private:
@@ -99,6 +104,7 @@ private:
     qint64 posicion_ = 0, duracion_ = 0, buscando_ = -1;
     int estado_ = Parado, medio_ = SinMedio;
     bool listo_ = false, quiereAndar_ = false, sonidoTele_ = false;
+    double volumen_ = 1.0;
     QString descompresor_;
     std::atomic<bool> rangoCompleto_{false};
     std::atomic<qint64> cuadros_{0};

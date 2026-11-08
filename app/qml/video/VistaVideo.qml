@@ -267,10 +267,20 @@ Item {
         }
         Text {
             id: tTotal
-            anchors { right: bPantalla.visible ? bPantalla.left : bDatos.visible ? bDatos.left : parent.right
-                      rightMargin: bPantalla.visible || bDatos.visible ? 12 * barra.b : 20 * barra.b; verticalCenter: parent.verticalCenter }
+            anchors { right: bVolumen.visible ? bVolumen.left : bPantalla.visible ? bPantalla.left : bDatos.visible ? bDatos.left : parent.right
+                      rightMargin: bVolumen.visible || bPantalla.visible || bDatos.visible ? 12 * barra.b : 20 * barra.b; verticalCenter: parent.verticalCenter }
             text: Formato.horaVideo(vista.rep.total)
             color: "#ffffff"; opacity: 0.8; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 26 * barra.b }
+        }
+        // Volumen (Matías, 08/11/2026): el parlante abre el panel con − y +
+        Item {
+            id: bVolumen
+            visible: vista.tocable && !vista.editando
+            anchors { right: bPantalla.visible ? bPantalla.left : bDatos.visible ? bDatos.left : parent.right
+                      rightMargin: 12 * barra.b; verticalCenter: parent.verticalCenter }
+            width: 42 * barra.b; height: width
+            Parlante { anchors.centerIn: parent; width: 32 * barra.b; height: width; nivel: vista.rep.volumen }
+            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: { vista.rep.menuVolumen = !vista.rep.menuVolumen; cierraVolumen.restart(); } }
         }
         // Pantalla completa / achicar, a la derecha del tiempo (Matías, 06/11/2026: el doble toque a veces no
         // entraba). Las cuatro esquinas hacia afuera para agrandar, hacia adentro para achicar.
@@ -280,8 +290,18 @@ Item {
             anchors { right: bDatos.visible ? bDatos.left : parent.right; rightMargin: bDatos.visible ? 12 * barra.b : 16 * barra.b
                       verticalCenter: parent.verticalCenter }
             width: 42 * barra.b; height: width
+            // En pantalla completa es una X para cerrar (Matías, 08/11/2026). Va en la barra: arriba los datos se pueden
+            // mover a cualquier rincón y una X fija los tapaba.
+            Rectangle {
+                visible: vista.completo
+                anchors.centerIn: parent; width: 46 * barra.b; height: width; radius: width / 2
+                color: "#ffffff"
+                Rectangle { anchors.centerIn: parent; width: 24 * barra.b; height: 4.5 * barra.b; radius: 2; color: "#000000"; rotation: 45 }
+                Rectangle { anchors.centerIn: parent; width: 24 * barra.b; height: 4.5 * barra.b; radius: 2; color: "#000000"; rotation: -45 }
+            }
             Canvas {
                 id: iconoPantalla
+                visible: !vista.completo
                 anchors.centerIn: parent; width: 28 * barra.b; height: width
                 property bool adentro: vista.completo
                 onAdentroChanged: requestPaint()
@@ -300,7 +320,7 @@ Item {
                     }
                 }
             }
-            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: vista.rep.dobleToque() }
+            MouseArea { anchors.fill: parent; anchors.margins: -8; onClicked: { vista.rep.menuVolumen = false; vista.rep.dobleToque(); } }
         }
         // Engranaje en pausa (pantalla completa): abre el menú de los datos
         Rectangle {
@@ -420,4 +440,45 @@ Item {
             }
         }
     }
+
+    // ---------- Panel del volumen: − / barra / +, y el parlante para el silencio. Se cierra solo a los 4 s ----------
+    Timer { id: cierraVolumen; interval: 4000; onTriggered: vista.rep.menuVolumen = false }
+    Rectangle {
+        id: panelVolumen
+        visible: vista.tocable && vista.rep.menuVolumen && !vista.editando
+        readonly property real b: vista.completo ? vista.s : 0.85
+        anchors { right: parent.right; bottom: barra.top; rightMargin: vista.completo ? 22 * vista.s : 12; bottomMargin: 12 * b }
+        width: 470 * b; height: 96 * b; radius: 22 * b
+        color: Qt.rgba(0, 0, 0, 0.78); border { width: 2; color: Tema.bordeCromo }
+        z: 4
+        MouseArea { anchors.fill: parent; onPressed: (m) => { m.accepted = true; cierraVolumen.restart(); } }   // que no pase al video
+        Row {
+            anchors.centerIn: parent; spacing: 14 * panelVolumen.b
+            Item {   // silencio
+                width: 72 * panelVolumen.b; height: width
+                Parlante { anchors.centerIn: parent; width: 44 * panelVolumen.b; height: width; nivel: vista.rep.volumen }
+                MouseArea { anchors.fill: parent; onClicked: { vista.rep.silencio(); cierraVolumen.restart(); } }
+            }
+            Rectangle {   // −
+                width: 72 * panelVolumen.b; height: width; radius: width / 2; color: Qt.rgba(1, 1, 1, 0.12); border { width: 2; color: "#ffffff" }
+                Rectangle { anchors.centerIn: parent; width: 30 * panelVolumen.b; height: 5 * panelVolumen.b; radius: 2; color: "#ffffff" }
+                MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: { vista.rep.ponerVolumen(vista.rep.volumen - 0.1); cierraVolumen.restart(); } }
+            }
+            Item {   // la barra con el número
+                width: 150 * panelVolumen.b; height: 72 * panelVolumen.b
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 14 * panelVolumen.b; radius: height / 2; color: Qt.rgba(1, 1, 1, 0.2) }
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * vista.rep.volumen; height: 14 * panelVolumen.b; radius: height / 2; color: Tema.acento }
+                Text { anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom }
+                       text: Math.round(vista.rep.volumen * 100) + " %"; color: "#ffffff"
+                       font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 20 * panelVolumen.b } }
+            }
+            Rectangle {   // +
+                width: 72 * panelVolumen.b; height: width; radius: width / 2; color: Tema.acento; border { width: 2; color: Tema.acentoClaro }
+                Rectangle { anchors.centerIn: parent; width: 30 * panelVolumen.b; height: 5 * panelVolumen.b; radius: 2; color: Tema.acentoTinta }
+                Rectangle { anchors.centerIn: parent; width: 5 * panelVolumen.b; height: 30 * panelVolumen.b; radius: 2; color: Tema.acentoTinta }
+                MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: { vista.rep.ponerVolumen(vista.rep.volumen + 0.1); cierraVolumen.restart(); } }
+            }
+        }
+    }
+
 }

@@ -14,6 +14,14 @@ Item {
     property bool activo: false     // con el botón en «Video»; si no, no se carga nada
     property bool completo: false   // pantalla completa
     property bool editando: false   // moviendo los datos en la pantalla (hasta «Guardar»)
+    property bool menuVolumen: false   // el panel del volumen (− / +), se cierra solo
+    // Volumen del video (Matías, 08/11/2026), guardado en la configuración. Silencio: 0, y vuelve al que estaba
+    readonly property real volumen: Datos.ajustes.videoVolumen !== undefined ? Datos.ajustes.videoVolumen : 1
+    function ponerVolumen(v) { Datos.ponerCfg("videoVolumen", Math.round(Math.max(0, Math.min(1, v)) * 10) / 10); }
+    function silencio() {
+        if (volumen > 0) { Datos.ponerCfg("videoVolumenAntes", volumen); ponerVolumen(0); }
+        else ponerVolumen(Datos.ajustes.videoVolumenAntes || 1);
+    }
     property bool menuDatos: false  // el menú del engranaje (solo en pausa): prender y apagar los datos
     signal dobleToque()
     clip: true
@@ -116,6 +124,7 @@ Item {
         source: rep.activo ? rep.url : ""
         videoOutput: rep.enTele ? Tele.salida : vista.salida
         sonidoTele: rep.enTele   // en la tele, el sonido también por el HDMI
+        volumen: rep.volumen
         onMediaStatusChanged: {
             if ((mediaStatus === MediaPlayer.LoadedMedia || mediaStatus === MediaPlayer.BufferedMedia) && rep.pendiente >= 0) {
                 if (playbackState === MediaPlayer.StoppedState) pause();   // muestra el cuadro aunque no ande

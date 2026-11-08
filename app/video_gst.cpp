@@ -11,6 +11,7 @@
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 
+#include <algorithm>
 #include <cstring>
 
 namespace {
@@ -183,6 +184,19 @@ QByteArray indiceMp4(QFile& a) {
 }
 }  // namespace
 
+void VideoGst::setVolumen(double v) {
+    v = std::clamp(v, 0.0, 1.0);
+    if (qFuzzyCompare(v + 1, volumen_ + 1)) return;
+    volumen_ = v;
+    if (tubo_) {
+        if (GstElement* vol = gst_bin_get_by_name(GST_BIN(tubo_), "volumen")) {
+            g_object_set(vol, "volume", volumen_, nullptr);
+            gst_object_unref(vol);
+        }
+    }
+    emit volumenChanged();
+}
+
 void VideoGst::abrir() {
     cuadros_ = 0;
     const QString ruta = source_.toLocalFile();
@@ -228,7 +242,16 @@ void VideoGst::abrir() {
     if (GstElement* antes = gst_bin_get_by_name(GST_BIN(tubo_), "antesSonido")) {
         GstElement* salida = sonidoTele_ ? salidaHdmi() : nullptr;
         if (!salida) salida = gst_element_factory_make("autoaudiosink", nullptr);
-        if (salida) { gst_bin_add(GST_BIN(tubo_), salida); gst_element_link(antes, salida); }
+        // El volumen va entre el sonido y la salida (se cambia andando, sin cortar)
+        GstElement* vol = gst_element_factory_make("volume", "volumen");
+        if (vol) g_object_set(vol, "volume", volumen_, nullptr);
+        if (salida && vol) {
+            gst_bin_add_many(GST_BIN(tubo_), vol, salida, nullptr);
+            gst_element_link_many(antes, vol, salida, nullptr);
+        } else if (salida) {
+            if (vol) gst_object_unref(vol);
+            gst_bin_add(GST_BIN(tubo_), salida); gst_element_link(antes, salida);
+        }
         gst_object_unref(antes);
     }
     if (GstElement* f = gst_bin_get_by_name(GST_BIN(tubo_), "archivo")) {

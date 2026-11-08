@@ -62,6 +62,7 @@ qt_add_qml_module(betometro_qml
     video/VentanaTele.qml
     video/IconoTele.qml
     video/Engranaje.qml
+    video/Parlante.qml
     tablet/TIcono.qml
     tablet/TBarra.qml
     tablet/TBoton.qml

@@ -282,6 +282,7 @@ Item {
             reproductor.editando = Contexto.prueba === "video-mover";
             if (Contexto.prueba === "video-mover") tPruebaMover.start();
             if (Contexto.prueba === "video-andando") reproductor.alternar();
+            reproductor.menuVolumen = Contexto.prueba === "video-volumen";   // captura: el panel del volumen
             if (Contexto.prueba === "video-pulsador") tPruebaPulsador.start();
         }
     }
