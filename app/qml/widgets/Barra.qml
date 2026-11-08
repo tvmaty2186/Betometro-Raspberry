@@ -22,7 +22,7 @@ Item {
         }
     }
     // Cursor (Matías, 08/11/2026): blanco con borde negro, más grueso. Dos formas para elegir:
-    // «raya» (la de siempre, vertical) o «flecha» (triangulito abajo de la barra, apuntando hacia arriba)
+    // «raya» (la de siempre, vertical) o «flecha» (triangulito encima de la barra, centrado, apuntando hacia arriba)
     readonly property bool flecha: Datos.ajustes.barraCursor === "flecha"
     readonly property real opCursor: raiz.valor === null || raiz.valor === undefined ? 0.35 : 1
     Rectangle {   // sombra del cursor (0 0 6px rgba(0,0,0,.6))
@@ -46,7 +46,7 @@ Item {
         visible: raiz.flecha
         width: Math.max(30, raiz.height * 2.8); height: Math.max(22, raiz.height * 1.9)
         x: raiz.pos * raiz.width - width / 2
-        y: raiz.height + 1
+        y: (raiz.height - height) / 2   // centrado sobre la barra (Matías, 08/11/2026)
         opacity: raiz.opCursor
         onWidthChanged: requestPaint(); onHeightChanged: requestPaint(); onVisibleChanged: if (visible) requestPaint()
         onPaint: {
