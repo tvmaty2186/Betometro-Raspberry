@@ -1,0 +1,240 @@
+<!doctype html><html lang=es><head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Betómetro · Manual del navegante</title>
+<link rel=icon href=/r/icono.png>
+<meta name=theme-color content="#0d2a18">
+<style>
+@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}
+@font-face{font-family:Barlow;font-weight:600;font-style:italic;src:url(/r/barlow-latin-600-italic.woff2)}
+@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}
+@font-face{font-family:'Barlow Condensed';font-weight:700;src:url(/r/barlow-condensed-latin-700-normal.woff2)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;font-size:17px;line-height:1.5;color:#f7f7f2;background:#0b2a17}
+main{max-width:680px;margin:auto;padding:0 16px 48px}
+.cab{position:relative;display:flex;align-items:center;gap:10px;padding:16px 0 12px;border-bottom:3px solid #f4c531;overflow:hidden}
+.cab img{height:50px}
+.cab .bar{width:2px;height:42px;background:linear-gradient(#fff,#9aa3ad);transform:skewX(-18deg);opacity:.8}
+.marca b{display:block;font:800 italic 28px/1 Barlow;color:#eef0f2}
+.marca span{display:block;font:600 10px/1.4 Barlow;letter-spacing:.2em;color:#b9cdb8;margin-top:3px}
+.rayas{position:absolute;right:-6px;top:-10px;bottom:-4px;width:74px;background:linear-gradient(105deg,transparent 0 30%,#f7f7f2 30% 46%,transparent 46% 58%,#f4c531 58% 74%,transparent 74%)}
+h1{font:800 italic 30px/1.15 Barlow;margin:22px 0 4px}
+.sub{color:#b9cdb8;font-style:italic;margin:0 0 8px}
+nav{margin:16px 0 8px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+nav a{display:block;padding:9px 12px;border-radius:10px;background:#123a22;color:#f7f7f2;text-decoration:none;font:800 italic 15px Barlow}
+nav a b{color:#f4c531;margin-right:6px}
+section{margin-top:26px;padding-top:4px}
+h2{display:flex;align-items:center;gap:10px;font:800 italic 22px/1.2 Barlow;margin:0 0 8px;color:#f7f7f2}
+h2 .n{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;font:700 19px/1 'Barlow Condensed'}
+h3{font:800 italic 17px Barlow;color:#f4c531;margin:16px 0 4px}
+p{margin:6px 0}
+ol,ul{margin:6px 0;padding-left:24px}
+li{margin:5px 0}
+.bt{display:inline-block;padding:0 7px;border-radius:6px;background:#f4c531;color:#14240f;font:800 italic 15px/1.5 Barlow;white-space:nowrap}
+.pt{display:inline-block;padding:0 7px;border-radius:6px;border:1.5px solid #b9cdb8;color:#f7f7f2;font:600 italic 15px/1.4 Barlow;white-space:nowrap}
+.ojo{margin:12px 0;padding:10px 14px;border-left:5px solid #f4c531;background:#123a22;border-radius:0 10px 10px 0}
+.mal{border-left-color:#e2533f}
+table{width:100%;border-collapse:collapse;margin:8px 0;font-size:16px}
+td,th{text-align:left;vertical-align:top;padding:8px 8px;border-bottom:1px solid #ffffff22}
+th{font:800 italic 14px Barlow;letter-spacing:.08em;color:#b9cdb8}
+td:first-child{width:42%;font-style:italic}
+.pie{margin-top:36px;color:#b9cdb8;font-size:14px;font-style:italic;text-align:center}
+@media print{
+  @page{size:A4;margin:14mm 14mm 16mm}
+  body{background:#fff;color:#111;font-size:12.5pt}
+  main{max-width:none;padding:0}
+  .cab{border-bottom-color:#d9a20f}
+  .cab{background:#0b2a17;padding:12px 14px;border-radius:10px}
+  nav a{background:#f1f4ef;color:#111;border:1px solid #cfd8cc}
+  nav a b{color:#8a6a00}
+  h2{color:#0b2a17}
+  h3{color:#8a6a00}
+  .pt{border-color:#666;color:#111}
+  .ojo{background:#f6f3e3}
+  .mal{background:#fbe9e6}
+  td,th{border-bottom-color:#ccc}
+  th,.sub,.pie{color:#555}
+  .pie{margin-top:10px}
+  section{break-inside:auto}
+  h2,h3{break-after:avoid}
+  .ojo,tr{break-inside:avoid}
+}
+</style></head><body><main>
+<div class=cab><img alt="" src="/r/leon.png"><div class=bar></div><div class=marca><b>BETÓMETRO</b><span>MANUAL DEL NAVEGANTE</span></div><div class=rayas></div></div>
+
+<h1>Cómo se usa el Betómetro</h1>
+<p class=sub>Para el navegante. Versión 1.0.34 · noviembre de 2026.</p>
+
+<nav>
+<a href="#prender"><b>1</b>Prender</a>
+<a href="#chequeo"><b>2</b>Chequeo previo</a>
+<a href="#cargar"><b>3</b>Cargar la carrera</a>
+<a href="#carrera"><b>4</b>En carrera</a>
+<a href="#informe"><b>5</b>El informe</a>
+<a href="#celu"><b>6</b>Pasarlo al celu</a>
+<a href="#video"><b>7</b>Video</a>
+<a href="#wifi"><b>8</b>Wifi e internet</a>
+<a href="#actualizar"><b>9</b>Actualizar</a>
+<a href="#apagar"><b>10</b>Apagar</a>
+<a href="#problemas"><b>11</b>Si algo falla</a>
+<a href="#cables"><b>12</b>Qué va conectado</a>
+</nav>
+
+<section id=prender>
+<h2><span class=n>1</span>Prender</h2>
+<ol>
+<li>Enchufá los <b>auriculares</b> y fijate que la <b>cámara</b> y el <b>pulsador</b> estén conectados.</li>
+<li>Dale corriente. En unos 30 segundos aparece el inicio.</li>
+<li>Si arriba dice <span class=pt>Actualizar a …</span> en amarillo, hay una versión nueva (ver <a href="#actualizar" style="color:inherit">9</a>). No hace falta hacerlo antes de correr.</li>
+</ol>
+<p>En el inicio están: <span class=pt>Carreras</span> <span class=pt>Práctica</span> <span class=pt>Chequeo previo</span> <span class=pt>Clima</span> <span class=pt>Pantalla de carrera</span> <span class=pt>Cámara</span> <span class=pt>Wifi e informes</span> <span class=pt>Ajustes</span>.</p>
+<div class="ojo mal"><b>Si el botón Chequeo previo está en rojo</b> dice por qué: <i>Tensión baja</i> (la fuente no da suficiente: revisá el cable y el convertidor) o <i>Calor</i>.</div>
+</section>
+
+<section id=chequeo>
+<h2><span class=n>2</span>Chequeo previo</h2>
+<p>Hacelo siempre antes de largar. Cada renglón queda en verde si está bien.</p>
+<ul>
+<li><b>GPS:</b> tiene que decir los satélites y los metros de precisión. Abajo dice de dónde sacó la hora.</li>
+<li><b>Pulsador:</b> tocá el renglón y apretá el pulsador. Tiene que decir <i>Llegó por el pulsador</i>.</li>
+<li><b>Probar la voz:</b> tocá y escuchá por los auriculares.</li>
+<li><b>Tensión y Temperatura:</b> en rojo, revisá la fuente o el calor.</li>
+<li><b>Cámara y lugar:</b> tiene que decir <i>Lista</i> y no <i>Poco lugar</i>.</li>
+<li><b>Simulador:</b> tocá y esperá. <i>Simulador OK</i> es que el programa anda bien.</li>
+</ul>
+<p>Abajo, el botón dice <span class=bt>TODO LISTO</span> o lo que falta (por ejemplo <i>Falta el GPS</i>).</p>
+</section>
+
+<section id=cargar>
+<h2><span class=n>3</span>Cargar la carrera</h2>
+<h3>Una carrera</h3>
+<ol>
+<li>Inicio → <span class=pt>Carreras</span> → <span class=bt>+ Nueva carrera</span>.</li>
+<li>Completá <b>Nombre</b>, <b>Localidad</b> (para el clima), <b>Fecha</b>, <b>Tiempo ideal</b>, <b>Distancia</b> y qué vueltas son <b>Medidas</b> (Impares, Pares o Todas).</li>
+<li>Tocá <span class=bt>Guardar</span>.</li>
+</ol>
+<p>El día de la carrera aparece en <b>PRÓXIMAS</b> con el botón <span class=bt>IR A LARGAR</span>. Si está gris, dice por qué (por ejemplo <i>Se larga el 15 nov</i>).</p>
+<p>Para borrar una carrera, mantenela apretada.</p>
+<h3>Práctica</h3>
+<p>Inicio → <span class=pt>Práctica</span>. Poné el tiempo ideal (tocá los minutos o los segundos para escribirlos), la distancia y las medidas. Después <span class=bt>IR A LARGAR</span>.</p>
+<p><b>Recorrido libre:</b> sin vueltas ni tiempo. Sirve para medir un camino. Va en silencio.</p>
+</section>
+
+<section id=carrera>
+<h2><span class=n>4</span>En carrera</h2>
+<h3>Largar y marcar</h3>
+<ol>
+<li>Al pasar la largada, apretá el <b>pulsador</b> (o el botón grande <span class=bt>LARGAR</span> en la pantalla).</li>
+<li>Cada vez que pasás por el control, apretá de nuevo: es <span class=bt>MARCAR</span>.</li>
+</ol>
+<p>Vale el momento en que <b>apoyás el dedo</b>, no cuando soltás. Una marca muy pegada a la anterior no cuenta (se puede cambiar en Ajustes → Pulsador → <i>Ignorar 2.ª marca</i>).</p>
+<h3>La voz</h3>
+<ul>
+<li>Antes de cada vuelta dice <i>Vuelta 3, medida</i> o <i>libre</i>.</li>
+<li>Los últimos 20 segundos cuenta hacia atrás y en cero dice <i>cero</i>.</li>
+<li>Si se pierde el GPS, suena un <b>pitido largo</b>. Cuando vuelve, un <i>tic</i>.</li>
+</ul>
+<h3>La pantalla</h3>
+<ul>
+<li><b>Adelantado / atrasado:</b> verde adelantado, amarillo atrasado.</li>
+<li><b>Velocidad sugerida:</b> la que tenés que llevar para llegar justo.</li>
+<li><b>SIN GPS · seguí por tiempo:</b> sin señal, guiate por el cronómetro.</li>
+</ul>
+<p>Qué widgets se ven lo elegís en Inicio → <span class=pt>Pantalla de carrera</span>.</p>
+<h3>Terminar</h3>
+<p>Tocá <span class=bt>Terminar</span> <b>dos veces</b> (el primer toque dice <i>Tocá otra vez</i>). Se guarda todo y va directo al informe.</p>
+<div class=ojo>Para salir en plena carrera hay que terminarla: el equipo no te deja salir sin querer.</div>
+</section>
+
+<section id=informe>
+<h2><span class=n>5</span>El informe</h2>
+<ul>
+<li>Arriba: el <b>error total</b>, el promedio y la mejor vuelta.</li>
+<li><b>Mapa y gráfico:</b> con <b>doble toque</b> se abren a pantalla completa. Ahí se acerca con otro doble toque y se recorre arrastrando. La X cierra.</li>
+<li><b>Todas las vueltas:</b> tocá <i>MEDIDA</i> o <i>LIBRE</i> para cambiarla.</li>
+<li><b>Unir dos vueltas</b> (una marca de más): mantené apretada la vuelta 3 segundos → <i>Unir V5 con V6</i> → tocá de nuevo para confirmar.</li>
+<li>Si te equivocaste: menú <b>⋮</b> → <i>Restablecer la carrera original</i>.</li>
+</ul>
+<p>Las carreras viejas están en Inicio → <span class=pt>Carreras</span> → <b>CORRIDAS</b> → <span class=bt>Informe</span>.</p>
+</section>
+
+<section id=celu>
+<h2><span class=n>6</span>Pasarlo al celu</h2>
+<ol>
+<li>En el informe tocá <span class=bt>Compartir</span>.</li>
+<li>El celu tiene que estar en <b>la misma wifi</b> que dice la pantalla. Si es la red propia: <b>Betometro-101</b>, clave <b>betometro</b>.</li>
+<li>Abrí la cámara del celu y apuntá al código. Se abre el informe completo, con mapa, gráficos y video.</li>
+</ol>
+<p>Desde el celu también podés entrar a <b>Betómetro en la red</b>: en la red propia, escribí <b>10.42.0.1</b> en el navegador. Ahí están todas las carreras, la copia de la base, la Prueba completa y este manual.</p>
+</section>
+
+<section id=video>
+<h2><span class=n>7</span>Video</h2>
+<ul>
+<li>Se prende en Ajustes → <span class=pt>Cámara</span> → <i>Grabar</i>. Ahí elegís cuándo empieza: al abrir la carrera, en la largada o a mano.</li>
+<li>En carrera, arriba se ve <b>REC</b> con un punto rojo.</li>
+<li>Sigue grabando 10 segundos después de Terminar.</li>
+<li>Recién terminada, el informe dice <i>El video se está procesando</i>. En un momento se puede ver.</li>
+<li>Si la cámara falla al empezar, prueba sola de nuevo. Si se corta en carrera, sigue en otro archivo.</li>
+<li>Con poco lugar en la tarjeta, se para el video y <b>la carrera sigue</b>. Los videos viejos se borran solos para hacer lugar.</li>
+</ul>
+</section>
+
+<section id=wifi>
+<h2><span class=n>8</span>Wifi e internet</h2>
+<ul>
+<li><b>En casa:</b> Ajustes → <span class=pt>Conectividad</span> → <i>Buscar redes</i> → elegí tu wifi y poné la clave. La recuerda.</li>
+<li><b>En la ruta o en boxes:</b> si en 90 segundos no encuentra una red conocida, arma la suya: <b>Betometro-101</b>, clave <b>betometro</b>. Sirve para pasar informes al celu (no tiene internet).</li>
+<li>Con internet: se actualiza, baja el clima y sube a Google Drive.</li>
+<li><b>Google Drive:</b> Ajustes → <span class=pt>Google Drive</span> → <i>Conectar</i>, escaneá el QR y elegí tu cuenta. Sube los informes, los videos y una copia de todas las carreras cuando está en tu wifi.</li>
+</ul>
+</section>
+
+<section id=actualizar>
+<h2><span class=n>9</span>Actualizar</h2>
+<ol>
+<li>Conectado a una wifi con internet: Ajustes → <span class=pt>Actualizar</span> → <span class=bt>Buscar</span>.</li>
+<li>Si dice <i>Versión … disponible</i>, tocá <span class=bt>ACTUALIZAR</span>.</li>
+<li>Dice <i>Instalando… no la apagues: se reinicia sola</i>. Esperá: puede tardar unos minutos.</li>
+</ol>
+<p><b>Sin internet:</b> copiá el archivo <i>betometro-pi-….tar.gz</i> a un pendrive, enchufalo y tocá <span class=bt>Pendrive</span>.</p>
+<div class=ojo><b>No se puede romper:</b> si la versión nueva no anda, vuelve sola a la anterior y al prender te avisa <i>La versión nueva no arrancaba: se volvió a la …</i>. No se actualiza con una carrera en curso.</div>
+</section>
+
+<section id=apagar>
+<h2><span class=n>10</span>Apagar</h2>
+<p>Ajustes → <span class=bt>Apagar</span> → tocá <b>dos veces</b>. Esperá que la pantalla se apague antes de cortar la corriente.</p>
+<div class=ojo><b>Si se corta la llave de golpe:</b> no se rompe nada. Las vueltas ya cerradas quedan guardadas. Se pierde solo la vuelta que estaba en curso y, del video, los últimos segundos. En recorrido libre se guarda lo andado cada minuto.</div>
+</section>
+
+<section id=problemas>
+<h2><span class=n>11</span>Si algo falla</h2>
+<table>
+<tr><th>Lo que ves</th><th>Qué hacer</th></tr>
+<tr><td>Sin GPS / Sin señal</td><td>Esperá con el auto al aire libre (no bajo techo). La primera vez de un día puede tardar unos minutos. En carrera, seguí por tiempo.</td></tr>
+<tr><td>GPS: Sin comunicación</td><td>El módulo no contesta: revisá los cables del GPS. En Ajustes → Velocidad y GPS probá <i>Módulo GPS: Auto</i>.</td></tr>
+<tr><td>El pulsador no marca</td><td>Chequeo previo → Pulsador. Si no llega, revisá el cable (pines 9 y 11). Mientras, usá el botón MARCAR de la pantalla (Ajustes → Pulsador → <i>MARCAR en pantalla</i>).</td></tr>
+<tr><td>No se escucha la voz</td><td>Fijate que los auriculares estén bien enchufados. Ajustes → Voz y sonido → volumen y <i>Probar</i>.</td></tr>
+<tr><td>Sin cámara / La cámara se colgó</td><td>Desenchufá y enchufá la cámara. En Ajustes → Cámara tocá <i>Buscar</i>. La carrera sigue igual sin video.</td></tr>
+<tr><td>Poco lugar / No se puede guardar</td><td>Borrá videos viejos (Ajustes → Cámara → Videos). Si sigue, la tarjeta puede estar fallando.</td></tr>
+<tr><td>Tensión baja (⚡)</td><td>La fuente no da 5 V suficientes: revisá el convertidor y el cable. Puede frenarse o reiniciarse.</td></tr>
+<tr><td>Calor</td><td>Dale aire a la caja; no la dejes al sol.</td></tr>
+<tr><td>Se queda en la foto de arranque</td><td>Esperá 2 minutos. Si no arranca, cortá y volvé a dar corriente. Si vino de una actualización, vuelve sola a la anterior.</td></tr>
+<tr><td>Simulador: Hay errores / Revisar</td><td>Tocá el renglón y <i>Mandar el reporte al desarrollador</i>.</td></tr>
+<tr><td>Algo raro que no está acá</td><td>Ajustes → <b>Prueba completa</b>. La Pi se revisa sola en unos minutos y le manda el resultado al desarrollador.</td></tr>
+</table>
+</section>
+
+<section id=cables>
+<h2><span class=n>12</span>Qué va conectado</h2>
+<ul>
+<li><b>Auriculares:</b> en la salida de audio de la Raspberry (3,5 mm).</li>
+<li><b>Pulsador:</b> entre el pin <b>11</b> y el pin <b>9</b> de la Raspberry. Cable trenzado o mallado.</li>
+<li><b>GPS</b> (NEO-M8N): por los pines de la Raspberry, con la antena en el techo.</li>
+<li><b>Cámara:</b> una webcam USB.</li>
+<li><b>Corriente:</b> 5 V y al menos 2,5 A. En el auto, con un convertidor de 12 V a 5 V de 3 A.</li>
+</ul>
+</section>
+
+<p class=pie>Betómetro · Avispón Verde #101 · Matías Russo</p>
+</main></body></html>
