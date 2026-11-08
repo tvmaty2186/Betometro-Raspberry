@@ -131,6 +131,18 @@ Botones del celu solo desde nuestras páginas; Drive pide el código de la panta
 Manual del navegante (Prueba completa → Manual; celu /ayuda y /manual.pdf), botón Tienda en los dos inicios con
 lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en construcción» con salida.
 
+## Personalizar desde el celu (decidido con Matías, 08/11/2026) — muestras en `docs/muestras/personalizar/`
+- En la Pi (Ajustes → Pantalla y tema) un QR abre la página **Personalizar** en el celu, con 4 pestañas y la vista del
+  inicio en vivo (acostada / parada); recién se manda a la Pi con GUARDAR, y siempre está «De fábrica».
+- **Foto** del inicio: elegir del celu, mover con el dedo, pellizcar; acostada y parada por separado.
+- **Auto:** número y nombre.
+- **Colores** (tema propio, parte del **Deportivo**: gris casi negro + rojo + letras blancas): solo 3 → principal (fondo),
+  acento, letras (blanco / crema / negro). Aviso si hay poco contraste. Bandera a cuadros y brillo cromado siempre.
+  **Fijos, nunca cambian:** la barra de promedio (verde/amarillo/rojo), adelantado/atrasado (texto y caja), vuelta
+  medida/libre (rojo/verde), los avisos, y el modo sol. Letra fija (la del Avispón).
+- **Reloj:** 6 velocímetros para el inicio (Clásico 404, Deportivo, Digital, Rally, Aviación, Anillo).
+- Orden: 1.0.41 Personalizar + Foto + Auto; 1.0.42 Colores + Relojes.
+
 ## Tienda de herramientas (decidido con Matías, 08/11/2026)
 - Botón **Tienda** en los dos inicios y pantalla con 8 lugares punteados vacíos (publicado en la 1.0.35). Sin brújula por ahora.
 - Cada herramienta es un programa Qt para la Pi, en un paquete `.tar.gz` con su ícono y su ficha (nombre, versión, descripción).
