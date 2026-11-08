@@ -104,7 +104,7 @@ automática y el arranque.
 Arreglos de la auditoría 12: el pulsador ya no pierde una marca si el programa estaba ocupado; si una versión
 nueva se traba al abrir, vuelve sola a la anterior (con sus servicios); el instalador no queda en negro si
 falla adentro de una función; la hora no se corrige con la carrera en curso; documentos al día.
-**Falta:** el manual del navegante (página en la Pi y PDF, Matías 08/11) y la guía de SD nueva.
+**Falta:** la guía de SD nueva. El manual está hecho para la 1.0.35 (Prueba completa → Manual; celu /ayuda y /manual.pdf; si se cambia `recursos/web/ayuda.html`, rearmar el PDF con `node herramientas/manual-pdf.js`).
 
 ## 1.0.33 (publicada 08/11/2026)
 Los videos MP4 vuelven a tener sonido en el informe de la Pi (el reproductor buscaba el sonido solo al principio).

@@ -53,7 +53,7 @@ cap informe-unir --pantalla informe --carrera "Santa Clara" --prueba unir
 cap informe-menu --pantalla informe --carrera "Santa Clara" --prueba menu
 cap ajustes --pantalla ajustes
 # Las pantallas tablet (las que se ven después del inicio) y la carrera
-for p in practica carreras chequeo conectividad actualizar camara clima simulador; do cap "tablet-$p" --pantalla "$p"; done
+for p in practica carreras chequeo conectividad actualizar camara clima simulador prueba manual; do cap "tablet-$p" --pantalla "$p"; done
 cap ficha --pantalla ficha --carrera "Santa Clara"
 cap carrera --pantalla carrera --carrera "Gualeguaychú" --prueba largar
 cap inicio-tablet --pantalla inicio --prueba tablet

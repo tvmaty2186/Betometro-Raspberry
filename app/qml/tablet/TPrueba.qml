@@ -124,7 +124,7 @@ TPantalla {
         x: raiz.h ? izq.width + 20 : 0
         y: raiz.h ? 0 : izq.height + 16
         width: raiz.h ? 420 : raiz.area.width
-        height: raiz.h ? raiz.area.height - 2 * 136 : 300
+        height: raiz.h ? raiz.area.height - 3 * 116 : 300
         radius: Math.max(14, Tema.radio * 1.7)
         color: "#fbf7ea"; border { width: 3; color: Tema.bordeCromo }
         Image {
@@ -137,15 +137,22 @@ TPantalla {
     }
     TBoton {
         id: empezar
-        x: caja.x; y: caja.y + caja.height + 16; width: caja.width; height: raiz.h ? 120 : 106
+        x: caja.x; y: caja.y + caja.height + 16; width: caja.width; height: raiz.h ? 100 : 106
         tipo: "acento"; icono: ""; tamNombre: 27; activo: !raiz.corre
         nombre: raiz.corre ? "Probando…" : raiz.e ? "Probar de nuevo" : "Empezar la prueba"
         dato: raiz.corre ? "Paso " + PruebaCompleta.paso + " de " + PruebaCompleta.total : "Tarda 3 a 5 minutos"
         onTocado: if (!PruebaCompleta.correr()) Navegacion.avisar(PruebaCompleta.porQueNo())
     }
     TBoton {
-        x: caja.x; y: empezar.y + empezar.height + 16; width: caja.width; height: raiz.h ? 120 : raiz.area.height - y
+        id: mandar
+        x: caja.x; y: empezar.y + empezar.height + 16; width: caja.width; height: raiz.h ? 100 : 106
         icono: ""; tamNombre: 24; nombre: "Mandar el resultado al desarrollador"; activo: !!raiz.e && !raiz.corre
         onTocado: Navegacion.avisar(PruebaCompleta.mandar() ? "Mandando el resultado por internet" : "Sin llave para mandarlo: usá el QR con el celu")
+    }
+    // El manual del navegante queda dentro de la Pi (Matías, 08/11/2026)
+    TBoton {
+        x: caja.x; y: mandar.y + mandar.height + 16; width: caja.width; height: raiz.h ? 100 : raiz.area.height - y
+        icono: ""; tamNombre: 24; nombre: "Manual del navegante"; dato: "Cómo se usa · si algo falla"; activo: !raiz.corre
+        onTocado: Navegacion.ir("manual")
     }
 }

@@ -35,7 +35,7 @@ Window {
             // Las 10 versiones viejas de esas pantallas se borraron en la 1.0.29 (auditoría 01-1.1).
             readonly property var tablet: ({ inicio: "TInicio", practica: "TPractica", clima: "TClima", camara: "TCamara", drive: "TDrive",
                                               ajustes: "TAjustes", ajustesSeccion: "TAjustesSeccion", carreras: "TCarreras",
-                                              ficha: "TFicha", chequeo: "TChequeo", simulador: "TSimulador", prueba: "TPrueba", conectividad: "TConectividad", actualizar: "TActualizar" })
+                                              ficha: "TFicha", chequeo: "TChequeo", simulador: "TSimulador", prueba: "TPrueba", manual: "TManual", conectividad: "TConectividad", actualizar: "TActualizar" })
             source: {
                 if ((Navegacion.actual !== "inicio" || Tema.tablet) && tablet[Navegacion.actual]) return "tablet/" + tablet[Navegacion.actual] + ".qml";
                 switch (Navegacion.actual) {

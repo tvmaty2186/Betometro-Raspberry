@@ -2,7 +2,9 @@
 // Por ahora con datos de muestra; en las próximas partes de E2 se conecta con el núcleo.
 #pragma once
 
+#include <QFile>
 #include <QObject>
+#include <QRegularExpression>
 #include <QString>
 
 class Contexto : public QObject {
@@ -48,6 +50,30 @@ public:
     int satelites() const { return satelites_; }
     QString redWifi() const { return redWifi_; }
 
+    // El manual del navegante (recursos/web/ayuda.html, el mismo de /ayuda en el celu) en el HTML simple que entiende
+    // un Text de QML: sin índice ni cabecera, con los estilos puestos a mano (hoja clara, se lee con sol)
+    Q_INVOKABLE QString manual() const {
+        QFile f(QStringLiteral(":/recursos/web/ayuda.html"));
+        if (!f.open(QIODevice::ReadOnly)) return QStringLiteral("Falta el manual");
+        QString h = QString::fromUtf8(f.readAll());
+        const int a = h.indexOf(QLatin1String("</nav>")), b = h.indexOf(QLatin1String("<p class=pie>"));
+        if (a < 0 || b < a) return QStringLiteral("Falta el manual");
+        h = h.mid(a + 6, b - a - 6);
+        using R = QRegularExpression;
+        h.replace(R(QStringLiteral("<section[^>]*>|</section>")), QString());
+        h.replace(R(QStringLiteral("<a [^>]*>([^<]*)</a>")), QStringLiteral("\\1"));
+        h.replace(R(QStringLiteral("<h2><span class=n>([0-9]+)</span>")), QStringLiteral("<h2><span style=\"color:#b8860b\">\\1 · </span>"));
+        h.replace(QLatin1String("</span> <span class=pt>"), QStringLiteral("</span> · <span class=pt>"));   // los nombres en fila
+        h.replace(QLatin1String("<span class=bt>"), QStringLiteral("<span style=\"background-color:#f4c531;color:#14240f;font-style:italic\">&nbsp;"));
+        h.replace(QLatin1String("<span class=pt>"), QStringLiteral("<span style=\"color:#1d4a2c;font-style:italic\">"));
+        // Los recuadros: una tabla de una celda con fondo (el Text de QML no pinta el fondo de un div)
+        h.replace(R(QStringLiteral("<div class=\"?ojo( mal)?\"?>(.*?)</div>"), R::DotMatchesEverythingOption), QStringLiteral("<table width=\"100%\" cellpadding=\"12\"><tr><td bgcolor=\"#f3ecd2\">\\2</td></tr></table>"));
+        h.replace(QLatin1String("<table>"), QStringLiteral("<table width=\"100%\" cellpadding=\"6\" cellspacing=\"0\">"));
+        h.replace(QLatin1String("<th>"), QStringLiteral("<th align=\"left\" bgcolor=\"#e8e2cc\">"));
+        h.replace(QLatin1String("<h2>"), QStringLiteral("<h2 style=\"color:#1d4a2c\">"));
+        h.replace(QLatin1String("<h3>"), QStringLiteral("<h3 style=\"color:#8a6a00\">"));
+        return h;
+    }
     QString horaFuente() const { return horaFuente_; }
     void setHoraFuente(const QString& f) { if (f != horaFuente_) { horaFuente_ = f; emit horaFuenteChanged(); } }
 signals:

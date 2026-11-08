@@ -193,6 +193,13 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda, bool post) const {
         return respuesta(200, "application/json; charset=utf-8", QJsonDocument(r).toJson(QJsonDocument::Compact));
     }
     if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
+    // El manual del navegante (Matías, 08/11/2026): la página y el PDF para imprimir o guardar en el celu
+    if (ruta == QLatin1String("/ayuda")) return respuesta(200, "text/html; charset=utf-8", pagina_web("ayuda").toUtf8());
+    if (ruta == QLatin1String("/manual.pdf")) {
+        QFile f(QStringLiteral(":/recursos/manual.pdf"));
+        if (!f.open(QIODevice::ReadOnly)) return respuesta(404, "text/plain; charset=utf-8", "No está el manual");
+        return respuesta(200, "application/pdf", f.readAll());
+    }
     // La Prueba completa: la página, cómo va (JSON), el resultado legible y el botón «Empezar» (solo por POST, como /control/accion)
     if (ruta == QLatin1String("/prueba")) return respuesta(200, "text/html; charset=utf-8", pagina_web("prueba").toUtf8());
     if (ruta == QLatin1String("/prueba/estado"))
