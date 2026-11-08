@@ -209,6 +209,13 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
         pruebaMic_.clear();
         emit pruebaMicChanged();
     });
+    // Si no arranca (falta aplay o el ayudante), «finished» nunca llega: el botón quedaba trabado (auditoría 12)
+    connect(&micProc_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e) {
+        if (e != QProcess::FailedToStart) return;
+        qWarning("Cámara: la prueba del micrófono no pudo arrancar (%s)", qPrintable(micProc_.program()));
+        pruebaMic_.clear();
+        emit pruebaMicChanged();
+    });
     detectar();
 }
 

@@ -100,6 +100,13 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.38 (publicada 08/11/2026)
+Prueba completa: el wifi prueba la ANTENA (sin wifi o sin internet no es falla; falla solo si no está la placa o no
+ve ninguna red). Las pruebas abren 10 pantallas más (compartir, wifi, editor, Drive, ajustes, recorrido, gráfico y
+mapa a pantalla completa, vertical). Servicio más protegido (ProtectSystem, ProtectHome, PrivateTmp). Aviso «NO LO
+APAGUES» en pantalla mientras se rearma el arranque. Arreglos: prueba de micrófono trabada, archivo temporal de Drive,
+aviso del video en iPhone, mail de ejemplo, licencias ([LICENCIAS.md](LICENCIAS.md), también en el equipo).
+
 ## 1.0.37 (publicada 08/11/2026)
 La Tienda lee el catálogo de Betometro-tienda (vacío por ahora; una herramienta publicada ahí aparece sola).
 Inicio del velocímetro: orden invertido (Carreras arriba, Ajustes abajo) y más aire entre los botones.

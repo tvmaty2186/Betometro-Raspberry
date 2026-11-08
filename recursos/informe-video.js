@@ -95,7 +95,7 @@
  ['play','pause','ended'].forEach(e=>vv.addEventListener(e,estado));
  ['timeupdate','seeked','loadeddata'].forEach(e=>vv.addEventListener(e,actualizar));
  vv.addEventListener('loadedmetadata',()=>{rayas();actualizar()});
- vv.addEventListener('error',()=>{const m=$('vMsj');m.classList.remove('no');m.textContent=vv.error&&vv.error.code===4?'Este navegador no puede abrir el video. Probá con Chrome, o descargalo.':'No se pudo abrir el video (¿se borró?).'});
+ vv.addEventListener('error',()=>{const m=$('vMsj');m.classList.remove('no');m.textContent=vv.error&&vv.error.code===4?(/\.mkv(\?|$)/i.test(vv.currentSrc||'')?'El video todavía se está preparando para el celu. Probá en un rato, o descargalo.':'Este navegador no puede abrir el video. Probá con Chrome, o descargalo.'):'No se pudo abrir el video (¿se borró?).'});
  $('vPP').onclick=alternar;
  const completa=()=>{const fs=document.fullscreenElement||document.webkitFullscreenElement;
   if(fs){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return}

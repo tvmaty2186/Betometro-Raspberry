@@ -630,18 +630,47 @@ void PruebaCompleta::pasoTarjeta() {
 
 // 10) Wifi e internet: red conectada y un HEAD a github.com con tiempo límite
 void PruebaCompleta::pasoWifi() {
+    // Lo que se prueba es la ANTENA, no que haya wifi: en la ruta o en boxes puede no haber ninguna red y está bien
+    // (Matías, 08/11/2026). Falla solo si no aparece la placa de wifi o no se ve ninguna red cerca.
     const QString red = p_.wifi ? p_.wifi->conectada() : QString();
     const bool propia = p_.wifi && p_.wifi->propia();
     const QString ip = p_.wifi ? p_.wifi->direccion() : QString();
-    QStringList d;
-    d << (propia ? QStringLiteral("red propia «%1» (%2 celus conectados)").arg(p_.wifi->nombrePropia()).arg(p_.wifi->conectadosPropia())
-                 : red.isEmpty() ? QStringLiteral("sin wifi") : QStringLiteral("wifi «%1», %2 de 4 rayitas").arg(red).arg(p_.wifi->senal()));
-    if (!ip.isEmpty()) d << QStringLiteral("IP %1").arg(ip);
-    if (propia || red.isEmpty()) {
-        d << QStringLiteral("sin internet: no se actualiza ni se mandan reportes");
-        terminarPaso(kLeve, d.join(QStringLiteral(" · ")));
+    if (raspberry() && !QFileInfo::exists(QStringLiteral("/sys/class/net/wlan0"))) {
+        terminarPaso(kGrave, QStringLiteral("no aparece la placa de wifi (wlan0): revisar la antena o el sistema"));
         return;
     }
+    QStringList d;
+    if (propia) {   // la red propia andando ya prueba la antena
+        d << QStringLiteral("antena bien: red propia «%1» armada (%2 celus conectados)").arg(p_.wifi->nombrePropia()).arg(p_.wifi->conectadosPropia());
+        if (!ip.isEmpty()) d << QStringLiteral("IP %1").arg(ip);
+        d << QStringLiteral("sin internet (no es una falla)");
+        terminarPaso(kOk, d.join(QStringLiteral(" · ")));
+        return;
+    }
+    if (red.isEmpty()) {   // sin conexión: se mira si la antena ve redes
+        const auto cuantas = [this] {
+            int n = p_.wifi ? static_cast<int>(p_.wifi->cerca().size()) : 0;
+            if (p_.wifi) for (const QVariant& g : p_.wifi->guardadas()) if (g.toMap().value("cerca").toBool()) ++n;
+            return n;
+        };
+        auto cerrar = [this, cuantas] {
+            const int n = cuantas();
+            if (n > 0) terminarPaso(kOk, QStringLiteral("antena bien: %1 %2 a la vista · sin conexión (no es una falla)").arg(n).arg(n == 1 ? QStringLiteral("red") : QStringLiteral("redes")));
+            else if (p_.wifi && !p_.wifi->redes()) terminarPaso(kOk, QStringLiteral("placa de wifi presente · «Conectarse a redes wifi» está apagado: no se buscó"));
+            else terminarPaso(kLeve, QStringLiteral("no se ve ninguna red cerca: puede ser el lugar (sin wifi alrededor) o la antena"));
+        };
+        if (cuantas() > 0 || !p_.wifi || !p_.wifi->redes()) { cerrar(); return; }
+        haciendo_ = QStringLiteral("Buscando redes con la antena…");
+        emit cambio();
+        p_.wifi->buscar();
+        auto* espera = new QTimer(vivo_);
+        espera->setSingleShot(true);
+        connect(espera, &QTimer::timeout, this, cerrar);
+        espera->start(rapida() ? 500 : 12000);
+        return;
+    }
+    d << QStringLiteral("antena bien: wifi «%1», %2 de 4 rayitas").arg(red).arg(p_.wifi->senal());
+    if (!ip.isEmpty()) d << QStringLiteral("IP %1").arg(ip);
     haciendo_ = QStringLiteral("Probando internet…");
     emit cambio();
     auto* red_ = new QNetworkAccessManager(vivo_);
@@ -654,8 +683,8 @@ void PruebaCompleta::pasoWifi() {
         r->deleteLater();
         const bool internet = r->error() == QNetworkReply::NoError || r->attribute(QNetworkRequest::HttpStatusCodeAttribute).isValid();
         d << (internet ? QStringLiteral("internet: sí, github.com contestó en %1 ms").arg(t.elapsed())
-                       : QStringLiteral("internet: NO (%1)").arg(r->errorString()));
-        terminarPaso(internet ? kOk : kLeve, d.join(QStringLiteral(" · ")));
+                       : QStringLiteral("esa wifi no tiene internet ahora (no es una falla del equipo)"));
+        terminarPaso(kOk, d.join(QStringLiteral(" · ")));
     });
 }
 

@@ -14,9 +14,9 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
       No corre en carrera. En la PC los pasos de hardware dicen «no se puede en la PC» (naranja).
 - [ ] Pasarle a Matías los comandos para pegar por ssh y anotar los números: peso de la base y procesador de la
       cámara (04, sección 4, pasos A y B); arranque, servicios y lugar ocupado (10, «Para mirar en la Pi»).
-- [ ] Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
+- [x] (1.0.38) Blindar el servicio sin dejar de ser root (`ProtectSystem=full`, `ProtectHome=yes`, `PrivateTmp=yes`),
       probándolo en la Pi (10-1.5 b).
-- [ ] Firmar los paquetes de actualización (opcional, medio) (10-3).
+- [x] (1.0.36) Firmar los paquetes de actualización: la Pi compara el .sha256 del release (10-3).
 - [x] Carrera y recorrido libre de punta a punta con `simular_neo` en las pruebas (09 P3). Hecho: prueba `carrera_simulada`
       (`pruebas/programa/prueba_carrera.cpp`): `simular_neo --fija` por un puerto virtual, el `GpsNeo` real y el `Crono`
       con el reloj de verdad; 3 vueltas de 6, 8 y 10 s a 48 km/h; chequea vueltas, tiempos (±0,15 s), distancias (±3 %),
@@ -67,7 +67,7 @@ Commits intermedios con `[skip ci]`; publicar al final con el OK de Matías.
       velocidad constante. Falta el Chequeo previo.
 - [x] **Voz guardada en el repo** (los WAV), para no depender de edge-tts ni de la caché de 7 días de GitHub
       (Matías: sí) (A-1.4).
-- [ ] Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
+- [x] (1.0.38) Arranque: que «no apagues» se vea mientras se rearma la foto de arranque (A-3).
 - [x] **Gráficos del informe a pantalla completa (Pi y celu)** (muestras aprobadas en `docs/muestras/1.0.30/graficos/`).
       Doble toque sobre el gráfico de velocidad o el mapa del informe → pantalla completa acostada (de pie se ve girada):
       cuadrícula cada 100 m y 5 km/h, todas las lecturas con color por tramo, raya por vuelta con tiempo y error,

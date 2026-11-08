@@ -36,6 +36,12 @@ Environment=BETO_VOZ=/usr/share/betometro/voz
 Environment=QT_FFMPEG_DECODING_HW_DEVICE_TYPES=,
 RuntimeDirectory=betometro
 StateDirectory=betometro
+# Más protegido sin dejar de ser root (auditoría 10-1.5 y 12): /usr, /boot y /etc de solo lectura, sin /home y con
+# su propio /tmp. Betómetro escribe solo en /var/lib/betometro y /run/betometro (el pendrive se monta ahí). El
+# instalador corre aparte (systemd-run), sin estas limitaciones.
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=yes
 # La foto de arranque queda en pantalla hasta que Betómetro dibuja (sin parpadeo negro)
 ExecStartPre=-/usr/bin/plymouth quit --retain-splash
 ExecStart=/usr/bin/betometro --fisica

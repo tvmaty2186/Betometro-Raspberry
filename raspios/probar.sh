@@ -58,6 +58,17 @@ cap ficha --pantalla ficha --carrera "Santa Clara"
 cap carrera --pantalla carrera --carrera "Gualeguaychú" --prueba largar
 cap inicio-tablet --pantalla inicio --prueba tablet
 cap salir-de-practica --pantalla carrera --prueba salir   # Salir sin largar vuelve a Práctica (no a «nueva carrera»)
+# Las que faltaban (auditoría 12): así un módulo que falta no deja ninguna pantalla en negro sin que se note
+cap compartir --pantalla compartir --carrera "Santa Clara"
+cap wifi-clave --pantalla wifi
+cap editor --pantalla editor
+cap drive --pantalla drive
+cap ajustes-voz --pantalla ajustesSeccion --prueba tablet-voz
+cap recorrido --pantalla carrera --prueba recorrido
+cap informe-grafico --pantalla informe --carrera "Santa Clara" --prueba grafico
+cap informe-mapa --pantalla informe --carrera "Santa Clara" --prueba mapa
+cap carrera-vertical --pantalla carrera --carrera "Gualeguaychú" --prueba largar --orientacion v
+cap inicio-vertical --pantalla inicio --orientacion v
 ls -la salida-pi/capturas
 [ "$faltan" = 0 ] || { echo "MAL: faltan capturas (una pantalla no abre)"; exit 1; }
 

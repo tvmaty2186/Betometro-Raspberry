@@ -17,7 +17,9 @@ cmake --build build-pi
 rm -rf salida-pi/raiz
 DESTDIR="$PWD/salida-pi/raiz" cmake --install build-pi --prefix /usr
 test -x salida-pi/raiz/usr/bin/betometro
-mkdir -p salida-pi/raiz/usr/share/betometro/voz
+mkdir -p salida-pi/raiz/usr/share/betometro/voz salida-pi/raiz/usr/share/betometro/licencias
+# Las licencias de las tipografías van con el equipo (la OFL lo pide) (auditoría 12)
+cp LICENCIAS.md docs/licencias/*.txt salida-pi/raiz/usr/share/betometro/licencias/
 if ls salida-pi/voz/elena/*.wav >/dev/null 2>&1; then
   cp -r salida-pi/voz/. salida-pi/raiz/usr/share/betometro/voz/
 else

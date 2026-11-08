@@ -90,7 +90,7 @@ Drive::Drive(Datos* datos, const QString& carpetaDatos, const QString& prueba, Q
         else if (q == QLatin1String("codigo")) { estado_ = QStringLiteral("codigo"); codigo_ = QStringLiteral("BXRT-KQWM"); }
         else {
             estado_ = QStringLiteral("conectado");
-            cuenta_ = QStringLiteral("tvmaty2186@gmail.com");
+            cuenta_ = QStringLiteral("ejemplo@gmail.com");
             if (q == QLatin1String("subiendo")) { subiendo_ = true; progreso_ = 0.45; texto_ = QStringLiteral("Subiendo Santa Clara · video 45 %"); }
             else if (q == QLatin1String("esperando")) texto_ = QStringLiteral("Esperando wifi de casa para los videos (3 videos, 2,1 GB)");
             else if (q == QLatin1String("error")) { texto_ = QStringLiteral("Faltan subir 2 archivos"); error_ = QStringLiteral("Drive lleno"); }
@@ -217,7 +217,7 @@ void Drive::conectar() {
         avisar();
         QTimer::singleShot(10000, this, [this] {
             if (estado_ != QLatin1String("codigo")) return;
-            estado_ = QStringLiteral("conectado"); cuenta_ = QStringLiteral("tvmaty2186@gmail.com"); codigo_.clear();
+            estado_ = QStringLiteral("conectado"); cuenta_ = QStringLiteral("ejemplo@gmail.com"); codigo_.clear();
             actualizarTexto(); avisar();
         });
         return;
@@ -748,6 +748,7 @@ void Drive::terminoArchivo(const QByteArray& cuerpo) {
 
 void Drive::fallar(const QString& texto) {
     if (curl_) { curl_->disconnect(this); curl_->kill(); curl_->deleteLater(); curl_ = nullptr; }
+    QFile::remove(carpeta_ + QStringLiteral("/.drive-curl"));   // tiene el token de 1 h: no queda tirado (auditoría 12)
     delete leyendo_;
     leyendo_ = nullptr;
     if (!texto.isEmpty()) error_ = texto;

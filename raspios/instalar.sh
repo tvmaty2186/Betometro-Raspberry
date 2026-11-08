@@ -193,6 +193,11 @@ if command -v plymouth-set-default-theme >/dev/null; then
   # Si cambió la foto o el tema, se rearma el arranque (la foto va adentro del initramfs)
   if [ "$(plymouth-set-default-theme)" != betometro ] || [ "$cambio" = 1 ]; then
     echo "   (rearmando el arranque: tarda unos minutos, no apagues)"
+    # Que se vea en la pantalla (Betómetro está parado): letras grandes y el aviso (auditoría 11A-3 / 12)
+    { f=/usr/share/consolefonts/Lat15-TerminusBold32x16.psf.gz
+      if [ -f "$f" ]; then setfont -C /dev/tty1 "$f" || true; fi
+      printf '\033c\033[?25l\n\n\n   ACTUALIZANDO BETOMETRO\n\n   NO LO APAGUES\n\n   Tarda unos minutos y se reinicia solo.\n' > /dev/tty1
+      chvt 1 || true; } 2>/dev/null || true
     plymouth-set-default-theme -R betometro || { plymouth-set-default-theme betometro; update-initramfs -u; } || true
   fi
 fi
