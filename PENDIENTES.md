@@ -100,6 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.40 (publicada 08/11/2026)
+Barras de velocidad y tiempo con una flecha blanca (negra en sol) centrada sobre la barra; los números de los botones
+− / + se achican si no entran (en Cabina la fecha pisaba los botones); el código de Google siempre entra en el
+recuadro; pruebas con capturas en Cabina además del Avispón.
+
 ## 1.0.39 (publicada 08/11/2026)
 Modo tele: el sonido del video vuelve a salir por la tele (directo por ALSA, `hdmi:CARD=vc4hdmi`). Desde la 1.0.28
 PulseAudio no mira la tele y la búsqueda de la salida fallaba: el sonido iba a los auriculares. Fuera del modo tele,
