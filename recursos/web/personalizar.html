@@ -55,6 +55,7 @@ input[type=range]{width:100%;accent-color:#f4c531}
 <div id=marcoVista><div id=pant></div></div>
 
 <section id=t-foto>
+ <div class="aviso ojo oculto avNota">El tema Avispón Verde siempre usa su foto, número y nombre originales. Lo tuyo se ve con los otros temas y con el tuyo (pestaña Colores).</div>
  <p class=ayuda>Arrastrá la foto con el dedo y pellizcá para agrandarla. Lo de afuera del marco amarillo no se ve.</p>
  <h3>TAMAÑO</h3><input type=range id=zoom min=1 max=4 step=0.01 value=1>
  <label class="bt a" style="margin-top:12px">📷 ELEGIR FOTO<input type=file id=archivo accept="image/*" hidden></label>
@@ -62,6 +63,7 @@ input[type=range]{width:100%;accent-color:#f4c531}
  <p class=ayuda>La acostada y la parada se acomodan por separado.</p>
 </section>
 <section id=t-auto class=oculto>
+ <div class="aviso ojo oculto avNota">El tema Avispón Verde siempre usa su foto, número y nombre originales. Lo tuyo se ve con los otros temas y con el tuyo (pestaña Colores).</div>
  <h3>NÚMERO DEL AUTO</h3><input type=number id=numero inputmode=numeric maxlength=4>
  <h3>NOMBRE DEL AUTO</h3><input type=text id=nombre maxlength=30>
 </section>
@@ -133,15 +135,17 @@ function dibujar(){
   $('marcoVista').style.width=M.W*k+'px';$('marcoVista').style.height=M.H*k+'px';
   p.style.width=M.W+'px';p.style.height=M.H+'px';p.style.transform=`scale(${k})`;p.dataset.k=k;
   p.style.background=`radial-gradient(120% 80% at 25% 0%,${c.f1} 0%,${c.f2} 40%,${c.f3} 100%)`;
-  const f=foto[o],src=f.fabrica?'/personalizar/fabrica.jpg':f.src;
-  let h=`<div class=foto style="left:${M.x}px;top:${M.y}px;width:${M.w}px;height:${M.h}px"><img id=img src="${src}" style="transform:translate(${f.x}px,${f.y}px) scale(${f.s})">`+
+  // El Avispón Verde es del 101 de Matías: siempre su foto, número y nombre originales (08/11/2026)
+  const av=est.tema==='avispon',f=foto[o],src=av||f.fabrica?'/personalizar/fabrica.jpg':f.src;
+  const estImg=av?`width:100%;height:100%;object-fit:cover;object-position:50% ${o==='h'?18:15}%;transform:none`:`transform:translate(${f.x}px,${f.y}px) scale(${f.s})`;
+  let h=`<div class=foto style="left:${M.x}px;top:${M.y}px;width:${M.w}px;height:${M.h}px"><img id=img src="${src}" style="${estImg}">`+
     (o==='h'?`<div class=fundeD style="right:0;top:0;bottom:0;width:25%;background:linear-gradient(90deg,transparent,${c.f2})"></div>`:'')+
     `<div class=fundeA style="left:0;right:0;bottom:0;height:${o==='h'?30:20}%;background:linear-gradient(transparent,${c.f2})"></div></div>`;
   h+=`<div class=marcoAm style="left:${M.x}px;top:${M.y}px;width:${M.w}px;height:${M.h}px;display:${est.tab==='foto'?'block':'none'}"></div>`;
   h+=`<div class=barra style="background:linear-gradient(${c.f3},${c.f3}ee);border-bottom:3px solid ${c.acento}"><img src=/r/leon.png><b style="color:${c.letras}">BETÓMETRO</b><span class=h style="color:${c.letras}">12:00</span></div>`;
   const conNum=est.tema==='avispon'||est.tema==='propio';
-  if(conNum)h+=`<div class=num style="left:${o==='h'?40:28}px;top:${o==='h'?510:430}px;width:120px;height:120px">${(est.numero||'101').slice(0,4)}</div>`;
-  h+=`<div class=nom style="left:${o==='h'?190:28}px;top:${o==='h'?600:556}px;color:${c.letras}">${(est.nombre||'').replace(/</g,'')}</div>`;
+  if(conNum)h+=`<div class=num style="left:${o==='h'?40:28}px;top:${o==='h'?510:430}px;width:120px;height:120px">${av?'101':(est.numero||'101').slice(0,4)}</div>`;
+  h+=`<div class=nom style="left:${o==='h'?190:28}px;top:${o==='h'?600:556}px;color:${c.letras}">${av?'Avispón Verde':(est.nombre||'').replace(/</g,'')}</div>`;
   for(let i=0;i<7;i++){
     const a=(o==='h'?104+i*21:272-i*21.5)*Math.PI/180,cx=o==='h'?1090+Math.cos(a)*310:629+Math.cos(a)*397,cy=o==='h'?436-Math.sin(a)*310:918+Math.sin(a)*397,d=o==='h'?76:96;
     const borde=est.tema==='avispon'?'#cfd4d8':c.acento;
@@ -198,6 +202,7 @@ function pintarControles(){
   else{cx.className='aviso bien';cx.textContent='✓ Se lee bien';}
   const rs=$('relojes');if(!rs.children.length){for(const[v,n]of RELOJES){const b=document.createElement('button');b.dataset.r=v;b.innerHTML=`<svg></svg>${n}`;b.onclick=()=>{est.reloj=v;est.cambios.reloj=true;dibujar();};rs.appendChild(b);}}
   $('relojNota').classList.toggle('oculto',est.tema==='propio');
+  document.querySelectorAll('.avNota').forEach(n=>n.classList.toggle('oculto',est.tema!=='avispon'));
   rs.querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.r===est.reloj);reloj(b.querySelector('svg'),b.dataset.r||relojDelTemaBase(),c.acento);});
 }
 function relojDelTemaBase(){return est.tema==='propio'||est.tema==='sport'?'deportivo':est.tema==='rally'?'rally':est.tema==='cabina'?'aviacion':'clasico';}

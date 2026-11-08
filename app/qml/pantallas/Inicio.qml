@@ -31,11 +31,12 @@ Item {
     TBarra { }
 
     Banda { visible: Tema.avispon; x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
-    Numero101 { visible: Tema.avispon || Tema.propio; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
+    Numero101 { visible: Tema.avispon || Tema.propio; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Tema.avispon ? "101" : (Datos.ajustes.numeroAuto || "101") }
     Text {
         id: nombreAuto
         x: raiz.h ? 190 : 28; y: raiz.h ? 600 : 556
-        text: Datos.ajustes.nombreAuto || ""
+        // El Avispón Verde es el 101 de Matías: número y nombre originales siempre
+        text: Tema.avispon ? "Avispón Verde" : (Datos.ajustes.nombreAuto || "")
         color: Tema.tinta
         style: Text.Raised; styleColor: "#000"
         font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.h ? 30 : 28 }

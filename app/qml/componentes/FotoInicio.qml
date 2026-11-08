@@ -9,7 +9,8 @@ Canvas {
     property real fundeDerecha: 0.75   // 1 = no funde
     property real fundeAbajo: 0.70
     // La foto propia (Personalizar) ya viene recortada a la medida del marco; si no hay, la de fábrica
-    readonly property string propia: Contexto.horizontal ? Contexto.fotoH : Contexto.fotoV
+    // El Avispón Verde siempre con su foto original (Matías, 08/11/2026: es de su auto)
+    readonly property string propia: Tema.avispon ? "" : (Contexto.horizontal ? Contexto.fotoH : Contexto.fotoV)
     readonly property string archivo: propia || "qrc:/recursos/img/inicio.jpg"
     onArchivoChanged: { loadImage(archivo); requestPaint(); }
     Component.onCompleted: loadImage(archivo)

@@ -98,7 +98,7 @@ Item {
     CabeceraInforme {
         h: raiz.h; c: raiz.c; rec: raiz.rec; marcas: raiz.marcas; vueltas: raiz.vueltas; dist: raiz.dist
         conVideo: raiz.videos.length > 0; verVideo: raiz.verVideo; botonTele: raiz.botonTele; enTele: raiz.enTele
-        numero: Datos.ajustes.numeroAuto || "101"
+        numero: Tema.avispon ? "101" : (Datos.ajustes.numeroAuto || "101")
         onVolver: Navegacion.ir("ficha", { id: raiz.id_ })
         onVerEnTele: raiz.verEnTele()
         onElegirVideo: (v) => { if (v && raiz.procesando) { Navegacion.avisar("El video se está procesando: en un momento se puede ver"); return; } raiz.verVideo = v; }
