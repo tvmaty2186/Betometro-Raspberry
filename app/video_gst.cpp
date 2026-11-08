@@ -159,6 +159,30 @@ void VideoGst::setSonidoTele(bool si) {
     if (andaba) play(); else pause();
 }
 
+namespace {
+// El índice de un MP4 («moov», donde dice si hay sonido) puede estar al final: los que pasa Betómetro a MP4
+// lo tienen al final (faststart=false). Se recorren las cajas de arriba hasta encontrarlo y se lee entero.
+// Antes se miraba solo el primer mega: los MP4 se veían mudos en la Pi (Matías, 08/11/2026).
+QByteArray indiceMp4(QFile& a) {
+    qint64 pos = 0;
+    const qint64 total = a.size();
+    while (pos + 8 <= total) {
+        if (!a.seek(pos)) break;
+        const QByteArray h = a.read(16);
+        if (h.size() < 8) break;
+        const auto u32 = [&h](int i) { return (quint32(uchar(h[i])) << 24) | (quint32(uchar(h[i + 1])) << 16) | (quint32(uchar(h[i + 2])) << 8) | quint32(uchar(h[i + 3])); };
+        qint64 tam = u32(0);
+        int cab = 8;
+        if (tam == 1 && h.size() >= 16) { tam = (qint64(u32(8)) << 32) | u32(12); cab = 16; }
+        else if (tam == 0) tam = total - pos;   // hasta el final
+        if (tam < cab) break;
+        if (h.mid(4, 4) == "moov") { a.seek(pos); return a.read(qMin<qint64>(tam, 64LL * 1024 * 1024)); }
+        pos += tam;
+    }
+    return {};
+}
+}  // namespace
+
 void VideoGst::abrir() {
     cuadros_ = 0;
     const QString ruta = source_.toLocalFile();
@@ -168,12 +192,14 @@ void VideoGst::abrir() {
         ponerMedio(Invalido);
         return;
     }
-    // ¿Tiene sonido? (sin sonido, una rama de audio vacía no dejaría arrancar). El índice está al principio.
+    // ¿Tiene sonido? (sin sonido, una rama de audio vacía no dejaría arrancar). En un MP4 se mira su índice (puede estar al final).
     const QByteArray cabeza = a.read(1024 * 1024);
-    a.close();
-    const bool sonido = cabeza.contains("mp4a") || cabeza.contains("A_OPUS") || cabeza.contains("A_AAC") || cabeza.contains("Opus");
     // MP4 o Matroska: por lo que tiene adentro (no por el nombre)
     const bool mp4 = cabeza.mid(4, 4) == "ftyp" || (!cabeza.startsWith("\x1a\x45\xdf\xa3") && ruta.endsWith(QLatin1String(".mp4"), Qt::CaseInsensitive));
+    const QByteArray indice = mp4 ? indiceMp4(a) : QByteArray();
+    a.close();
+    const auto conSonido = [](const QByteArray& b) { return b.contains("mp4a") || b.contains("A_OPUS") || b.contains("A_AAC") || b.contains("Opus"); };
+    const bool sonido = conSonido(cabeza) || conSonido(indice);
     // Descompresor: el chip de la Raspberry si está; si no, el que haya.
     // La etiqueta de color: las webcams MJPEG graban con la de las fotos (rango completo, «1:4:0:0») y el chip
     // no la acepta: se queda esperando sin decir nada (probado en la Pi de Matías, 06/11/2026). Se le pone
