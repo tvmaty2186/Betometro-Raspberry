@@ -32,9 +32,12 @@ main{max-width:520px;margin:auto;padding:0 12px 40px}
 .nom{position:absolute;font:800 italic 30px Barlow;white-space:nowrap}
 h3{font:800 italic 14px Barlow;letter-spacing:.12em;color:#b9cdb8;margin:14px 0 6px}
 .ayuda{color:#b9cdb8;font-size:14px;font-style:italic;text-align:center;margin:4px 0}
-.pal{display:flex;flex-wrap:wrap;gap:8px}
-.pal button{width:40px;height:40px;border-radius:50%;border:3px solid #ffffff44;padding:0}
-.pal button.on{border:4px solid #fff;box-shadow:0 0 0 2px #000}
+#panal{width:100%;display:block;margin:10px auto 0;touch-action:manipulation}
+#grises{display:flex;gap:4px;justify-content:center;margin-top:6px}
+#grises button{width:30px;height:30px;border-radius:7px;border:1px solid #0008;padding:0}
+#grises button.on{border:3px solid #fff;box-shadow:0 0 0 2px #000}
+#elegidos{display:flex;gap:14px;justify-content:center;margin:10px 0;font:700 14px Barlow;color:#fff}
+#elegidos i{display:inline-block;width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-left:4px;border:2px solid #fff}
 input[type=text],input[type=number]{width:100%;padding:12px;border-radius:12px;border:2px solid #cfd4d8;background:#08190e;color:#fff;font:800 italic 22px Barlow}
 input[type=range]{width:100%;accent-color:#f4c531}
 .bt{display:block;width:100%;margin:10px 0;padding:14px;border-radius:14px;text-align:center;font:800 italic 19px Barlow;border:2px solid #f4c531;background:transparent;color:#f4c531}
@@ -68,8 +71,10 @@ input[type=range]{width:100%;accent-color:#f4c531}
  <h3>NOMBRE DEL AUTO</h3><input type=text id=nombre maxlength=30>
 </section>
 <section id=t-colores class=oculto>
- <h3>PRINCIPAL (FONDO)</h3><div class=pal id=palFondo></div>
- <h3>ACENTO</h3><div class=pal id=palAcento></div>
+ <h3>¿QUÉ PINTÁS?</h3><div class=seg id=que><button data-q=fondo class=on>Principal (fondo)</button><button data-q=acento>Acento</button></div>
+ <svg id=panal></svg>
+ <div id=grises></div>
+ <div id=elegidos></div>
  <h3>LETRAS</h3><div class=seg id=letras><button data-l=blanco>Blanco</button><button data-l=crema>Crema</button><button data-l=negro>Negro</button></div>
  <div id=contraste class=aviso></div>
  <p class=ayuda>Los colores de aviso (verde, amarillo y rojo) y el modo sol no cambian.</p>
@@ -184,16 +189,29 @@ $('fotoFabrica').onclick=()=>{const o=est.orient;Object.assign(foto[o],{fabrica:
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{est.tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
   for(const t of['foto','auto','colores','reloj'])$('t-'+t).classList.toggle('oculto',t!==est.tab);dibujar();});
 document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{est.orient=b.dataset.o;document.querySelectorAll('#orient button').forEach(x=>x.classList.toggle('on',x===b));dibujar();});
-const FONDOS=['#1a1c1f','#1d5233','#14305c','#5a1218','#3a2a14','#3c1d5a','#0e1215','#e9e6dc'],ACENTOS=['#e10600','#f4c531','#ff8c1a','#2fd162','#29b6f6','#ff4fd8','#f7f7f2','#9aa3ad'];
-function paleta(id,lista,clave){$(id).innerHTML='';for(const col of lista){const b=document.createElement('button');b.style.background=col;b.onclick=()=>{est.tema='propio';est.propio[clave]=col;est.cambios.tema=true;dibujar();};$(id).appendChild(b);}}
-paleta('palFondo',FONDOS,'fondo');paleta('palAcento',ACENTOS,'acento');
+// Panal de 127 colores + 9 grises (Matías, 08/11/2026: «más colores»). Blanco al centro; el tono gira y se oscurece hacia afuera.
+const PANAL=(()=>{const N=6,R=13.5,W=Math.sqrt(3)*R,out=[];
+  const hsl=(h,s,l)=>{s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return'#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');};
+  const hex=(cx,cy)=>{let d='';for(let i=0;i<6;i++){const a=(60*i-30)*Math.PI/180;d+=(i?'L':'M')+(cx+R*.94*Math.cos(a)).toFixed(1)+' '+(cy+R*.94*Math.sin(a)).toFixed(1);}return d+'Z';};
+  for(let q=-N;q<=N;q++)for(let r=-N;r<=N;r++){const t=-q-r;if(Math.abs(t)>N)continue;const d=Math.max(Math.abs(q),Math.abs(r),Math.abs(t)),x=W*(q+r/2),y=1.5*R*r;
+    out.push({d:hex(x,y),col:d===0?'#ffffff':hsl((Math.atan2(y,x)*180/Math.PI+450)%360,d>4?85:100,96-d*12)});}
+  const ws=W*(2*N+1)+4,hs=3*R*N+2*R+4;$('panal').setAttribute('viewBox',`${-ws/2} ${-hs/2} ${ws} ${hs}`);return out;})();
+const GRISES=[...Array(9)].map((_,i)=>{const v=Math.round(255-i*255/8).toString(16).padStart(2,'0');return'#'+v+v+v;});
+let pinta='fondo';
+function elegirColor(col){if(!col)return;est.tema='propio';est.propio[pinta]=col;est.cambios.tema=true;dibujar();}
+$('panal').onclick=e=>elegirColor(e.target.dataset&&e.target.dataset.c);
+$('grises').innerHTML=GRISES.map(g=>`<button data-c="${g}" style="background:${g}"></button>`).join('');
+$('grises').onclick=e=>elegirColor(e.target.dataset&&e.target.dataset.c);
+document.querySelectorAll('#que button').forEach(b=>b.onclick=()=>{pinta=b.dataset.q;document.querySelectorAll('#que button').forEach(x=>x.classList.toggle('on',x===b));dibujar();});
 document.querySelectorAll('#letras button').forEach(b=>b.onclick=()=>{est.tema='propio';est.propio.letras=b.dataset.l;est.cambios.tema=true;dibujar();});
 $('temaFabrica').onclick=()=>{est.tema='avispon';est.cambios.tema=true;dibujar();};
 const RELOJES=[['','El del tema'],['clasico','Clásico 404'],['deportivo','Deportivo'],['digital','Digital'],['rally','Rally'],['aviacion','Aviación'],['anillo','Anillo']];
 function pintarControles(){
   const p=est.propio,pr=est.tema==='propio',c=colores();
-  $('palFondo').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',pr&&FONDOS[i]===p.fondo));
-  $('palAcento').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',pr&&ACENTOS[i]===p.acento));
+  const ac=pr?p[pinta]:'';
+  $('panal').innerHTML=[...PANAL].sort((a,b)=>(a.col===ac)-(b.col===ac)).map(h=>`<path d="${h.d}" fill="${h.col}" data-c="${h.col}" stroke="${h.col===ac?'#fff':'#0008'}" stroke-width="${h.col===ac?3.5:.8}"/>`).join('');
+  $('grises').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.c===ac));
+  $('elegidos').innerHTML=`<span>Fondo<i style="background:${pr?p.fondo:c.f2}"></i></span><span>Acento<i style="background:${pr?p.acento:c.acento}"></i></span>`;
   document.querySelectorAll('#letras button').forEach(b=>b.classList.toggle('on',pr&&b.dataset.l===p.letras));
   const r1=contraste(c.letras,c.f2),r2=contraste(c.acento,c.f2),cx=$('contraste');
   if(!pr){cx.className='aviso ojo';cx.textContent='Ahora: tema '+({avispon:'Avispón',sport:'Deportivo',rally:'Rally',cabina:'Cabina'}[est.tema]||est.tema)+'. Tocá un color para armar el tuyo (parte del Deportivo).';}
