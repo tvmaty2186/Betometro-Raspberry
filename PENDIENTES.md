@@ -100,6 +100,10 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.46 (publicada 08/11/2026)
+- Tema propio: al guardar colores desde el celu la pantalla se vuelve a armar (los acentos quedaban viejos).
+- Personalizar → Colores: sin botones; los círculos de Fondo y Acento de abajo eligen qué se pinta (Matías).
+
 ## 1.0.45 (publicada 08/11/2026)
 - **Vigilante** (`app/vigilante.cpp`): memoria cada 10 s; si pasa del 70 %, la pantalla se congela más de 1,5 s o hay
   tirones en carrera, manda un reporte con el equipo (memoria, swap, carga, temperatura, tensión), los 5 procesos que
