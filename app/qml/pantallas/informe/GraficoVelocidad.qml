@@ -102,7 +102,7 @@ Tarjeta { datos: true;
             if (caja.que === "comp" && caja.vm.m) for (const p of caja.vm.m) if (p[7]) vmax = Math.max(vmax, p[2]);
             const esc = doble ? Math.ceil(vmax) : Math.max(20, Math.ceil(vmax / 10) * 10);
             const Y = doble ? v => height / 2 - (height / 2 - 6) * v / esc : v => height - 6 - (height - 12) * v / esc;
-            g.strokeStyle = "rgba(255,255,255,0.12)"; g.lineWidth = 1;
+            g.strokeStyle = (Tema.datosClaros ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"); g.lineWidth = 1;
             g.fillStyle = Tema.tintaSuave; g.font = "11px '" + Tema.fuente + "'"; g.textAlign = "right";
             for (let i = 0; i <= 4; i++) {
                 const v = doble ? esc * (2 - i) / 2 : esc * i / 4;
@@ -110,7 +110,7 @@ Tarjeta { datos: true;
                 g.fillText(doble ? (v > 0 ? "+" : v < 0 ? "−" : "") + String(Math.abs(v)).replace(".", ",") : String(Math.round(v)), 24, Y(v) + 4);
             }
             if (doble) {   // el cero, más marcado
-                g.strokeStyle = "rgba(255,255,255,0.45)"; g.beginPath(); g.moveTo(30, Y(0)); g.lineTo(width - 4, Y(0)); g.stroke();
+                g.strokeStyle = (Tema.datosClaros ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)"); g.beginPath(); g.moveTo(30, Y(0)); g.lineTo(width - 4, Y(0)); g.stroke();
             } else if (caja.sug > 0 && caja.que !== "comp") {
                 g.strokeStyle = Tema.acento; g.lineWidth = 2; g.setLineDash([8, 6]);
                 g.beginPath(); g.moveTo(30, Y(caja.sug)); g.lineTo(width - 4, Y(caja.sug)); g.stroke(); g.setLineDash([]);

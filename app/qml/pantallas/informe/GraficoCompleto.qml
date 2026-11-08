@@ -212,7 +212,7 @@ Tarjeta { datos: true;
             const pasos = [100, 200, 500, 1000, 2000, 5000, 10000];
             let paso = pasos[0];
             for (const p of pasos) { paso = p; if (caja.span / p <= 80) break; }
-            const fino = "rgba(255,255,255,0.07)", medio = "rgba(255,255,255,0.16)";
+            const fino = "rgba(255,255,255,0.07)", medio = (Tema.datosClaros ? "rgba(0,0,0,0.16)" : "rgba(255,255,255,0.16)");
             g.lineWidth = 1;
             g.fillStyle = Tema.tintaSuave; g.font = "14px '" + Tema.fuente + "'"; g.textAlign = "center";
             for (let d = Math.ceil(caja.de / paso) * paso; d <= caja.a; d += paso) {
@@ -236,7 +236,7 @@ Tarjeta { datos: true;
                 g.fillStyle = Tema.acento; g.font = "italic 15px '" + Tema.fuente600 + "'"; g.textAlign = "left";
                 g.fillText((caja.sug > 0 ? "sugerida " : "promedio ") + caja.fmt(caja.ref, 1), x0 + 8, caja.ey(caja.ref) + 18);
             } else if (caja.modo !== "vel" && 0 > e.yA && 0 < e.yB) {
-                g.strokeStyle = caja.modo === "ade" ? Tema.acento : "rgba(255,255,255,0.45)"; g.lineWidth = 2;
+                g.strokeStyle = caja.modo === "ade" ? Tema.acento : (Tema.datosClaros ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)"); g.lineWidth = 2;
                 if (caja.modo === "ade") g.setLineDash([8, 6]);
                 g.beginPath(); g.moveTo(x0, caja.ey(0)); g.lineTo(x1, caja.ey(0)); g.stroke(); g.setLineDash([]);
                 if (caja.modo === "ade") { g.fillStyle = Tema.acento; g.font = "italic 15px '" + Tema.fuente600 + "'"; g.textAlign = "left"; g.fillText("en hora", x0 + 8, caja.ey(0) + 18); }

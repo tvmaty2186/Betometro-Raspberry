@@ -17,7 +17,7 @@ Tarjeta { datos: true;
     property var inf: ({})                  // Datos.informe(id): largadas
     property var gps: []                    // Datos.marcasGps(id): una por vuelta
     readonly property bool conGps: gps.some(m => m && m.hay)
-    readonly property color celeste: Tema.sol ? "#0b5394" : "#7fd0ff"
+    readonly property color celeste: Tema.sol || Tema.datosClaros ? "#0b5394" : "#7fd0ff"
     // La vuelta modelo: la medida más cerca del ideal
     readonly property int modelo: {
         let k = -1;

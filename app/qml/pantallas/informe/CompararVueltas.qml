@@ -65,7 +65,7 @@ Item {
             for (const s of [A, M]) for (const p of s.k) { vmin = Math.min(vmin, p[1]); vmax = Math.max(vmax, p[1]); }
             vmin = Math.floor(vmin / 10) * 10; vmax = Math.ceil(vmax / 10) * 10; if (vmax <= vmin) vmax = vmin + 10;
             const YV = v => yv1 - (v - vmin) / (vmax - vmin) * (yv1 - yv0);
-            g.font = "12px '" + Tema.fuente600 + "'"; g.fillStyle = String(Tema.tintaSuave); g.strokeStyle = "rgba(255,255,255,0.12)"; g.lineWidth = 1;
+            g.font = "12px '" + Tema.fuente600 + "'"; g.fillStyle = String(Tema.tintaSuave); g.strokeStyle = (Tema.datosClaros ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.12)"); g.lineWidth = 1;
             for (let v = vmin; v <= vmax; v += 10) { g.beginPath(); g.moveTo(x0, YV(v)); g.lineTo(x0 + w, YV(v)); g.stroke(); g.fillText(String(v), 22, YV(v) + 4); }
             // sectores
             g.setLineDash([6, 6]); g.strokeStyle = String(Tema.acento); g.globalAlpha = 0.5;
@@ -90,7 +90,7 @@ Item {
             g.font = "italic 15px '" + Tema.fuente600 + "'"; g.fillStyle = String(Tema.tinta);
             g.fillText("TIEMPO GANADO / PERDIDO CONTRA " + raiz.nombreV(raiz.modelo) + " (SEGUNDOS)", x0, yd0 - 14);
             g.fillStyle = "rgba(0,0,0,0.2)"; g.fillRect(x0, yd0, w, yd1 - yd0);
-            g.strokeStyle = "rgba(255,255,255,0.5)"; g.beginPath(); g.moveTo(x0, ym); g.lineTo(x0 + w, ym); g.stroke();
+            g.strokeStyle = (Tema.datosClaros ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)"); g.beginPath(); g.moveTo(x0, ym); g.lineTo(x0 + w, ym); g.stroke();
             g.font = "12px '" + Tema.fuente600 + "'"; g.fillStyle = String(Tema.tintaSuave);
             g.fillText("+" + String(dmax).replace(".", ","), 14, YD(-dmax) + 10); g.fillText("0", 30, ym + 4); g.fillText("−" + String(dmax).replace(".", ","), 14, YD(dmax) - 2);
             g.font = "italic 13px '" + Tema.fuente600 + "'";

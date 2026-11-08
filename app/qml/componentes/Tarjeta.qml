@@ -15,8 +15,8 @@ Item {
     Rectangle {
         anchors.fill: parent; radius: raiz.radio
         gradient: Gradient {
-            GradientStop { position: 0; color: raiz.fijo ? "#2a2e33" : raiz.oscura ? Tema.caja1 : Tema.tarjeta1 }
-            GradientStop { position: 1; color: raiz.fijo ? "#0c0d0f" : raiz.oscura ? Tema.caja2 : Tema.tarjeta2 }
+            GradientStop { position: 0; color: raiz.fijo ? Tema.datos1 : raiz.oscura ? Tema.caja1 : Tema.tarjeta1 }
+            GradientStop { position: 1; color: raiz.fijo ? Tema.datos2 : raiz.oscura ? Tema.caja2 : Tema.tarjeta2 }
         }
         // brillo de arriba (inset 0 1px 0 blanco)
         Rectangle { visible: Tema.avispon; x: parent.radius; width: parent.width - 2 * parent.radius; height: 1; color: Qt.rgba(1, 1, 1, 0.35) }

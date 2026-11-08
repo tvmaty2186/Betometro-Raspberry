@@ -19,7 +19,12 @@ QtObject {
     // El acento se usa también para textos e íconos: si el elegido casi no se distingue del fondo (negro o muy oscuro
     // sobre un fondo oscuro, o muy claro sobre uno claro), se aclara u oscurece lo justo para que se lea
     // (Matías, 08/11/2026: «con acentos negros hay mucho texto o íconos que se pierden»).
-    readonly property color pAcento: legible(pAcentoElegido, [pFondo, Qt.lighter(pFondo, 1.6), Qt.color("#2a2e33")])
+    readonly property color pAcento: legible(pAcentoElegido, [pFondo, Qt.lighter(pFondo, 1.6), datos1])
+    // Fondo de gráficos, mapas y tablas de datos en el tema propio: gris oscuro; con letras negras, gris claro
+    // (Matías, 08/11/2026: con letras negras el gráfico se perdía sobre el gris oscuro)
+    readonly property bool datosClaros: propio && pp.letras === "negro"
+    readonly property color datos1: datosClaros ? "#eef0f2" : "#2a2e33"
+    readonly property color datos2: datosClaros ? "#d3d7db" : "#0c0d0f"
     function luz(c) {   // luminancia relativa (WCAG)
         const f = x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
         return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
