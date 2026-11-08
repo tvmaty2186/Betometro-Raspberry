@@ -15,7 +15,7 @@ Item {
     property real oy: 0
     width: cont.childrenRect.width
     height: cont.childrenRect.height
-    x: d.reproductor.xDe(clave, width)
+    x: d.reproductor.xDato(clave, width, height)   // nunca encima de la X de cerrar
     y: d.reproductor.yDe(clave, height)
     z: moviendo ? 5 : 1
     visible: d.reproductor.completo && d.reproductor.prendido(clave) && (d.reproductor.editando || d.reproductor.e.lap >= 0 || clave === "vuelta")
@@ -57,7 +57,7 @@ Item {
             if (!d.moviendo) return;
             d.moviendo = false;
             d.reproductor.guardarPos(d.clave, d.x, d.y, d.width, d.height);
-            d.x = Qt.binding(() => d.reproductor.xDe(d.clave, d.width));
+            d.x = Qt.binding(() => d.reproductor.xDato(d.clave, d.width, d.height));
             d.y = Qt.binding(() => d.reproductor.yDe(d.clave, d.height));
         }
     }

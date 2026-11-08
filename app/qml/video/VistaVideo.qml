@@ -67,6 +67,16 @@ Item {
     readonly property real arriba: 18 * s
     readonly property real abajo: height - 84 * s     // arriba de la barra
     function xDe(clave, w) { return margen + rep.lugar(clave).x * Math.max(0, width - 2 * margen - w); }
+    // La X de cerrar, arriba a la derecha (Matías, 08/11/2026): ningún dato queda encima, cae al lado (a la
+    // izquierda). También en la tele, aunque ahí no se vea la X, así los datos quedan en el mismo lugar.
+    readonly property real tamX: 76 * s
+    readonly property real xX: width - margen - tamX
+    function fueraDeX(nx, ny, w, h) {
+        const sep = 10 * s;
+        const pisa = nx + w > xX - sep && ny < arriba + tamX + sep;
+        return pisa ? Math.max(margen, xX - sep - w) : nx;
+    }
+    function xDato(clave, w, h) { return fueraDeX(xDe(clave, w), yDe(clave, h), w, h); }
     function yDe(clave, h) { return arriba + rep.lugar(clave).y * Math.max(0, abajo - arriba - h); }
     function guardarPos(clave, x, y, w, h) {
         const aw = width - 2 * margen - w, ah = abajo - arriba - h;
@@ -96,7 +106,8 @@ Item {
         }
         guiaX = bx ? bx.g : -1; guiaY = by ? by.g : -1;
         pegaA = by && by.q ? by.q : bx && bx.q ? bx.q : "";
-        return { x: bx ? bx.v : nx, y: by ? by.v : ny };
+        const ry = by ? by.v : ny;
+        return { x: fueraDeX(bx ? bx.v : nx, ry, w, h), y: ry };
     }
     readonly property var datos: [dVuelta, dAdelanto, dTiempo, dDistancia, dVelocidad, dPista]
 
@@ -290,18 +301,8 @@ Item {
             anchors { right: bDatos.visible ? bDatos.left : parent.right; rightMargin: bDatos.visible ? 12 * barra.b : 16 * barra.b
                       verticalCenter: parent.verticalCenter }
             width: 42 * barra.b; height: width
-            // En pantalla completa es una X para cerrar (Matías, 08/11/2026). Va en la barra: arriba los datos se pueden
-            // mover a cualquier rincón y una X fija los tapaba.
-            Rectangle {
-                visible: vista.completo
-                anchors.centerIn: parent; width: 46 * barra.b; height: width; radius: width / 2
-                color: "#ffffff"
-                Rectangle { anchors.centerIn: parent; width: 24 * barra.b; height: 4.5 * barra.b; radius: 2; color: "#000000"; rotation: 45 }
-                Rectangle { anchors.centerIn: parent; width: 24 * barra.b; height: 4.5 * barra.b; radius: 2; color: "#000000"; rotation: -45 }
-            }
             Canvas {
                 id: iconoPantalla
-                visible: !vista.completo
                 anchors.centerIn: parent; width: 28 * barra.b; height: width
                 property bool adentro: vista.completo
                 onAdentroChanged: requestPaint()
@@ -439,6 +440,18 @@ Item {
                 MouseArea { anchors.fill: parent; anchors.margins: -6; onClicked: vista.rep.editando = false }
             }
         }
+    }
+
+    // ---------- X para cerrar la pantalla completa, arriba a la derecha (Matías, 08/11/2026) ----------
+    Rectangle {
+        visible: vista.tocable && vista.completo && !!vista.rep.vid
+        x: vista.xX; y: vista.arriba
+        width: vista.tamX; height: width; radius: width / 2
+        color: Qt.rgba(0, 0, 0, 0.6); border { width: 3; color: "#ffffff" }
+        z: 6
+        Rectangle { anchors.centerIn: parent; width: 38 * vista.s; height: 6 * vista.s; radius: 3; color: "#ffffff"; rotation: 45 }
+        Rectangle { anchors.centerIn: parent; width: 38 * vista.s; height: 6 * vista.s; radius: 3; color: "#ffffff"; rotation: -45 }
+        MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: { vista.rep.menuVolumen = false; vista.rep.editando = false; vista.rep.dobleToque(); } }
     }
 
     // ---------- Panel del volumen: − / barra / +, y el parlante para el silencio. Se cierra solo a los 4 s ----------
