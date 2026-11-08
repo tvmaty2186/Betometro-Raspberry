@@ -61,7 +61,8 @@ Item {
     // El velocímetro del inicio se elige en Personalizar (6 estilos); "" = el del tema. El tema propio arranca con el Deportivo
     RelojInicio {
         id: velInicio
-        estilo: Datos.ajustes.relojInicio || (Tema.propio ? "deportivo" : "")
+        // El elegido solo vale en el tema propio; cada tema de fábrica usa el suyo
+        estilo: Tema.propio ? (Datos.ajustes.relojInicio || "deportivo") : ""
         x: raiz.h ? 930 : 379; y: raiz.h ? 280 : 668
         width: raiz.h ? 320 : 500; height: width
         property real t: 0

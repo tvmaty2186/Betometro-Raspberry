@@ -75,6 +75,7 @@ input[type=range]{width:100%;accent-color:#f4c531}
 </section>
 <section id=t-reloj class=oculto>
  <h3>VELOCÍMETRO DEL INICIO</h3><div class=relojes id=relojes></div>
+ <div class="aviso ojo oculto" id=relojNota>Este velocímetro se usa con tu tema propio (pestaña Colores). Los otros temas tienen el suyo.</div>
 </section>
 <div id=resultado class="aviso oculto"></div>
 <button class="bt a" id=guardar>GUARDAR</button>
@@ -121,7 +122,8 @@ function reloj(s,e,acento){
   else if(e==='anillo'){el(s,'circle',{r:104,fill:'#0c0e10'});arco(s,84,0,160,'#ffffff22',16);arco(s,84,0,V,acento,16);txt(s,0,22,V,{fill:'#fff','font-family':BC,'font-size':72,'font-weight':700});txt(s,0,48,'KM/H',{fill:'#9aa0a6','font-size':13})}
   else{el(s,'circle',{r:104,fill:'#cfd4d8'});el(s,'circle',{r:96,fill:'#f3ecd8'});marcas(s,90,78,'#1d2a20',4);nums(s,64,'#1d5233',BC,17);txt(s,0,70,V,{fill:'#1d5233','font-family':BC,'font-size':32,'font-weight':700});aguja(s,V,'#111')}
 }
-function relojDelTema(){return est.reloj||(est.tema==='propio'||est.tema==='sport'?'deportivo':est.tema==='rally'?'rally':est.tema==='cabina'?'aviacion':'clasico');}
+// El elegido vale solo en el tema propio; los otros temas usan el suyo (Matías, 08/11/2026)
+function relojDelTema(){return est.tema==='propio'?(est.reloj||'deportivo'):relojDelTemaBase();}
 
 // ---------- La vista del inicio (la misma cuenta de posiciones que Inicio.qml) ----------
 const NOMBRES=['Carreras','Práctica','Chequeo previo','Pantalla de carrera','Clima','Tienda','Ajustes'],ICON=['⚑','⏱','✓','▦','☁','⌂','⚙'];
@@ -195,6 +197,7 @@ function pintarControles(){
   else if(r2<1.8){cx.className='aviso ojo';cx.textContent='⚠ El acento se parece mucho al fondo: los botones principales no van a resaltar.';}
   else{cx.className='aviso bien';cx.textContent='✓ Se lee bien';}
   const rs=$('relojes');if(!rs.children.length){for(const[v,n]of RELOJES){const b=document.createElement('button');b.dataset.r=v;b.innerHTML=`<svg></svg>${n}`;b.onclick=()=>{est.reloj=v;est.cambios.reloj=true;dibujar();};rs.appendChild(b);}}
+  $('relojNota').classList.toggle('oculto',est.tema==='propio');
   rs.querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.r===est.reloj);reloj(b.querySelector('svg'),b.dataset.r||relojDelTemaBase(),c.acento);});
 }
 function relojDelTemaBase(){return est.tema==='propio'||est.tema==='sport'?'deportivo':est.tema==='rally'?'rally':est.tema==='cabina'?'aviacion':'clasico';}
