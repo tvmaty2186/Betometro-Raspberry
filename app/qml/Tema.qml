@@ -90,10 +90,9 @@ QtObject {
     readonly property color warn: de("#f4c531", "#ffb000", "#ffd400", "#ffd23f", "#a33a00")
     // Rojo y naranja de estado (pasada, grave, revisar). Iguales en los temas oscuros; más oscuros en sol, para que se
     // lean sobre blanco (auditoría 12: estaban escritos a mano en 8 archivos)
-    // Rayita (cursor) de las barras de velocidad y de tiempo: un color que no está en la barra (verde, amarillo y
-    // rojo) para que salte a la vista (Matías, 08/11/2026). Celeste eléctrico; magenta en Cabina (ya usa celeste);
-    // azul fuerte en sol (sobre blanco).
-    readonly property color cursorBarra: de("#00d8ff", "#00d8ff", "#00d8ff", "#ff2bd6", "#0038ff")
+    // Rayita (cursor) de las barras de velocidad y de tiempo (Matías, 08/11/2026): el celeste se perdía sobre el verde.
+    // Prueba A: negra con borde blanco (se ve sobre verde, amarillo y rojo). Opción B: fucsia con borde negro.
+    readonly property color cursorBarra: "#0b0d0c"
     readonly property color rojo: de("#d23b2c", "#d23b2c", "#d23b2c", "#d23b2c", "#b3261e")
     readonly property color naranja: de("#d9741a", "#d9741a", "#d9741a", "#d9741a", "#a34f00")
     readonly property color mal: de("#ff6b5a", "#c0162c", "#e10600", "#ff4d5e", "#c4001a")
