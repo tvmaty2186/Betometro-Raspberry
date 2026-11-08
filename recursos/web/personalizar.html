@@ -36,8 +36,11 @@ h3{font:800 italic 14px Barlow;letter-spacing:.12em;color:#b9cdb8;margin:14px 0 
 #grises{display:flex;gap:4px;justify-content:center;margin-top:6px}
 #grises button{width:30px;height:30px;border-radius:7px;border:1px solid #0008;padding:0}
 #grises button.on{border:3px solid #fff;box-shadow:0 0 0 2px #000}
-#elegidos{display:flex;gap:14px;justify-content:center;margin:10px 0;font:700 14px Barlow;color:#fff}
-#elegidos i{display:inline-block;width:22px;height:22px;border-radius:50%;vertical-align:middle;margin-left:4px;border:2px solid #fff}
+/* Los círculos de muestra eligen qué se pinta (Matías, 08/11/2026) */
+#que{display:flex;gap:10px;margin:6px 0}
+#que button{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;border-radius:14px;border:2px solid #ffffff44;background:transparent;color:#fff;font:800 italic 17px Barlow}
+#que button i{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #000}
+#que button.on{border:3px solid #f4c531;background:#f4c53122;color:#f4c531}
 input[type=text],input[type=number]{width:100%;padding:12px;border-radius:12px;border:2px solid #cfd4d8;background:#08190e;color:#fff;font:800 italic 22px Barlow}
 input[type=range]{width:100%;accent-color:#f4c531}
 .bt{display:block;width:100%;margin:10px 0;padding:14px;border-radius:14px;text-align:center;font:800 italic 19px Barlow;border:2px solid #f4c531;background:transparent;color:#f4c531}
@@ -71,10 +74,9 @@ input[type=range]{width:100%;accent-color:#f4c531}
  <h3>NOMBRE DEL AUTO</h3><input type=text id=nombre maxlength=30>
 </section>
 <section id=t-colores class=oculto>
- <h3>¿QUÉ PINTÁS?</h3><div class=seg id=que><button data-q=fondo class=on>Principal (fondo)</button><button data-q=acento>Acento</button></div>
+ <h3>TOCÁ EL COLOR QUE QUERÉS CAMBIAR</h3><div id=que><button data-q=fondo class=on><i></i>Fondo</button><button data-q=acento><i></i>Acento</button></div>
  <svg id=panal></svg>
  <div id=grises></div>
- <div id=elegidos></div>
  <h3>LETRAS</h3><div class=seg id=letras><button data-l=blanco>Blanco</button><button data-l=crema>Crema</button><button data-l=negro>Negro</button></div>
  <div id=contraste class=aviso></div>
  <p class=ayuda>Los colores de aviso (verde, amarillo y rojo) y el modo sol no cambian.</p>
@@ -211,7 +213,8 @@ function pintarControles(){
   const ac=pr?p[pinta]:'';
   $('panal').innerHTML=[...PANAL].sort((a,b)=>(a.col===ac)-(b.col===ac)).map(h=>`<path d="${h.d}" fill="${h.col}" data-c="${h.col}" stroke="${h.col===ac?'#fff':'#0008'}" stroke-width="${h.col===ac?3.5:.8}"/>`).join('');
   $('grises').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.c===ac));
-  $('elegidos').innerHTML=`<span>Fondo<i style="background:${pr?p.fondo:c.f2}"></i></span><span>Acento<i style="background:${pr?p.acento:c.acento}"></i></span>`;
+  document.querySelector('#que [data-q=fondo] i').style.background=pr?p.fondo:c.f2;
+  document.querySelector('#que [data-q=acento] i').style.background=pr?p.acento:c.acento;
   document.querySelectorAll('#letras button').forEach(b=>b.classList.toggle('on',pr&&b.dataset.l===p.letras));
   const r1=contraste(c.letras,c.f2),r2=contraste(c.acento,c.f2),cx=$('contraste');
   if(!pr){cx.className='aviso ojo';cx.textContent='Ahora: tema '+({avispon:'Avispón',sport:'Deportivo',rally:'Rally',cabina:'Cabina'}[est.tema]||est.tema)+'. Tocá un color para armar el tuyo (parte del Deportivo).';}
