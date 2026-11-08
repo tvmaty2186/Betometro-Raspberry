@@ -100,6 +100,9 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.41 (publicada 08/11/2026)
+El velocímetro elegido en Personalizar vale solo en el tema propio; cada tema de fábrica vuelve al suyo (Matías).
+
 ## 1.0.40 «personalizar» (publicada 08/11/2026)
 **Personalizar desde el celu** (Ajustes → Pantalla y tema → QR): foto del inicio (mover, pellizcar, acostada y parada),
 número y nombre del auto, tema propio (fondo, acento, letras; parte del Deportivo) y 6 velocímetros del inicio.
