@@ -120,7 +120,11 @@ lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en c
 - **Un solo repositorio `Betometro-tienda`**: una carpeta por herramienta + el catálogo `tienda.json`. GitHub arma cada paquete.
 - En la Pi: baja el catálogo, Instalar (comprueba el hash), Abrir → Betómetro se cierra y abre la herramienta; al salir o si se
   traba, Betómetro vuelve solo. Nunca con una carrera en curso.
-- Falta: que Matías cree el repositorio y elija la primera herramienta (ideas: brújula, registrador de viaje, calculadora de
+- **Primera herramienta (para otro día, Matías 08/11/2026): «El Avispón vuela»**, juego propio de un botón, **solo con el
+  pulsador**. 20 niveles en 4 mundos (Autódromo, Ruta de tierra, Montaña, De noche), jefe cada 5 (La Grúa, El Escarabajo,
+  El Cóndor, El Cronómetro), 3 vidas, estrellas por banderas, menú con el pulsador (apretar = jugar; 1 s = cambiar de
+  nivel), X para volver. Muestras en `docs/muestras/juego/`. Orden: base de la Tienda (instalar/abrir/volver) → mundo 1 → resto.
+- Antes: que Matías cree el repositorio y elija la primera herramienta (ideas: brújula, registrador de viaje, calculadora de
   regularidad, velocímetro grande, visor de videos, música, un juego).
 
 ## 1.0.34 «auditoría final» (publicada 08/11/2026)
