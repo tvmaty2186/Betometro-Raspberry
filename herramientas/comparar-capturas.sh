@@ -51,6 +51,11 @@ cap chequeo chequeo
 cap informe informe --carrera "Santa Clara"
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
+# Con la letra más ancha (Cabina): en la 1.0.39 la fecha pisaba los botones − y + y no lo vio ninguna prueba,
+# porque todas eran en el Avispón (Matías, 08/11/2026). El último --tema gana.
+cap ficha-cabina ficha --carrera "Santa Clara" --tema cabina
+cap practica-cabina practica --tema cabina
+cap voz-cabina ajustesSeccion --prueba tablet-voz --tema cabina
 
 t0=$(date +%s)
 en_vuelo=0

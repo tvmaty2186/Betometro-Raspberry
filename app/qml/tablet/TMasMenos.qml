@@ -22,7 +22,11 @@ Row {
         Timer { id: rep; interval: 120; repeat: true; onTriggered: parent.tocada() }   // dejándolo apretado, sigue
     }
     Tecla { t: "−"; anchors.verticalCenter: parent.verticalCenter; onTocada: raiz.menos() }
-    Text { width: raiz.anchoTexto; anchors.verticalCenter: parent.verticalCenter; horizontalAlignment: Text.AlignHCenter
+    // El número se achica solo si no entra: con la letra ancha de Cabina (B612 Mono) la fecha pisaba los botones
+    // (Matías, 08/11/2026). Así vale para todos los temas y todos los lugares donde se usa.
+    Text { width: raiz.anchoTexto; height: 66; anchors.verticalCenter: parent.verticalCenter
+           horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+           fontSizeMode: Text.HorizontalFit; minimumPixelSize: 22
            text: raiz.texto; color: Tema.numero; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 46 }
            MouseArea { anchors.fill: parent; onClicked: raiz.tocado() } }
     Tecla { t: "+"; anchors.verticalCenter: parent.verticalCenter; onTocada: raiz.mas() }

@@ -23,7 +23,7 @@ Item {
     }
     // Cursor (Matías, 08/11/2026): blanco con borde negro, más grueso. Dos formas para elegir:
     // «raya» (la de siempre, vertical) o «flecha» (triangulito encima de la barra, centrado, apuntando hacia arriba)
-    readonly property bool flecha: Datos.ajustes.barraCursor === "flecha"
+    readonly property bool flecha: Datos.ajustes.barraCursor !== "raya"   // de fábrica, la flecha (Matías, 08/11/2026)
     readonly property real opCursor: raiz.valor === null || raiz.valor === undefined ? 0.35 : 1
     Rectangle {   // sombra del cursor (0 0 6px rgba(0,0,0,.6))
         visible: !raiz.flecha
@@ -49,12 +49,14 @@ Item {
         y: (raiz.height - height) / 2   // centrado sobre la barra (Matías, 08/11/2026)
         opacity: raiz.opCursor
         onWidthChanged: requestPaint(); onHeightChanged: requestPaint(); onVisibleChanged: if (visible) requestPaint()
+        Connections { target: Tema; function onSolChanged() { triangulo.requestPaint(); } }
         onPaint: {
             const c = getContext("2d"); c.reset();
             const b = 2.5;
             c.beginPath(); c.moveTo(width / 2, b); c.lineTo(width - b, height - b); c.lineTo(b, height - b); c.closePath();
-            c.fillStyle = "#ffffff"; c.fill();
-            c.lineWidth = b; c.lineJoin = "round"; c.strokeStyle = "#0b0d0c"; c.stroke();
+            // Blanca con borde negro; en modo sol, negra con borde blanco (Matías, 08/11/2026)
+            c.fillStyle = Tema.sol ? "#0b0d0c" : "#ffffff"; c.fill();
+            c.lineWidth = b; c.lineJoin = "round"; c.strokeStyle = Tema.sol ? "#ffffff" : "#0b0d0c"; c.stroke();
         }
     }
 }
