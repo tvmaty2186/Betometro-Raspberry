@@ -12,6 +12,7 @@ Item {
         { texto: "Chequeo previo", icono: "chequeo", pantalla: "chequeo" },
         { texto: "Pantalla de carrera", icono: "pantalla", pantalla: "editor" },
         { texto: "Clima", icono: "clima", pantalla: "clima" },   // donde estaba Ajustes (Matías, 05/11/2026)
+        { texto: "Tienda", icono: "tienda", pantalla: "tienda" },   // herramientas que se abren aparte (Matías, 08/11/2026)
         { texto: "Ajustes", icono: "ajustes", pantalla: "ajustes" }
     ]
 
@@ -77,11 +78,11 @@ Item {
         Disco {
             required property var modelData
             required property int index
-            // Seis botones repartidos en el mismo arco que antes ocupaban cinco
-            readonly property real ang: (raiz.h ? 232 - index * 23 : 150 + index * 24) * Math.PI / 180
+            // Siete botones en el arco (con la Tienda, 08/11/2026): más juntos, en el mismo arco que ocupaban los seis
+            readonly property real ang: (raiz.h ? 232 - index * 19 : 150 + index * 20) * Math.PI / 180
             readonly property real cx: raiz.h ? 1090 + Math.cos(ang) * 288 : 629 + Math.cos(ang) * 397
             readonly property real cy: raiz.h ? 436 - Math.sin(ang) * 288 : 918 + Math.sin(ang) * 397
-            d: raiz.h ? 86 : 104
+            d: raiz.h ? 80 : 104   // 80 con siete botones (antes 86 con seis)
             x: cx - d / 2; y: cy - d / 2
             icono: modelData.icono
             texto: modelData.texto

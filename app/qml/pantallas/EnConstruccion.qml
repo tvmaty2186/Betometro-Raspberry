@@ -10,5 +10,5 @@ Item {
         text: "Pantalla en construcción · tocá para volver"
         color: Tema.tintaSuave; font { family: Tema.fuente; italic: Tema.cursiva; pixelSize: 20 }
     }
-    MouseArea { anchors.fill: parent; onClicked: Navegacion.volver() }
+    MouseArea { anchors.fill: parent; onClicked: Navegacion.ir("inicio") }
 }

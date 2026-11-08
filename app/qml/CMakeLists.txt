@@ -117,6 +117,7 @@ qt_add_qml_module(betometro_qml
     widgets/WVelocimetro.qml
   RESOURCES
     iconos/ajustes.svg
+    iconos/tienda.svg
     iconos/clima.svg
     iconos/carreras.svg
     iconos/chequeo.svg
