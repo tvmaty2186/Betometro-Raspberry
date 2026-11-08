@@ -100,6 +100,15 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.45 (publicada 08/11/2026)
+- **Vigilante** (`app/vigilante.cpp`): memoria cada 10 s; si pasa del 70 %, la pantalla se congela más de 1,5 s o hay
+  tirones en carrera, manda un reporte con el equipo (memoria, swap, carga, temperatura, tensión), los 5 procesos que
+  más usan, cuánto crece Betómetro por minuto, las últimas pantallas, qué está andando y la memoria de la última media
+  hora. Un aviso por motivo cada 10 min. Costo medido: ~0,05 s de procesador por minuto.
+- **Chequeo previo → Memoria:** semáforo y «Despejar» (dos toques): reinicia Betómetro y vuelve al Chequeo diciendo
+  cuánto liberó (`despejar.json`).
+- **Apagar:** ventana con Apagar, Reiniciar y Cancelar.
+
 ## 1.0.44 (publicada 08/11/2026)
 - La Pi se ponía lenta tras guardar muchas veces desde el celu: el Canvas de la foto del inicio no soltaba las fotos
   viejas (~12 MB por guardado). Arreglado; el fondo se repinta al cambiar el color del tema propio.

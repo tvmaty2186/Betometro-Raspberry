@@ -18,6 +18,11 @@ public:
         if (raspberry()) QProcess::startDetached(QStringLiteral("/sbin/poweroff"), {});
         QCoreApplication::quit();
     }
+    // Reiniciar la Raspberry entera (Ajustes → Apagar → Reiniciar). En la PC solo cierra el programa.
+    Q_INVOKABLE void reiniciar() {
+        if (raspberry()) QProcess::startDetached(QStringLiteral("/sbin/reboot"), {});
+        QCoreApplication::quit();
+    }
     // Brillo de la pantalla, 10 a 100 % (100 = el máximo que da la pantalla). Se escribe en la luz de fondo
     // del sistema (/sys/class/backlight/…: la Touch Display 2 la tiene). Antes el brillo solo se guardaba.
     Q_INVOKABLE void brillo(int porcentaje) {

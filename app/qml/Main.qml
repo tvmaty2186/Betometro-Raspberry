@@ -52,10 +52,15 @@ Window {
         }
         Aviso { id: aviso }
         Connections { target: Navegacion; function onAviso(texto) { aviso.mostrar(texto); } }
+        // El vigilante anota las últimas pantallas, para el reporte si algo se traba
+        Connections { target: Navegacion; function onActualChanged() { Vigilante.pantalla(Navegacion.actual); } }
         // La Prueba completa arrancada desde el celu (/prueba): se abre su pantalla, que es donde se contesta «¿Se escuchó?»
         Connections { target: PruebaCompleta; function onEmpezo() { if (Navegacion.actual !== "prueba") Navegacion.ir("prueba"); } }
         // Al prender: cómo salió la última actualización («Se instaló la 1.0.28» o que volvió a la anterior)
-        Component.onCompleted: if (Actualizador.resultado) Qt.callLater(() => aviso.mostrar(Actualizador.resultado))
+        Component.onCompleted: {
+            Vigilante.pantalla(Navegacion.actual);
+            if (Actualizador.resultado) Qt.callLater(() => aviso.mostrar(Actualizador.resultado));
+        }
     }
 
     // Modo tele: la ventana de la tele (HDMI) solo si hay una segunda pantalla (docs/video.md)

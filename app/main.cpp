@@ -46,6 +46,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "audio.h"
 #include "gps.h"
 #include "salud.h"
+#include "vigilante.h"
 #include "clima.h"
 #include "qr.h"
 #include "sistema.h"
@@ -275,6 +276,19 @@ int main(int argc, char* argv[]) {
     salud.modoCarrera(crono.enCurso());
     QObject::connect(&crono, &Crono::enCursoChanged, &salud, [&] { salud.modoCarrera(crono.enCurso()); });
     QObject::connect(&crono, &Crono::enCursoChanged, &wifi, [&] { wifi.modoCarrera(crono.enCurso()); });
+    // Vigilante de memoria y trabas: si algo se pone pesado, manda un reporte con quién lo está usando
+    Vigilante vigilante(carpeta, &reportes);
+    vigilante.enCarrera = [&] { return crono.enCurso(); };
+    vigilante.andando = [&] {
+        QStringList a;
+        if (crono.enCurso()) a << QStringLiteral("carrera en curso");
+        if (camara.grabando()) a << QStringLiteral("cámara grabando");
+        if (camara.convirtiendo()) a << QStringLiteral("pasando un video a MP4");
+        if (drive.subiendo()) a << QStringLiteral("Drive: ") + drive.texto();
+        return a;
+    };
+    // Después de «Despejar memoria», vuelve al Chequeo previo
+    if (vigilante.despejeAntes() >= 0 && !op.isSet(oPantalla)) contexto.setPantallaInicial(QStringLiteral("chequeo"));
     // Brillo: al prender y cada vez que cambia en Ajustes
     auto ponerBrillo = [&] {
         const QVariant b = datos.cfg(QStringLiteral("brillo"));
@@ -323,6 +337,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Simulador"), &simulacion);
     motor.rootContext()->setContextProperty(QStringLiteral("PruebaCompleta"), &pruebaCompleta);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
+    motor.rootContext()->setContextProperty(QStringLiteral("Vigilante"), &vigilante);
     motor.rootContext()->setContextProperty(QStringLiteral("Clima"), &clima);
     motor.rootContext()->setContextProperty(QStringLiteral("Hdmi"), &hdmi);
     motor.rootContext()->setContextProperty(QStringLiteral("Drive"), &drive);

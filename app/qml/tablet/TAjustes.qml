@@ -9,9 +9,9 @@ TPantalla {
     id: raiz
     titulo: "Ajustes"
     readonly property var a: Datos.ajustes
-    readonly property var temas: ({ avispon: "Avispón", rally: "Rally", sport: "Deportivo", cabina: "Cabina" })
-    property bool apagarArmado: false
-    Timer { id: desarmar; interval: 3000; onTriggered: raiz.apagarArmado = false }
+    readonly property var temas: ({ avispon: "Avispón", rally: "Rally", sport: "Deportivo", cabina: "Cabina", propio: "Propio" })
+    // Apagar: una ventana con Apagar, Reiniciar y Cancelar (Matías, 08/11/2026)
+    property bool menuApagar: Contexto.prueba === "apagar"   // --prueba apagar: abierta, para las capturas
     function seccion(s) { Navegacion.ir("ajustesSeccion", { seccion: s }); }
     readonly property var orden: ["auto", "tema", "voz", "velocidad", "pulsador", "red", "camara", "drive", "actualizar", "prueba", "apagar"]
     readonly property int enGrilla: raiz.h ? 8 : 10
@@ -21,7 +21,7 @@ TPantalla {
         switch (k) {
         case "auto": return "Mi auto"; case "tema": return "Pantalla y tema"; case "voz": return "Voz y sonido"; case "velocidad": return "Velocidad y GPS";
         case "pulsador": return "Pulsador"; case "red": return "Conectividad"; case "camara": return "Cámara"; case "drive": return "Google Drive";
-        case "actualizar": return "Actualizar"; case "prueba": return "Prueba completa"; default: return raiz.apagarArmado ? "Tocá otra vez" : "Apagar";
+        case "actualizar": return "Actualizar"; case "prueba": return "Prueba completa"; default: return "Apagar";
         }
     }
     function icono(k) { return k === "prueba" ? "check" : k === "drive" ? "nube" : k === "pulsador" ? "bandera" : k; }
@@ -40,7 +40,7 @@ TPantalla {
         case "prueba": return PruebaCompleta.estado === "corriendo" ? "Probando…" : PruebaCompleta.estado === "ok" ? "Todo bien · " + PruebaCompleta.cuando
                               : PruebaCompleta.estado === "leve" ? "Revisar · " + PruebaCompleta.fallas + (PruebaCompleta.fallas === 1 ? " aviso" : " avisos")
                               : PruebaCompleta.estado === "grave" ? "Hay errores: avisá" : "La Pi se revisa sola";
-        default: return raiz.apagarArmado ? "para apagar" : "Tocá 2 veces";
+        default: return "o reiniciar";
         }
     }
     function tipo(k) {
@@ -57,7 +57,7 @@ TPantalla {
         case "drive": Navegacion.ir("drive"); break;
         case "actualizar": Navegacion.ir("actualizar"); break;
         case "prueba": Navegacion.ir("prueba"); break;
-        default: if (raiz.apagarArmado) Sistema.apagar(); else { raiz.apagarArmado = true; desarmar.restart(); }
+        default: raiz.menuApagar = true;
         }
     }
     Component {
@@ -89,6 +89,45 @@ TPantalla {
             readonly property int n: raiz.orden.length - raiz.enGrilla
             readonly property real an: (width - (n - 1) * spacing) / n
             Repeater { model: raiz.orden.slice(raiz.enGrilla); delegate: boton; onItemAdded: (i, item) => item.width = Qt.binding(() => fila.an) }
+        }
+    }
+
+    // Ventana de Apagar: tapa toda la pantalla; tocar afuera es como Cancelar
+    Item {
+        parent: raiz
+        anchors.fill: parent
+        z: 100
+        visible: raiz.menuApagar
+        Rectangle { anchors.fill: parent; color: "#000000"; opacity: 0.72 }
+        MouseArea { anchors.fill: parent; onClicked: raiz.menuApagar = false }
+        Rectangle {
+            id: panel
+            anchors.centerIn: parent
+            width: raiz.h ? 1040 : 620
+            height: raiz.h ? 400 : 860
+            radius: Math.max(14, Tema.radio * 1.7)
+            gradient: Gradient { GradientStop { position: 0; color: Tema.tarjeta1 } GradientStop { position: 1; color: Tema.tarjeta2 } }
+            border { width: 3; color: Tema.bordeCromo }
+            MouseArea { anchors.fill: parent }   // que tocar el panel no cierre
+            Text {
+                id: pregunta
+                anchors { top: parent.top; topMargin: 26; horizontalCenter: parent.horizontalCenter }
+                text: "¿Qué querés hacer?"; color: Tema.tinta
+                font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 40 }
+            }
+            Grid {
+                anchors { top: pregunta.bottom; topMargin: 26; left: parent.left; right: parent.right; bottom: parent.bottom; margins: 26 }
+                columns: raiz.h ? 3 : 1
+                spacing: 22
+                readonly property real an: raiz.h ? (width - 2 * spacing) / 3 : width
+                readonly property real al: raiz.h ? height : (height - 2 * spacing) / 3
+                TBoton { width: parent.an; height: parent.al; icono: "apagar"; nombre: "Apagar"; dato: "Hasta la próxima"; tipo: "peligro"
+                         onTocado: Sistema.apagar() }
+                TBoton { width: parent.an; height: parent.al; icono: "actualizar"; nombre: "Reiniciar"; dato: "Apaga y vuelve a prender"
+                         onTocado: Sistema.reiniciar() }
+                TBoton { width: parent.an; height: parent.al; icono: "atras"; nombre: "Cancelar"; dato: "Seguir usando"
+                         onTocado: raiz.menuApagar = false }
+            }
         }
     }
 }

@@ -13,7 +13,18 @@ TPantalla {
     readonly property bool gpsOk: !!g.ok && g.hz > 0 && g.precision <= umbral
     readonly property bool todoListo: gpsOk || !Datos.ajustes.velActiva
     focus: true
-    Component.onCompleted: { forceActiveFocus(); if (Contexto.prueba === "simulador") Simulador.correr(); }   // simulador: solo capturas
+    Component.onCompleted: {
+        forceActiveFocus();
+        if (Contexto.prueba === "simulador") Simulador.correr();   // simulador: solo capturas
+        // Volvió de «Despejar memoria»: cuánto liberó
+        const antes = Vigilante.tomarDespeje();
+        if (antes >= 0) Navegacion.avisar("Memoria despejada: antes " + antes + " % → ahora " + Vigilante.memoria + " %");
+    }
+    // Memoria y «Despejar» (Matías, 08/11/2026): reinicia el programa (unos 10 s) y vuelve acá.
+    // Dos toques, como para no reiniciar sin querer.
+    readonly property int mem: Vigilante.memoria
+    property bool despejarArmado: false
+    Timer { id: desarmarDespeje; interval: 3000; onTriggered: raiz.despejarArmado = false }
     function recibido(por) { if (pulsador !== "esperando") return; pulsador = "funciona"; llegoPor = por; }
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca() { raiz.recibido("el pulsador"); } }
     Keys.onPressed: e => {
@@ -72,7 +83,18 @@ TPantalla {
                  onTocado: { if (e === "leve" || e === "grave") Navegacion.ir("simulador"); else if (e !== "corriendo") Simulador.correr(); } }
     }
     TBoton {
-        x: 0; y: grilla.height + 18; width: raiz.area.width; height: 110
+        id: botonMemoria
+        x: 0; y: grilla.height + 18; height: 110
+        width: raiz.h ? grilla.an : (raiz.area.width - 18) / 2
+        tamNombre: 30
+        tipo: raiz.despejarArmado ? "acento" : raiz.mem >= 80 ? "peligro" : raiz.mem >= 60 ? "naranja" : ""
+        nombre: raiz.despejarArmado ? "Tocá otra vez" : "Memoria " + (raiz.mem >= 0 ? raiz.mem + " %" : "—")
+        dato: raiz.despejarArmado ? "para despejar (tarda 10 s)" : raiz.mem >= 80 ? "Despejá antes de largar"
+              : raiz.mem >= 60 ? "Conviene despejar" : "Bien · tocá para despejar"
+        onTocado: { if (raiz.despejarArmado) Vigilante.despejar(); else { raiz.despejarArmado = true; desarmarDespeje.restart(); } }
+    }
+    TBoton {
+        x: botonMemoria.width + 18; y: grilla.height + 18; width: raiz.area.width - botonMemoria.width - 18; height: 110
         tipo: raiz.todoListo ? "acento" : ""; icono: ""; tamNombre: 40
         nombre: raiz.todoListo ? "TODO LISTO" : "Falta el GPS"; activo: raiz.todoListo
         onTocado: Navegacion.ir("inicio")

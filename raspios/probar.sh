@@ -64,6 +64,7 @@ cap wifi-clave --pantalla wifi
 cap editor --pantalla editor
 cap drive --pantalla drive
 cap ajustes-voz --pantalla ajustesSeccion --prueba tablet-voz
+cap apagar --pantalla ajustes --prueba apagar   # la ventana Apagar / Reiniciar / Cancelar (1.0.45)
 cap recorrido --pantalla carrera --prueba recorrido
 cap informe-grafico --pantalla informe --carrera "Santa Clara" --prueba grafico
 cap informe-mapa --pantalla informe --carrera "Santa Clara" --prueba mapa
