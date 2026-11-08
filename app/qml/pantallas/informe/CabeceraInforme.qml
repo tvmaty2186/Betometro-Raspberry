@@ -57,7 +57,10 @@ Item {
                text: cab.c.errorTotal || ""
                height: 50; verticalAlignment: Text.AlignVCenter   // alto fijo: con Chakra Petch (Deportivo) la línea de abajo se salía
                color: errorArriba.promS <= 0.2 ? Tema.bien : errorArriba.promS <= 0.5 ? Tema.acento : Tema.mal
-               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 46 } }
+               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 46 }
+               // Tema propio: sobre una pastilla gris oscura, que se lea con cualquier fondo (Matías: rojo sobre rojo)
+               Rectangle { visible: Tema.propio; z: -1; anchors { fill: parent; leftMargin: -12; rightMargin: -12; topMargin: 2; bottomMargin: 2 }
+                           radius: height / 2; color: "#0c0d0f"; opacity: 0.85 } }
         Sub { visible: cab.h; text: "promedio " + (cab.c.promedio || "–") + " · mejor " + (cab.c.mejor || "–"); tam: 12
               anchors.right: parent.right }
     }
