@@ -66,7 +66,11 @@ Item {
     }
     readonly property var conTraza: vueltas.map((v, i) => v.m ? i : -1).filter(i => i >= 0)
     property int lap: conTraza.length ? conTraza[0] : -1
-    property string modo: "vel"      // vel, acel, ade
+    property string modo: "vel"      // vel, acel, ade, comp
+    // La vuelta modelo (la medida más cerca del ideal), para el modo «Comp.» (08/11/2026)
+    readonly property int modelo: tabla.modelo
+    readonly property var vm: modelo >= 0 ? vueltas[modelo] : null
+    function abrirComparar() { comparar.abrir(raiz.lap); raiz.completoQue = "comparar"; }
     function restablecer() {   // ya confirmado en la tabla
         if (Datos.restablecer(id_)) { rev++; tabla.fila = -1; lap = conTraza.length ? conTraza[0] : -1; Navegacion.avisar("Carrera restablecida"); }
     }
@@ -110,18 +114,19 @@ Item {
     MapaInforme {
         id: mapa
         h: raiz.h; vv: raiz.vv; inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas
-        dist: raiz.dist; sug: raiz.sug; lap: raiz.lap; modo: raiz.modo
+        dist: raiz.dist; sug: raiz.sug; lap: raiz.lap; modo: raiz.modo; vm: raiz.vm; nombreModelo: raiz.vm ? "V" + raiz.vm.n : ""; esModelo: raiz.lap === raiz.modelo
         auto: raiz.reproductor.e
         onElegirModo: (m) => raiz.modo = m
         onIrVideo: (i, t) => raiz.irVideo(i, t)
-        onAbrir: { mapaC.abrir(); raiz.completoQue = "mapa"; }
+        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } mapaC.abrir(); raiz.completoQue = "mapa"; }
     }
 
     // Velocidad de la vuelta elegida, a lo largo de la distancia
     GraficoVelocidad {
         id: grafico
         h: raiz.h; vv: raiz.vv; rec: raiz.rec; inf: raiz.inf; vu: raiz.vu; lap: raiz.lap; marcas: raiz.marcas; sug: raiz.sug
-        onAbrir: { graficoC.modo = "vel"; graficoC.abrir(raiz.lap); raiz.completoQue = "grafico"; }
+        modo: raiz.modo; vm: raiz.vm; nombreModelo: raiz.vm ? "V" + raiz.vm.n : ""; esModelo: raiz.lap === raiz.modelo
+        onAbrir: { if (raiz.modo === "comp") { raiz.abrirComparar(); return; } graficoC.modo = "vel"; graficoC.abrir(raiz.lap); raiz.completoQue = "grafico"; }
     }
     // Doble toque sobre el gráfico o el mapa: a pantalla completa, acostado (de pie se ve girado) (1.0.30)
     property string completoQue: ""      // "", grafico, mapa, comparar
@@ -165,7 +170,6 @@ Item {
         visible: !raiz.rec
         h: raiz.h; vv: raiz.vv; c: raiz.c; vueltas: raiz.vueltas; inf: raiz.inf; lap: raiz.lap
         gps: { raiz.rev; return Datos.marcasGps(raiz.id_); }
-        onComparar: { comparar.abrir(raiz.lap); raiz.completoQue = "comparar"; }
         reproductor: raiz.reproductor
         onVerVuelta: (i) => { if (raiz.vueltas[i].m) raiz.lap = i; }
         onIrVideo: (i, t) => raiz.irVideo(i, t)
@@ -244,8 +248,8 @@ Item {
         id: tPruebaCompleto; interval: 300
         onTriggered: {
             if (Contexto.prueba === "comparar") {
-                comparar.abrir(3);
-                raiz.completoQue = "comparar";
+                raiz.lap = 3; raiz.modo = "comp";
+                raiz.abrirComparar();
             } else if (Contexto.prueba === "grafico") {
                 graficoC.abrir(-1);
                 const T = graficoC.tramos;
@@ -267,6 +271,7 @@ Item {
         // con muchas vueltas (BETO_MUESTRA_LARGA), una de las últimas
         const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
         if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa" || Contexto.prueba === "comparar") tPruebaCompleto.start();
+        else if (Contexto.prueba === "comp") { lap = 3; modo = "comp"; }   // el modo «Comp.» con la V4 contra la modelo
         else if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") tabla.fila = 3;
         else if (Contexto.prueba === "menu") tabla.menuAbierto = true;

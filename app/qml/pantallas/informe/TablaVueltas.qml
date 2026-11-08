@@ -6,7 +6,7 @@ import Betometro
 // (restablecer la carrera original, compartir) y el error total al pie.
 // Marca virtual por GPS (Matías, 08/11/2026, muestra docs/muestras/informe-gps/a.png): al lado del pulsador manual,
 // el tiempo y el error del pulsador virtual, solo de referencia; ★ en la vuelta modelo (la más cerca del ideal),
-// y abajo el error total de cada uno y cuánto tarde (o temprano) se marcó en promedio. «Comparar» abre la comparación.
+// y abajo el error total de cada uno y cuánto tarde (o temprano) se marcó en promedio.
 // Lo que se elige acá (fila, menú, confirmaciones) vive acá; los cambios a la carrera salen como señales.
 Tarjeta {
     id: caja
@@ -41,7 +41,6 @@ Tarjeta {
     signal unir(int indice)                 // ya confirmado: juntar esa vuelta con la siguiente
     signal restablecer()                    // ya confirmado
     signal compartir()
-    signal comparar()
     onFilaChanged: confirmarUnir = false
     Timer { id: tUnirVuelve; interval: 3000; onTriggered: caja.confirmarUnir = false }
     Timer { id: tRestVuelve; interval: 3000; onTriggered: caja.confirmarRest = false }
@@ -73,12 +72,6 @@ Tarjeta {
     x: caja.h ? 648 : 20; y: caja.h ? 362 : 900
     width: caja.h ? 608 : parent.width - 40; height: caja.h ? 338 : 360
     Sub { x: 22; y: 16; text: "Todas las vueltas"; tam: 12 }
-    BotonAmarillo {
-        visible: caja.modelo >= 0 && caja.vueltas.some(v => v.m && v.m.length)
-        anchors { right: mas3.left; rightMargin: 8; top: parent.top; topMargin: 6 }
-        width: 132; height: 32; tamTexto: 16; texto: "Comparar"
-        onTocado: caja.comparar()
-    }
     // Con el menú abierto, tocar en otra parte de la tarjeta lo cierra
     MouseArea { anchors.fill: parent; z: 9; visible: caja.menuAbierto; onClicked: caja.cerrarMenu() }
     // Menú ⋮ (app 2.4.1): restablecer la carrera original y compartir

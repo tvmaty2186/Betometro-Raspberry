@@ -1,11 +1,12 @@
 import QtQuick
 import Betometro
+import "comparar.js" as Comp
 
 // Comparar una vuelta contra la vuelta modelo (la medida más cerca del ideal), a pantalla completa (Matías,
 // 08/11/2026, muestra docs/muestras/informe-gps/b.png): las dos velocidades superpuestas a lo largo de la vuelta,
 // el tiempo ganado o perdido punto a punto, el mapa pintado donde se ganó (verde) o se perdió (rojo) y una tabla
-// con 4 sectores iguales. Arriba se elige la vuelta. Se usa el recorrido grabado de cada vuelta (inf.vueltas[i].m:
-// [t, d, kmh, acel, adel, x, y, ok]); cada vuelta se lleva a su largo (L) para que las dos midan lo mismo.
+// con 4 sectores iguales. La vuelta es la elegida en la tabla; se abre con doble toque en el gráfico o el mapa en el
+// modo «Comp.». Las cuentas, en comparar.js.
 Item {
     id: raiz
     property var inf: ({})
@@ -14,34 +15,11 @@ Item {
     property int elegida: -1
     signal cerrar()
     readonly property var vueltas: inf.vueltas || []
-    readonly property var candidatas: { const r = []; for (let i = 0; i < vueltas.length; ++i) if (i !== modelo && vueltas[i].m && vueltas[i].m.length > 4) r.push(i); return r; }
-    function abrir(lap) { elegida = lap >= 0 && lap !== modelo && candidatas.indexOf(lap) >= 0 ? lap : (candidatas.length ? candidatas[0] : -1); }
+    function abrir(lap) { elegida = lap; }
     function nombreV(i) { const v = vueltas[i]; return v ? "V" + v.n + ((inf.largadas || 1) > 1 ? " L" + v.largada : "") : ""; }
-
-    // Serie de una vuelta: fracción de la vuelta (0..1) → segundos, velocidad, punto del mapa. Empieza en 0 s y
-    // termina en el tiempo del pulsador, así la diferencia total es la de la vuelta.
-    function serie(i) {
-        const v = vueltas[i];
-        if (!v || !v.m) return null;
-        const L = v.L || 1, f = [0], t = [0], k = [], x = [], y = [];
-        for (const p of v.m) {
-            if (!p[7]) continue;
-            const fr = Math.min(1, Math.max(0, p[1] / L));
-            if (fr <= f[f.length - 1] || p[0] <= t[t.length - 1]) continue;
-            f.push(fr); t.push(p[0]); k.push([fr, p[2]]); x.push([fr, p[5], p[6]]);
-        }
-        f.push(1); t.push(Math.max(t[t.length - 1], v.realMs / 1000));
-        return { f: f, t: t, k: k, xy: x, real: v.realMs };
-    }
-    function tEn(s, fr) {
-        let a = 0, b = s.f.length - 1;
-        while (b - a > 1) { const m = (a + b) >> 1; if (s.f[m] <= fr) a = m; else b = m; }
-        const df = s.f[b] - s.f[a];
-        return s.t[a] + (df > 0 ? (fr - s.f[a]) / df * (s.t[b] - s.t[a]) : 0);
-    }
-    readonly property var sA: elegida >= 0 ? serie(elegida) : null
-    readonly property var sM: modelo >= 0 ? serie(modelo) : null
-    function delta(fr) { return tEn(sA, fr) - tEn(sM, fr); }   // + = la elegida va atrasada contra la modelo
+    readonly property var sA: elegida >= 0 && elegida !== modelo ? Comp.serie(vueltas[elegida]) : null
+    readonly property var sM: modelo >= 0 ? Comp.serie(vueltas[modelo]) : null
+    function delta(fr) { return Comp.delta(sA, sM, fr); }   // + = la elegida va atrasada contra la modelo
     readonly property var sectores: {
         if (!sA || !sM) return [];
         const r = [], L = vueltas[modelo].L || 0;
@@ -53,24 +31,7 @@ Item {
     onSMChanged: { graf.requestPaint(); mapa.requestPaint(); }
 
     Tarjeta { anchors.fill: parent; oscura: true }
-    Sub { x: 24; y: 18; tam: 14; text: "Comparar · " + raiz.nombre + " · contra " + raiz.nombreV(raiz.modelo) + ", la vuelta modelo (la más cerca del ideal)" }
-    // Elegir la vuelta
-    Row {
-        x: 24; y: 48; spacing: 8
-        Text { anchors.verticalCenter: parent.verticalCenter; text: "Vuelta:"; color: Tema.tintaSuave; font { family: Tema.fuente600; italic: true; pixelSize: 16 } }
-        Repeater {
-            model: raiz.candidatas
-            Rectangle {
-                required property int modelData
-                readonly property bool on: modelData === raiz.elegida
-                width: tCh.implicitWidth + 26; height: 34; radius: 17
-                color: on ? Tema.acento : "transparent"; border { width: 2; color: on ? Tema.acentoClaro : Tema.bordeCromo }
-                Text { id: tCh; anchors.centerIn: parent; text: raiz.nombreV(modelData); color: parent.on ? Tema.acentoTinta : Tema.tinta
-                       font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: 17 } }
-                MouseArea { anchors.fill: parent; anchors.margins: -4; onClicked: raiz.elegida = parent.modelData }
-            }
-        }
-    }
+    Sub { x: 24; y: 18; tam: 14; text: "Comparar · " + raiz.nombre + " · " + raiz.nombreV(raiz.elegida) + " contra " + raiz.nombreV(raiz.modelo) + ", la vuelta modelo (la más cerca del ideal)" }
     // Cerrar
     Rectangle {
         anchors { right: parent.right; rightMargin: 20; top: parent.top; topMargin: 14 }
@@ -80,7 +41,7 @@ Item {
     }
     // Leyenda
     Text {
-        x: 24; y: 92; textFormat: Text.StyledText
+        x: 24; y: 56; textFormat: Text.StyledText
         readonly property var a: raiz.vueltas[raiz.elegida]
         readonly property var m: raiz.vueltas[raiz.modelo]
         text: !a || !m ? "" : "<font color='" + Tema.numero + "'>━ " + raiz.nombreV(raiz.elegida) + " · " + Formato.tiempo(a.realMs) + (a.difMs !== undefined ? " · " + Formato.dif(a.difMs) : "") + "</font>"
@@ -91,7 +52,7 @@ Item {
     // Gráficos: arriba las velocidades, abajo el tiempo ganado / perdido
     Canvas {
         id: graf
-        x: 10; y: 118; width: 820; height: parent.height - 130
+        x: 10; y: 86; width: 820; height: parent.height - 98
         Connections { target: Tema; function onNombreChanged() { graf.requestPaint(); } function onSolChanged() { graf.requestPaint(); } }
         onPaint: {
             const g = getContext("2d"); g.reset();
@@ -162,8 +123,7 @@ Item {
                 g.lineWidth = 8 * k;
                 for (let i = 1; i < A.xy.length; ++i) {
                     const a = A.xy[i - 1], b = A.xy[i];
-                    const dd = raiz.delta(b[0]) - raiz.delta(a[0]), v = dd / Math.max(0.001, b[0] - a[0]) / 100;   // s cada 1 % de vuelta
-                    g.strokeStyle = v > 0.01 ? String(Tema.rojo) : v < -0.01 ? String(Tema.bien) : "rgba(255,255,255,0.55)";
+                    g.strokeStyle = Comp.colorTramo(A, raiz.sM, a[0], b[0], String(Tema.rojo), String(Tema.bien));
                     g.beginPath(); g.moveTo(X(a[1]), Y(a[2])); g.lineTo(X(b[1]), Y(b[2])); g.stroke();
                 }
                 g.fillStyle = "#fff"; g.beginPath(); g.arc(X(P[0][0]), Y(P[0][1]), 6, 0, 2 * Math.PI); g.fill();

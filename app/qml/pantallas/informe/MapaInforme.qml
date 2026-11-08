@@ -1,5 +1,6 @@
 import QtQuick
 import Betometro
+import "comparar.js" as Comp
 
 // Mapa del informe: la pista y el recorrido de la vuelta elegida, con color según velocidad, aceleración o
 // adelanto (Vel./Acel./Adel.). En recorrido libre, la llegada y las marcas numeradas. Con video, el punto
@@ -15,7 +16,12 @@ Tarjeta {
     property real dist: 0
     property real sug: 0                            // velocidad sugerida (km/h), 0 si no hay distancia
     property int lap: -1
-    property string modo: "vel"                     // vel, acel, ade
+    property string modo: "vel"                     // vel, acel, ade, comp (contra la vuelta modelo)
+    property var vm: null                           // la vuelta modelo (la más cerca del ideal), para «Comp.»
+    property string nombreModelo: ""
+    property bool esModelo: false                   // la vuelta elegida es la modelo
+    readonly property var sA: modo === "comp" && vu && !esModelo ? Comp.serie(vu) : null
+    readonly property var sM: modo === "comp" && vm ? Comp.serie(vm) : null
     property var auto: ({ lap: -1, x: 0, y: 0 })    // reproductor.e: dónde está el auto en el video
     signal elegirModo(string m)
     signal irVideo(int lap, real t)
@@ -45,13 +51,14 @@ Tarjeta {
     height: !caja.vv ? (caja.h ? 590 : 470) : (caja.h ? 230 : 280)
     // Hasta los botones Vel./Acel./Adel. y con «…» si no entra (Deportivo y Cabina, 08-5)
     Sub { x: 18; y: 16; width: botonesModo.x - 18 - 10; elide: Text.ElideRight
-          visible: !caja.vv || caja.h; text: caja.vv ? "Dónde está · tocá y el video va ahí" : caja.modo === "vel" ? (caja.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : caja.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
+          visible: !caja.vv || caja.h; text: caja.vv ? "Dónde está · tocá y el video va ahí" : caja.modo === "comp" ? "Rojo perdió · verde ganó contra " + caja.nombreModelo : caja.modo === "vel" ? (caja.rec ? "Recorrido · color = velocidad" : "Recorrido de la vuelta · color = velocidad") : caja.modo === "acel" ? "Recorrido · color = aceleración" : "Recorrido · color = adelanto"; tam: 12 }
     Row {
         id: botonesModo
         anchors { right: parent.right; rightMargin: 14; top: parent.top; topMargin: 10 }
         spacing: 6
         Repeater {
             model: [{ t: "Vel.", m: "vel" }, { t: "Acel.", m: "acel" }].concat(caja.dist > 0 ? [{ t: "Adel.", m: "ade" }] : [])
+                   .concat(caja.vm && !caja.rec ? [{ t: "Comp.", m: "comp" }] : [])
             Rectangle {
                 required property var modelData
                 width: tm.implicitWidth + 18; height: 26; radius: 13
@@ -125,7 +132,10 @@ Tarjeta {
             for (let i = 1; i < M.length; i++) {
                 if (!M[i][7] || !M[i - 1][7]) continue;
                 g.beginPath(); g.moveTo(ox + M[i - 1][5] * k, oy + M[i - 1][6] * k); g.lineTo(ox + M[i][5] * k, oy + M[i][6] * k);
-                g.strokeStyle = caja.colorPunto(M[i]); g.stroke();
+                g.strokeStyle = caja.modo !== "comp" ? caja.colorPunto(M[i])
+                              : caja.sA && caja.sM ? Comp.colorTramo(caja.sA, caja.sM, M[i - 1][1] / (caja.vu.L || 1), M[i][1] / (caja.vu.L || 1), String(Tema.rojo), String(Tema.bien))
+                              : "rgba(255,255,255,0.45)";
+                g.stroke();
             }
             g.beginPath(); g.arc(X(P[0]), Y(P[0]), 9 * k, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
             const izq = X(P[0]) > width * 0.7;   // cerca del borde derecho: el texto va a la izquierda
@@ -150,5 +160,13 @@ Tarjeta {
                 }
             }
         }
+    }
+    // «Comp.» con la vuelta modelo elegida: no hay contra qué comparar
+    Text {
+        visible: caja.modo === "comp" && caja.esModelo && !caja.vv
+        anchors { horizontalCenter: parent.horizontalCenter; bottom: parent.bottom; bottomMargin: 18 }
+        width: parent.width - 40; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+        text: caja.nombreModelo + " es la vuelta modelo. Elegí otra en la tabla para compararla."
+        color: Tema.acento; font { family: Tema.fuente600; italic: true; pixelSize: 17 }
     }
 }
