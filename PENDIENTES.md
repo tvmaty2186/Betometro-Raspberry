@@ -100,10 +100,12 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.33 (publicada 08/11/2026)
+Los videos MP4 vuelven a tener sonido en el informe de la Pi (el reproductor buscaba el sonido solo al principio).
+
 ## 1.0.32 «cámara despierta» (publicada 07/11/2026)
 La Pi ya no duerme la cámara (era la causa de «failed during initialization»). La Prueba completa cuenta bien
 los cuadros, graba los 30 s aunque reintente y compara la reproducción con lo grabado.
-**Pendiente:** el sonido de la cámara no se escucha (Matías, 07/11): falta el diagnóstico.
 
 ## 1.0.31 «cámara firme» (publicada 07/11/2026)
 Si la cámara falla al arrancar, prueba sola de nuevo a los 2 s (también en carrera). La Prueba completa espera a
