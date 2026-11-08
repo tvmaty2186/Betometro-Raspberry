@@ -100,6 +100,12 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.36 «más segura» (publicada 08/11/2026)
+Botones del celu solo desde nuestras páginas; Drive pide el código de la pantalla; la Pi comprueba la huella
+(sha256) de cada actualización; los avisos se escriben de a tandas; largada sin GPS viejo; tiempo ideal mínimo
+5 s; rojo y naranja del tema (sol); guía de SD nueva ([docs/sd-nueva.md](docs/sd-nueva.md)).
+**Ojo:** la huella se comprueba desde la 1.0.36 en adelante (la 1.0.35 instala la 1.0.36 sin comprobar).
+
 ## 1.0.35 (publicada 08/11/2026)
 Manual del navegante (Prueba completa → Manual; celu /ayuda y /manual.pdf), botón Tienda en los dos inicios con
 lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en construcción» con salida.
@@ -117,7 +123,7 @@ lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en c
 Arreglos de la auditoría 12: el pulsador ya no pierde una marca si el programa estaba ocupado; si una versión
 nueva se traba al abrir, vuelve sola a la anterior (con sus servicios); el instalador no queda en negro si
 falla adentro de una función; la hora no se corrige con la carrera en curso; documentos al día.
-**Falta:** la guía de SD nueva. El manual está hecho para la 1.0.35 (Prueba completa → Manual; celu /ayuda y /manual.pdf; si se cambia `recursos/web/ayuda.html`, rearmar el PDF con `node herramientas/manual-pdf.js`).
+El manual está hecho para la 1.0.35 (Prueba completa → Manual; celu /ayuda y /manual.pdf; si se cambia `recursos/web/ayuda.html`, rearmar el PDF con `node herramientas/manual-pdf.js`).
 
 ## 1.0.33 (publicada 08/11/2026)
 Los videos MP4 vuelven a tener sonido en el informe de la Pi (el reproductor buscaba el sonido solo al principio).
