@@ -38,6 +38,13 @@ Tarjeta { datos: true;
     property real k: 1
     property real ox: 0
     property real oy: 0
+    // Mientras se pellizca o se arrastra no se redibuja: se agranda y se corre el dibujo que ya está (la Pi 3 no
+    // llega a redibujar a cada movimiento y tironeaba, Matías 08/11/2026). Al soltar se redibuja una vez.
+    property bool enGesto: false
+    property real kP: 1              // la vista con la que se dibujó por última vez
+    property real oxP: 0
+    property real oyP: 0
+    function terminarGesto() { if (!enGesto) return; enGesto = false; repintar(); }
     property var sel: null           // la lectura tocada
     function ex(x) { return ox + x * k; }
     function ey(y) { return oy + y * k; }
@@ -63,7 +70,7 @@ Tarjeta { datos: true;
         k = Math.max(kBase, Math.min(kBase * 40, nk));
         ox = Math.max(ax0 + 40 - 364 * k, Math.min(ax1 - 40, nox));
         oy = Math.max(ay0 + 40 - 330 * k, Math.min(ay1 - 40, noy));
-        repintar();
+        if (enGesto) mapita.requestPaint(); else repintar();
     }
     function verTramo(d0, d1) {   // acercar hasta que se vea justo el tramo entre esas distancias (m) de la vuelta
         let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
@@ -132,107 +139,116 @@ Tarjeta { datos: true;
         MouseArea { anchors.fill: parent; anchors.margins: -10; onClicked: caja.cerrar() }
     }
 
-    Canvas {
-        id: mapa
-        anchors.fill: parent
-        onPaint: {
-            const g = getContext("2d");
-            g.reset();
-            const P = caja.pista, M = caja.lecturas, k = caja.k;
-            if (!P.length) {
-                g.fillStyle = Tema.tintaSuave; g.font = "italic 18px '" + Tema.fuente600 + "'"; g.textAlign = "center";
-                g.fillText("Esta carrera no tiene el recorrido grabado.", width / 2, height / 2);
-                return;
-            }
-            const X = x => caja.ex(x), Y = y => caja.ey(y);
-            g.save();
-            g.beginPath(); g.rect(3, 3, width - 6, height - 6); g.clip();
-            // la pista (sombra y gris), más ancha al acercar pero no más de 30 px
-            const kk = Math.max(1, Math.min(1.6, k / caja.kBase * 0.4 + 1));
-            g.lineJoin = "round"; g.lineCap = "round";
-            g.beginPath(); g.moveTo(X(P[0][0]), Y(P[0][1]));
-            for (const p of P) g.lineTo(X(p[0]), Y(p[1]));
-            if (caja.inf.cerrada) g.closePath();
-            g.strokeStyle = "rgba(0,0,0,0.45)"; g.lineWidth = 19 * kk; g.stroke();
-            g.strokeStyle = "#3a3f45"; g.lineWidth = 11 * kk; g.stroke();
-            // la vuelta pintada, tramo por tramo, solo lo visible
-            g.lineWidth = 8 * kk;
-            let col = null, abierto = false;
-            for (let i = 1; i < M.length; i++) {
-                const a = M[i - 1], b = M[i];
-                if (!a[7] || !b[7] || !caja.seVe(X(b[5]), Y(b[6]), 40)) { if (abierto) g.stroke(); abierto = false; col = null; continue; }
-                const c = caja.color(b);
-                if (c !== col) {
-                    if (abierto) g.stroke();
-                    g.strokeStyle = c; g.beginPath(); g.moveTo(X(a[5]), Y(a[6])); col = c; abierto = true;
+    Item {   // recorta el dibujo mientras se agranda (que no tape la tarjeta)
+        anchors.fill: parent; anchors.margins: 3; clip: true
+        Canvas {
+            id: mapa
+            x: -3; y: -3; width: caja.width; height: caja.height
+            // Durante el gesto: el dibujo de la última vista, llevado a la vista nueva (escala y corrimiento)
+            transform: [
+                Scale { xScale: caja.k / caja.kP; yScale: caja.k / caja.kP },
+                Translate { x: caja.ox - caja.k / caja.kP * caja.oxP; y: caja.oy - caja.k / caja.kP * caja.oyP }
+            ]
+            onPaint: {
+                const g = getContext("2d");
+                g.reset();
+                caja.kP = caja.k; caja.oxP = caja.ox; caja.oyP = caja.oy;
+                const P = caja.pista, M = caja.lecturas, k = caja.k;
+                if (!P.length) {
+                    g.fillStyle = Tema.tintaSuave; g.font = "italic 18px '" + Tema.fuente600 + "'"; g.textAlign = "center";
+                    g.fillText("Esta carrera no tiene el recorrido grabado.", width / 2, height / 2);
+                    return;
                 }
-                g.lineTo(X(b[5]), Y(b[6]));
-            }
-            if (abierto) g.stroke();
-            // rayitas cada 1 km (cada 5 si están muy juntas), con el número
-            let largo = 0;
-            for (let i = 1; i < M.length; i++) if (M[i][7] && M[i - 1][7]) largo += Math.hypot(M[i][5] - M[i - 1][5], M[i][6] - M[i - 1][6]);
-            const pxKm = largo * k / Math.max(1, caja.largo / 1000);   // píxeles que mide 1 km en pantalla
-            const pasoKm = pxKm >= 60 ? 1000 : pxKm >= 12 ? 5000 : 0;
-            g.font = "13px '" + Tema.fuente600 + "'"; g.textAlign = "center";
-            let dmin = 0, dmax = 0, hay = false;
-            if (pasoKm > 0) {
-                let j = 1;
-                for (let d = pasoKm; d < caja.largo; d += pasoKm) {
-                    while (j < M.length && M[j][1] < d) j++;
-                    if (j >= M.length) break;
-                    const a = M[j - 1], b = M[j];
-                    if (!a[7] || !b[7]) continue;
-                    const px = X(a[5] + (b[5] - a[5]) * 0.5), py = Y(a[6] + (b[6] - a[6]) * 0.5);
-                    if (!caja.seVe(px, py, 0)) continue;
-                    let nx = -(b[6] - a[6]), ny = b[5] - a[5]; const n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n;
-                    g.strokeStyle = "rgba(255,255,255,0.8)"; g.lineWidth = 2;
-                    g.beginPath(); g.moveTo(px + nx * 11, py + ny * 11); g.lineTo(px - nx * 11, py - ny * 11); g.stroke();
-                    g.fillStyle = Tema.tintaSuave; g.fillText(caja.kmTxt(d, 0), px + nx * 24, py + ny * 24 + 5);
+                const X = x => caja.ex(x), Y = y => caja.ey(y);
+                g.save();
+                g.beginPath(); g.rect(3, 3, width - 6, height - 6); g.clip();
+                // la pista (sombra y gris), más ancha al acercar pero no más de 30 px
+                const kk = Math.max(1, Math.min(1.6, k / caja.kBase * 0.4 + 1));
+                g.lineJoin = "round"; g.lineCap = "round";
+                g.beginPath(); g.moveTo(X(P[0][0]), Y(P[0][1]));
+                for (const p of P) g.lineTo(X(p[0]), Y(p[1]));
+                if (caja.inf.cerrada) g.closePath();
+                g.strokeStyle = "rgba(0,0,0,0.45)"; g.lineWidth = 19 * kk; g.stroke();
+                g.strokeStyle = "#3a3f45"; g.lineWidth = 11 * kk; g.stroke();
+                // la vuelta pintada, tramo por tramo, solo lo visible
+                g.lineWidth = 8 * kk;
+                let col = null, abierto = false;
+                for (let i = 1; i < M.length; i++) {
+                    const a = M[i - 1], b = M[i];
+                    if (!a[7] || !b[7] || !caja.seVe(X(b[5]), Y(b[6]), 40)) { if (abierto) g.stroke(); abierto = false; col = null; continue; }
+                    const c = caja.color(b);
+                    if (c !== col) {
+                        if (abierto) g.stroke();
+                        g.strokeStyle = c; g.beginPath(); g.moveTo(X(a[5]), Y(a[6])); col = c; abierto = true;
+                    }
+                    g.lineTo(X(b[5]), Y(b[6]));
                 }
-            }
-            // qué parte se ve (para el texto de abajo)
-            for (const p of M) if (p[7] && caja.seVe(X(p[5]), Y(p[6]), 0)) { if (!hay) { dmin = p[1]; hay = true; } dmax = p[1]; }
-            caja.txtViendo = !hay ? "" : k <= caja.kBase * 1.01 ? (caja.rec ? "Recorrido completo" : "Vuelta completa") : "Viendo del km " + caja.kmTxt(dmin, 1) + " al " + caja.kmTxt(dmax, 1);
-            // largada
-            const p0 = P[0];
-            g.beginPath(); g.arc(X(p0[0]), Y(p0[1]), 14, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
-            const izq = X(p0[0]) > width * 0.7;
-            g.fillStyle = Tema.tinta; g.font = "italic 18px '" + Tema.fuente800 + "'"; g.textAlign = izq ? "right" : "left";
-            g.fillText("LARGADA", X(p0[0]) + (izq ? -22 : 22), Y(p0[1]) + 7);
-            if (caja.rec) {   // recorrido libre: la llegada y las marcas con km y hora
-                const F = P[P.length - 1];
-                if (!caja.inf.cerrada) {
-                    g.fillStyle = "#111111"; g.fillRect(X(F[0]) - 12, Y(F[1]) - 12, 24, 24);
-                    g.strokeStyle = "#ffffff"; g.lineWidth = 3; g.strokeRect(X(F[0]) - 12, Y(F[1]) - 12, 24, 24);
-                    const izqF = X(F[0]) > width * 0.7;
-                    g.fillStyle = Tema.tinta; g.textAlign = izqF ? "right" : "left";
-                    g.fillText("LLEGADA", X(F[0]) + (izqF ? -22 : 22), Y(F[1]) + 7);
+                if (abierto) g.stroke();
+                // rayitas cada 1 km (cada 5 si están muy juntas), con el número
+                let largo = 0;
+                for (let i = 1; i < M.length; i++) if (M[i][7] && M[i - 1][7]) largo += Math.hypot(M[i][5] - M[i - 1][5], M[i][6] - M[i - 1][6]);
+                const pxKm = largo * k / Math.max(1, caja.largo / 1000);   // píxeles que mide 1 km en pantalla
+                const pasoKm = pxKm >= 60 ? 1000 : pxKm >= 12 ? 5000 : 0;
+                g.font = "13px '" + Tema.fuente600 + "'"; g.textAlign = "center";
+                let dmin = 0, dmax = 0, hay = false;
+                if (pasoKm > 0) {
+                    let j = 1;
+                    for (let d = pasoKm; d < caja.largo; d += pasoKm) {
+                        while (j < M.length && M[j][1] < d) j++;
+                        if (j >= M.length) break;
+                        const a = M[j - 1], b = M[j];
+                        if (!a[7] || !b[7]) continue;
+                        const px = X(a[5] + (b[5] - a[5]) * 0.5), py = Y(a[6] + (b[6] - a[6]) * 0.5);
+                        if (!caja.seVe(px, py, 0)) continue;
+                        let nx = -(b[6] - a[6]), ny = b[5] - a[5]; const n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n;
+                        g.strokeStyle = "rgba(255,255,255,0.8)"; g.lineWidth = 2;
+                        g.beginPath(); g.moveTo(px + nx * 11, py + ny * 11); g.lineTo(px - nx * 11, py - ny * 11); g.stroke();
+                        g.fillStyle = Tema.tintaSuave; g.fillText(caja.kmTxt(d, 0), px + nx * 24, py + ny * 24 + 5);
+                    }
                 }
-                for (const mk of caja.marcas) {
-                    if (mk.x === undefined || !caja.seVe(X(mk.x), Y(mk.y), 60)) continue;
-                    g.beginPath(); g.arc(X(mk.x), Y(mk.y), 16, 0, Math.PI * 2);
-                    g.fillStyle = Tema.amarillo; g.fill(); g.strokeStyle = "#111111"; g.lineWidth = 3; g.stroke();
-                    g.fillStyle = "#111111"; g.font = "italic 20px '" + Tema.fuente800 + "'"; g.textAlign = "center";
-                    g.fillText(String(mk.n), X(mk.x), Y(mk.y) + 7);
-                    // la etiqueta del lado de afuera de la curva, para no pisar la ruta
-                    let i = 0; for (let q = 1; q < M.length; q++) if (Math.abs(M[q][0] - mk.ms / 1000) < Math.abs(M[i][0] - mk.ms / 1000)) i = q;
-                    const a = M[Math.max(0, i - 2)], b = M[Math.min(M.length - 1, i + 2)], c = M[Math.min(M.length - 1, i + 12)];
-                    let nx = -(b[6] - a[6]), ny = b[5] - a[5]; const n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n;
-                    if ((c[5] - M[i][5]) * nx + (c[6] - M[i][6]) * ny > 0) { nx = -nx; ny = -ny; }
-                    g.fillStyle = Tema.acento; g.font = "italic 15px '" + Tema.fuente600 + "'"; g.textAlign = nx < 0 ? "right" : "left";
-                    g.fillText("km " + caja.kmTxt(mk.m || 0, 1) + " · " + Formato.hms(mk.ms, true), X(mk.x) + nx * 30, Y(mk.y) + ny * 30 + 5);
+                // qué parte se ve (para el texto de abajo)
+                for (const p of M) if (p[7] && caja.seVe(X(p[5]), Y(p[6]), 0)) { if (!hay) { dmin = p[1]; hay = true; } dmax = p[1]; }
+                caja.txtViendo = !hay ? "" : k <= caja.kBase * 1.01 ? (caja.rec ? "Recorrido completo" : "Vuelta completa") : "Viendo del km " + caja.kmTxt(dmin, 1) + " al " + caja.kmTxt(dmax, 1);
+                // largada
+                const p0 = P[0];
+                g.beginPath(); g.arc(X(p0[0]), Y(p0[1]), 14, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
+                const izq = X(p0[0]) > width * 0.7;
+                g.fillStyle = Tema.tinta; g.font = "italic 18px '" + Tema.fuente800 + "'"; g.textAlign = izq ? "right" : "left";
+                g.fillText("LARGADA", X(p0[0]) + (izq ? -22 : 22), Y(p0[1]) + 7);
+                if (caja.rec) {   // recorrido libre: la llegada y las marcas con km y hora
+                    const F = P[P.length - 1];
+                    if (!caja.inf.cerrada) {
+                        g.fillStyle = "#111111"; g.fillRect(X(F[0]) - 12, Y(F[1]) - 12, 24, 24);
+                        g.strokeStyle = "#ffffff"; g.lineWidth = 3; g.strokeRect(X(F[0]) - 12, Y(F[1]) - 12, 24, 24);
+                        const izqF = X(F[0]) > width * 0.7;
+                        g.fillStyle = Tema.tinta; g.textAlign = izqF ? "right" : "left";
+                        g.fillText("LLEGADA", X(F[0]) + (izqF ? -22 : 22), Y(F[1]) + 7);
+                    }
+                    for (const mk of caja.marcas) {
+                        if (mk.x === undefined || !caja.seVe(X(mk.x), Y(mk.y), 60)) continue;
+                        g.beginPath(); g.arc(X(mk.x), Y(mk.y), 16, 0, Math.PI * 2);
+                        g.fillStyle = Tema.amarillo; g.fill(); g.strokeStyle = "#111111"; g.lineWidth = 3; g.stroke();
+                        g.fillStyle = "#111111"; g.font = "italic 20px '" + Tema.fuente800 + "'"; g.textAlign = "center";
+                        g.fillText(String(mk.n), X(mk.x), Y(mk.y) + 7);
+                        // la etiqueta del lado de afuera de la curva, para no pisar la ruta
+                        let i = 0; for (let q = 1; q < M.length; q++) if (Math.abs(M[q][0] - mk.ms / 1000) < Math.abs(M[i][0] - mk.ms / 1000)) i = q;
+                        const a = M[Math.max(0, i - 2)], b = M[Math.min(M.length - 1, i + 2)], c = M[Math.min(M.length - 1, i + 12)];
+                        let nx = -(b[6] - a[6]), ny = b[5] - a[5]; const n = Math.hypot(nx, ny) || 1; nx /= n; ny /= n;
+                        if ((c[5] - M[i][5]) * nx + (c[6] - M[i][6]) * ny > 0) { nx = -nx; ny = -ny; }
+                        g.fillStyle = Tema.acento; g.font = "italic 15px '" + Tema.fuente600 + "'"; g.textAlign = nx < 0 ? "right" : "left";
+                        g.fillText("km " + caja.kmTxt(mk.m || 0, 1) + " · " + Formato.hms(mk.ms, true), X(mk.x) + nx * 30, Y(mk.y) + ny * 30 + 5);
+                    }
                 }
+                // el punto tocado
+                const s = caja.sel;
+                if (s) {
+                    g.beginPath(); g.arc(X(s[5]), Y(s[6]), 10, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
+                    g.strokeStyle = "#111111"; g.lineWidth = 3; g.stroke();
+                    globito.x = Math.min(width - globito.width - 20, Math.max(20, X(s[5]) + 24));
+                    globito.y = Math.min(height - 150, Math.max(76, Y(s[6]) - 88));
+                }
+                g.restore();
             }
-            // el punto tocado
-            const s = caja.sel;
-            if (s) {
-                g.beginPath(); g.arc(X(s[5]), Y(s[6]), 10, 0, Math.PI * 2); g.fillStyle = "#ffffff"; g.fill();
-                g.strokeStyle = "#111111"; g.lineWidth = 3; g.stroke();
-                globito.x = Math.min(width - globito.width - 20, Math.max(20, X(s[5]) + 24));
-                globito.y = Math.min(height - 150, Math.max(76, Y(s[6]) - 88));
-            }
-            g.restore();
         }
     }
     // Globito del punto tocado
@@ -262,7 +278,8 @@ Tarjeta { datos: true;
         property real k0: 1
         property real ox0: 0
         property real oy0: 0
-        onPinchStarted: { k0 = caja.k; ox0 = caja.ox; oy0 = caja.oy; }
+        onPinchStarted: { k0 = caja.k; ox0 = caja.ox; oy0 = caja.oy; caja.enGesto = true; }
+        onPinchFinished: caja.terminarGesto()
         onPinchUpdated: (pinch) => {
             const nk = Math.max(caja.kBase, Math.min(caja.kBase * 40, k0 * pinch.scale));
             const sx = pinch.startCenter.x, sy = pinch.startCenter.y + 80, cx = pinch.center.x, cy = pinch.center.y + 80;
@@ -283,8 +300,11 @@ Tarjeta { datos: true;
                 if (!pressed) return;
                 if (!arrastro && Math.hypot(m.x - xPres, m.y - yPres) < 8) return;
                 arrastro = true;
+                caja.enGesto = true;
                 caja.poner(caja.k, oxPres + m.x - xPres, oyPres + m.y - yPres);
             }
+            onReleased: caja.terminarGesto()
+            onCanceled: caja.terminarGesto()
             onClicked: (m) => {
                 if (arrastro) return;
                 if (unToque.running && Math.hypot(m.x - xToque, m.y - yToque) < 40) { unToque.stop(); xToque = -1; caja.acercar(m.x, m.y + 80, 2); return; }
