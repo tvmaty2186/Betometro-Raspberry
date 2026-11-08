@@ -1,6 +1,9 @@
 #include "servidor.h"
 
 #include <QRandomGenerator>
+#include <QSaveFile>
+
+#include "contexto.h"
 
 #include "control_remoto.h"
 #include "datos.h"
@@ -84,6 +87,8 @@ QByteArray Servidor::zip(const QList<QPair<QString, QByteArray>>& archivos) {
 
 Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre), datos_(datos), puerto_(puerto) {
     nuevoCodigoDrive();
+    llaveP_ = qEnvironmentVariableIsSet("BETO_FIJO") ? QStringLiteral("fija")   // capturas y pruebas
+                                                      : QString::number(QRandomGenerator::system()->generate64(), 36).left(10);
     connect(&tcp_, &QTcpServer::newConnection, this, [this] {
         while (QTcpSocket* s = tcp_.nextPendingConnection()) {
             connect(s, &QTcpSocket::disconnected, s, &QObject::deleteLater);
@@ -112,6 +117,27 @@ Servidor::Servidor(Datos* datos, quint16 puerto, QObject* padre) : QObject(padre
                     if (pedido.size() - fin - 4 < largo) return;   // falta el resto del archivo
                     s->setProperty("atendido", true);
                     s->write(respuesta(200, "text/html; charset=utf-8", recibirDrive(pedido.mid(fin + 4, largo))));
+                    s->disconnectFromHost();
+                    return;
+                }
+                // POST /personalizar: lo que se eligió en el celu, con las fotos ya recortadas (hasta 6 MB)
+                if (linea.size() >= 2 && linea[0] == "POST" && QUrl(QString::fromUtf8(linea[1])).path() == QLatin1String("/personalizar")) {
+                    const int fin = pedido.indexOf("\r\n\r\n");
+                    qint64 largo = -1;
+                    bool nuestra = false;
+                    for (const QByteArray& c : pedido.left(fin).split('\n')) {
+                        if (c.trimmed().toLower().startsWith("content-length:")) largo = c.trimmed().mid(15).trimmed().toLongLong();
+                        if (c.trimmed().toLower().startsWith("x-betometro:")) nuestra = true;
+                    }
+                    if (largo < 0 || largo > 6 * 1024 * 1024 || !nuestra) {
+                        s->setProperty("atendido", true);
+                        s->write(respuesta(400, "application/json; charset=utf-8", "{\"ok\":false,\"error\":\"No se pudo recibir\"}"));
+                        s->disconnectFromHost();
+                        return;
+                    }
+                    if (pedido.size() - fin - 4 < largo) return;   // falta el resto
+                    s->setProperty("atendido", true);
+                    s->write(respuesta(200, "application/json; charset=utf-8", recibirPersonalizar(pedido.mid(fin + 4, largo))));
                     s->disconnectFromHost();
                     return;
                 }
@@ -210,6 +236,23 @@ QByteArray Servidor::responder(const QByteArray& rutaCruda, bool post) const {
     }
     if (ruta == QLatin1String("/drive")) return respuesta(200, "text/html; charset=utf-8", paginaDrive());
     // El manual del navegante (Matías, 08/11/2026): la página y el PDF para imprimir o guardar en el celu
+    // Personalizar (08/11/2026): la página, con lo que hay ahora, y las fotos del inicio de ahora (propias o de fábrica)
+    if (ruta == QLatin1String("/personalizar")) {
+        const QVariantMap a = datos_->ajustes();
+        QJsonObject e{{"numeroAuto", a.value("numeroAuto").toString()}, {"nombreAuto", a.value("nombreAuto").toString()},
+                      {"tema", a.value("tema").toString()}, {"reloj", a.value("relojInicio").toString()},
+                      {"temaPropio", QJsonObject::fromVariantMap(a.value("temaPropio").toMap())}};
+        QString html = pagina_web("personalizar");
+        html.replace(QLatin1String("/*ESTADO*/null"), QString::fromUtf8(QJsonDocument(e).toJson(QJsonDocument::Compact)));
+        return respuesta(200, "text/html; charset=utf-8", html.toUtf8());
+    }
+    if (ruta == QLatin1String("/personalizar/foto-h.jpg") || ruta == QLatin1String("/personalizar/foto-v.jpg") || ruta == QLatin1String("/personalizar/fabrica.jpg")) {
+        const bool h = ruta.endsWith(QLatin1String("-h.jpg"));
+        const bool fabrica = ruta.endsWith(QLatin1String("fabrica.jpg"));
+        QFile f(!fabrica && contexto_ && QFile::exists(contexto_->archivoFoto(h)) ? contexto_->archivoFoto(h) : QStringLiteral(":/recursos/img/inicio.jpg"));
+        if (!f.open(QIODevice::ReadOnly)) return respuesta(404, "text/plain; charset=utf-8", "No está la foto");
+        return respuesta(200, "image/jpeg", f.readAll());
+    }
     if (ruta == QLatin1String("/ayuda")) return respuesta(200, "text/html; charset=utf-8", pagina_web("ayuda").toUtf8());
     if (ruta == QLatin1String("/manual.pdf")) {
         QFile f(QStringLiteral(":/recursos/manual.pdf"));
@@ -387,4 +430,55 @@ QByteArray Servidor::paginaDrive(const QString& aviso, bool bien) const {
 // «Carreras» (cambiar de carrera como capítulos). Pregunta cómo está la tele cada medio segundo.
 QByteArray Servidor::paginaControl() const {
     return pagina_web("control").toUtf8();
+}
+
+// POST /personalizar: {llave, numeroAuto, nombreAuto, tema: "propio"|"avispon"…, temaPropio: {fondo, acento, letras},
+// reloj, fotoH, fotoV: "data:image/jpeg;base64,…" | "fabrica"}. Todo validado: colores #rrggbb, textos cortos.
+QByteArray Servidor::recibirPersonalizar(const QByteArray& cuerpo) {
+    const auto mal = [](const QString& t) { return QJsonDocument(QJsonObject{{"ok", false}, {"error", t}}).toJson(QJsonDocument::Compact); };
+    const QJsonObject o = QJsonDocument::fromJson(cuerpo).object();
+    if (o.value("llave").toString() != llaveP_ || llaveP_.isEmpty()) return mal(QStringLiteral("Escaneá de nuevo el QR de la Pi (Ajustes → Pantalla y tema)"));
+    const QRegularExpression color(QStringLiteral("^#[0-9a-fA-F]{6}$"));
+    if (o.contains("numeroAuto")) {
+        const QString n = o.value("numeroAuto").toString().trimmed();
+        if (!QRegularExpression(QStringLiteral("^[0-9]{1,4}$")).match(n).hasMatch()) return mal(QStringLiteral("El número tiene que tener de 1 a 4 cifras"));
+        datos_->ponerCfg(QStringLiteral("numeroAuto"), n);
+    }
+    if (o.contains("nombreAuto")) datos_->ponerCfg(QStringLiteral("nombreAuto"), o.value("nombreAuto").toString().trimmed().left(30));
+    if (o.contains("reloj")) {
+        const QString r = o.value("reloj").toString();
+        static const QStringList validos{QString(), "clasico", "deportivo", "digital", "rally", "aviacion", "anillo"};
+        if (validos.contains(r)) datos_->ponerCfg(QStringLiteral("relojInicio"), r);
+    }
+    if (o.contains("temaPropio")) {
+        const QJsonObject t = o.value("temaPropio").toObject();
+        const QString letras = t.value("letras").toString();
+        if (!color.match(t.value("fondo").toString()).hasMatch() || !color.match(t.value("acento").toString()).hasMatch()
+            || !(letras == "blanco" || letras == "crema" || letras == "negro"))
+            return mal(QStringLiteral("Colores no válidos"));
+        datos_->ponerCfg(QStringLiteral("temaPropio"), QVariantMap{{"fondo", t.value("fondo").toString().toLower()},
+                                                                  {"acento", t.value("acento").toString().toLower()}, {"letras", letras}});
+    }
+    if (o.contains("tema")) {
+        const QString t = o.value("tema").toString();
+        if (QStringList{"avispon", "rally", "sport", "cabina", "propio"}.contains(t)) {
+            datos_->ponerCfg(QStringLiteral("tema"), t);
+            if (contexto_) contexto_->setTema(t);
+        }
+    }
+    for (const bool h : {true, false}) {
+        const QString clave = h ? QStringLiteral("fotoH") : QStringLiteral("fotoV");
+        if (!o.contains(clave) || !contexto_) continue;
+        const QString v = o.value(clave).toString();
+        const QString archivo = contexto_->archivoFoto(h);
+        if (v == QLatin1String("fabrica")) { QFile::remove(archivo); contexto_->fotoCambio(); continue; }
+        if (!v.startsWith(QLatin1String("data:image/jpeg;base64,"))) return mal(QStringLiteral("La foto no llegó bien"));
+        const QByteArray jpg = QByteArray::fromBase64(v.mid(23).toLatin1());
+        if (jpg.size() < 1000 || !jpg.startsWith("\xff\xd8")) return mal(QStringLiteral("La foto no llegó bien"));
+        QSaveFile f(archivo);
+        if (!f.open(QIODevice::WriteOnly) || f.write(jpg) != jpg.size() || !f.commit()) return mal(QStringLiteral("No se pudo guardar la foto"));
+        contexto_->fotoCambio();
+    }
+    qWarning("Personalizar: cambios guardados desde el celu");
+    return QJsonDocument(QJsonObject{{"ok", true}}).toJson(QJsonDocument::Compact);
 }

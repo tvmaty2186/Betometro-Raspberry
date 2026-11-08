@@ -23,7 +23,10 @@ class Contexto : public QObject {
     Q_PROPERTY(QString nombreAuto READ nombreAuto NOTIFY numeroAutoChanged)
     Q_PROPERTY(int satelites READ satelites NOTIFY gpsChanged)
     Q_PROPERTY(QString redWifi READ redWifi NOTIFY wifiChanged)
-    Q_PROPERTY(QString horaFuente READ horaFuente NOTIFY horaFuenteChanged)   // de dónde salió la hora: internet, gps o ""
+    Q_PROPERTY(QString horaFuente READ horaFuente NOTIFY horaFuenteChanged)
+    // Foto propia del inicio (Personalizar, 08/11/2026): dirección del archivo acostada / parada, "" = la de fábrica
+    Q_PROPERTY(QString fotoH READ fotoH NOTIFY fotoChanged)
+    Q_PROPERTY(QString fotoV READ fotoV NOTIFY fotoChanged)   // de dónde salió la hora: internet, gps o ""
 
 public:
     bool horizontal() const { return horizontal_; }
@@ -74,9 +77,15 @@ public:
         h.replace(QLatin1String("<h3>"), QStringLiteral("<h3 style=\"color:#8a6a00\">"));
         return h;
     }
+    void ponerCarpeta(const QString& c) { carpeta_ = c; emit fotoChanged(); }
+    QString archivoFoto(bool h) const { return carpeta_ + (h ? QStringLiteral("/inicio-h.jpg") : QStringLiteral("/inicio-v.jpg")); }
+    QString fotoH() const { return url(archivoFoto(true)); }
+    QString fotoV() const { return url(archivoFoto(false)); }
+    void fotoCambio() { ++fotoVersion_; emit fotoChanged(); }
     QString horaFuente() const { return horaFuente_; }
     void setHoraFuente(const QString& f) { if (f != horaFuente_) { horaFuente_ = f; emit horaFuenteChanged(); } }
 signals:
+    void fotoChanged();
     void horaFuenteChanged();
     void horizontalChanged();
     void temaChanged();
@@ -87,6 +96,12 @@ signals:
     void wifiChanged();
 
 private:
+    QString url(const QString& f) const {
+        if (carpeta_.isEmpty() || !QFile::exists(f)) return {};
+        return QStringLiteral("file://") + f + QStringLiteral("?v=") + QString::number(fotoVersion_);   // otra dirección: se vuelve a leer
+    }
+    QString carpeta_;
+    int fotoVersion_ = 0;
     QString horaFuente_ = QStringLiteral("internet");
     bool horizontal_ = true;
     bool fisica_ = false;

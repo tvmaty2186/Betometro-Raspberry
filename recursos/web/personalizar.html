@@ -1,0 +1,227 @@
+<!doctype html><html lang=es><head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Betómetro · Personalizar</title>
+<link rel=icon href=/r/icono.png>
+<meta name=theme-color content="#0d2a18">
+<style>
+@font-face{font-family:Barlow;font-weight:600;src:url(/r/barlow-latin-600-normal.woff2)}
+@font-face{font-family:Barlow;font-weight:800;font-style:italic;src:url(/r/barlow-latin-800-italic.woff2)}
+@font-face{font-family:'Barlow Condensed';font-weight:700;src:url(/r/barlow-condensed-latin-700-normal.woff2)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Barlow,system-ui,sans-serif;font-weight:600;color:#f7f7f2;background:#0b2a17}
+main{max-width:520px;margin:auto;padding:0 12px 40px}
+.cab{display:flex;align-items:center;gap:10px;padding:12px 0 10px;border-bottom:3px solid #f4c531}
+.cab img{height:38px}.cab b{font:800 italic 22px Barlow}
+.tabs{display:flex;gap:6px;margin:12px 0 8px}
+.tabs button,.seg button{flex:1;padding:10px 2px;border-radius:12px;border:2px solid #cfd4d8;background:transparent;color:#fff;font:800 italic 15px Barlow}
+.tabs button.on,.seg button.on{background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;border-color:#ffe9a0}
+.seg{display:flex;gap:6px;margin:6px 0}
+#marcoVista{position:relative;margin:8px auto;border-radius:10px;overflow:hidden;border:2px solid #cfd4d8;touch-action:none}
+#pant{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;font-family:Barlow}
+.foto{position:absolute;overflow:hidden}
+.foto img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.foto .fundeA,.foto .fundeD{position:absolute;pointer-events:none}
+.marcoAm{position:absolute;border:6px dashed #f4c531;pointer-events:none;display:none}
+.disco{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px}
+.disco i{position:absolute;font:600 13px Barlow;white-space:nowrap;font-style:normal}
+.barra{position:absolute;left:0;right:0;top:0;height:74px;display:flex;align-items:center;gap:14px;padding:0 20px}
+.barra img{height:54px}.barra b{font:800 italic 34px Barlow;color:#dfe3e6}
+.barra .h{margin-left:auto;font:700 44px 'Barlow Condensed'}
+.num{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#c9ced3 45%,#8d959c 70%,#e8ebee);display:flex;align-items:center;justify-content:center;font:800 italic 44px Barlow;color:#1d5233;box-shadow:0 6px 12px #0008}
+.nom{position:absolute;font:800 italic 30px Barlow;white-space:nowrap}
+h3{font:800 italic 14px Barlow;letter-spacing:.12em;color:#b9cdb8;margin:14px 0 6px}
+.ayuda{color:#b9cdb8;font-size:14px;font-style:italic;text-align:center;margin:4px 0}
+.pal{display:flex;flex-wrap:wrap;gap:8px}
+.pal button{width:40px;height:40px;border-radius:50%;border:3px solid #ffffff44;padding:0}
+.pal button.on{border:4px solid #fff;box-shadow:0 0 0 2px #000}
+input[type=text],input[type=number]{width:100%;padding:12px;border-radius:12px;border:2px solid #cfd4d8;background:#08190e;color:#fff;font:800 italic 22px Barlow}
+input[type=range]{width:100%;accent-color:#f4c531}
+.bt{display:block;width:100%;margin:10px 0;padding:14px;border-radius:14px;text-align:center;font:800 italic 19px Barlow;border:2px solid #f4c531;background:transparent;color:#f4c531}
+.a{background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;border-color:#ffe9a0}
+.fila{display:flex;gap:10px}.fila .bt{flex:1}
+.relojes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.relojes button{background:#08190e;border:2px solid #ffffff33;border-radius:14px;color:#fff;font:800 italic 13px Barlow;padding:4px}
+.relojes button.on{border:3px solid #f4c531;background:#f4c53118}
+.relojes svg{width:100%;aspect-ratio:1}
+.aviso{margin:10px 0;padding:10px 12px;border-radius:12px;font-size:15px}
+.bien{background:#1f7a3a}.malo{background:#8f130b}.ojo{background:#6b5200}
+.oculto{display:none}
+</style></head><body><main>
+<div class=cab><img alt="" src="/r/leon.png"><b>PERSONALIZAR</b></div>
+<div id=sinLlave class="aviso malo oculto">Para guardar, abrí esta página escaneando el QR de la Pi (Ajustes → Pantalla y tema → Personalizar).</div>
+<div class=tabs id=tabs><button data-t=foto class=on>Foto</button><button data-t=auto>Auto</button><button data-t=colores>Colores</button><button data-t=reloj>Reloj</button></div>
+<div class=seg id=orient><button data-o=h class=on>Acostada</button><button data-o=v>Parada</button></div>
+<div id=marcoVista><div id=pant></div></div>
+
+<section id=t-foto>
+ <p class=ayuda>Arrastrá la foto con el dedo y pellizcá para agrandarla. Lo de afuera del marco amarillo no se ve.</p>
+ <h3>TAMAÑO</h3><input type=range id=zoom min=1 max=4 step=0.01 value=1>
+ <label class="bt a" style="margin-top:12px">📷 ELEGIR FOTO<input type=file id=archivo accept="image/*" hidden></label>
+ <button class=bt id=fotoFabrica>Foto de fábrica (esta posición)</button>
+ <p class=ayuda>La acostada y la parada se acomodan por separado.</p>
+</section>
+<section id=t-auto class=oculto>
+ <h3>NÚMERO DEL AUTO</h3><input type=number id=numero inputmode=numeric maxlength=4>
+ <h3>NOMBRE DEL AUTO</h3><input type=text id=nombre maxlength=30>
+</section>
+<section id=t-colores class=oculto>
+ <h3>PRINCIPAL (FONDO)</h3><div class=pal id=palFondo></div>
+ <h3>ACENTO</h3><div class=pal id=palAcento></div>
+ <h3>LETRAS</h3><div class=seg id=letras><button data-l=blanco>Blanco</button><button data-l=crema>Crema</button><button data-l=negro>Negro</button></div>
+ <div id=contraste class=aviso></div>
+ <p class=ayuda>Los colores de aviso (verde, amarillo y rojo) y el modo sol no cambian.</p>
+ <button class=bt id=temaFabrica>Volver al Avispón</button>
+</section>
+<section id=t-reloj class=oculto>
+ <h3>VELOCÍMETRO DEL INICIO</h3><div class=relojes id=relojes></div>
+</section>
+<div id=resultado class="aviso oculto"></div>
+<button class="bt a" id=guardar>GUARDAR</button>
+</main>
+<script>
+const ESTADO=/*ESTADO*/null||{};
+const LLAVE=new URLSearchParams(location.search).get('c')||'';
+const $=id=>document.getElementById(id);
+if(!LLAVE)$('sinLlave').classList.remove('oculto');
+
+// ---------- Estado ----------
+const TEMAS={avispon:['#3d8c57','#1d5233','#0d2a18','#f4c531','#f7f7f2'],sport:['#2b2f34','#1a1c1f','#111214','#e10600','#ffffff'],
+  rally:['#2a2219','#120e0a','#070504','#ffb000','#f3e7c8'],cabina:['#0e1215','#05080a','#000000','#2fd162','#e8eef2']};
+const LETRAS={blanco:'#ffffff',crema:'#f3ecd8',negro:'#0b0d0c'};
+const est={orient:'h',tab:'foto',tema:ESTADO.tema||'avispon',propio:Object.assign({fondo:'#1a1c1f',acento:'#e10600',letras:'blanco'},ESTADO.temaPropio||{}),
+  reloj:ESTADO.reloj||'',numero:ESTADO.numeroAuto||'101',nombre:ESTADO.nombreAuto||'',cambios:{}};
+const MARCO={h:{x:0,y:80,w:860,h:470,W:1280,H:720},v:{x:0,y:80,w:720,h:370,W:720,H:1280}};
+const foto={h:{src:'/personalizar/foto-h.jpg',iw:0,ih:0,s:1,x:0,y:0,fabrica:false},v:{src:'/personalizar/foto-v.jpg',iw:0,ih:0,s:1,x:0,y:0,fabrica:false}};
+
+function colores(){
+  if(est.tema==='propio'){const f=est.propio.fondo;return{f1:mezcla(f,'#ffffff',.18),f2:f,f3:mezcla(f,'#000000',.33),acento:est.propio.acento,letras:LETRAS[est.propio.letras]||'#fff'};}
+  const t=TEMAS[est.tema]||TEMAS.avispon;return{f1:t[0],f2:t[1],f3:t[2],acento:t[3],letras:t[4]};
+}
+function rgb(h){h=h.replace('#','');return[0,2,4].map(i=>parseInt(h.substr(i,2),16));}
+function mezcla(a,b,t){const x=rgb(a),y=rgb(b);return'#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('');}
+function lum(h){return rgb(h).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);}
+function contraste(a,b){const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+
+// ---------- Velocímetros (los mismos 6 de la Pi) ----------
+const NS='http://www.w3.org/2000/svg';
+function el(s,t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);s.appendChild(e);return e}
+function txt(s,x,y,t,a){const e=el(s,'text',Object.assign({x,y,'text-anchor':'middle'},a));e.textContent=t;return e}
+const ang=v=>(-225+v/160*270)*Math.PI/180,P=(r,v)=>[Math.cos(ang(v))*r,Math.sin(ang(v))*r];
+function marcas(s,r1,r2,col,w){for(let v=0;v<=160;v+=10){const a=P(r1,v),b=P(r2,v);el(s,'line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:col,'stroke-width':v%20?w/2:w})}}
+function nums(s,r,col,f,fs){for(let v=0;v<=160;v+=20){const p=P(r,v);txt(s,p[0],p[1]+fs/3,v,{fill:col,'font-family':f,'font-size':fs,'font-weight':700})}}
+function aguja(s,v,col){const p=P(80,v);el(s,'line',{x1:0,y1:0,x2:p[0],y2:p[1],stroke:col,'stroke-width':5,'stroke-linecap':'round'});el(s,'circle',{r:8,fill:col})}
+function arco(s,r,v0,v1,col,w){const a=P(r,v0),b=P(r,v1),l=(v1-v0)/160*270>180?1:0;el(s,'path',{d:`M${a[0]} ${a[1]} A${r} ${r} 0 ${l} 1 ${b[0]} ${b[1]}`,stroke:col,'stroke-width':w,fill:'none','stroke-linecap':'round'})}
+function reloj(s,e,acento){
+  s.innerHTML='';s.setAttribute('viewBox','-110 -110 220 220');const V=47,BC="'Barlow Condensed'";
+  if(e==='deportivo'){el(s,'circle',{r:104,fill:'#9aa3ad'});el(s,'circle',{r:98,fill:'#e9ecef'});el(s,'circle',{r:94,fill:'#141414'});arco(s,88,120,160,'#e10600',6);marcas(s,90,76,'#fff',4);nums(s,62,'#fff','Barlow',15);txt(s,0,66,V,{fill:'#fff','font-family':BC,'font-size':34,'font-weight':700});aguja(s,V,'#e10600')}
+  else if(e==='digital'){el(s,'circle',{r:104,fill:'#0c0d0f'});for(let v=0;v<=160;v+=5){const a=P(92,v),b=P(80,v);el(s,'line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:v<=V?(v<110?'#2fd162':'#ffd400'):'#2a2e33','stroke-width':7})}txt(s,0,18,V,{fill:'#fff','font-family':BC,'font-size':74,'font-weight':700});txt(s,0,44,'KM/H',{fill:'#9aa0a6','font-size':13})}
+  else if(e==='rally'){el(s,'circle',{r:104,fill:'#2a2219'});el(s,'circle',{r:96,fill:'#120e0a'});arco(s,88,0,160,'#3a2f22',10);arco(s,88,130,160,'#c0162c',10);marcas(s,82,70,'#f3e7c8',3);nums(s,55,'#ffb000',BC,18);txt(s,0,70,V,{fill:'#ffb000','font-family':BC,'font-size':32,'font-weight':700});aguja(s,V,'#ffb000')}
+  else if(e==='aviacion'){el(s,'circle',{r:104,fill:'#2b3640'});el(s,'circle',{r:96,fill:'#05080a'});marcas(s,90,76,'#e8eef2',3);nums(s,62,'#3cf06e','monospace',14);for(const k of[[-1,-1],[1,-1],[-1,1],[1,1]])el(s,'circle',{cx:k[0]*74,cy:k[1]*74,r:4,fill:'#4fc3f7'});txt(s,0,-30,'AIRSPEED',{fill:'#4fc3f7','font-family':'monospace','font-size':10});txt(s,0,70,V,{fill:'#3cf06e','font-family':'monospace','font-size':28});aguja(s,V,'#e8eef2')}
+  else if(e==='anillo'){el(s,'circle',{r:104,fill:'#0c0e10'});arco(s,84,0,160,'#ffffff22',16);arco(s,84,0,V,acento,16);txt(s,0,22,V,{fill:'#fff','font-family':BC,'font-size':72,'font-weight':700});txt(s,0,48,'KM/H',{fill:'#9aa0a6','font-size':13})}
+  else{el(s,'circle',{r:104,fill:'#cfd4d8'});el(s,'circle',{r:96,fill:'#f3ecd8'});marcas(s,90,78,'#1d2a20',4);nums(s,64,'#1d5233',BC,17);txt(s,0,70,V,{fill:'#1d5233','font-family':BC,'font-size':32,'font-weight':700});aguja(s,V,'#111')}
+}
+function relojDelTema(){return est.reloj||(est.tema==='propio'||est.tema==='sport'?'deportivo':est.tema==='rally'?'rally':est.tema==='cabina'?'aviacion':'clasico');}
+
+// ---------- La vista del inicio (la misma cuenta de posiciones que Inicio.qml) ----------
+const NOMBRES=['Carreras','Práctica','Chequeo previo','Pantalla de carrera','Clima','Tienda','Ajustes'],ICON=['⚑','⏱','✓','▦','☁','⌂','⚙'];
+function dibujar(){
+  const o=est.orient,M=MARCO[o],c=colores(),p=$('pant'),ancho=$('marcoVista').parentNode.clientWidth;
+  const k=(o==='h'?ancho:Math.min(ancho,340))/M.W;
+  $('marcoVista').style.width=M.W*k+'px';$('marcoVista').style.height=M.H*k+'px';
+  p.style.width=M.W+'px';p.style.height=M.H+'px';p.style.transform=`scale(${k})`;p.dataset.k=k;
+  p.style.background=`radial-gradient(120% 80% at 25% 0%,${c.f1} 0%,${c.f2} 40%,${c.f3} 100%)`;
+  const f=foto[o],src=f.fabrica?'/personalizar/fabrica.jpg':f.src;
+  let h=`<div class=foto style="left:${M.x}px;top:${M.y}px;width:${M.w}px;height:${M.h}px"><img id=img src="${src}" style="transform:translate(${f.x}px,${f.y}px) scale(${f.s})">`+
+    (o==='h'?`<div class=fundeD style="right:0;top:0;bottom:0;width:25%;background:linear-gradient(90deg,transparent,${c.f2})"></div>`:'')+
+    `<div class=fundeA style="left:0;right:0;bottom:0;height:${o==='h'?30:20}%;background:linear-gradient(transparent,${c.f2})"></div></div>`;
+  h+=`<div class=marcoAm style="left:${M.x}px;top:${M.y}px;width:${M.w}px;height:${M.h}px;display:${est.tab==='foto'?'block':'none'}"></div>`;
+  h+=`<div class=barra style="background:linear-gradient(${c.f3},${c.f3}ee);border-bottom:3px solid ${c.acento}"><img src=/r/leon.png><b style="color:${c.letras}">BETÓMETRO</b><span class=h style="color:${c.letras}">12:00</span></div>`;
+  const conNum=est.tema==='avispon'||est.tema==='propio';
+  if(conNum)h+=`<div class=num style="left:${o==='h'?40:28}px;top:${o==='h'?510:430}px;width:120px;height:120px">${(est.numero||'101').slice(0,4)}</div>`;
+  h+=`<div class=nom style="left:${o==='h'?190:28}px;top:${o==='h'?600:556}px;color:${c.letras}">${(est.nombre||'').replace(/</g,'')}</div>`;
+  for(let i=0;i<7;i++){
+    const a=(o==='h'?104+i*21:272-i*21.5)*Math.PI/180,cx=o==='h'?1090+Math.cos(a)*310:629+Math.cos(a)*397,cy=o==='h'?436-Math.sin(a)*310:918+Math.sin(a)*397,d=o==='h'?76:96;
+    const borde=est.tema==='avispon'?'#cfd4d8':c.acento;
+    h+=`<div class=disco style="left:${cx-d/2}px;top:${cy-d/2}px;width:${d}px;height:${d}px;background:radial-gradient(circle at 40% 30%,${c.f1},${c.f3});border:4px solid ${borde}">${ICON[i]}<i style="${o==='h'?'right:'+(d+6)+'px':'top:'+(d+4)+'px'};color:${c.letras}">${NOMBRES[i]}</i></div>`;
+  }
+  const vx=o==='h'?930:379,vy=o==='h'?280:668,vw=o==='h'?320:500;
+  h+=`<svg id=velo style="position:absolute;left:${vx}px;top:${vy}px;width:${vw}px;height:${vw}px"></svg>`;
+  p.innerHTML=h;reloj($('velo'),relojDelTema(),c.acento);
+  const im=$('img');im.onload=()=>{f.iw=im.naturalWidth;f.ih=im.naturalHeight;if(!f.listo){ajustarInicial(o);f.listo=true;aplicar();}};
+  if(im.complete&&im.naturalWidth){f.iw=im.naturalWidth;f.ih=im.naturalHeight;}
+  $('zoom').value=f.s/base(o)||1;
+  pintarControles();
+}
+function base(o){const f=foto[o],M=MARCO[o];return f.iw?Math.max(M.w/f.iw,M.h/f.ih):1;}
+function ajustarInicial(o){const f=foto[o],M=MARCO[o],b=base(o);f.s=b;f.x=(M.w-f.iw*b)/2;f.y=(M.h-f.ih*b)*(f.src.indexOf('foto-')>=0?.5:.18);}
+function limitar(o){const f=foto[o],M=MARCO[o];f.s=Math.max(f.s,base(o));f.x=Math.min(0,Math.max(M.w-f.iw*f.s,f.x));f.y=Math.min(0,Math.max(M.h-f.ih*f.s,f.y));}
+function aplicar(){const o=est.orient,f=foto[o];limitar(o);const im=$('img');if(im)im.style.transform=`translate(${f.x}px,${f.y}px) scale(${f.s})`;$('zoom').value=f.s/base(o);}
+
+// ---------- Mover y pellizcar (solo en la pestaña Foto) ----------
+const dedos=new Map();let ini=null;
+$('marcoVista').addEventListener('pointerdown',e=>{if(est.tab!=='foto')return;$('marcoVista').setPointerCapture(e.pointerId);dedos.set(e.pointerId,{x:e.clientX,y:e.clientY});ini=null;});
+$('marcoVista').addEventListener('pointermove',e=>{
+  if(!dedos.has(e.pointerId))return;const k=+$('pant').dataset.k,o=est.orient,f=foto[o];
+  const antes=dedos.get(e.pointerId);dedos.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(dedos.size===1){f.x+=(e.clientX-antes.x)/k;f.y+=(e.clientY-antes.y)/k;}
+  else if(dedos.size===2){const[a,b]=[...dedos.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(!ini)ini={d,s:f.s};
+    const ns=Math.max(base(o),Math.min(base(o)*4,ini.s*d/ini.d)),M=MARCO[o],cx=M.w/2,cy=M.h/2;f.x=cx-(cx-f.x)*ns/f.s;f.y=cy-(cy-f.y)*ns/f.s;f.s=ns;}
+  est.cambios['foto'+o]=true;f.fabrica=false;aplicar();});
+const soltar=e=>{dedos.delete(e.pointerId);ini=null;};
+$('marcoVista').addEventListener('pointerup',soltar);$('marcoVista').addEventListener('pointercancel',soltar);
+$('zoom').oninput=()=>{const o=est.orient,f=foto[o],M=MARCO[o],ns=base(o)*$('zoom').value,cx=M.w/2,cy=M.h/2;f.x=cx-(cx-f.x)*ns/f.s;f.y=cy-(cy-f.y)*ns/f.s;f.s=ns;est.cambios['foto'+o]=true;f.fabrica=false;aplicar();};
+$('archivo').onchange=()=>{const a=$('archivo').files[0];if(!a)return;const r=new FileReader();r.onload=()=>{for(const o of['h','v']){Object.assign(foto[o],{src:r.result,listo:false,fabrica:false,iw:0});est.cambios['foto'+o]=true;}dibujar();};r.readAsDataURL(a);};
+$('fotoFabrica').onclick=()=>{const o=est.orient;Object.assign(foto[o],{fabrica:true,listo:false,iw:0});est.cambios['foto'+o]=true;dibujar();};
+
+// ---------- Pestañas, colores, reloj y auto ----------
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{est.tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  for(const t of['foto','auto','colores','reloj'])$('t-'+t).classList.toggle('oculto',t!==est.tab);dibujar();});
+document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>{est.orient=b.dataset.o;document.querySelectorAll('#orient button').forEach(x=>x.classList.toggle('on',x===b));dibujar();});
+const FONDOS=['#1a1c1f','#1d5233','#14305c','#5a1218','#3a2a14','#3c1d5a','#0e1215','#e9e6dc'],ACENTOS=['#e10600','#f4c531','#ff8c1a','#2fd162','#29b6f6','#ff4fd8','#f7f7f2','#9aa3ad'];
+function paleta(id,lista,clave){$(id).innerHTML='';for(const col of lista){const b=document.createElement('button');b.style.background=col;b.onclick=()=>{est.tema='propio';est.propio[clave]=col;est.cambios.tema=true;dibujar();};$(id).appendChild(b);}}
+paleta('palFondo',FONDOS,'fondo');paleta('palAcento',ACENTOS,'acento');
+document.querySelectorAll('#letras button').forEach(b=>b.onclick=()=>{est.tema='propio';est.propio.letras=b.dataset.l;est.cambios.tema=true;dibujar();});
+$('temaFabrica').onclick=()=>{est.tema='avispon';est.cambios.tema=true;dibujar();};
+const RELOJES=[['','El del tema'],['clasico','Clásico 404'],['deportivo','Deportivo'],['digital','Digital'],['rally','Rally'],['aviacion','Aviación'],['anillo','Anillo']];
+function pintarControles(){
+  const p=est.propio,pr=est.tema==='propio',c=colores();
+  $('palFondo').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',pr&&FONDOS[i]===p.fondo));
+  $('palAcento').querySelectorAll('button').forEach((b,i)=>b.classList.toggle('on',pr&&ACENTOS[i]===p.acento));
+  document.querySelectorAll('#letras button').forEach(b=>b.classList.toggle('on',pr&&b.dataset.l===p.letras));
+  const r1=contraste(c.letras,c.f2),r2=contraste(c.acento,c.f2),cx=$('contraste');
+  if(!pr){cx.className='aviso ojo';cx.textContent='Ahora: tema '+({avispon:'Avispón',sport:'Deportivo',rally:'Rally',cabina:'Cabina'}[est.tema]||est.tema)+'. Tocá un color para armar el tuyo (parte del Deportivo).';}
+  else if(r1<4.5){cx.className='aviso malo';cx.textContent='⚠ Poco contraste entre las letras y el fondo: no se va a leer al sol. Probá otras letras.';}
+  else if(r2<1.8){cx.className='aviso ojo';cx.textContent='⚠ El acento se parece mucho al fondo: los botones principales no van a resaltar.';}
+  else{cx.className='aviso bien';cx.textContent='✓ Se lee bien';}
+  const rs=$('relojes');if(!rs.children.length){for(const[v,n]of RELOJES){const b=document.createElement('button');b.dataset.r=v;b.innerHTML=`<svg></svg>${n}`;b.onclick=()=>{est.reloj=v;est.cambios.reloj=true;dibujar();};rs.appendChild(b);}}
+  rs.querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.r===est.reloj);reloj(b.querySelector('svg'),b.dataset.r||relojDelTemaBase(),c.acento);});
+}
+function relojDelTemaBase(){return est.tema==='propio'||est.tema==='sport'?'deportivo':est.tema==='rally'?'rally':est.tema==='cabina'?'aviacion':'clasico';}
+$('numero').value=est.numero;$('nombre').value=est.nombre;
+$('numero').oninput=()=>{est.numero=$('numero').value.replace(/\D/g,'').slice(0,4);est.cambios.auto=true;dibujar();};
+$('nombre').oninput=()=>{est.nombre=$('nombre').value.slice(0,30);est.cambios.auto=true;dibujar();};
+
+// ---------- Guardar ----------
+function recorte(o){
+  const f=foto[o],M=MARCO[o],cv=document.createElement('canvas');cv.width=M.w*2;cv.height=M.h*2;
+  const g=cv.getContext('2d'),im=new Image();
+  return new Promise((ok,mal)=>{im.onload=()=>{g.drawImage(im,f.x*2,f.y*2,f.iw*f.s*2,f.ih*f.s*2);ok(cv.toDataURL('image/jpeg',.85));};im.onerror=mal;im.src=f.src;});
+}
+$('guardar').onclick=async()=>{
+  const r=$('resultado');r.className='aviso ojo';r.textContent='Mandando…';
+  try{
+    const d={llave:LLAVE};
+    if(est.cambios.auto){d.numeroAuto=est.numero||'101';d.nombreAuto=est.nombre;}
+    if(est.cambios.reloj)d.reloj=est.reloj;
+    if(est.cambios.tema){d.tema=est.tema;if(est.tema==='propio')d.temaPropio=est.propio;}
+    for(const o of['h','v'])if(est.cambios['foto'+o])d['foto'+o.toUpperCase()]=foto[o].fabrica?'fabrica':await recorte(o);
+    const res=await fetch('/personalizar',{method:'POST',headers:{'Content-Type':'application/json','X-Betometro':'1'},body:JSON.stringify(d)});
+    const j=await res.json();
+    if(j.ok){r.className='aviso bien';r.textContent='✓ ¡Listo! Ya se ve en la Pi.';est.cambios={};}
+    else{r.className='aviso malo';r.textContent=j.error||'No se pudo guardar';}
+  }catch(e){r.className='aviso malo';r.textContent='Sin conexión con el Betómetro. ¿Estás en la misma wifi?';}
+};
+window.addEventListener('resize',dibujar);
+dibujar();
+</script></body></html>

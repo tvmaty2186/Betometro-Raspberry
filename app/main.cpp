@@ -283,6 +283,7 @@ int main(int argc, char* argv[]) {
     ponerBrillo();
     QObject::connect(&datos, &Datos::cfgChanged, &sistema, ponerBrillo);
     if (!op.isSet(oOrient)) contexto.setHorizontal(datos.cfg(QStringLiteral("orientacion")).toString() != QStringLiteral("vertical"));
+    contexto.ponerCarpeta(carpeta);   // la foto propia del inicio (inicio-h.jpg / inicio-v.jpg)
     contexto.setTema(datos.cfg(QStringLiteral("tema")).toString());
     if (op.isSet(oTema)) contexto.setTema(op.value(oTema));
     contexto.setSol(datos.cfg(QStringLiteral("modoSol")).toString() == QStringLiteral("si") || op.value(oPrueba) == QStringLiteral("sol"));
@@ -303,6 +304,7 @@ int main(int argc, char* argv[]) {
     piezas.pulsador = pulsador;
     PruebaCompleta pruebaCompleta(piezas);
     servidor.ponerPrueba(&pruebaCompleta);
+    servidor.ponerContexto(&contexto);   // Personalizar: tema y foto del inicio
     QQmlApplicationEngine motor;
     pruebaCompleta.ponerMotor(&motor);
     motor.addImageProvider(QStringLiteral("qr"), new ProveedorQr);

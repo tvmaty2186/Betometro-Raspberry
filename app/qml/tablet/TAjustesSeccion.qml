@@ -31,6 +31,10 @@ TPantalla {
                 TIcono { width: 44; height: 44; nombre: "auto" } }
 
             // ---- Pantalla y tema
+            // Personalizar desde el celu (08/11/2026): foto del inicio, número y nombre, colores y velocímetro
+            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Personalizar desde el celu"; detalle: "Foto del inicio, auto, colores y velocímetro"
+                    tocable: true; onTocada: Navegacion.ir("personalizar")
+                TIcono { width: 44; height: 44; nombre: "qr" } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Inicio con botones"; detalle: "Apagado: el inicio con la foto del auto"
                 TLlave { prendida: !!raiz.a.modoTablet; onCambiada: v => raiz.poner("modoTablet", v) } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Tema"

@@ -12,6 +12,7 @@ class ControlRemoto;
 class Datos;
 class Drive;
 class PruebaCompleta;
+class Contexto;
 class Reportes;
 class QTcpSocket;
 
@@ -32,6 +33,12 @@ public:
     void ponerDrive(Drive* d) { drive_ = d; }
     void ponerControl(ControlRemoto* c) { control_ = c; }   // el celu como control de la tele (/control)
     void ponerPrueba(PruebaCompleta* p) { prueba_ = p; }    // la Prueba completa: verla y arrancarla desde el celu (/prueba)
+    void ponerContexto(Contexto* c) { contexto_ = c; }      // Personalizar: el tema y la foto del inicio
+    // Personalizar desde el celu (08/11/2026): la dirección del QR lleva una llave que cambia en cada arranque;
+    // sin ella la página no deja guardar (que nadie de la wifi te cambie el equipo sin ver la pantalla)
+    Q_PROPERTY(QString llavePersonalizar READ llavePersonalizar CONSTANT)
+    QString llavePersonalizar() const { return llaveP_; }
+    QByteArray recibirPersonalizar(const QByteArray& cuerpo);   // POST /personalizar (JSON): lo aplica y contesta JSON
 
     // POST /drive: el JSON del cliente de Google (desde la página /drive). Devuelve la página de respuesta.
     QByteArray recibirDrive(const QByteArray& cuerpo);
@@ -58,6 +65,8 @@ private:
     Drive* drive_ = nullptr;
     ControlRemoto* control_ = nullptr;
     PruebaCompleta* prueba_ = nullptr;
+    Contexto* contexto_ = nullptr;
+    QString llaveP_;
     quint16 puerto_;
     QString codigoDrive_;
     void nuevoCodigoDrive();

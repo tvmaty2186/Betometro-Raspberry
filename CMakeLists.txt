@@ -82,7 +82,7 @@ if(BETO_PROGRAMA)
     qt_add_resources(betometro recursos
       PREFIX "/"
       FILES ${BETO_FUENTES} recursos/img/leon.png recursos/img/inicio.jpg recursos/informe-plantilla.html
-            recursos/web/index.html recursos/web/drive.html recursos/web/control.html recursos/web/prueba.html recursos/web/ayuda.html recursos/manual.pdf
+            recursos/web/index.html recursos/web/drive.html recursos/web/control.html recursos/web/prueba.html recursos/web/ayuda.html recursos/web/personalizar.html recursos/manual.pdf
             recursos/img/betometro-icono-512.png recursos/img/betometro-icono-redondo-512.png)
   else()
     message(STATUS "Sin Qt 6: no se compila el programa, solo el núcleo")

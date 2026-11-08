@@ -100,10 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
-## 1.0.40 (publicada 08/11/2026)
-Barras de velocidad y tiempo con una flecha blanca (negra en sol) centrada sobre la barra; los números de los botones
-− / + se achican si no entran (en Cabina la fecha pisaba los botones); el código de Google siempre entra en el
-recuadro; pruebas con capturas en Cabina además del Avispón.
+## 1.0.40 «personalizar» (publicada 08/11/2026)
+**Personalizar desde el celu** (Ajustes → Pantalla y tema → QR): foto del inicio (mover, pellizcar, acostada y parada),
+número y nombre del auto, tema propio (fondo, acento, letras; parte del Deportivo) y 6 velocímetros del inicio.
+Además: flecha blanca en las barras (negra en sol); los números de los botones − / + se achican si no entran; el código
+de Google siempre entra; pruebas con capturas en Cabina. Probado de punta a punta (celu simulado → Pi).
 
 ## 1.0.39 (publicada 08/11/2026)
 Modo tele: el sonido del video vuelve a salir por la tele (directo por ALSA, `hdmi:CARD=vc4hdmi`). Desde la 1.0.28
@@ -141,7 +142,7 @@ lugares vacíos, volumen y X para cerrar en el video a pantalla completa, «en c
   **Fijos, nunca cambian:** la barra de promedio (verde/amarillo/rojo), adelantado/atrasado (texto y caja), vuelta
   medida/libre (rojo/verde), los avisos, y el modo sol. Letra fija (la del Avispón).
 - **Reloj:** 6 velocímetros para el inicio (Clásico 404, Deportivo, Digital, Rally, Aviación, Anillo).
-- Orden: 1.0.41 Personalizar + Foto + Auto; 1.0.42 Colores + Relojes.
+- Hecho todo en la 1.0.40 (Matías: «sumá todo a la 40»).
 
 ## Tienda de herramientas (decidido con Matías, 08/11/2026)
 - Botón **Tienda** en los dos inicios y pantalla con 8 lugares punteados vacíos (publicado en la 1.0.35). Sin brújula por ahora.
