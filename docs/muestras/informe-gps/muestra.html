@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Muestra para Matías (08/11/2026): informe con la marca virtual por GPS (solo referencia) y «Comparar» contra
+     la vuelta modelo (la más cerca del ideal). #a = informe, #b = Comparar a pantalla completa. 1280×720, Avispón. -->
+<style>
+@font-face{font-family:B;src:url(../../../recursos/fuentes/barlow-latin-600-normal.woff2)}
+@font-face{font-family:BI;src:url(../../../recursos/fuentes/barlow-latin-600-italic.woff2)}
+@font-face{font-family:BX;src:url(../../../recursos/fuentes/barlow-latin-800-italic.woff2)}
+@font-face{font-family:BC;src:url(../../../recursos/fuentes/barlow-condensed-latin-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;font-family:B;color:#f7f7f2}
+.p{width:1280px;height:720px;position:relative;overflow:hidden;margin-bottom:20px;
+   background:radial-gradient(120% 80% at 25% 0%,#3d8c57 0%,#1d5233 40%,#0d2a18 100%)}
+.t{position:absolute;border:3px solid #cfd4d8;border-radius:22px;background:linear-gradient(rgba(64,140,90,.55),rgba(10,38,22,.92))}
+.tit{font:600 15px B;letter-spacing:2.5px;color:#d6e6d2;font-style:italic}
+.am{color:#f4c531}.rojo{color:#ff6b5b}.verde{color:#5ce68a}.gris{color:#9fb5a3}
+.chip{display:inline-block;border:2px solid #cfd4d8;border-radius:16px;padding:2px 12px;font:800 15px BX}
+.chip.on{background:#f4c531;color:#14240f;border-color:#ffe9a0}
+.badge{display:inline-block;border:2px solid #d9443a;color:#ff6b5b;border-radius:14px;padding:1px 10px;font:700 15px BC;letter-spacing:1px}
+.nuevo{outline:3px dashed #29b6f6;outline-offset:4px;border-radius:10px}
+.flecha{position:absolute;font:800 16px BX;color:#29b6f6;background:#06223a;border:2px solid #29b6f6;border-radius:10px;padding:4px 10px}
+table{border-collapse:collapse;width:100%}
+td{padding:4px 4px;font:800 21px BX;white-space:nowrap}
+</style></head><body>
+
+<!-- ===================== A · INFORME ===================== -->
+<div class=p id=a>
+ <div style="position:absolute;left:24px;top:12px;width:62px;height:62px;border:3px solid #cfd4d8;border-radius:16px;font:40px B;text-align:center;line-height:54px">‹</div>
+ <img src="../../../recursos/img/leon.png" style="position:absolute;left:104px;top:18px;height:52px">
+ <div style="position:absolute;left:205px;top:14px;font:800 38px BX;color:#e8ece6;text-shadow:0 2px 0 #000">SANTA CLARA</div>
+ <div style="position:absolute;left:205px;top:60px" class=tit>07/11 · IDEAL 3:00:0 · 2.500 M · 6 VUELTAS</div>
+ <div style="position:absolute;right:322px;top:14px;text-align:right">
+  <div class=tit>ERROR TOTAL · 6 MEDIDAS</div>
+  <div style="font:800 46px BX;color:#ff6b5b;line-height:1.1">9,6 s</div>
+  <div class=tit>PROMEDIO 1,6 S · MEJOR 0,8 S</div></div>
+ <div style="position:absolute;left:986px;top:16px;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff,#9aa3ad);font:800 22px BX;color:#1d5233;text-align:center;line-height:70px">101</div>
+ <div style="position:absolute;left:1064px;top:20px;width:194px;height:60px;border-radius:16px;background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;font:800 24px BX;text-align:center;line-height:60px">Compartir</div>
+
+ <!-- Mapa (igual que hoy) -->
+ <div class=t style="left:22px;top:108px;width:604px;height:594px">
+  <div class=tit style="position:absolute;left:18px;top:18px">RECORRIDO DE LA VUELTA · COLOR = VELOCIDAD</div>
+  <div style="position:absolute;right:14px;top:12px"><span class="chip on">Vel.</span> <span class=chip>Acel.</span> <span class=chip>Adel.</span></div>
+  <svg width=604 height=594 style="position:absolute;left:0;top:0"><path id=pista d="M540 300 C 460 160 330 170 300 210 C 230 270 80 270 60 320 C 50 350 120 370 220 400 C 300 430 330 460 380 440 C 450 420 500 390 520 370" fill=none stroke="#0a1f12" stroke-width=26 stroke-linecap="round"/>
+   <path d="M540 300 C 460 160 330 170 300 210 C 230 270 80 270 60 320 C 50 350 120 370 220 400 C 300 430 330 460 380 440 C 450 420 500 390 520 370" fill=none stroke="#3b8be0" stroke-width=12 stroke-linecap=round stroke-dasharray="70 20 40 30"/>
+   <circle cx=540 cy=300 r=13 fill="#fff"/><text x=420 y=306 font-family=BX font-size=17 fill="#fff">LARGADA</text></svg>
+ </div>
+
+ <!-- Gráfico (igual que hoy) -->
+ <div class=t style="left:646px;top:108px;width:612px;height:234px">
+  <div class=tit style="position:absolute;left:18px;top:18px">VELOCIDAD KM/H · V3 · SUGERIDA 50,0</div>
+  <svg width=612 height=234 style="position:absolute;left:0;top:0" id=grafA></svg>
+ </div>
+
+ <!-- Tabla con la marca GPS -->
+ <div class=t style="left:646px;top:360px;width:612px;height:342px;padding:14px 20px">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+   <span class=tit>TODAS LAS VUELTAS</span>
+   <span class=nuevo style="background:linear-gradient(#ffe07a,#f4c531 50%,#d9a20f);color:#14240f;border-radius:14px;padding:3px 16px;font:800 18px BX">Comparar</span></div>
+  <table style="margin-top:6px">
+   <tr class=gris style="font:600 12px B;letter-spacing:1.5px"><td style="font:600 12px B"></td><td style="font:600 12px B"></td><td style="font:600 12px B">PULSADOR</td><td style="font:600 12px B">ERROR</td><td style="font:600 12px B" class=nuevo>&nbsp;GPS (REF.)</td><td style="font:600 12px B;text-align:right">KM/H</td></tr>
+   <tbody id=filas></tbody>
+  </table>
+  <div class=nuevo style="margin-top:8px;padding:6px 8px;font:600 15px BI;color:#d6e6d2;border-top:1px solid #ffffff33">Pulsador contra GPS: marcaste en promedio <b class=am>0,10 s tarde</b> · 1 marca GPS dudosa</div>
+ </div>
+ <div class=flecha style="left:700px;top:668px;display:none"></div>
+</div>
+
+<!-- ===================== B · COMPARAR ===================== -->
+<div class=p id=b>
+ <div class=t style="left:10px;top:10px;width:1260px;height:700px">
+  <div class=tit style="position:absolute;left:24px;top:20px">COMPARAR · SANTA CLARA · CONTRA <span class=am>V3, LA VUELTA MODELO (LA MÁS CERCA DEL IDEAL: +0,8 s)</span></div>
+  <div style="position:absolute;left:24px;top:52px;font:600 15px BI;color:#d6e6d2">Elegí la vuelta:
+   <span class=chip>V1</span> <span class=chip>V2</span> <span class=chip>V4</span> <span class=chip>V5</span> <span class=chip>V6</span>
+   &nbsp; <span class="chip on">V4</span> está elegida</div>
+  <div style="position:absolute;right:20px;top:14px;width:60px;height:60px;border:3px solid #cfd4d8;border-radius:16px;font:40px B;text-align:center;line-height:52px">✕</div>
+  <!-- Leyenda -->
+  <div style="position:absolute;left:24px;top:92px;font:800 17px BX"><span style="color:#fff">━ V4 · 3:01:9 · +1,9 s</span> &nbsp;&nbsp; <span class=am>┅ V3 modelo · 3:00:8 · +0,8 s</span></div>
+  <svg width=820 height=560 style="position:absolute;left:10px;top:120px" id=grafB></svg>
+  <!-- Derecha: mapa + sectores -->
+  <div class=t style="left:850px;top:96px;width:390px;height:250px;border-width:2px">
+   <div class=tit style="position:absolute;left:14px;top:10px;font-size:13px">DÓNDE SE FUE LA DIFERENCIA</div>
+   <svg width=390 height=250 style="position:absolute;left:0;top:0" id=mapaB></svg>
+  </div>
+  <div class=t style="left:850px;top:360px;width:390px;height:318px;border-width:2px;padding:12px 18px">
+   <div class=tit style="font-size:13px">POR SECTOR · V4 CONTRA V3</div>
+   <table style="margin-top:6px" id=sect></table>
+   <div style="margin-top:6px;border-top:1px solid #ffffff44;padding-top:8px;display:flex;justify-content:space-between;font:800 22px BX"><span>Vuelta</span><span class=rojo>1,1 s más lenta</span></div>
+  </div>
+ </div>
+</div>
+
+<script>
+// Velocidad de una vuelta tipo (km/h) en la distancia d (0..2500 m)
+const vel=(d,k=0)=>50+17*Math.sin(d/2500*2*Math.PI*3+0.3+k*0.18)+4*Math.sin(d/2500*2*Math.PI*7+k);
+// --- A: gráfico
+(()=>{const g=document.getElementById('grafA');let p='',x0=48,w=540,y=v=>205-(v-0)/70*160;
+ for(const v of[0,18,35,53,70]){p+=`<line x1=${x0} x2=${x0+w} y1=${y(v)} y2=${y(v)} stroke="#ffffff22"/><text x=20 y=${y(v)+4} font-family=B font-size=11 fill="#9fb5a3">${v}</text>`;}
+ let d='';for(let i=0;i<=200;i++){const m=i/200*2500;d+=(i?'L':'M')+(x0+i/200*w).toFixed(1)+' '+y(vel(m,1)).toFixed(1);}
+ p+=`<line x1=${x0} x2=${x0+w} y1=${y(50)} y2=${y(50)} stroke="#f4c531" stroke-width=2 stroke-dasharray="10 7"/><path d="${d}" fill=none stroke="#f3ecd8" stroke-width="3"/>`;g.innerHTML=p;})();
+// --- A: filas
+(()=>{const f=[['V1','3:01:5','+1,5 s','+0,12'],['V2','2:57:9','−2,1 s','+0,08'],['V3','3:00:8','+0,8 s','+0,11','modelo'],['V4','3:01:9','+1,9 s','+0,09'],['V5','2:58:3','−1,7 s','¿?','dudosa'],['V6','3:01:6','+1,6 s','+0,10']],kmh=['47,2','47,7','47,2','47,6','49,1','47,8'];
+ document.getElementById('filas').innerHTML=f.map((r,i)=>`<tr style="${r[4]==='modelo'?'background:#f4c53122':''}"><td style="width:44px">${r[0]}</td><td><span class=badge>MEDIDA</span>${r[4]==='modelo'?' <span class=am style="font:800 13px BX">★ MODELO</span>':''}</td><td>${r[1]}</td><td class=rojo>${r[2]}</td><td class=nuevo style="font:700 18px BC;color:${r[4]==='dudosa'?'#9fb5a3':'#7fd0ff'}">${r[4]==='dudosa'?'dudosa':r[3]+' s'}</td><td style="text-align:right;font-size:18px">${kmh[i]}</td></tr>`).join('');})();
+// --- B: dos gráficos (velocidades superpuestas y tiempo ganado/perdido)
+(()=>{const g=document.getElementById('grafB');let p='';const x0=60,w=740,X=m=>x0+m/2500*w;
+ const yv=v=>40+(75-v)/45*240;               // arriba: velocidad 30..75
+ const yd=t=>430+(-t)/1.4*80;                // abajo: diferencia −1,4..+1,4 s
+ for(const v of[30,40,50,60,70]){p+=`<line x1=${x0} x2=${x0+w} y1=${yv(v)} y2=${yv(v)} stroke="#ffffff1c"/><text x=24 y=${yv(v)+4} font-family=B font-size=12 fill="#9fb5a3">${v}</text>`;}
+ // sectores
+ const S=[0,700,1250,1900,2500];
+ for(let i=0;i<4;i++){p+=`<line x1=${X(S[i])} x2=${X(S[i])} y1=30 y2=530 stroke="#f4c53188" stroke-dasharray="6 6"/><text x=${X((S[i]+S[i+1])/2)-12} y=30 font-family=BX font-size=17 fill="#f4c531">S${i+1}</text>`;}
+ let a='',b='',dt='',acc=0;
+ for(let i=0;i<=300;i++){const m=i/300*2500,v3=vel(m,0),v4=vel(m,0)-1.6*Math.sin(m/2500*2*Math.PI*2.2+.6)-0.7;
+  a+=(i?'L':'M')+X(m).toFixed(1)+' '+yv(v3).toFixed(1);b+=(i?'L':'M')+X(m).toFixed(1)+' '+yv(v4).toFixed(1);
+  acc=(m<700?0.6*m/700:m<1250?0.6-0.3*(m-700)/550:m<1900?0.3+0.2*(m-1250)/650:0.5+0.6*(m-1900)/600)+0.06*Math.sin(m/90);
+  dt+=(i?'L':'M')+X(m).toFixed(1)+' '+yd(-acc).toFixed(1);}
+ p+=`<path d="${a}" fill=none stroke="#f4c531" stroke-width=3 stroke-dasharray="9 6"/><path d="${b}" fill=none stroke="#ffffff" stroke-width="3"/>`;
+ // abajo
+ p+=`<text x=${x0} y=330 font-family=B font-size=15 fill="#d6e6d2" letter-spacing=2 font-style=italic>TIEMPO GANADO / PERDIDO CONTRA V3 (SEGUNDOS)</text>`;
+ p+=`<rect x=${x0} y=350 width=${w} height=160 fill="#00000033" rx="8"/>`;
+ for(const t of[-1,0,1]){p+=`<line x1=${x0} x2=${x0+w} y1=${yd(t)} y2=${yd(t)} stroke="${t?'#ffffff1c':'#ffffff88'}"/><text x=18 y=${yd(t)+4} font-family=B font-size=12 fill="#9fb5a3">${t>0?'+':t<0?'−':''}${Math.abs(t)},0</text>`;}
+ p+=`<text x=${x0+8} y=${yd(1)-8} font-family=BI font-size=13 fill="#5ce68a">arriba: adelantado</text><text x=${x0+8} y=${yd(-1)+18} font-family=BI font-size=13 fill="#ff6b5b">abajo: atrasado</text>`;
+ p+=`<path d="${dt}" fill=none stroke="#ff6b5b" stroke-width="3.5"/>`;
+ p+=`<text x=${X(2500)-120} y=${yd(-0.75)} font-family=BX font-size=18 fill="#ff6b5b">−1,1 s</text>`;
+ p+=`<text x=${x0} y=545 font-family=B font-size=13 fill="#9fb5a3">0 m</text><text x=${X(2500)-50} y=545 font-family=B font-size=13 fill="#9fb5a3">2.500 m</text>`;
+ g.innerHTML=p;})();
+// --- B: mapa y sectores
+(()=>{const m=document.getElementById('mapaB');const tr='M340 120 C 280 40 200 50 180 75 C 140 110 50 110 40 140 C 35 160 75 175 135 190 C 185 205 205 225 235 215 C 280 200 320 185 330 170';
+ m.innerHTML=`<path d="${tr}" fill=none stroke="#0a1f12" stroke-width=18 stroke-linecap="round"/><path d="${tr}" fill=none stroke="#ff6b5b" stroke-width=9 stroke-linecap=round stroke-dasharray="120 0 70 1000"/>
+ <path d="${tr}" fill=none stroke="#5ce68a" stroke-width=9 stroke-dasharray="0 190 90 1000"/><path d="${tr}" fill=none stroke="#ff6b5b" stroke-width=9 stroke-dasharray="0 280 260 1000"/>
+ <circle cx=340 cy=120 r=8 fill=#fff /><text x=14 y=238 font-family=BI font-size=13 fill="#d6e6d2"><tspan fill="#ff6b5b">rojo</tspan> perdió · <tspan fill="#5ce68a">verde</tspan> ganó contra V3</text>`;
+ const s=[['S1','0 a 700 m','+0,6 s','rojo'],['S2','700 a 1.250 m','−0,3 s','verde'],['S3','1.250 a 1.900 m','+0,2 s','rojo'],['S4','1.900 a 2.500 m','+0,6 s','rojo']];
+ document.getElementById('sect').innerHTML=s.map(r=>`<tr><td class=am>${r[0]}</td><td style="font:600 15px B;color:#d6e6d2">${r[1]}</td><td class=${r[3]} style="text-align:right">${r[2]} ${r[3]==='rojo'?'más lento':'más rápido'}</td></tr>`).join('');})();
+</script>
+</body></html>
