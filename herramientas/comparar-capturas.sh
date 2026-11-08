@@ -31,7 +31,7 @@ mkdir -p "$XDG_RUNTIME_DIR"
 
 # Una captura: nombre pantalla [opciones…]; sale acostada (h) y de pie (v), de a 4 a la vez
 LISTA=()
-cap() { LISTA+=("$*"); }
+cap() { LISTA+=("$*"); }   # los nombres con espacios van con comillas adentro: --carrera '"Santa Clara"'
 # La carrera largada depende del reloj (el crono va andando: «0:01:1», «± segundos» 0,0 o −0,1): más tolerancia
 declare -A TOLS=([carrera-largada]=3)
 una() {   # nombre orientacion pantalla [opciones…]
@@ -43,17 +43,18 @@ una() {   # nombre orientacion pantalla [opciones…]
 cap inicio inicio
 cap carreras carreras
 cap ficha ficha --carrera "Gualeguaychú"
-cap ficha-corrida ficha --carrera "Santa Clara"
+cap ficha-corrida ficha --carrera '"Santa Clara"'
 cap practica practica
 cap ajustes ajustes
 cap conectividad conectividad
 cap chequeo chequeo
-cap informe informe --carrera "Santa Clara"
+cap informe informe --carrera '"Santa Clara"'
+cap comparar informe --carrera '"Santa Clara"' --prueba comparar
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
 # Con la letra más ancha (Cabina): en la 1.0.39 la fecha pisaba los botones − y + y no lo vio ninguna prueba,
 # porque todas eran en el Avispón (Matías, 08/11/2026). El último --tema gana.
-cap ficha-cabina ficha --carrera "Santa Clara" --tema cabina
+cap ficha-cabina ficha --carrera '"Santa Clara"' --tema cabina
 cap practica-cabina practica --tema cabina
 cap voz-cabina ajustesSeccion --prueba tablet-voz --tema cabina
 

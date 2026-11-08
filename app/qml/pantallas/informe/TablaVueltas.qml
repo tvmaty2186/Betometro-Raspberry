@@ -4,6 +4,9 @@ import Betometro
 // Tabla del informe: todas las vueltas (tipo MEDIDA/LIBRE que se toca y cambia, tiempo, diferencia, velocidad o
 // dónde empieza en el video), «Unir V5 con V6» al mantener apretada una vuelta 3 s (app 2.4.1), el menú ⋮
 // (restablecer la carrera original, compartir) y el error total al pie.
+// Marca virtual por GPS (Matías, 08/11/2026, muestra docs/muestras/informe-gps/a.png): al lado del pulsador manual,
+// el tiempo y el error del pulsador virtual, solo de referencia; ★ en la vuelta modelo (la más cerca del ideal),
+// y abajo el error total de cada uno y cuánto tarde (o temprano) se marcó en promedio. «Comparar» abre la comparación.
 // Lo que se elige acá (fila, menú, confirmaciones) vive acá; los cambios a la carrera salen como señales.
 Tarjeta {
     id: caja
@@ -12,6 +15,20 @@ Tarjeta {
     property var c: ({})                    // Datos.carrera(id): errorTotal, promedio, mejor, modificada
     property var vueltas: []
     property var inf: ({})                  // Datos.informe(id): largadas
+    property var gps: []                    // Datos.marcasGps(id): una por vuelta
+    readonly property bool conGps: gps.some(m => m && m.hay)
+    readonly property color celeste: Tema.sol ? "#0b5394" : "#7fd0ff"
+    // La vuelta modelo: la medida más cerca del ideal
+    readonly property int modelo: {
+        let k = -1;
+        for (let i = 0; i < vueltas.length; ++i) {
+            const v = vueltas[i];
+            if (!v.medida || v.difMs === undefined || v.interrumpida) continue;
+            if (k < 0 || Math.abs(v.difMs) < Math.abs(vueltas[k].difMs)) k = i;
+        }
+        return k;
+    }
+    function seg(ms, dec) { return (Math.abs(ms) / 1000).toFixed(dec).replace(".", ",") + " s"; }
     property int lap: -1                    // la vuelta elegida (se resalta y queda a la vista)
     property Item reproductor: null         // para «▸ hora del video» de cada vuelta
     property int fila: -1                   // vuelta elegida para «Unir» (manteniéndola apretada 3 s)
@@ -24,6 +41,7 @@ Tarjeta {
     signal unir(int indice)                 // ya confirmado: juntar esa vuelta con la siguiente
     signal restablecer()                    // ya confirmado
     signal compartir()
+    signal comparar()
     onFilaChanged: confirmarUnir = false
     Timer { id: tUnirVuelve; interval: 3000; onTriggered: caja.confirmarUnir = false }
     Timer { id: tRestVuelve; interval: 3000; onTriggered: caja.confirmarRest = false }
@@ -55,6 +73,12 @@ Tarjeta {
     x: caja.h ? 648 : 20; y: caja.h ? 362 : 900
     width: caja.h ? 608 : parent.width - 40; height: caja.h ? 338 : 360
     Sub { x: 22; y: 16; text: "Todas las vueltas"; tam: 12 }
+    BotonAmarillo {
+        visible: caja.modelo >= 0 && caja.vueltas.some(v => v.m && v.m.length)
+        anchors { right: mas3.left; rightMargin: 8; top: parent.top; topMargin: 6 }
+        width: 132; height: 32; tamTexto: 16; texto: "Comparar"
+        onTocado: caja.comparar()
+    }
     // Con el menú abierto, tocar en otra parte de la tarjeta lo cierra
     MouseArea { anchors.fill: parent; z: 9; visible: caja.menuAbierto; onClicked: caja.cerrarMenu() }
     // Menú ⋮ (app 2.4.1): restablecer la carrera original y compartir
@@ -101,9 +125,27 @@ Tarjeta {
                : "Unir " + caja.nombreV(caja.vueltas[caja.fila]) + " con " + caja.nombreV(caja.vueltas[caja.fila + 1])
         onTocado: caja.tocarUnir()
     }
+    // Encabezado: PULSADOR MANUAL y PULSADOR VIRTUAL (GPS), cada uno con TIEMPO y ERROR
+    Item {
+        visible: caja.conGps
+        x: 28; y: barraUnir.visible ? 90 : 40; width: parent.width - 56; height: 34
+        readonly property real u: (width - 12) / 10
+        Rectangle { x: parent.u * 6.2 + 6; width: parent.u * 3; height: parent.height; color: Qt.rgba(41 / 255, 182 / 255, 246 / 255, 0.12); radius: 6 }
+        Text { x: parent.u * 3.2 + 6; y: 0; width: parent.u * 3; horizontalAlignment: Text.AlignHCenter; text: "PULSADOR MANUAL"; color: Tema.tinta
+               font { family: Tema.fuente600; pixelSize: 11; letterSpacing: 1.2 } }
+        Rectangle { x: parent.u * 3.2 + 12; y: 15; width: parent.u * 3 - 12; height: 1.5; color: Qt.rgba(1, 1, 1, 0.35) }
+        Text { x: parent.u * 6.2 + 6; y: 0; width: parent.u * 3; horizontalAlignment: Text.AlignHCenter; text: "PULSADOR VIRTUAL (GPS)"; color: caja.celeste
+               font { family: Tema.fuente600; pixelSize: 11; letterSpacing: 1.2 } }
+        Rectangle { x: parent.u * 6.2 + 12; y: 15; width: parent.u * 3 - 12; height: 1.5; color: caja.celeste; opacity: 0.5 }
+        Repeater {
+            model: [[3.2, "TIEMPO"], [4.8, "ERROR"], [6.3, "TIEMPO"], [7.9, "ERROR"], [9.35, caja.vv ? "VIDEO" : "KM/H"]]
+            Text { required property var modelData; x: modelData[0] * parent.u + 6; y: 19; text: modelData[1]; color: Tema.tintaSuave
+                   font { family: Tema.fuente600; pixelSize: 10; letterSpacing: 1.2 } }
+        }
+    }
     Flickable {
         id: tabla
-        anchors { fill: parent; topMargin: barraUnir.visible ? 90 : 40; leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
+        anchors { fill: parent; topMargin: (barraUnir.visible ? 90 : 40) + (caja.conGps ? 34 : 0); leftMargin: 22; rightMargin: 22; bottomMargin: 12 }
         contentHeight: colT.height; clip: true; boundsBehavior: Flickable.StopAtBounds
         // Con muchas vueltas, la vuelta elegida (o la del video) queda a la vista
         function verFila(i) {
@@ -140,37 +182,52 @@ Tarjeta {
                         id: filaV
                         anchors.verticalCenter: parent.verticalCenter; x: 6
                         readonly property real u: (colT.width - 12) / 10
+                        readonly property var g: caja.conGps ? caja.gps[index] : null
                         // Cada columna centrada en la fila: la velocidad (letra más chica) quedaba más arriba (08-15)
-                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 1.6; text: caja.nombreV(modelData); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
+                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.2 : 1.6); textFormat: Text.StyledText
+                               text: caja.nombreV(modelData) + (index === caja.modelo && caja.conGps ? "<font color='" + Tema.acento + "'> ★</font>" : "")
+                               color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
                         // Etiqueta MEDIDA / LIBRE: se toca y cambia (la libre no suma error)
-                        Item { width: parent.u * 3; height: 30
+                        Item { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 2.0 : 3); height: 30
                             Rectangle {
                                 id: etiq
                                 readonly property color col: modelData.interrumpida ? "#8a929b" : modelData.medida ? Tema.rojo : Tema.bien
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: tEtiq.implicitWidth + 22; height: 28; radius: 14
+                                width: tEtiq.implicitWidth + (caja.conGps ? 14 : 22); height: caja.conGps ? 24 : 28; radius: height / 2
                                 color: Qt.rgba(col.r, col.g, col.b, 0.18); border { width: 1.5; color: col }
                                 Text { id: tEtiq; anchors.centerIn: parent; color: etiq.col
                                        text: modelData.interrumpida ? "INTERRUMPIDA" : modelData.medida ? "MEDIDA" : "LIBRE"
-                                       font { family: Tema.fuente800; weight: Font.ExtraBold; pixelSize: 16; letterSpacing: 1 } }
+                                       font { family: Tema.fuente800; weight: Font.ExtraBold; pixelSize: caja.conGps ? 13 : 16; letterSpacing: 1 } }
                                 MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: !modelData.interrumpida
                                             onClicked: caja.cambiarMedida(index) }
                             } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 2.2; text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * 2; text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
+                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.6 : 2.2); text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
+                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.4 : 2); text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
                                color: modelData.difMs === undefined ? Tema.tintaSuave : caja.colorDif(modelData.difMs)
-                               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 24 } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; visible: caja.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
+                        // Pulsador virtual (GPS): solo referencia
+                        Rectangle {
+                            visible: caja.conGps; width: parent.u * 3; height: 40; color: Qt.rgba(41 / 255, 182 / 255, 246 / 255, 0.12)
+                            readonly property bool ok: !!filaV.g && filaV.g.hay
+                            Text { x: 4; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.53
+                                   text: parent.ok && !filaV.g.dudosa ? Formato.tiempo(filaV.g.realMs) : "—"; color: caja.celeste
+                                   font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
+                            Text { x: parent.width * 0.53; anchors.verticalCenter: parent.verticalCenter
+                                   text: !parent.ok ? "sin datos" : filaV.g.dudosa ? "dudosa" : Formato.dif(filaV.g.difMs)
+                                   color: parent.ok && !filaV.g.dudosa ? caja.celeste : Tema.tintaSuave
+                                   font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: parent.ok && !filaV.g.dudosa ? 22 : 15 } }
+                        }
+                        Text { anchors.verticalCenter: parent.verticalCenter; visible: caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
                                text: "▸ " + caja.inicioVideo(index); color: index === caja.lap ? Tema.acento : Tema.tinta
                                font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; visible: !caja.vv; width: parent.u * 1.2; horizontalAlignment: Text.AlignRight
+                        Text { anchors.verticalCenter: parent.verticalCenter; visible: !caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
                                text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
-                               color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
+                               color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 18 : 20 } }
                     }
                 }
             }
             Item {
-                width: colT.width; height: 64
+                width: colT.width; height: caja.conGps ? 92 : 64
                 readonly property var med: caja.vueltas.filter(v => v.medida && v.difMs !== undefined)
                 visible: med.length > 0
                 Rectangle { width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.2) }
@@ -178,6 +235,20 @@ Tarjeta {
                 Sub { x: 6; y: 40; tam: 12; text: "promedio " + (caja.c.promedio || "–") + " · mejor " + (caja.c.mejor || "–") }
                 Text { anchors { right: parent.right; rightMargin: 6; top: parent.top; topMargin: 6 }
                        text: caja.c.errorTotal || ""; color: Tema.acento; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 26 } }
+                // Pulsador virtual: error total (sin las dudosas) y cuánto tarde o temprano se marcó en promedio
+                Text {
+                    visible: caja.conGps; x: 6; y: 64; width: parent.width - 12; elide: Text.ElideRight; textFormat: Text.StyledText
+                    readonly property var buenas: caja.gps.filter(m => m && m.hay && !m.dudosa)
+                    readonly property var medidas: caja.gps.filter((m, i) => m && m.hay && !m.dudosa && caja.vueltas[i] && caja.vueltas[i].medida)
+                    readonly property real total: medidas.reduce((a, m) => a + Math.abs(m.difMs), 0)
+                    readonly property real prom: buenas.length ? buenas.reduce((a, m) => a + m.pulsadorMenosGpsMs, 0) / buenas.length : 0
+                    readonly property bool hayDudosas: caja.gps.some(m => m && m.hay && m.dudosa)
+                    text: "Virtual: error total <font color='" + caja.celeste + "'><b>" + caja.seg(total, 1) + "</b></font>"
+                          + (hayDudosas ? " (sin las dudosas)" : "")
+                          + (buenas.length ? " · marcaste en promedio <font color='" + Tema.acento + "'><b>" + caja.seg(prom, 2)
+                             + (Math.abs(prom) < 5 ? "" : prom > 0 ? " tarde" : " temprano") + "</b></font>" : "")
+                    color: Tema.tintaSuave; font { family: Tema.fuente600; italic: true; pixelSize: 15 }
+                }
             }
         }
     }

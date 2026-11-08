@@ -1,4 +1,5 @@
 // El informe de una carrera: datos para dibujar, HTML para compartir y los cambios que se hacen desde él.
+#include "marca_gps.h"
 #include "datos.h"
 #include "datos_comun.h"
 #include "informe.h"
@@ -14,6 +15,16 @@ QVariantMap Datos::informe(const QString& id) const {
     if (!c) return {};
     const std::string j = datosInforme(*c, cfg_["umbralPrecisionM"].aNumero(20)).escribir();
     return QJsonDocument::fromJson(QByteArray::fromStdString(j)).toVariant().toMap();
+}
+
+QVariantList Datos::marcasGps(const QString& id) const {
+    const Carrera* c = buscar(id);
+    if (!c) return {};
+    QVariantList r;
+    for (const MarcaGps& m : beto::marcasGps(*c))
+        r << QVariantMap{{"hay", m.hay}, {"dudosa", m.dudosa}, {"realMs", static_cast<qlonglong>(m.realMs)},
+                         {"difMs", static_cast<qlonglong>(m.difMs)}, {"pulsadorMenosGpsMs", static_cast<qlonglong>(m.pulsadorMenosGpsMs)}};
+    return r;
 }
 
 QString Datos::nombreInforme(const QString& id) const {

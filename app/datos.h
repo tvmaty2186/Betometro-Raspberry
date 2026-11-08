@@ -78,6 +78,8 @@ public:
 
     // Informe (sección 9 de la app): datos para dibujar, HTML para compartir y su nombre
     Q_INVOKABLE QVariantMap informe(const QString& id) const;
+    // Marca virtual por GPS de cada vuelta (solo referencia, para el informe): hay, dudosa, realMs, difMs, pulsadorMenosGpsMs
+    Q_INVOKABLE QVariantList marcasGps(const QString& id) const;
     Q_INVOKABLE QString nombreInforme(const QString& id) const;
     Q_INVOKABLE QString guardarInformeHtml(const QString& id) const;   // devuelve la ruta del archivo
     QByteArray informeHtml(const QString& id) const;                   // el HTML del informe (vacío si no está)

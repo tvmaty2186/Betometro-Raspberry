@@ -68,6 +68,7 @@ cap apagar --pantalla ajustes --prueba apagar   # la ventana Apagar / Reiniciar 
 cap recorrido --pantalla carrera --prueba recorrido
 cap informe-grafico --pantalla informe --carrera "Santa Clara" --prueba grafico
 cap informe-mapa --pantalla informe --carrera "Santa Clara" --prueba mapa
+cap informe-comparar --pantalla informe --carrera "Santa Clara" --prueba comparar   # Comparar contra la vuelta modelo (1.0.47)
 cap carrera-vertical --pantalla carrera --carrera "Gualeguaychú" --prueba largar --orientacion v
 cap inicio-vertical --pantalla inicio --orientacion v
 ls -la salida-pi/capturas

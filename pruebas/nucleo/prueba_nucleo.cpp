@@ -16,6 +16,7 @@
 #include "almacen.h"
 #include "informe.h"
 #include "json.h"
+#include "marca_gps.h"
 #include "modelo.h"
 #include "motor.h"
 #include "programador.h"
@@ -817,6 +818,50 @@ static void numerosRapidos() {
     IGUAL(Json::leer("-58.3815911").aNumero(), -58.3815911);
 }
 
+// Marca virtual por GPS: un círculo de 300 m de radio a 72 km/h, GPS a 5 por segundo. El pulsador marca cada vuelta
+// con un desfasaje conocido; la marca virtual tiene que encontrar el cruce real (con el redondeo a 0,1 s de la traza)
+static void marcaGps() {
+    const double R = 300, vel = 20, L = 2 * M_PI * R, periodo = L / vel * 1000;   // ms
+    const double lat0 = -32.97, lon0 = -60.65, kx = 111320 * std::cos(lat0 * M_PI / 180), ky = 110540;
+    const std::vector<int64_t> desfase = {120, 80, -50, 200};   // + = el pulsador marcó tarde
+    auto armar = [&](double prec) {
+        Carrera c;
+        c.tiempoIdealMs = static_cast<int64_t>(periodo);
+        int64_t inicio = 0;
+        for (size_t k = 0; k < desfase.size(); ++k) {
+            const int64_t fin = static_cast<int64_t>(std::llround(periodo * (k + 1))) + desfase[k];
+            Vuelta v;
+            v.n = static_cast<int>(k) + 1; v.idealMs = c.tiempoIdealMs; v.realMs = fin - inicio; v.difMs = v.realMs - v.idealMs;
+            for (int64_t t = (inicio / 200 + 1) * 200; t < fin; t += 200) {   // lecturas en la grilla de 200 ms del GPS
+                const double th = vel * t / 1000.0 / R, x = R * std::sin(th), y = R * (1 - std::cos(th));
+                v.traza.push_back(FilaTraza{fijarDecimalesJs((t - inicio) / 1000.0, 1), 0, 72,
+                                            fijarDecimalesJs(lat0 + y / ky, 6), fijarDecimalesJs(lon0 + x / kx, 6), prec});
+            }
+            if (k == 0) v.traza.insert(v.traza.begin(), FilaTraza{0, 0, 72, lat0, lon0, prec});
+            c.vueltas.push_back(v);
+            inicio = fin;
+        }
+        return c;
+    };
+    const auto m = marcasGps(armar(3));
+    IGUAL(m.size(), desfase.size());
+    for (size_t k = 0; k + 1 < desfase.size(); ++k) {
+        CHEQUEAR(m[k].hay && !m[k].dudosa);
+        CHEQUEAR(std::llabs(m[k].pulsadorMenosGpsMs - desfase[k]) <= 60);   // el redondeo de la traza: ±50 ms
+        const int64_t real = static_cast<int64_t>(std::llround(periodo));
+        CHEQUEAR(std::llabs(m[k].realMs - real) <= 120);
+    }
+    // La última: el pulsador marcó tarde y la traza termina en la marca, después de cruzar: se encuentra igual
+    CHEQUEAR(m[3].hay);
+    // Con poca precisión: dudosa
+    const auto md = marcasGps(armar(25));
+    CHEQUEAR(md[0].hay && md[0].dudosa);
+    // Sin traza: no hay
+    Carrera vacia; vacia.vueltas.resize(2);
+    const auto mv = marcasGps(vacia);
+    CHEQUEAR(!mv[0].hay && !mv[1].hay);
+}
+
 int main() {
     numerosRapidos();
     informeDanado();
@@ -833,6 +878,7 @@ int main() {
     traza();
     modelo();
     almacen();
+    marcaGps();
     std::cout << chequeos << " chequeos, " << fallas << " fallas\n";
     return fallas ? 1 : 0;
 }

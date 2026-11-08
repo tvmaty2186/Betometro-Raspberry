@@ -124,7 +124,7 @@ Item {
         onAbrir: { graficoC.modo = "vel"; graficoC.abrir(raiz.lap); raiz.completoQue = "grafico"; }
     }
     // Doble toque sobre el gráfico o el mapa: a pantalla completa, acostado (de pie se ve girado) (1.0.30)
-    property string completoQue: ""      // "", grafico, mapa
+    property string completoQue: ""      // "", grafico, mapa, comparar
     Item {
         id: capaCompleta
         visible: raiz.completoQue !== ""
@@ -139,6 +139,14 @@ Item {
             visible: raiz.completoQue === "grafico"
             anchors.fill: parent; anchors.margins: 12
             inf: raiz.inf; nombre: raiz.c.nombre || ""; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug
+            onCerrar: raiz.completoQue = ""
+        }
+        // Comparar una vuelta contra la modelo (la más cerca del ideal) (08/11/2026)
+        CompararVueltas {
+            id: comparar
+            visible: raiz.completoQue === "comparar"
+            anchors.fill: parent; anchors.margins: 12
+            inf: raiz.inf; nombre: raiz.c.nombre || ""; modelo: tabla.modelo
             onCerrar: raiz.completoQue = ""
         }
         MapaCompleto {
@@ -156,6 +164,8 @@ Item {
         id: tabla
         visible: !raiz.rec
         h: raiz.h; vv: raiz.vv; c: raiz.c; vueltas: raiz.vueltas; inf: raiz.inf; lap: raiz.lap
+        gps: { raiz.rev; return Datos.marcasGps(raiz.id_); }
+        onComparar: { comparar.abrir(raiz.lap); raiz.completoQue = "comparar"; }
         reproductor: raiz.reproductor
         onVerVuelta: (i) => { if (raiz.vueltas[i].m) raiz.lap = i; }
         onIrVideo: (i, t) => raiz.irVideo(i, t)
@@ -233,7 +243,10 @@ Item {
     Timer {   // solo para capturas: el gráfico o el mapa a pantalla completa, con zoom y un punto tocado
         id: tPruebaCompleto; interval: 300
         onTriggered: {
-            if (Contexto.prueba === "grafico") {
+            if (Contexto.prueba === "comparar") {
+                comparar.abrir(3);
+                raiz.completoQue = "comparar";
+            } else if (Contexto.prueba === "grafico") {
                 graficoC.abrir(-1);
                 const T = graficoC.tramos;
                 if (raiz.rec) graficoC.ver(0, Math.min(graficoC.total, 15000));                 // los primeros 15 km
@@ -253,7 +266,7 @@ Item {
     Component.onCompleted: {   // solo para capturas
         // con muchas vueltas (BETO_MUESTRA_LARGA), una de las últimas
         const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
-        if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa") tPruebaCompleto.start();
+        if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa" || Contexto.prueba === "comparar") tPruebaCompleto.start();
         else if (Contexto.prueba === "libre") cambiarMedida(1);
         else if (Contexto.prueba === "unir") tabla.fila = 3;
         else if (Contexto.prueba === "menu") tabla.menuAbierto = true;

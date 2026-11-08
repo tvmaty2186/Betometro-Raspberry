@@ -18,6 +18,7 @@ add_library(nucleo STATIC
   app/nucleo/programador.cpp
   app/nucleo/neo.cpp
   app/nucleo/pulsador.cpp
+  app/nucleo/marca_gps.cpp
 )
 target_include_directories(nucleo PUBLIC app/nucleo)
 target_compile_options(nucleo PRIVATE -Wall -Wextra -Wpedantic)
