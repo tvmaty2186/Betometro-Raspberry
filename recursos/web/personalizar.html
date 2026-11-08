@@ -36,11 +36,11 @@ h3{font:800 italic 14px Barlow;letter-spacing:.12em;color:#b9cdb8;margin:14px 0 
 #grises{display:flex;gap:4px;justify-content:center;margin-top:6px}
 #grises button{width:30px;height:30px;border-radius:7px;border:1px solid #0008;padding:0}
 #grises button.on{border:3px solid #fff;box-shadow:0 0 0 2px #000}
-/* Los círculos de muestra eligen qué se pinta (Matías, 08/11/2026) */
-#que{display:flex;gap:10px;margin:6px 0}
-#que button{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px;border-radius:14px;border:2px solid #ffffff44;background:transparent;color:#fff;font:800 italic 17px Barlow}
-#que button i{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #000}
-#que button.on{border:3px solid #f4c531;background:#f4c53122;color:#f4c531}
+/* Los círculos de abajo eligen qué se pinta (Matías, 08/11/2026: sin botones) */
+#que{display:flex;gap:18px;justify-content:center;margin:12px 0 4px}
+#que button{display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border-radius:30px;border:3px solid transparent;background:transparent;color:#fff;font:700 16px Barlow}
+#que button i{width:36px;height:36px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #000}
+#que button.on{border-color:#f4c531;color:#f4c531;font-weight:800}
 input[type=text],input[type=number]{width:100%;padding:12px;border-radius:12px;border:2px solid #cfd4d8;background:#08190e;color:#fff;font:800 italic 22px Barlow}
 input[type=range]{width:100%;accent-color:#f4c531}
 .bt{display:block;width:100%;margin:10px 0;padding:14px;border-radius:14px;text-align:center;font:800 italic 19px Barlow;border:2px solid #f4c531;background:transparent;color:#f4c531}
@@ -74,9 +74,10 @@ input[type=range]{width:100%;accent-color:#f4c531}
  <h3>NOMBRE DEL AUTO</h3><input type=text id=nombre maxlength=30>
 </section>
 <section id=t-colores class=oculto>
- <h3>TOCÁ EL COLOR QUE QUERÉS CAMBIAR</h3><div id=que><button data-q=fondo class=on><i></i>Fondo</button><button data-q=acento><i></i>Acento</button></div>
  <svg id=panal></svg>
  <div id=grises></div>
+ <div id=que><button data-q=fondo class=on><i></i>Fondo</button><button data-q=acento><i></i>Acento</button></div>
+ <p class=ayuda style="text-align:center;margin-top:0">Tocá el círculo del color que querés cambiar.</p>
  <h3>LETRAS</h3><div class=seg id=letras><button data-l=blanco>Blanco</button><button data-l=crema>Crema</button><button data-l=negro>Negro</button></div>
  <div id=contraste class=aviso></div>
  <p class=ayuda>Los colores de aviso (verde, amarillo y rojo) y el modo sol no cambian.</p>
