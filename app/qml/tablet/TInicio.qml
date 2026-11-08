@@ -1,7 +1,7 @@
 import QtQuick
 import Betometro
 
-// Inicio en Modo Tablet: 8 botones grandes (4×2 acostada, 2×4 parada). Muestra: docs/muestras/tablet/inicio-h.png
+// Inicio en Modo Tablet: 9 botones grandes (3×3; con la Tienda desde el 08/11/2026). Muestra: docs/muestras/tablet/inicio-h.png
 TPantalla {
     id: raiz
     titulo: ""
@@ -15,10 +15,10 @@ TPantalla {
 
     Grid {
         anchors.fill: raiz.area
-        columns: raiz.h ? 4 : 2
+        columns: 3
         spacing: 18
         readonly property real an: (width - (columns - 1) * spacing) / columns
-        readonly property real al: (height - ((raiz.h ? 2 : 4) - 1) * spacing) / (raiz.h ? 2 : 4)
+        readonly property real al: (height - 2 * spacing) / 3
         TBoton { width: parent.an; height: parent.al; tipo: "acento"; icono: "bandera"; nombre: "Carreras"
                  dato: raiz.proxima ? "Próxima: " + raiz.proxima.nombre + " " + raiz.proxima.fecha.slice(8, 10) + "/" + raiz.proxima.fecha.slice(5, 7) : "Cargar una carrera"
                  onTocado: Navegacion.ir("carreras") }
@@ -40,6 +40,10 @@ TPantalla {
         TBoton { width: parent.an; height: parent.al; icono: "red"; nombre: "Wifi e informes"
                  dato: Wifi.propia ? Wifi.nombrePropia : Wifi.conectada ? Wifi.direccion : "Sin wifi"
                  onTocado: Navegacion.ir("conectividad") }
+        // Herramientas que se abren aparte de Betómetro (Matías, 08/11/2026). Por ahora vacía.
+        TBoton { width: parent.an; height: parent.al; icono: "tienda"; nombre: "Tienda"; tipo: "borde"
+                 dato: "Herramientas"
+                 onTocado: Navegacion.ir("tienda") }
         TBoton { width: parent.an; height: parent.al; icono: "ajustes"; nombre: "Ajustes"
                  dato: Contexto.versionNueva ? "Actualizar a " + Contexto.versionNueva : "v" + Contexto.version
                  onTocado: Navegacion.ir("ajustes") }

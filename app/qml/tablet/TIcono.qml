@@ -4,7 +4,7 @@ import Betometro
 // Íconos de línea del Modo Tablet (dibujados: se pintan del color que se pida, en cualquier tema).
 // nombre: bandera, crono, check, pantalla, camara, red, ajustes, voz, tema, auto, gps, velocidad,
 //         actualizar, apagar, mic, girar, espejo, rec, atras, tarjeta, buscar, lista, qr, informe, lugar, nube, ruta,
-//         termometro, rayo, hd (08-9, 1.0.29)
+//         termometro, rayo, hd (08-9, 1.0.29), tienda
 Canvas {
     id: raiz
     property string nombre: ""
@@ -26,6 +26,9 @@ Canvas {
         switch (nombre) {
         case "bandera": L([14, 58, 14, 10]); L([14, 12, 46, 12, 41, 21, 46, 30, 14, 30]); break;
         case "crono": C(32, 36, 20); L([32, 36, 32, 24]); L([26, 8, 38, 8]); L([32, 8, 32, 16]); break;
+        case "tienda":   // local con toldo y puerta (la Tienda, 08/11/2026)
+            L([8, 24, 14, 8, 50, 8, 56, 24, 8, 24]); A(17, 24, 9, 0, 180); A(35, 24, 9, 0, 180); A(53, 24, 9, 0, 180);
+            L([12, 34, 12, 56, 52, 56, 52, 34]); L([26, 56, 26, 42, 38, 42, 38, 56]); break;
         case "check": R(14, 10, 36, 46, 6); L([22, 34, 29, 41, 42, 27]); break;
         case "tilde": L([14, 33, 26, 45, 50, 20]); break;
         case "simulador": A(32, 32, 22, 30, 320); L([52, 16, 52, 28, 40, 28]); L([26, 22, 26, 42, 42, 32, 26, 22]); break;   // flecha en círculo con play
