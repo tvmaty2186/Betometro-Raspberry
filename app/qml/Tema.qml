@@ -15,7 +15,31 @@ QtObject {
     readonly property bool propio: nombre === "propio" && !sol
     readonly property var pp: Datos.ajustes.temaPropio || ({})
     readonly property color pFondo: pp.fondo || "#1a1c1f"
-    readonly property color pAcento: pp.acento || "#e10600"
+    readonly property color pAcentoElegido: pp.acento || "#e10600"
+    // El acento se usa también para textos e íconos: si el elegido casi no se distingue del fondo (negro o muy oscuro
+    // sobre un fondo oscuro, o muy claro sobre uno claro), se aclara u oscurece lo justo para que se lea
+    // (Matías, 08/11/2026: «con acentos negros hay mucho texto o íconos que se pierden»).
+    readonly property color pAcento: legible(pAcentoElegido, [pFondo, Qt.lighter(pFondo, 1.6), Qt.color("#2a2e33")])
+    function luz(c) {   // luminancia relativa (WCAG)
+        const f = x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+        return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+    }
+    function contraste(a, b) { const x = luz(a), y = luz(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+    function legible(c, fondos) {
+        const peor = k => Math.min(...fondos.map(f => contraste(k, f)));
+        if (peor(c) >= 3) return c;
+        // El cambio más chico (aclarando u oscureciendo) que alcance; si ninguno alcanza, el que más se distinga
+        let mejor = c, mejorPeor = peor(c);
+        for (let t = 0.05; t <= 1.0001; t += 0.05) {
+            for (const k of [Qt.rgba(c.r + (1 - c.r) * t, c.g + (1 - c.g) * t, c.b + (1 - c.b) * t, 1),
+                             Qt.rgba(c.r * (1 - t), c.g * (1 - t), c.b * (1 - t), 1)]) {
+                const pk = peor(k);
+                if (pk >= 3) return k;
+                if (pk > mejorPeor) { mejor = k; mejorPeor = pk; }
+            }
+        }
+        return mejor;
+    }
     readonly property color pLetras: pp.letras === "negro" ? "#0b0d0c" : pp.letras === "crema" ? "#f3ecd8" : "#ffffff"
     // Cambia solo si cambia algún color del tema propio (Main.qml vuelve a armar la pantalla)
     readonly property string firmaPropio: propio ? pFondo + "|" + pAcento + "|" + pLetras : ""

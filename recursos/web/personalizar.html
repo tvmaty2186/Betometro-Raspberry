@@ -220,7 +220,7 @@ function pintarControles(){
   const r1=contraste(c.letras,c.f2),r2=contraste(c.acento,c.f2),cx=$('contraste');
   if(!pr){cx.className='aviso ojo';cx.textContent='Ahora: tema '+({avispon:'Avispón',sport:'Deportivo',rally:'Rally',cabina:'Cabina'}[est.tema]||est.tema)+'. Tocá un color para armar el tuyo (parte del Deportivo).';}
   else if(r1<4.5){cx.className='aviso malo';cx.textContent='⚠ Poco contraste entre las letras y el fondo: no se va a leer al sol. Probá otras letras.';}
-  else if(r2<1.8){cx.className='aviso ojo';cx.textContent='⚠ El acento se parece mucho al fondo: los botones principales no van a resaltar.';}
+  else if(r2<3){cx.className='aviso ojo';cx.textContent='⚠ El acento casi no se distingue del fondo: en la Pi se va a ver más claro (o más oscuro) para que los textos se lean.';}
   else{cx.className='aviso bien';cx.textContent='✓ Se lee bien';}
   const rs=$('relojes');if(!rs.children.length){for(const[v,n]of RELOJES){const b=document.createElement('button');b.dataset.r=v;b.innerHTML=`<svg></svg>${n}`;b.onclick=()=>{est.reloj=v;est.cambios.reloj=true;dibujar();};rs.appendChild(b);}}
   $('relojNota').classList.toggle('oculto',est.tema==='propio');
