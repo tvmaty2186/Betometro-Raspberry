@@ -100,6 +100,11 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.44 (publicada 08/11/2026)
+- La Pi se ponía lenta tras guardar muchas veces desde el celu: el Canvas de la foto del inicio no soltaba las fotos
+  viejas (~12 MB por guardado). Arreglado; el fondo se repinta al cambiar el color del tema propio.
+- «Personalizar desde el celu» aparece solo con el tema Propio (Matías).
+
 ## 1.0.43 (publicada 08/11/2026)
 Personalizar → Colores: panal de 127 colores y 9 grises; se elige si se pinta el principal o el acento (Matías: «más colores»).
 
