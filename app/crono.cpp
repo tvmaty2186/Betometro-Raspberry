@@ -259,7 +259,7 @@ void Crono::alEvento(Evento e, const DatosEvento& d) {
             Vuelta g = Vuelta::desdeMotor(v, largada_, &traza_);
             if (recorrido_) { g.interrumpida = false; g.medida = false; }   // terminar es lo normal en un recorrido
             if (!carreraId_.isEmpty()) datos_->agregarVuelta(carreraId_, g);
-            if (recorrido_ && !carreraId_.isEmpty()) datos_->quitarExtra(carreraId_, "enCurso");   // ya está la definitiva
+            if (!carreraId_.isEmpty()) datos_->quitarExtra(carreraId_, "enCurso");   // ya está la definitiva
             if (e == Evento::Cerrada) {
                 ++vueltasGuardadas_;
                 const double dif = v.difMs ? *v.difMs : 0;
@@ -297,23 +297,23 @@ void Crono::alMuestra(const Muestra& m) {
         }
         const Estado e = motor_->estado(m.t);   // como grabarTraza() de la app
         traza_.agregar(m, datosLargada_->distanciaM, e.restanteM);
-        if (recorrido_ && m.t - ultParcialT_ >= 60000) guardarParcial(m.t);
     }
 }
 
-// Recorrido libre: cada minuto se guarda lo andado como extra["enCurso"]. Si se corta la luz antes de Terminar,
-// al prender queda como la vuelta del recorrido, marcada «interrumpida» («se cortó» en el informe).
+// La vuelta en curso se guarda como extra["enCurso"] (recorrido libre cada minuto, carrera cada 20 s). Si se corta la
+// luz (o el vigilante reinicia el programa), al prender queda como una vuelta «interrumpida» con lo andado.
 void Crono::guardarParcial(double t) {
     ultParcialT_ = t;
     if (carreraId_.isEmpty() || !motor_) return;
     const Estado e = motor_->estado(t);
     VueltaMotor v;
     v.n = e.n > 0 ? e.n : 1;
-    v.medida = false;
+    v.medida = recorrido_ ? false : e.medida;
     v.realMs = e.transMs;
     v.fuente = "corte";
     v.fin = QDateTime::currentMSecsSinceEpoch();
-    v.distM = std::max(0.0, -e.restanteM);
+    const double D = recorrido_ ? 0.0 : datosLargada_->distanciaM;
+    v.distM = std::max(0.0, D - e.restanteM);
     if (e.transMs > 1000) v.velPromKmh = *v.distM / (e.transMs / 1000) * 3.6;
     v.velMaxKmh = velMaxVuelta_;
     v.interrumpida = true;
@@ -326,6 +326,9 @@ void Crono::refrescar() {
     Estado e;
     if (motor_) {
         e = motor_->estado(t);
+        // Lo andado de la vuelta en curso, a cada rato: si se corta la luz no se pierde (carrera cada 20 s,
+        // recorrido libre cada minuto; Matías, 08/11/2026: el cable se desenganchó dos veces)
+        if (e.enCurso && t - ultParcialT_ >= (recorrido_ ? 60000 : 20000)) guardarParcial(t);
     } else {   // antes de la primera largada: vista en reposo
         Motor reposo(*datosLargada_);
         if (ultimaMuestra_) reposo.muestra(*ultimaMuestra_);

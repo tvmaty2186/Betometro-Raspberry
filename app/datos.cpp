@@ -25,14 +25,14 @@ Datos::Datos(const QString& carpeta, QObject* padre) : QObject(padre), carpeta_(
     guardarLuego_.setSingleShot(true);
     guardarLuego_.setInterval(300);
     connect(&guardarLuego_, &QTimer::timeout, this, [this] { guardarPendientes(); });
-    // Recorrido libre que se cortó (luz, vigilante) antes de Terminar: lo andado queda como su vuelta
+    // Carrera o recorrido libre que se cortó (luz, vigilante) a mitad de una vuelta: lo andado queda como vuelta interrumpida
     for (Carrera& c : base_.carreras) {
         if (!c.extra.tiene("enCurso")) continue;
         if (c.extra["enCurso"].esObjeto()) {
             Vuelta v = Vuelta::desdeJson(c.extra["enCurso"]);
             v.interrumpida = true;
             c.vueltas.push_back(std::move(v));
-            qWarning("Recorrido «%s» cortado antes de Terminar: se recuperó lo andado", c.nombre.c_str());
+            qWarning("«%s» se cortó a mitad de la vuelta %d: se recuperó lo andado (%.0f s)", c.nombre.c_str(), v.n, v.realMs / 1000.0);
         }
         c.extra.sacar("enCurso");
         guardar(q(c.id));
