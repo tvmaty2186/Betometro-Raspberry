@@ -100,6 +100,9 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.43 (publicada 08/11/2026)
+Personalizar → Colores: panal de 127 colores y 9 grises; se elige si se pinta el principal o el acento (Matías: «más colores»).
+
 ## 1.0.42 (publicada 08/11/2026)
 El tema Avispón Verde siempre con su foto, el 101 y «Avispón Verde» (es el auto de Matías). Los otros temas y el propio
 usan lo personalizado; lo personalizado no se borra.
