@@ -326,7 +326,7 @@ Json armarConfig(const Json& guardado) {
     numeroEn(c, def, "pitidoCadaS", 0, 600);
     numeroEn(c, def, "umbralPrecisionM", 1, 200);
     boolEn(c, def, "calibrar");
-    opcionEn(c, def, "tema", {"avispon", "rally", "sport", "cabina"});
+    opcionEn(c, def, "tema", {"avispon", "rally", "sport", "cabina", "propio"});   // propio: el de Personalizar (08/11/2026)
     {
         std::string n = c["numeroAuto"].aTexto();
         if (n.empty()) c["numeroAuto"] = def["numeroAuto"];

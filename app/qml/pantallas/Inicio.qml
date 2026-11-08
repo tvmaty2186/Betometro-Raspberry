@@ -31,7 +31,7 @@ Item {
     TBarra { }
 
     Banda { visible: Tema.avispon; x: 0; y: raiz.h ? 560 : 478; width: raiz.h ? 820 : 720 }
-    Numero101 { visible: Tema.avispon; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
+    Numero101 { visible: Tema.avispon || Tema.propio; x: raiz.h ? 40 : 28; y: raiz.h ? 510 : 430; numero: Datos.ajustes.numeroAuto || "101" }
     Text {
         id: nombreAuto
         x: raiz.h ? 190 : 28; y: raiz.h ? 600 : 556
@@ -58,8 +58,10 @@ Item {
     }
 
     // Se mueve solo, cerca de la sugerida (48), como el inicio de la app: 47 + 2,5·sen(0,9 t) + 1,2·sen(2,3 t)
-    Velocimetro {
+    // El velocímetro del inicio se elige en Personalizar (6 estilos); "" = el del tema. El tema propio arranca con el Deportivo
+    RelojInicio {
         id: velInicio
+        estilo: Datos.ajustes.relojInicio || (Tema.propio ? "deportivo" : "")
         x: raiz.h ? 930 : 379; y: raiz.h ? 280 : 668
         width: raiz.h ? 320 : 500; height: width
         property real t: 0

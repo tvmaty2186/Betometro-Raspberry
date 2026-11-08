@@ -34,7 +34,7 @@ TPantalla {
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Inicio con botones"; detalle: "Apagado: el inicio con la foto del auto"
                 TLlave { prendida: !!raiz.a.modoTablet; onCambiada: v => raiz.poner("modoTablet", v) } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Tema"
-                TOpciones { opciones: [{ texto: "Avispón", valor: "avispon" }, { texto: "Rally", valor: "rally" }, { texto: "Deportivo", valor: "sport" }, { texto: "Cabina", valor: "cabina" }]
+                TOpciones { opciones: [{ texto: "Avispón", valor: "avispon" }, { texto: "Rally", valor: "rally" }, { texto: "Deportivo", valor: "sport" }, { texto: "Cabina", valor: "cabina" }, { texto: "Propio", valor: "propio" }]
                             valor: raiz.a.tema || "avispon"; onElegido: v => { raiz.poner("tema", v); Contexto.tema = v; } } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Orientación"
                 TOpciones { opciones: [{ texto: "Acostada", valor: "horizontal" }, { texto: "Parada", valor: "vertical" }]
