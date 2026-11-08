@@ -100,6 +100,10 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.37 (publicada 08/11/2026)
+La Tienda lee el catálogo de Betometro-tienda (vacío por ahora; una herramienta publicada ahí aparece sola).
+Inicio del velocímetro: orden invertido (Carreras arriba, Ajustes abajo) y más aire entre los botones.
+
 ## 1.0.36 «más segura» (publicada 08/11/2026)
 Botones del celu solo desde nuestras páginas; Drive pide el código de la pantalla; la Pi comprueba la huella
 (sha256) de cada actualización; los avisos se escriben de a tandas; largada sin GPS viejo; tiempo ideal mínimo
