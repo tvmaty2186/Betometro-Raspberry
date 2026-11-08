@@ -80,8 +80,10 @@ TPantalla {
             Rectangle {
                 width: parent.width; height: 130; radius: 20
                 color: Qt.rgba(0, 0, 0, 0.35); border { width: 3; color: Tema.acento }
-                Text { anchors.centerIn: parent; text: Drive.codigo; color: Tema.tinta
-                       font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 92; letterSpacing: 8 } }
+                // Se achica solo si el código es largo (Google a veces manda más letras; Matías, 08/11/2026)
+                Text { anchors.centerIn: parent; width: parent.width - 40; height: parent.height - 16; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                       fontSizeMode: Text.HorizontalFit; minimumPixelSize: 36; text: Drive.codigo; color: Tema.tinta
+                       font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 92; letterSpacing: 6 } }
             }
             TBoton { width: parent.width; height: 84; tamNombre: 28; nombre: "Cancelar"; onTocado: Drive.cancelar() }
         }
@@ -181,8 +183,9 @@ TPantalla {
                 Rectangle {
                     width: parent.width; height: 150; radius: 24
                     color: Qt.rgba(0, 0, 0, 0.35); border { width: 4; color: Tema.acento }
-                    Text { anchors.centerIn: parent; text: Drive.codigo; color: Tema.tinta
-                           font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 104; letterSpacing: 10 } }
+                    Text { anchors.centerIn: parent; width: parent.width - 40; height: parent.height - 16; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                           fontSizeMode: Text.HorizontalFit; minimumPixelSize: 40; text: Drive.codigo; color: Tema.tinta
+                           font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 104; letterSpacing: 6 } }
                 }
                 Text { text: "Elegí tu cuenta y tocá «Continuar». Esta pantalla se cierra sola."; color: Tema.tintaSuave
                        width: parent.width; wrapMode: Text.WordWrap; font { family: Tema.fuente600; pixelSize: 24 } }

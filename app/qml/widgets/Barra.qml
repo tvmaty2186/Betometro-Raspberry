@@ -27,10 +27,11 @@ Item {
     }
     Rectangle {
         id: cursor
-        width: Math.max(4, raiz.height * 0.5); height: Math.max(14, raiz.height * 2.6); radius: width / 2
+        // Más gruesa y de un color que resalta en cada tema (Matías, 08/11/2026), con borde oscuro
+        width: Math.max(8, raiz.height * 0.95); height: Math.max(20, raiz.height * 3.2); radius: width / 2
         y: (raiz.height - height) / 2
         x: raiz.pos * raiz.width - width / 2
-        color: Tema.rally ? "#2a2118" : "#ffffff"; border { width: 1.5; color: Tema.rally ? "#f3e7c8" : "#111" }
+        color: Tema.cursorBarra; border { width: 2; color: "#0b0d0c" }
         opacity: raiz.valor === null || raiz.valor === undefined ? 0.35 : 1
         // Sin animación: el dato llega 10 a 20 veces por segundo y la animación nunca terminaba (la pantalla se
         // redibujaba a 60 cuadros por segundo toda la carrera) (03-1.1)

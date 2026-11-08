@@ -88,6 +88,7 @@ Drive::Drive(Datos* datos, const QString& carpetaDatos, const QString& prueba, Q
         const QString q = p.mid(6);
         if (q == QLatin1String("falta")) { estado_ = QStringLiteral("falta"); }
         else if (q == QLatin1String("codigo")) { estado_ = QStringLiteral("codigo"); codigo_ = QStringLiteral("BXRT-KQWM"); }
+        else if (q == QLatin1String("codigo-largo")) { estado_ = QStringLiteral("codigo"); codigo_ = QStringLiteral("BXRT-KQWM-PZLD-HN"); }   // para ver que entra
         else {
             estado_ = QStringLiteral("conectado");
             cuenta_ = QStringLiteral("ejemplo@gmail.com");
