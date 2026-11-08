@@ -33,7 +33,7 @@ if(BETO_PROGRAMA)
   find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg Multimedia Network)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
-    qt_add_executable(betometro app/main.cpp app/contexto.h ${BETO_DATOS} app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp app/simulacion.h app/simulacion.cpp app/prueba_completa.h app/prueba_completa.cpp
+    qt_add_executable(betometro app/main.cpp app/contexto.h ${BETO_DATOS} app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp app/simulacion.h app/simulacion.cpp app/prueba_completa.h app/prueba_completa.cpp app/tienda.h app/tienda.cpp
       app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp app/imagen_video.h app/imagen_video.cpp app/video_gst.h app/video_gst.cpp
       app/drive.h app/drive.cpp app/drive_logica.h app/drive_logica.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
@@ -133,6 +133,11 @@ if(BETO_PRUEBAS)
     target_compile_definitions(prueba_clima PRIVATE BETO_VERSION="${PROJECT_VERSION}" BETO_PRUEBA_DIR="${CMAKE_SOURCE_DIR}/pruebas/programa")
     target_link_libraries(prueba_clima PRIVATE Qt6::Core Qt6::Network)
     add_test(NAME clima COMMAND prueba_clima)
+    add_executable(prueba_tienda pruebas/programa/prueba_tienda.cpp app/tienda.cpp app/tienda.h)
+    target_include_directories(prueba_tienda PRIVATE app)
+    target_compile_definitions(prueba_tienda PRIVATE BETO_VERSION="${PROJECT_VERSION}")
+    target_link_libraries(prueba_tienda PRIVATE Qt6::Core Qt6::Network)
+    add_test(NAME tienda COMMAND prueba_tienda)
     # Carrera de punta a punta: simular_neo por un puerto serie virtual, GpsNeo de verdad y el Crono (09 P3)
     add_executable(prueba_carrera pruebas/programa/prueba_carrera.cpp ${BETO_DATOS} app/crono.cpp app/crono.h app/gps.cpp app/gps.h app/camara.cpp app/camara.h)
     qt_add_resources(prueba_carrera plantilla PREFIX "/" FILES recursos/informe-plantilla.html)

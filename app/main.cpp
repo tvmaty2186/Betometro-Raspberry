@@ -50,6 +50,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "qr.h"
 #include "sistema.h"
 #include "actualizador.h"
+#include "tienda.h"
 #include "camara.h"
 #include "pulsador_gpio.h"
 #include "reportes.h"
@@ -205,6 +206,7 @@ int main(int argc, char* argv[]) {
     Camara camara(&datos, carpeta);
     crono.ponerCamara(&camara);
     Actualizador actualizador(carpeta);
+    Tienda tienda(carpeta);   // el catálogo de herramientas (Betometro-tienda)
     contexto.setVersionNueva(actualizador.versionNueva());
     QObject::connect(&actualizador, &Actualizador::cambio, &contexto, [&] { contexto.setVersionNueva(actualizador.versionNueva()); });
     if (op.value(oPrueba).contains(QStringLiteral("nueva"))) contexto.setVersionNueva(QStringLiteral("1.0.21"));   // muestra «Actualizar»
@@ -315,6 +317,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);
     motor.rootContext()->setContextProperty(QStringLiteral("Camara"), &camara);
     motor.rootContext()->setContextProperty(QStringLiteral("Actualizador"), &actualizador);
+    motor.rootContext()->setContextProperty(QStringLiteral("Tienda"), &tienda);
     motor.rootContext()->setContextProperty(QStringLiteral("Simulador"), &simulacion);
     motor.rootContext()->setContextProperty(QStringLiteral("PruebaCompleta"), &pruebaCompleta);
     motor.rootContext()->setContextProperty(QStringLiteral("Salud"), &salud);
