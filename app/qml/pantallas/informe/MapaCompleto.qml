@@ -7,7 +7,7 @@ import Betometro
 // el mapita con todo el recorrido y el recuadro de lo visible, el punto tocado con su globito, Vel./Acel./Adel., X.
 // Sin sugerida (recorrido libre) el color de la velocidad es contra el promedio (Matías, 07/11/2026).
 // Se dibuja con Canvas solo lo visible y se repinta solo al cambiar el zoom, la posición, el modo o el punto.
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property var inf: ({})           // Datos.informe(id): pista, cerrada
     property var vu: null            // la vuelta elegida (inf.vueltas[lap])

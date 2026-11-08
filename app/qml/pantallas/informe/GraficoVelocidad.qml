@@ -3,7 +3,7 @@ import Betometro
 
 // Gráfico del informe: la velocidad de la vuelta elegida a lo largo de la distancia, con la sugerida punteada.
 // En recorrido libre, las marcas como rayas amarillas con su número.
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property bool h: true
     property bool vv: false          // se está viendo el video: el gráfico no se muestra

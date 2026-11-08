@@ -8,7 +8,7 @@ import Betometro
 // el tiempo y el error del pulsador virtual, solo de referencia; ★ en la vuelta modelo (la más cerca del ideal),
 // y abajo el error total de cada uno y cuánto tarde (o temprano) se marcó en promedio.
 // Lo que se elige acá (fila, menú, confirmaciones) vive acá; los cambios a la carrera salen como señales.
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property bool h: true
     property bool vv: false                 // se está viendo el video: la columna de la derecha es «▸ hora del video»

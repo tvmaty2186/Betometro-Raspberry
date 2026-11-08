@@ -3,7 +3,7 @@ import Betometro
 
 // Recorrido libre en el informe: el resumen (tiempo, distancia, promedio, máxima, parado, aceleración máxima)
 // y la lista de marcas (muestra docs/muestras/recorrido/3-informe.png). Va donde iría la tabla de vueltas.
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property bool h: true
     property var inf: ({})           // Datos.informe(id): resumen

@@ -8,7 +8,7 @@ import Betometro
 // Toque = elige el punto (globito); doble toque = acerca ahí; pellizco = zoom; arrastrar = recorrer; abajo la
 // barrita con toda la carrera y el recuadro de lo visible. Se dibuja con Canvas solo lo visible y se repinta
 // solo al cambiar el zoom, la posición, el modo o el punto elegido (Pi 3).
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property var inf: ({})           // Datos.informe(id)
     property string nombre: ""

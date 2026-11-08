@@ -30,7 +30,7 @@ Item {
     onSAChanged: { graf.requestPaint(); mapa.requestPaint(); }
     onSMChanged: { graf.requestPaint(); mapa.requestPaint(); }
 
-    Tarjeta { anchors.fill: parent; oscura: true }
+    Tarjeta { datos: true; anchors.fill: parent; oscura: true }
     Sub { x: 24; y: 18; tam: 14; text: "Comparar · " + raiz.nombre + " · " + raiz.nombreV(raiz.elegida) + " contra " + raiz.nombreV(raiz.modelo) + ", la vuelta modelo (la más cerca del ideal)" }
     // Cerrar
     Rectangle {
@@ -104,7 +104,7 @@ Item {
     }
 
     // Mapa: dónde se fue la diferencia
-    Tarjeta {
+    Tarjeta { datos: true;
         x: parent.width - 410; y: 96; width: 390; height: 250
         Sub { x: 14; y: 10; tam: 12; text: "Dónde se fue la diferencia" }
         Canvas {
@@ -134,7 +134,7 @@ Item {
                color: Tema.tintaSuave; font { family: Tema.fuente600; italic: true; pixelSize: 13 } }
     }
     // Sectores
-    Tarjeta {
+    Tarjeta { datos: true;
         x: parent.width - 410; y: 360; width: 390; height: parent.height - 380
         Sub { x: 18; y: 12; tam: 12; text: "Por sector · " + raiz.nombreV(raiz.elegida) + " contra " + raiz.nombreV(raiz.modelo) }
         Column {

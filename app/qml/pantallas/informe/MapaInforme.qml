@@ -5,7 +5,7 @@ import "comparar.js" as Comp
 // Mapa del informe: la pista y el recorrido de la vuelta elegida, con color según velocidad, aceleración o
 // adelanto (Vel./Acel./Adel.). En recorrido libre, la llegada y las marcas numeradas. Con video, el punto
 // amarillo es donde va el auto y tocar el recorrido lleva el video ahí.
-Tarjeta {
+Tarjeta { datos: true;
     id: caja
     property bool h: true
     property bool vv: false                         // se está viendo el video (la tarjeta se achica)
