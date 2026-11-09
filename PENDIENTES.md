@@ -95,6 +95,11 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## Para la 1.0.57 (hecho, sin publicar)
+- Apagar/Reiniciar también bloqueados **actualizando** (bajando o instalando), con la **Prueba completa** en marcha y
+  con un **comando del buzón** corriendo. Antes de apagar se espera a que la carrera que se está guardando quede en
+  la tarjeta (`Sistema::antesDeApagar` → `Datos::guardarYa`).
+
 ## 1.0.56 (publicada 09/11/2026)
 - Color de la vuelta siempre en **pantalla completa** (se sacó el «marco»). Ajustes → Pantalla y tema: **Vuelta medida**
   y **Vuelta libre** con 5 colores cada una (rojo, verde, azul, amarillo, naranja).

@@ -13,7 +13,11 @@ TPantalla {
     // Apagar: una ventana con Apagar, Reiniciar y Cancelar (Matías, 08/11/2026)
     property bool menuApagar: Contexto.prueba.indexOf("apagar") === 0   // --prueba apagar: abierta, para las capturas
     // Qué está trabajando que no se puede cortar ("" = nada): grabando, pasando a MP4 o subiendo a Google Drive
+    // (09/11/2026) También: actualizando, Prueba completa y un comando del buzón (revisión a distancia)
     readonly property string ocupado: Contexto.prueba === "apagar-ocupado" ? "Subiendo a Google Drive"
+        : typeof Actualizador !== "undefined" && Actualizador && (Actualizador.estado === "descargando" || Actualizador.estado === "instalando") ? "Actualizando Betómetro"
+        : typeof PruebaCompleta !== "undefined" && PruebaCompleta && PruebaCompleta.estado === "corriendo" ? "Prueba completa en marcha"
+        : typeof Buzon !== "undefined" && Buzon && Buzon.corriendo ? "Revisión a distancia en marcha"
         : typeof Camara !== "undefined" && Camara && Camara.grabando ? "Grabando video"
         : typeof Camara !== "undefined" && Camara && Camara.convirtiendo ? "Preparando el video"
         : typeof Drive !== "undefined" && Drive && Drive.subiendo ? "Subiendo a Google Drive" : ""

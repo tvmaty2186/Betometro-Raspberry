@@ -7,6 +7,7 @@
 #include <cmath>
 #include <QObject>
 #include <QProcess>
+#include <functional>
 
 class Sistema : public QObject {
     Q_OBJECT
@@ -14,12 +15,16 @@ class Sistema : public QObject {
 public:
     using QObject::QObject;
     bool raspberry() const { return qEnvironmentVariableIsSet("BETO_RASPBERRY"); }
+    // Antes de apagar o reiniciar: esperar a que lo que se está guardando quede en la tarjeta (09/11/2026)
+    std::function<void()> antesDeApagar;
     Q_INVOKABLE void apagar() {
+        if (antesDeApagar) antesDeApagar();
         if (raspberry()) QProcess::startDetached(QStringLiteral("/sbin/poweroff"), {});
         QCoreApplication::quit();
     }
     // Reiniciar la Raspberry entera (Ajustes → Apagar → Reiniciar). En la PC solo cierra el programa.
     Q_INVOKABLE void reiniciar() {
+        if (antesDeApagar) antesDeApagar();
         if (raspberry()) QProcess::startDetached(QStringLiteral("/sbin/reboot"), {});
         QCoreApplication::quit();
     }

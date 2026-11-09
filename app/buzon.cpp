@@ -101,6 +101,7 @@ void Buzon::correr(int numero, const QString& comando) {
     QFile e(carpeta_ + QStringLiteral("/buzon.encurso"));
     if (e.open(QIODevice::WriteOnly | QIODevice::Truncate)) { e.write(QByteArray::number(numero)); e.close(); }
     qWarning("Buzón: corre el comando del pedido #%d", numero);
+    ponerCorriendo(true);
     auto* p = new QProcess(this);
     p->setProcessChannelMode(QProcess::MergedChannels);
     p->setStandardInputFile(QProcess::nullDevice());
@@ -129,6 +130,7 @@ void Buzon::correr(int numero, const QString& comando) {
         p->deleteLater();
         QFile::remove(carpeta_ + QStringLiteral("/buzon.encurso"));
         ocupado_ = false;
+        ponerCorriendo(false);
     });
     connect(p, &QProcess::errorOccurred, this, [this, p, numero, reloj](QProcess::ProcessError err) {
         if (err != QProcess::FailedToStart) return;
@@ -137,6 +139,7 @@ void Buzon::correr(int numero, const QString& comando) {
         p->deleteLater();
         QFile::remove(carpeta_ + QStringLiteral("/buzon.encurso"));
         ocupado_ = false;
+        ponerCorriendo(false);
     });
 }
 

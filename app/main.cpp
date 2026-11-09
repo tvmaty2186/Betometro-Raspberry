@@ -327,6 +327,7 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::enCursoChanged, &servidor, prenderServidor);
     QObject::connect(&datos, &Datos::cfgChanged, &servidor, prenderServidor);
     Sistema sistema;
+    sistema.antesDeApagar = [&datos] { datos.guardarYa(); };   // una carrera a medio guardar no se corta
     // Modo tele: si hay una tele en el HDMI (docs/video.md). --prueba tele-reiniciar: como si estuviera
     // enchufada pero Qt no la viera
     Hdmi hdmi(op.value(oPrueba) == QStringLiteral("tele-reiniciar"));
@@ -397,6 +398,7 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Pulsador"), pulsador);   // null en la PC
     motor.rootContext()->setContextProperty(QStringLiteral("Audio"), &audio);
     motor.rootContext()->setContextProperty(QStringLiteral("Sistema"), &sistema);
+    motor.rootContext()->setContextProperty(QStringLiteral("Buzon"), &buzon);
     motor.rootContext()->setContextProperty(QStringLiteral("Contexto"), &contexto);
     motor.rootContext()->setContextProperty(QStringLiteral("Datos"), &datos);
     motor.rootContext()->setContextProperty(QStringLiteral("Crono"), &crono);

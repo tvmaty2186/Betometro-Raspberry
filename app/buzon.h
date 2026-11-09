@@ -19,7 +19,9 @@ class QProcess;
 
 class Buzon : public QObject {
     Q_OBJECT
+    Q_PROPERTY(bool corriendo READ corriendo NOTIFY corriendoChanged)   // corre un comando: no apagar (09/11/2026)
 public:
+    bool corriendo() const { return corriendo_; }
     Buzon(const QString& carpetaDatos, QObject* padre = nullptr);
     std::function<bool()> puede;            // internet, sin carrera y prendido
     void empezar();                         // cada 2 min (y al rato de arrancar)
@@ -39,4 +41,8 @@ private:
     QByteArray etag_;
     QSet<int> hechos_;
     bool ocupado_ = false, llaveMala_ = false;
+    bool corriendo_ = false;
+    void ponerCorriendo(bool si) { if (si != corriendo_) { corriendo_ = si; emit corriendoChanged(); } }
+signals:
+    void corriendoChanged();
 };
