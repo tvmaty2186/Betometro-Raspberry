@@ -153,6 +153,9 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
   Ahora van en `Loader` y se arman al abrirlas.
 - 08/11/2026: zoom del mapa grande con tirones: redibujaba a cada movimiento. Ahora durante el gesto solo se escala y
   corre el dibujo (transform) y se redibuja al soltar.
+- 09/11/2026: **arranque** (26,5 s): Betómetro esperaba a la red (`After=systemd-user-sessions`, que va después de
+  NetworkManager, 5,7 s). Ya no espera (sí al sonido). Betómetro mismo tardaba 8,7 s en la Pi (0,1 s en la PC): la
+  Prueba completa ahora dice cuánto tarda cada parte («Betómetro empezó a los … s · datos … · primera imagen …»).
 - 08/11/2026: el tema «propio» no se guardaba: `modelo.cpp` valida la lista de temas (hay que sumar cada tema nuevo).
 - Un comentario `//` en medio de una expresión QML de varias líneas se come el resto de la línea (pasó con `* Math.PI`).
 - Buildroot: cada imagen tardaba 2–3 h y fallaba por piezas del sistema; por eso se pasó a Raspberry Pi OS (`sistema/` e `imagen.yml` se borraron el 07/11/2026; quedan en el historial de git).

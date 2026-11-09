@@ -1,6 +1,8 @@
 [Unit]
 Description=Betómetro
-After=systemd-user-sessions.service sound.target pulseaudio-sistema.service
+# Sin esperar a la red (systemd-user-sessions va después de NetworkManager, 5,7 s en la Pi): la wifi se conecta sola
+# después (09/11/2026). Sí espera al sonido: la voz se prepara apenas arranca.
+After=sound.target pulseaudio-sistema.service
 Wants=pulseaudio-sistema.service
 # Betómetro ocupa la pantalla: sin la consola de texto en tty1
 Conflicts=getty@tty1.service

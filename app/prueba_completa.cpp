@@ -1,4 +1,5 @@
 #include "prueba_completa.h"
+#include "arranque.h"
 
 #include <QCoreApplication>
 #include <QDate>
@@ -296,7 +297,7 @@ void PruebaCompleta::pasoSistema() {
         else if ((freno & 0x90000) || temp >= 70 || (memTotal > 0 && memLibre < 150LL * 1024 * 1024) || !raspberry()) e = kLeve;
         terminarPaso(e, d.join(QStringLiteral(" · ")));
     };
-    if (!raspberry() || !QFile::exists(QStringLiteral("/usr/bin/systemd-analyze"))) { cerrar(QStringLiteral("arranque: no se puede en la PC")); return; }
+    if (!raspberry() || !QFile::exists(QStringLiteral("/usr/bin/systemd-analyze"))) { cerrar(QStringLiteral("arranque: ") + ::arranque::resumen()); return; }
     correrComando(QStringLiteral("systemd-analyze"), {}, 10000, [this, cerrar](int, const QString& salida) {
         QString arranque = salida.section('\n', 0, 0).trimmed();
         if (arranque.contains(QLatin1String("= "))) arranque = QStringLiteral("arranque %1").arg(arranque.section(QStringLiteral("= "), 1).trimmed());
@@ -304,7 +305,8 @@ void PruebaCompleta::pasoSistema() {
         correrComando(QStringLiteral("systemd-analyze"), {QStringLiteral("blame")}, 10000, [arranque, cerrar](int, const QString& blame) {
             QStringList top;
             for (const QString& l : blame.split('\n', Qt::SkipEmptyParts)) { top << l.simplified(); if (top.size() == 5) break; }
-            cerrar(arranque + (top.isEmpty() ? QString() : QStringLiteral(" (más lentos: %1)").arg(top.join(QStringLiteral(", ")))));
+            cerrar(arranque + (top.isEmpty() ? QString() : QStringLiteral(" (más lentos: %1)").arg(top.join(QStringLiteral(", "))))
+                   + QStringLiteral(" · ") + ::arranque::resumen());
         });
     });
 }

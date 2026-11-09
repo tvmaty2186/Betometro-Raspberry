@@ -48,6 +48,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "gps.h"
 #include "salud.h"
 #include "vigilante.h"
+#include "arranque.h"
 #include "clima.h"
 #include "qr.h"
 #include "sistema.h"
@@ -80,11 +81,10 @@ static void cargarFuentes() {
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
-    // BETO_MEDIR_ARRANQUE=1: cuánto tarda cada parte del arranque (para hacerlo más rápido)
-    static QElapsedTimer relojArranque;
-    relojArranque.start();
-    const bool medir = qEnvironmentVariableIsSet("BETO_MEDIR_ARRANQUE");
-    auto marca = [&](const char* que) { if (medir) qInfo("arranque %6lld ms · %s", static_cast<long long>(relojArranque.elapsed()), que); };
+    // Cuánto tarda cada parte del arranque (app/arranque.h): va a la Prueba completa; BETO_MEDIR_ARRANQUE=1 lo escribe
+    arranque::reloj();
+    arranque::empezoA();
+    auto marca = [](const char* que) { arranque::marcar(que); };
     QSocketNotifier* avisoSalir = nullptr;
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, gAvisoSalir) == 0) {
         avisoSalir = new QSocketNotifier(gAvisoSalir[1], QSocketNotifier::Read, &app);
@@ -369,7 +369,7 @@ int main(int argc, char* argv[]) {
     marca("antes de la pantalla");
     motor.loadFromModule("Betometro", "Main");
     marca("pantalla armada");
-    if (medir && !motor.rootObjects().isEmpty())
+    if (!motor.rootObjects().isEmpty())
         if (auto* v = qobject_cast<QQuickWindow*>(motor.rootObjects().first()))
             QObject::connect(v, &QQuickWindow::frameSwapped, &app, [marca] { static bool una = false; if (!una) { una = true; marca("primera imagen en pantalla"); } });
     if (motor.rootObjects().isEmpty()) return 1;
