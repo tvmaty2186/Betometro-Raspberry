@@ -31,27 +31,32 @@ Item {
         x: vid.h ? 24 : 370; y: vid.h ? 530 : 600
         width: vid.h ? 600 : 330; height: vid.h ? 170 : 280
         Sub { x: 18; y: 16; text: "En este momento"; tam: 12 }
+        // Velocidad · Sugerida / Distancia · Adelanto (Matías, 09/11/2026)
         Grid {
-            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 18 }
-            columns: vid.h ? 3 : 1; rowSpacing: 4
+            anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 18; bottomMargin: vid.h ? 12 : 24 }
+            columns: 2; rowSpacing: vid.h ? 6 : 14
             // Tres datos fijos con el texto enlazado: el Repeater recibía una lista nueva 10 veces por segundo (03-1.2)
             component DatoAhora: Item {
                 property string e
                 property string v
                 property string u
                 property color c
-                width: vid.h ? (cajaVideo.width - 36) / 3 : 294; height: vid.h ? 96 : 64
-                Sub { text: parent.e; tam: 11; anchors.top: vid.h ? parent.top : undefined; anchors.verticalCenter: vid.h ? undefined : parent.verticalCenter }
+                width: vid.h ? (cajaVideo.width - 36) / 2 : 147; height: vid.h ? 50 : 84
+                Sub { text: parent.e; tam: 11; anchors.top: parent.top }
                 Row {
-                    anchors { bottom: parent.bottom; right: vid.h ? undefined : parent.right }
+                    anchors.bottom: parent.bottom
                     spacing: 4
-                    Text { id: num; text: parent.parent.v; color: parent.parent.c; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: vid.h ? 52 : 44 } }
+                    Text { id: num; text: parent.parent.v; color: parent.parent.c; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: vid.h ? 34 : 40 } }
                     Text { anchors.baseline: num.baseline; text: parent.parent.u; color: Tema.tintaSuave
                            font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 20 } }
                 }
             }
             DatoAhora { e: "Velocidad"; v: reproductor.e.lap >= 0 && reproductor.e.ok ? String(Math.round(reproductor.e.kmh)) : "–"; u: "km/h"; c: Tema.numero }
             DatoAhora { e: "Sugerida"; v: vid.sug > 0 ? vid.sug.toFixed(1).replace(".", ",") : "–"; u: ""; c: Tema.tinta }
+            DatoAhora { e: "Distancia"; c: Tema.tinta
+                        readonly property real d: reproductor.e.lap >= 0 && reproductor.e.ok ? reproductor.e.d : -1
+                        v: d < 0 ? "–" : d < 1000 ? String(Math.round(d)) : (d / 1000).toFixed(2).replace(".", ",")
+                        u: d < 0 ? "" : d < 1000 ? "m" : "km" }
             DatoAhora { e: "Adelanto"; v: reproductor.e.lap >= 0 && vid.dist > 0 ? Formato.dif(reproductor.e.ade * 1000) : "–"; u: ""
                         c: reproductor.e.lap < 0 || Math.abs(reproductor.e.ade) < 1 ? Tema.bien : Math.abs(reproductor.e.ade) < 3 ? Tema.acento : Tema.rojo }
         }

@@ -141,7 +141,7 @@ Tarjeta { datos: true;
                font { family: Tema.fuente600; pixelSize: 11; letterSpacing: 1.2 } }
         Rectangle { x: parent.u * 6.2 + 12; y: 15; width: parent.u * 3 - 12; height: 1.5; color: caja.celeste; opacity: 0.5 }
         Repeater {
-            model: [[3.2, "TIEMPO"], [4.8, "ERROR"], [6.3, "TIEMPO"], [7.9, "ERROR"], [9.35, caja.vv ? "VIDEO" : "KM/H"]]
+            model: [[3.2, "TIEMPO"], [4.8, "ERROR"], [6.3, "TIEMPO"], [7.9, "ERROR"], [9.35, "KM/H"]]
             Text { required property var modelData; x: modelData[0] * parent.u + 6; y: 19; text: modelData[1]; color: Tema.tintaSuave
                    font { family: Tema.fuente600; pixelSize: 10; letterSpacing: 1.2 } }
         }
@@ -221,10 +221,8 @@ Tarjeta { datos: true;
                                    color: parent.ok && !filaV.g.dudosa ? caja.celeste : Tema.tintaSuave
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: parent.ok && !filaV.g.dudosa ? 22 : 15 } }
                         }
-                        Text { anchors.verticalCenter: parent.verticalCenter; visible: caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
-                               text: "▸ " + caja.inicioVideo(index); color: index === caja.lap ? Tema.acento : Tema.tinta; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11
-                               font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; visible: !caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
+                        // Sin la columna «▸ hora del video»: con el video también va la velocidad (Matías, 09/11/2026)
+                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
                                text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
                                color: Tema.tintaSuave; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 18 : 20 } }
                     }
