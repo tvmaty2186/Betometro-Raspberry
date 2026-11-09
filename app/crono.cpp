@@ -234,6 +234,9 @@ void Crono::salir() {
 
 void Crono::terminarCon(const QString& motivo, bool aMano) {
     motor_->terminar(reloj_ms_(), aMano);
+    // Terminada: no queda nada «en curso». Si la última vuelta recién empezaba, el motor no la guarda y el parcial
+    // quedaba, y al arrancar de nuevo aparecía como vuelta cortada de 0 s (reporte del 08/11/2026, simulador)
+    if (!carreraId_.isEmpty()) datos_->quitarExtra(carreraId_, "enCurso");
     // El video sigue unos segundos más (para ver la llegada) y para solo
     if (camara_ && camara_->grabando()) camara_->detener(static_cast<int>(datos_->config()["camaraFinS"].aNumero(10)));
     emit enCursoChanged();

@@ -103,6 +103,8 @@ automática y el arranque.
 ## 1.0.52 (sin publicar, en preparación)
 - Carrera nueva: arranca con todas las vueltas medidas (antes, la última elección de Práctica; de fábrica impares).
   Práctica: de fábrica «Todas»; recuerda lo último que se eligió.
+- Al terminar una carrera justo después de marcar, quedaba guardada la vuelta recién empezada y al arrancar de nuevo
+  aparecía una vuelta cortada de 0 s (se vio en el reporte del simulador, 08/11/2026).
 
 ## 1.0.51 (publicada 09/11/2026)
 - Chequeo previo: la pantalla de carrera se acomoda sola según por dónde llegó la marca de prueba del pulsador
