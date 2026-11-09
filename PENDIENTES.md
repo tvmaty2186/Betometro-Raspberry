@@ -95,6 +95,12 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## 1.0.56 (publicada 09/11/2026)
+- Color de la vuelta siempre en **pantalla completa** (se sacó el «marco»). Ajustes → Pantalla y tema: **Vuelta medida**
+  y **Vuelta libre** con 5 colores cada una (rojo, verde, azul, amarillo, naranja).
+- Salir con el pulsador: a los 3 s, cartel grande **«TERMINANDO CARRERA»**; a los 5 s sale. Soltar antes lo cancela.
+- **Apagar/Reiniciar bloqueados** mientras se graba, se pasa a MP4 o se sube a Google Drive (avisa qué está haciendo).
+
 ## 1.0.55 (publicada 09/11/2026)
 - Carrera: cada marca que cuenta prende un **marco amarillo** alrededor de la pantalla (~0,35 s) y MARCAR se ilumina
   más tiempo. Las marcas ignoradas no muestran nada (a propósito).
