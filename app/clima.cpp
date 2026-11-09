@@ -192,6 +192,7 @@ void Clima::avisar() {
 }
 
 void Clima::pedir(double lat, double lon, bool forzar) {
+    if (sinPedir_) return;
     const QString k = clave(lat, lon);
     if (!cache_.contains(k)) { cache_.insert(k, Entrada{}); podarCache(k); }   // lugar nuevo: que no crezca sin tope
     Entrada& e = cache_[k];
@@ -345,24 +346,39 @@ QVariantList Clima::horasDelDia(double lat, double lon, const QString& fecha) {
 void Clima::adjuntar(const QString& carreraId, const QString& nombre, double lat, double lon) {
     if (!guardarAdjunto) return;
     guardarAdjunto(carreraId, QVariantMap{{"nombre", nombre}, {"lat", lat}, {"lon", lon}});
-    pedir(lat, lon);
-    actualizarAdjuntos();
+    actualizarAdjuntos(true);
+}
+
+void Clima::empezarAdjuntos() {
+    connect(&relojAdjuntos_, &QTimer::timeout, this, [this] { actualizarAdjuntos(true); });
+    relojAdjuntos_.start(60 * 60 * 1000);
+    QTimer::singleShot(60 * 1000, this, [this] { actualizarAdjuntos(true); });
+    connect(this, &Clima::cambio, this, [this] { actualizarAdjuntos(false); }, Qt::QueuedConnection);   // llegó un pronóstico
 }
 
 void Clima::quitarAdjunto(const QString& carreraId) { if (guardarAdjunto) guardarAdjunto(carreraId, {}); }
 
-void Clima::actualizarAdjuntos() {
+void Clima::actualizarAdjuntos(bool conRed) {
     if (!adjuntos || !guardarAdjunto) return;
     const QString hoy = QDate::currentDate().toString(Qt::ISODate);
+    const qint64 ahora = QDateTime::currentMSecsSinceEpoch();
     for (const QVariant& x : adjuntos()) {
         const QVariantMap a = x.toMap();
         const QString fecha = a.value("fecha").toString();
         if (fecha < hoy) continue;   // ya pasó: queda el último pronóstico
         QVariantMap cl = a.value("clima").toMap();
         const double lat = cl.value("lat").toDouble(), lon = cl.value("lon").toDouble();
-        const QVariantMap d = dia(lat, lon, fecha);   // si es viejo, lo vuelve a pedir
-        if (!d.value("disponible").toBool()) continue;
+        // ¿Le toca pedir por internet? 2 veces por día; el día de la carrera, cada hora. Cuenta desde la última vez
+        // que se bajó bien: sin internet vuelve a probar en el próximo reloj (cada hora)
+        const qint64 cada = fecha == hoy ? 60LL * 60 * 1000 : 12LL * 60 * 60 * 1000;
+        const qint64 bajado = cache_.contains(clave(lat, lon)) ? cache_.value(clave(lat, lon)).cuando : 0;
+        if (conRed && ahora - bajado >= cada - 60 * 1000)
+            pedir(lat, lon, true);   // cuando llega, «cambio» vuelve a pasar por acá (sin red) y lo guarda
+        sinPedir_ = true;            // dia() y horasDelDia() piden solos si es viejo: acá no
+        const QVariantMap d = dia(lat, lon, fecha);
+        if (!d.value("disponible").toBool()) { sinPedir_ = false; continue; }
         const QVariantList h = horasDelDia(lat, lon, fecha);
+        sinPedir_ = false;
         // ¿Nada nuevo? (comparado como texto: lo guardado vuelve con números decimales)
         auto texto = [](const QVariantMap& m) { return QJsonDocument::fromVariant(m).toJson(QJsonDocument::Compact); };
         if (texto({{"dia", cl.value("dia")}, {"horas", cl.value("horas")}}) == texto({{"dia", d}, {"horas", h}})) continue;

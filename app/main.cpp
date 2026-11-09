@@ -228,11 +228,7 @@ int main(int argc, char* argv[]) {
         if (m.isEmpty()) datos.quitarExtra(id, "clima");
         else datos.ponerExtra(id, "clima", beto::Json::leer(QJsonDocument::fromVariant(m).toJson(QJsonDocument::Compact).toStdString()));
     };
-    QObject::connect(&clima, &Clima::cambio, &clima, &Clima::actualizarAdjuntos, Qt::QueuedConnection);   // llegó un pronóstico
-    QTimer relojClima;   // y cada media hora, por si hay internet nuevo
-    QObject::connect(&relojClima, &QTimer::timeout, &clima, &Clima::actualizarAdjuntos);
-    relojClima.start(30 * 60 * 1000);
-    QTimer::singleShot(60 * 1000, &clima, &Clima::actualizarAdjuntos);
+    clima.empezarAdjuntos();   // 2 veces por día; el día de la carrera, cada hora
     QObject::connect(gps, &FuenteGps::muestra, &clima, [&clima](const beto::Muestra& m) {
         if (m.lat && m.lon && m.precisionM < 50) clima.ponerPosicion(*m.lat, *m.lon);
     });

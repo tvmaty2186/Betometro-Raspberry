@@ -49,13 +49,16 @@ public:
     Q_INVOKABLE QVariantList horasDelDia(double lat, double lon, const QString& fecha);
 
     // Clima adjuntado a una carrera (Matías, 09/11/2026): se guarda en la carrera y, cada vez que hay internet, se
-    // actualiza con el último pronóstico de ese lugar para el día de la carrera. Sin internet queda el último.
-    // Pasado el día de la carrera ya no se toca. main.cpp conecta los dos ganchos con Datos.
+    // actualiza con el último pronóstico de ese lugar para el día de la carrera: 2 veces por día, y el día de la
+    // carrera cada hora (Matías, 09/11/2026). Si llega un pronóstico por otro lado, se aprovecha sin pedir de nuevo.
+    // Sin internet queda el último. Pasado el día de la carrera ya no se toca. main.cpp conecta los ganchos con Datos.
     std::function<QVariantList()> adjuntos;                                   // [{id, fecha, clima: {nombre, lat, lon, …}}]
     std::function<void(const QString& id, const QVariantMap& clima)> guardarAdjunto;   // mapa vacío = quitar
     Q_INVOKABLE void adjuntar(const QString& carreraId, const QString& nombre, double lat, double lon);
     Q_INVOKABLE void quitarAdjunto(const QString& carreraId);
-    void actualizarAdjuntos();
+    // conRed: el reloj de cada hora (pide por internet a los que les toca); sin: solo con lo que ya hay bajado
+    void actualizarAdjuntos(bool conRed = false);
+    void empezarAdjuntos();   // el reloj: el primero al minuto de prender, después cada hora
 
     void ponerPosicion(double lat, double lon);   // desde el GPS
     void ponerCarrera(bool enCurso);              // en carrera no se pide el nombre del lugar (11A-1.1)
@@ -71,6 +74,8 @@ signals:
     void cambio();
 
 private:
+    QTimer relojAdjuntos_;
+    bool sinPedir_ = false;               // mientras se revisan los adjuntos sin red: pedir() no sale a internet
     struct Entrada { QJsonObject datos; qint64 cuando = 0, intento = 0; bool pidiendo = false; QString error; };
     void podarCache(const QString& salvo = {});   // deja como mucho kLugares (los más nuevos; «salvo» queda siempre)
     QJsonObject inventado(double lat, double lon) const;   // para la PC
