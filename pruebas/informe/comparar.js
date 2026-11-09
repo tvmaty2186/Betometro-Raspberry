@@ -59,7 +59,7 @@ const casos = [
 for (let s = 0; s < 20; s++) { const r = azar(100 + s); casos.push({ semilla: 200 + s, largo: 500 + Math.round(r() * 6000), idealMs: 30000 + Math.round(r() * 400000),
   vueltas: 1 + Math.floor(r() * 5), hz: [1, 5, 10][s % 3], mala: r() * 0.3, saltos: r() * 0.04, huecos: [[100, 100 + r() * 800]], vueltaHueco: 1 + (s % 3), corte: 1 + (s % 4) }); }
 
-const SOLO_RASPBERRY = ['videos', 'video', 'videoMs'];
+const SOLO_RASPBERRY = ['videos', 'video', 'videoMs', 'distM'];   // distM: metros de cada vuelta para la tabla (09/11/2026)
 const fallas = []; let numeros = 0, maxCoord = 0, maxOtro = 0, hzActual = 1, acelSalteadas = 0;
 function comparar(a, b, ruta) {
   if (typeof a === 'number' && typeof b === 'number') {
