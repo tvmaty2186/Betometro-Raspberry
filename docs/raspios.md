@@ -107,8 +107,12 @@ Para revisar o arreglar la Pi sin ssh, esté en la red que esté (Matías, 09/11
   «Ayuda a distancia» apagada (Ajustes → Conectividad, al final).
 - Corre con `systemd-run --wait --pipe` (como root, fuera del encierro del servicio), hasta 5 min. Contesta con la
   salida como comentario y cierra el issue. Usa la llave de los reportes (`reportes.token`: Issues lectura y escritura).
-- Para reiniciar Betómetro, que no corte la respuesta: `(sleep 3; systemctl restart betometro) >/dev/null 2>&1 &`.
+- Reiniciar sin cortar la respuesta: con un temporizador aparte, `systemd-run --on-active=20 /usr/bin/systemctl reboot`
+  (o `... restart betometro`). Un `&` adentro del pedido no sirve: systemd lo mata al terminar la unidad.
   Si igual se corta en el medio, al volver contesta «Se cortó en el medio».
+- Algo largo (más de 5 min, por ejemplo `apt-get full-upgrade`): como unidad aparte, `systemd-run --unit=beto-X
+  -p StandardOutput=file:/var/lib/betometro/X.log -p StandardError=file:... bash -c "..."`, y después otro pedido
+  que lea el log (el journal guarda solo avisos: la salida normal no queda). Así se actualizó el sistema el 09/11/2026.
 - Hechos: `/var/lib/betometro/buzon.hechos` (no se repiten).
 
 ## Cosas de la pantalla y del arranque (lo que costó)
