@@ -16,6 +16,9 @@ TPantalla {
     Component.onCompleted: {
         forceActiveFocus();
         if (Contexto.prueba === "simulador") Simulador.correr();   // simulador: solo capturas
+        if (Contexto.prueba === "pulsador-pantalla" || Contexto.prueba === "pulsador-boton") {   // solo capturas
+            pulsador = "esperando"; recibido(Contexto.prueba === "pulsador-pantalla" ? "la pantalla" : "el pulsador");
+        }
         // Volvió de «Despejar memoria»: cuánto liberó
         const antes = Vigilante.tomarDespeje();
         if (antes >= 0) Navegacion.avisar("Memoria despejada: antes " + antes + " % → ahora " + Vigilante.memoria + " %");
@@ -25,7 +28,13 @@ TPantalla {
     readonly property int mem: Vigilante.memoria
     property bool despejarArmado: false
     Timer { id: desarmarDespeje; interval: 3000; onTriggered: raiz.despejarArmado = false }
-    function recibido(por) { if (pulsador !== "esperando") return; pulsador = "funciona"; llegoPor = por; }
+    // La pantalla de carrera se acomoda sola según por dónde llegó la marca (Matías, 09/11/2026): por el pulsador (o
+    // una tecla) → sin el botón MARCAR en pantalla; por la pantalla → con MARCAR. Es el ajuste «MARCAR en pantalla».
+    function recibido(por) {
+        if (pulsador !== "esperando") return;
+        pulsador = "funciona"; llegoPor = por;
+        Datos.ponerCfg("marcarPantalla", por === "la pantalla");
+    }
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca() { raiz.recibido("el pulsador"); } }
     Keys.onPressed: e => {
         if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter || e.key === Qt.Key_Space || e.key === Qt.Key_F9) { recibido("el teclado"); e.accepted = true; }
@@ -54,7 +63,9 @@ TPantalla {
                  dato: !raiz.g.modulo ? "Buscando…" : !habla ? "Sin comunicación" : (raiz.g.original ? "" : "Réplica ") + raiz.g.modulo.split(" · ")[0] + " · " + (raiz.g.hz || 0) + " por s" }
         TBoton { width: parent.an; height: parent.al; icono: "bandera"; nombre: "Pulsador"
                  tipo: raiz.pulsador === "funciona" ? "acento" : ""
-                 dato: raiz.pulsador === "esperando" ? "Apretalo ahora…" : raiz.pulsador === "funciona" ? "Llegó por " + raiz.llegoPor : "Tocá para probar"
+                 dato: raiz.pulsador === "esperando" ? "Apretalo ahora…"
+                       : raiz.pulsador === "funciona" ? "Llegó por " + raiz.llegoPor + "\n" + (raiz.llegoPor === "la pantalla" ? "Con MARCAR en pantalla" : "Sin MARCAR en pantalla")
+                       : "Tocá para probar"
                  onTocado: { if (raiz.pulsador === "esperando") raiz.recibido("la pantalla"); else { raiz.pulsador = "esperando"; raiz.forceActiveFocus(); } } }
         TBoton { width: parent.an; height: parent.al; icono: "voz"; nombre: "Probar la voz"; dato: "Volumen " + Math.round(Datos.ajustes.volumen) + "%"
                  onTocado: Audio.lista ? Audio.probar() : Navegacion.avisar("Faltan los audios de la voz") }

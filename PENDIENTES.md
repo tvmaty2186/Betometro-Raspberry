@@ -100,6 +100,10 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.51 (sin publicar, en preparación)
+- Chequeo previo: la pantalla de carrera se acomoda sola según por dónde llegó la marca de prueba del pulsador
+  (pantalla → con MARCAR; pulsador o tecla → sin MARCAR). Cambia el ajuste «MARCAR en pantalla».
+
 ## 1.0.50 (publicada 09/11/2026)
 - Arranque: Betómetro ya no espera a la red (~3,5 s menos); la Prueba completa dice cuánto tarda cada parte.
 - Clima: doble toque en un día → hora por hora.
