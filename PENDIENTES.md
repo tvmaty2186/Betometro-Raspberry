@@ -100,6 +100,14 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.49 (publicada 09/11/2026)
+- Tema propio: el acento siempre se lee (se aclara u oscurece si no se distingue del fondo); con letras negras, los
+  gráficos, mapas y tablas van sobre gris claro.
+- La vuelta en curso se guarda cada 20 s: si se corta la luz queda como interrumpida con lo andado.
+- Informe: aviso de marca faltante (⚠, el GPS vio que se pasó la línea sin marcar).
+- Ejemplo de la PC con el pulsador un poquito tarde; `BETO_MEDIR_ARRANQUE`, `BETO_MUESTRA_FALTA`.
+- **Falta:** el arranque de la Pi (25 s) está en el sistema; Matías tiene que pasar `systemd-analyze`.
+
 ## 1.0.48 (publicada 08/11/2026)
 - El informe abre más rápido: las pantallas completas (gráfico, mapa, Comparar) se arman al abrirlas.
 - GStreamer se prepara en segundo plano a los 10 s de prender (el informe se trabó 8,5 s la primera vez).
