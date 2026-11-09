@@ -50,9 +50,11 @@ TPantalla {
                             onMas: { const v = raiz.entre(Math.round(raiz.a.brillo) + 10, 10, 100); Sistema.brillo(v); raiz.poner("brillo", v); } } }
             TFila { visible: raiz.sec === "pantalla"; etiqueta: "Modo sol"; detalle: "Fondo claro para pleno sol"
                 TLlave { prendida: raiz.a.modoSol === "si"; onCambiada: v => raiz.poner("modoSol", v ? "si" : "no") } }
-            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Color de la vuelta"
-                TOpciones { opciones: [{ texto: "Fondo", valor: "fondo" }, { texto: "Marco", valor: "marco" }]
-                            valor: raiz.a.indicador; onElegido: v => raiz.poner("indicador", v) } }
+            // Color de la vuelta en toda la pantalla (sin «marco», Matías 09/11/2026): 5 colores para cada una
+            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Vuelta medida"; detalle: "Color de la pantalla"
+                TColores { valor: raiz.a.colMedida; onElegido: v => raiz.poner("colMedida", v) } }
+            TFila { visible: raiz.sec === "pantalla"; etiqueta: "Vuelta libre"; detalle: "Color de la pantalla"
+                TColores { valor: raiz.a.colPractica; onElegido: v => raiz.poner("colPractica", v) } }
 
             // ---- Voz y sonido
             TFila { visible: raiz.sec === "voz"; etiqueta: "Volumen"

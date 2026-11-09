@@ -12,7 +12,7 @@
 
 #include "pulsador.h"
 
-constexpr int kAvisoLargoMs = 2000;   // «Seguí apretando para salir»
+constexpr int kAvisoLargoMs = 3000;   // cartel «Terminando carrera» y «Seguí apretando para salir»
 constexpr int kLargoMs = 5000;        // sale de la carrera (Matías, 09/11/2026)
 
 class PulsadorGpio : public QObject {
@@ -30,7 +30,7 @@ public:
 signals:
     void marca(double edadMs);
     void cambio();
-    // Mantenido apretado (Salir con el pulsador): a los 2 s el aviso, a los 5 s salir. Soltar antes los cancela.
+    // Mantenido apretado (Salir con el pulsador): a los 3 s el aviso, a los 5 s salir. Soltar antes los cancela.
     void avisoLargo();
     void largo();
 

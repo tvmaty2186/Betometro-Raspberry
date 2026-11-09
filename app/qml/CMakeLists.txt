@@ -79,6 +79,7 @@ qt_add_qml_module(betometro_qml
     tablet/TMasMenos.qml
     tablet/TLlave.qml
     tablet/TOpciones.qml
+    tablet/TColores.qml
     tablet/TPantalla.qml
     tablet/TInicio.qml
     tablet/TDato.qml

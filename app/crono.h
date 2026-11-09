@@ -43,7 +43,7 @@ public:
     Q_INVOKABLE void terminar();             // a mano: guarda la vuelta interrumpida
     // Salir con el pulsador (mantenido 5 s): solo con alguna vuelta cerrada (o en un recorrido), para no salir
     // al largar. La vuelta que abrió esa misma marca no se guarda (duraba lo que se tuvo apretado).
-    bool puedeSalirPulsador() const;
+    Q_INVOKABLE bool puedeSalirPulsador() const;
     void terminarPulsador();
     Q_INVOKABLE void salir();                // sin carrera en curso: suelta la carrera elegida
     Q_INVOKABLE QString carreraId() const { return carreraId_; }

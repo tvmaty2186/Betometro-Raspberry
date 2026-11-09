@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
     // Pulsador por cable (GPIO17, pin 11 a GND pin 9), con la pull-up interna. Solo en la Raspberry.
     PulsadorGpio* pulsador = qEnvironmentVariableIsSet("BETO_RASPBERRY") ? new PulsadorGpio(17, &app) : nullptr;
     if (pulsador && !pulsador->activo()) qWarning("Pulsador: %s", qPrintable(pulsador->error()));
-    // Salir con el pulsador (Ajustes → Pulsador, apagado de fábrica): mantenido 2 s avisa, 5 s termina la carrera
+    // Salir con el pulsador (Ajustes → Pulsador, apagado de fábrica): mantenido 3 s avisa (y cartel en Carrera.qml), 5 s termina
     if (pulsador) {
         auto salirPrendido = [&datos] { return datos.cfg(QStringLiteral("salirPulsador")).toBool(); };
         QObject::connect(pulsador, &PulsadorGpio::avisoLargo, &crono, [&, salirPrendido] {

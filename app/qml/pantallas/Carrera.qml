@@ -73,16 +73,11 @@ Item {
     Rectangle {
         id: colorVuelta
         anchors.fill: parent
-        readonly property bool fondo: Datos.ajustes.indicador !== "marco"
+        readonly property bool fondo: true   // siempre pantalla completa: el «marco» se sacó (Matías, 09/11/2026)
         color: est.medida && !raiz.recorrido ? Datos.ajustes.colMedida : Datos.ajustes.colPractica
         opacity: Crono.enCurso && fondo ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 250 } }
         Behavior on color { ColorAnimation { duration: 250 } }
-    }
-    Rectangle {   // indicador «marco»: borde interior de 7 px
-        anchors.fill: parent; color: "transparent"
-        border { width: Tema.sol ? 11 : 7; color: est.medida && !raiz.recorrido ? Datos.ajustes.colMedida : Datos.ajustes.colPractica }   // en sol 11 px, como la app
-        visible: Crono.enCurso && Datos.ajustes.indicador === "marco"
     }
 
     // Línea de arriba: carrera · ideal · distancia | GPS | Terminar / Salir
@@ -203,5 +198,29 @@ Item {
         NumberAnimation { target: marcoMarca; property: "opacity"; to: 1; duration: 30 }
         PauseAnimation { duration: 240 }
         NumberAnimation { target: marcoMarca; property: "opacity"; to: 0; duration: 100 }
+    }
+
+    // Salir con el pulsador: a los 3 s apretado, cartel grande «Terminando carrera»; a los 5 s sale.
+    // Si se suelta antes, el cartel se va y la carrera sigue (Matías, 09/11/2026)
+    property bool terminando: false
+    Connections {
+        target: Pulsador; ignoreUnknownSignals: true
+        function onAvisoLargo() { if (Datos.ajustes.salirPulsador && Crono.puedeSalirPulsador()) raiz.terminando = true; }
+        function onCambio() { if (!Pulsador.apretado) raiz.terminando = false; }
+    }
+    Rectangle {
+        anchors.fill: parent; z: 110
+        visible: raiz.terminando && Crono.enCurso
+        color: Qt.rgba(0, 0, 0, 0.72)
+        Column {
+            anchors.centerIn: parent; spacing: 18
+            width: parent.width - 80
+            Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                   text: "TERMINANDO CARRERA"; color: Tema.acento
+                   font { family: Tema.fuente800; italic: Tema.cursiva; weight: Font.ExtraBold; pixelSize: raiz.h ? 88 : 76; letterSpacing: 2 } }
+            Text { width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                   text: "Seguí apretando para salir · soltá para seguir"; color: Tema.tinta
+                   font { family: Tema.fuente600; italic: Tema.cursiva; pixelSize: raiz.h ? 30 : 28 } }
+        }
     }
 }
