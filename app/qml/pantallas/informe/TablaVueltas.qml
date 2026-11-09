@@ -141,7 +141,7 @@ Tarjeta { datos: true;
                font { family: Tema.fuente600; pixelSize: 11; letterSpacing: 1.2 } }
         Rectangle { x: parent.u * 6.2 + 12; y: 15; width: parent.u * 3 - 12; height: 1.5; color: caja.celeste; opacity: 0.5 }
         Repeater {
-            model: [[3.2, "TIEMPO"], [4.8, "ERROR"], [6.3, "TIEMPO"], [7.9, "ERROR"], [9.35, "KM/H"]]
+            model: [[3.2, "TIEMPO"], [4.8, "ERROR"], [6.3, "TIEMPO"], [7.9, "ERROR"], [9.35, "METROS"]]
             Text { required property var modelData; x: modelData[0] * parent.u + 6; y: 19; text: modelData[1]; color: Tema.tintaSuave
                    font { family: Tema.fuente600; pixelSize: 10; letterSpacing: 1.2 } }
         }
@@ -221,9 +221,9 @@ Tarjeta { datos: true;
                                    color: parent.ok && !filaV.g.dudosa ? caja.celeste : Tema.tintaSuave
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: parent.ok && !filaV.g.dudosa ? 22 : 15 } }
                         }
-                        // Sin la columna «▸ hora del video»: con el video también va la velocidad (Matías, 09/11/2026)
+                        // Última columna: los metros de cada vuelta (Matías, 09/11/2026: más útil que los km/h; sin «▸ hora del video»)
                         Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
-                               text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
+                               text: modelData.distM !== null && modelData.distM !== undefined ? Math.round(modelData.distM).toLocaleString(Qt.locale("es_AR"), "f", 0) : "–"
                                color: Tema.tintaSuave; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 18 : 20 } }
                     }
                 }

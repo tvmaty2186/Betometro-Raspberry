@@ -237,6 +237,7 @@ Json datosInforme(const Carrera& c, double umbralPrecisionM) {
         if (v.difMs) j["difMs"] = *v.difMs;
         j["velPromKmh"] = v.velPromKmh ? Json(*v.velPromKmh) : Json();
         j["velMaxKmh"] = v.velMaxKmh ? Json(*v.velMaxKmh) : Json();
+        j["distM"] = v.distM ? Json(*v.distM) : Json();   // metros de la vuelta, para la tabla (Matías, 09/11/2026)
         j["m"] = Json();
         j["L"] = v.distM && *v.distM != 0 ? *v.distM : (D != 0 ? D : 1.0);
         if (v.interrumpida) j["interrumpida"] = true;   // solo Raspberry
