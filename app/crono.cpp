@@ -109,7 +109,7 @@ void Crono::preparar(const QString& id) {
         c.nombre = "Práctica";
         c.tiempoIdealMs = cfg["tiempoIdealMs"].aEntero(240000);
         c.distanciaM = cfg["distanciaM"].aEntero(3200);
-        c.patron = cfg["patron"].aTexto("alt1");
+        c.patron = cfg["patron"].aTexto("todas");
     } else {
         const Carrera* g = datos_->buscar(id);
         if (!g) return;

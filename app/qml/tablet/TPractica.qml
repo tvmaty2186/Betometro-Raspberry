@@ -8,7 +8,7 @@ TPantalla {
     titulo: "Práctica"
     property int tiempoIdealMs: Datos.cfg("tiempoIdealMs")
     property int distanciaM: Datos.cfg("distanciaM")
-    property string patron: Datos.cfg("patron")
+    property string patron: Datos.cfg("patron") || "todas"
     property string campo: ""
     function ponerTiempo(v) { tiempoIdealMs = Math.max(5000, Math.min(5999000, v)); Datos.ponerCfg("tiempoIdealMs", tiempoIdealMs); }
     // Casilleros del tiempo: qué se edita («m»/«s») y lo escrito, de izquierda a derecha

@@ -100,6 +100,10 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.52 (sin publicar, en preparación)
+- Carrera nueva: arranca con todas las vueltas medidas (antes, la última elección de Práctica; de fábrica impares).
+  Práctica: de fábrica «Todas»; recuerda lo último que se eligió.
+
 ## 1.0.51 (publicada 09/11/2026)
 - Chequeo previo: la pantalla de carrera se acomoda sola según por dónde llegó la marca de prueba del pulsador
   (pantalla → con MARCAR; pulsador o tecla → sin MARCAR). Cambia el ajuste «MARCAR en pantalla».

@@ -55,7 +55,7 @@ QVariantMap Datos::carrera(const QString& id) const {
     n.fecha = s(hoy().toString(Qt::ISODate));
     n.tiempoIdealMs = cfg_["tiempoIdealMs"].aEntero(240000);
     n.distanciaM = cfg_["distanciaM"].aEntero(3200);
-    n.patron = cfg_["patron"].aTexto("alt1");
+    n.patron = "todas";   // una carrera nueva arranca con todas las vueltas medidas (Matías, 09/11/2026); después se cambia
     QVariantMap r = resumen(n);
     r["id"] = QString();
     r["nueva"] = true;
@@ -131,7 +131,7 @@ QString Datos::crearPractica() {
     c.creada = s(ahora.toUTC().toString(Qt::ISODateWithMs));
     c.tiempoIdealMs = cfg_["tiempoIdealMs"].aEntero(240000);
     c.distanciaM = cfg_["distanciaM"].aEntero(3200);
-    c.patron = cfg_["patron"].aTexto("alt1");
+    c.patron = cfg_["patron"].aTexto("todas");
     base_.carreras.push_back(c);
     guardar(q(c.id));
     emit carrerasChanged();
