@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Muestra para Matías (09/11/2026): doble toque en un día del clima → el día hora por hora. 1280×720, Avispón. -->
+<style>
+@font-face{font-family:B;src:url(../../../recursos/fuentes/barlow-latin-600-normal.woff2)}
+@font-face{font-family:BI;src:url(../../../recursos/fuentes/barlow-latin-600-italic.woff2)}
+@font-face{font-family:BX;src:url(../../../recursos/fuentes/barlow-latin-800-italic.woff2)}
+@font-face{font-family:BC;src:url(../../../recursos/fuentes/barlow-condensed-latin-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111}
+.p{width:1280px;height:720px;position:relative;overflow:hidden;font-family:B;color:#f7f7f2;
+   background:radial-gradient(120% 80% at 25% 0%,#3d8c57 0%,#1d5233 40%,#0d2a18 100%)}
+.t{position:absolute;border:3px solid #cfd4d8;border-radius:22px;background:linear-gradient(#1f4a2f,#08190e)}
+.tit{font:600 14px BI;letter-spacing:2.5px;color:#d6e6d2}
+.h{position:absolute;top:0;width:96px;text-align:center}
+</style></head><body>
+<div class=p id=a>
+ <div class=t style="left:12px;top:12px;width:1256px;height:696px">
+  <div style="position:absolute;left:28px;top:20px;font:800 34px BX">Martes 10 <span style="color:#f4c531">· hora por hora</span></div>
+  <div style="position:absolute;left:28px;top:66px" class=tit>SANTA CLARA DEL MAR · MÁX 19° · MÍN 10° · LLUVIA 80 % · 6,5 MM · VIENTO HASTA 34</div>
+  <div style="position:absolute;right:20px;top:16px;width:62px;height:62px;border:3px solid #cfd4d8;border-radius:16px;font:40px B;text-align:center;line-height:54px">✕</div>
+  <!-- tira de horas -->
+  <div style="position:absolute;left:24px;top:104px;width:1206px;height:300px;border-radius:16px;background:rgba(0,0,0,.25);overflow:hidden" id=tira></div>
+  <div style="position:absolute;left:24px;top:410px" class=tit>DESLIZÁ PARA VER TODAS LAS HORAS ▸</div>
+  <!-- gráfico -->
+  <div style="position:absolute;left:24px;top:446px" class=tit>TEMPERATURA (LÍNEA) Y LLUVIA (BARRAS) EN EL DÍA</div>
+  <svg id=g width=1206 height=220 style="position:absolute;left:24px;top:466px"></svg>
+ </div>
+</div>
+<script>
+const H=[...Array(24)].map((_,h)=>{const t=10+9*Math.max(0,Math.sin((h-7)/24*2*Math.PI*0.95)), ll=h>=13&&h<=19?[30,55,80,80,70,45,20][h-13]:h>19?10:0;
+ return {h,t:Math.round(t),ll,mm:ll>50?(ll/40).toFixed(1):'0',v:Math.round(12+12*Math.sin(h/24*Math.PI)),icono:ll>50?'🌧':ll>20?'🌦':(h<7||h>20)?'🌙':h<10?'🌤':'☀️'}});
+const tira=document.getElementById('tira');
+tira.innerHTML=H.filter(x=>x.h>=6&&x.h<=23).slice(0,12).map((x,i)=>`<div class=h style="left:${8+i*100}px;height:300px;${i===8?'background:rgba(244,197,49,.18);border-radius:14px':''}">
+ <div style="font:700 22px BC;margin-top:14px;color:${i===8?'#f4c531':'#d6e6d2'}">${String(x.h).padStart(2,'0')} h</div>
+ <div style="font-size:44px;margin-top:10px">${x.icono}</div>
+ <div style="font:800 40px BX;margin-top:6px">${x.t}°</div>
+ <div style="font:700 21px BC;color:#5fb4ff;margin-top:6px">${x.ll} %</div>
+ <div style="font:600 15px B;color:#9fd0ff">${x.mm} mm</div>
+ <div style="font:600 16px B;color:#d6e6d2;margin-top:8px">💨 ${x.v}</div></div>`).join('');
+const g=document.getElementById('g');let p='';const X=h=>40+h*(1150/23),Yt=t=>190-(t-5)/20*170;
+for(const t of[10,15,20]){p+=`<line x1=40 x2=1190 y1=${Yt(t)} y2=${Yt(t)} stroke="#ffffff22"/><text x=6 y=${Yt(t)+4} font-family=B font-size=12 fill="#9fb5a3">${t}°</text>`;}
+for(const x of H){if(x.ll)p+=`<rect x=${X(x.h)-16} y=${200-x.ll*1.6} width=32 height=${x.ll*1.6} rx=4 fill="#3a8de0" opacity=".55"/>`;}
+p+=`<polyline fill=none stroke="#f4c531" stroke-width=4 points="${H.map(x=>X(x.h)+','+Yt(x.t)).join(' ')}"/>`;
+for(const h of[0,6,12,18,23])p+=`<text x=${X(h)-10} y=216 font-family=B font-size=13 fill="#9fb5a3">${h} h</text>`;
+p+=`<line x1=${X(14)} x2=${X(14)} y1=0 y2=200 stroke="#f4c531" stroke-dasharray="6 6"/><text x=${X(14)+6} y=14 font-family=BX font-size=14 fill="#f4c531">14 h</text>`;
+g.innerHTML=p;
+</script>
+</body></html>
