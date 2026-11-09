@@ -368,11 +368,11 @@ void Clima::actualizarAdjuntos(bool conRed) {
         if (fecha < hoy) continue;   // ya pasó: queda el último pronóstico
         QVariantMap cl = a.value("clima").toMap();
         const double lat = cl.value("lat").toDouble(), lon = cl.value("lon").toDouble();
-        // ¿Le toca pedir por internet? 2 veces por día; el día de la carrera, cada hora. Cuenta desde la última vez
-        // que se bajó bien: sin internet vuelve a probar en el próximo reloj (cada hora)
+        // ¿Le toca pedir por internet? 2 veces por día; el día de la carrera, cada hora (cuenta desde la última vez que
+        // se bajó bien). Sin internet no se intenta: se pide cuando se conecta (seConecto)
         const qint64 cada = fecha == hoy ? 60LL * 60 * 1000 : 12LL * 60 * 60 * 1000;
         const qint64 bajado = cache_.contains(clave(lat, lon)) ? cache_.value(clave(lat, lon)).cuando : 0;
-        if (conRed && ahora - bajado >= cada - 60 * 1000)
+        if (conRed && (!hayInternet || hayInternet()) && ahora - bajado >= cada - 60 * 1000)
             pedir(lat, lon, true);   // cuando llega, «cambio» vuelve a pasar por acá (sin red) y lo guarda
         sinPedir_ = true;            // dia() y horasDelDia() piden solos si es viejo: acá no
         const QVariantMap d = dia(lat, lon, fecha);

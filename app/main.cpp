@@ -252,6 +252,14 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
+    // Clima adjuntado a carreras: sin internet no se intenta; apenas se conecta a una wifi (no la propia), se piden
+    clima.hayInternet = [&wifi] { return !wifi.conectada().isEmpty() && !wifi.propia(); };
+    QObject::connect(&wifi, &Wifi::cambio, &clima, [&wifi, &clima] {
+        static bool antes = false;
+        const bool ahora = !wifi.conectada().isEmpty() && !wifi.propia();
+        if (ahora && !antes) QTimer::singleShot(5000, &clima, [&clima] { clima.seConecto(); });   // que termine de conectar
+        antes = ahora;
+    });
     marca("wifi");
     auto ponerPropia = [&] {
         auto siONada = [&](const char* k) { const QVariant v = datos.cfg(QLatin1String(k)); return !v.isValid() || v.toBool(); };

@@ -159,7 +159,7 @@ Las mismas 12 pantallas que en horizontal, apiladas en una columna. Diferencias:
 - Sin el aviso de «video cortado» (no aporta).
 - **Clima:** doble toque en un día → hora por hora. **«A carrera»** adjunta el clima del lugar a una carrera próxima
   (`extra["clima"]`: nombre, lat, lon, actualizado, dia, horas); se actualiza solo con internet hasta el día de la
-  carrera (2 veces por día; el día de la carrera, cada hora; sin internet reintenta cada hora) y sin internet queda
+  carrera (2 veces por día; el día de la carrera, cada hora; sin internet no intenta: pide apenas se conecta a una wifi) y sin internet queda
   el último. Se ve en Carreras («guardado») y en el informe (⋮ → Ver el clima guardado).
 - Si el GPS ve que se pasó la línea a mitad de una vuelta **sin marcar**, el informe lo anota (⚠ y una línea al pie).
   Solo un dato: no parte la vuelta.

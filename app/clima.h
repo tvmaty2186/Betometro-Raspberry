@@ -56,6 +56,10 @@ public:
     std::function<void(const QString& id, const QVariantMap& clima)> guardarAdjunto;   // mapa vacío = quitar
     Q_INVOKABLE void adjuntar(const QString& carreraId, const QString& nombre, double lat, double lon);
     Q_INVOKABLE void quitarAdjunto(const QString& carreraId);
+    // Sin internet no se intenta nada: apenas se conecta a una wifi (main.cpp llama a seConecto) se piden los que
+    // les toca (Matías, 09/11/2026). Sin el gancho se supone que hay (la PC).
+    std::function<bool()> hayInternet;
+    void seConecto() { actualizarAdjuntos(true); }
     // conRed: el reloj de cada hora (pide por internet a los que les toca); sin: solo con lo que ya hay bajado
     void actualizarAdjuntos(bool conRed = false);
     void empezarAdjuntos();   // el reloj: el primero al minuto de prender, después cada hora
