@@ -13,6 +13,9 @@ TPantalla {
     property bool usarGps: !deCarrera && Datos.ajustes.climaModo !== "lugar"
     property var lugar: deCarrera ? { nombre: par.nombre, lat: par.lat, lon: par.lon } : (Datos.ajustes.climaLugar || null)
     property string diaElegido: par.fecha || ""
+    property string diaHoras: ""      // doble toque en un día: ese día hora por hora
+    // --prueba clima-horas: el día de mañana abierto, para las capturas
+    Component.onCompleted: if (Contexto.prueba === "clima-horas") Qt.callLater(() => { const ds = raiz.p.dias || []; if (ds.length > 1) raiz.diaHoras = ds[1].fecha; })
     readonly property bool hayLugar: usarGps ? Clima.hayGps : !!(lugar && lugar.lat !== undefined)
     readonly property real lat: usarGps ? Clima.gpsLat : (lugar && lugar.lat !== undefined ? lugar.lat : 0)
     readonly property real lon: usarGps ? Clima.gpsLon : (lugar && lugar.lon !== undefined ? lugar.lon : 0)
@@ -128,9 +131,17 @@ TPantalla {
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: (modelData.lluvia || 0) + "%"; color: Tema.lluvia
                            font { family: Tema.fuente600; pixelSize: 23 } }
                 }
-                MouseArea { anchors.fill: parent; onClicked: raiz.diaElegido = parent.sel ? "" : modelData.fecha }
+                MouseArea { anchors.fill: parent; onClicked: raiz.diaElegido = parent.sel ? "" : modelData.fecha
+                            onDoubleClicked: { raiz.diaElegido = modelData.fecha; raiz.diaHoras = modelData.fecha; } }
             }
         }
     }
     BuscadorLugar { id: buscador; parent: raiz; onElegido: l => raiz.elegirLugar(l) }
+    TClimaHoras {
+        parent: raiz; anchors.fill: parent
+        h: raiz.h; fecha: raiz.diaHoras; lugar: raiz.nombre
+        dia: raiz.diaHoras && raiz.hayLugar && Clima.version >= 0 ? Clima.dia(raiz.lat, raiz.lon, raiz.diaHoras) : null
+        horas: raiz.diaHoras && raiz.hayLugar && Clima.version >= 0 ? Clima.horasDelDia(raiz.lat, raiz.lon, raiz.diaHoras) : []
+        onCerrar: raiz.diaHoras = ""
+    }
 }

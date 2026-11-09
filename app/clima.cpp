@@ -322,6 +322,26 @@ QVariantMap Clima::dia(double lat, double lon, const QString& fecha) {
     return r;
 }
 
+QVariantList Clima::horasDelDia(double lat, double lon, const QString& fecha) {
+    pedir(lat, lon);
+    const Entrada e = cache_.value(clave(lat, lon));
+    const QJsonObject h = e.datos.value(QStringLiteral("hourly")).toObject();
+    const QJsonArray ht = h.value(QStringLiteral("time")).toArray();
+    auto v = [&](const char* k, int i) { return h.value(QLatin1String(k)).toArray().at(i).toDouble(); };
+    QVariantList l;
+    for (int i = 0; i < ht.size(); ++i) {
+        if (!ht[i].toString().startsWith(fecha)) continue;
+        l << QVariantMap{{"hora", ht[i].toString().mid(11, 2).toInt()},
+                         {"temp", qRound(v("temperature_2m", i))},
+                         {"codigo", static_cast<int>(v("weather_code", i))},
+                         {"lluvia", qRound(v("precipitation_probability", i))},
+                         {"mm", v("precipitation", i)},
+                         {"viento", qRound(v("wind_speed_10m", i))},
+                         {"rafagas", qRound(v("wind_gusts_10m", i))}};
+    }
+    return l;
+}
+
 QVariantList Clima::horasDe(double lat, double lon, const QString& fecha) {
     pedir(lat, lon);
     const Entrada e = cache_.value(clave(lat, lon));

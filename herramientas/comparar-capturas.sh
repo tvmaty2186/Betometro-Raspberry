@@ -51,6 +51,7 @@ cap chequeo chequeo
 cap informe informe --carrera '"Santa Clara"'
 cap comparar informe --carrera '"Santa Clara"' --prueba comparar
 cap informe-comp informe --carrera '"Santa Clara"' --prueba comp
+cap clima-horas clima --prueba clima-horas
 cap carrera carrera --carrera "Gualeguaychú"
 cap carrera-largada carrera --carrera "Gualeguaychú" --prueba largar
 # Con la letra más ancha (Cabina): en la 1.0.39 la fecha pisaba los botones − y + y no lo vio ninguna prueba,

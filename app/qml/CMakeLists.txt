@@ -84,6 +84,7 @@ qt_add_qml_module(betometro_qml
     tablet/TDato.qml
     tablet/TPractica.qml
     tablet/TClima.qml
+    tablet/TClimaHoras.qml
     tablet/TCamara.qml
     tablet/TDrive.qml
     tablet/TAjustes.qml

@@ -52,6 +52,10 @@ int main(int argc, char** argv) {
         CHEQUEAR(h2.size() == 12 && h2[0].toMap()["hora"].toInt() == 0 && h2[9].toMap()["hora"].toInt() == 18);
         CHEQUEAR(h2[9].toMap()["codigo"].toInt() == 61 && h2[9].toMap()["lluvia"].toInt() == (18 * 3 + 7) % 100);
         CHEQUEAR(c.horasDe(-37.836, -57.506, "2026-11-09").isEmpty());
+        // Hora por hora (doble toque en un día): las 24, con lluvia en mm y viento
+        const QVariantList h24 = c.horasDelDia(-37.836, -57.506, "2026-11-08");
+        CHEQUEAR(h24.size() == 24 && h24[18].toMap()["hora"].toInt() == 18 && h24[18].toMap()["codigo"].toInt() == 61);
+        CHEQUEAR(h24[18].toMap().contains("mm") && h24[18].toMap().contains("rafagas"));
     }
 
     // ---- Tope: con 25 lugares guardados quedan los 20 más nuevos

@@ -42,6 +42,9 @@ public:
     Q_INVOKABLE QVariantMap dia(double lat, double lon, const QString& fecha);
     // Las horas de un día (para verlo hora por hora)
     Q_INVOKABLE QVariantList horasDe(double lat, double lon, const QString& fecha);
+    // Las 24 horas de un día, para verlo hora por hora (doble toque en un día, 09/11/2026):
+    // [{hora, temp, codigo, lluvia (%), mm, viento, rafagas}]
+    Q_INVOKABLE QVariantList horasDelDia(double lat, double lon, const QString& fecha);
 
     void ponerPosicion(double lat, double lon);   // desde el GPS
     void ponerCarrera(bool enCurso);              // en carrera no se pide el nombre del lugar (11A-1.1)
