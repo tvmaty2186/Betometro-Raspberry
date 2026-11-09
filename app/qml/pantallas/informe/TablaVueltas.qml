@@ -190,7 +190,7 @@ Tarjeta { datos: true;
                         Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.2 : 1.6); textFormat: Text.StyledText
                                text: caja.nombreV(modelData) + (index === caja.modelo && caja.conGps ? "<font color='" + Tema.acento + "'> ★</font>" : "")
                                      + (caja.sinMarca.indexOf(index) >= 0 ? "<font color='" + Tema.warn + "'> ⚠</font>" : "")
-                               color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
+                               color: Tema.numero; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
                         // Etiqueta MEDIDA / LIBRE: se toca y cambia (la libre no suma error)
                         Item { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 2.0 : 3); height: 30
                             Rectangle {
@@ -205,28 +205,28 @@ Tarjeta { datos: true;
                                 MouseArea { anchors.fill: parent; anchors.margins: -6; enabled: !modelData.interrumpida
                                             onClicked: caja.cambiarMedida(index) }
                             } }
-                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.6 : 2.2); text: Formato.tiempo(modelData.realMs); color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
+                        Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.6 : 2.2); text: Formato.tiempo(modelData.realMs); color: Tema.numero; rightPadding: 10; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
                         Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.4 : 2); text: modelData.difMs === undefined ? "–" : Formato.dif(modelData.difMs)
-                               color: modelData.difMs === undefined ? Tema.tintaSuave : caja.colorDif(modelData.difMs)
+                               color: modelData.difMs === undefined ? Tema.tintaSuave : caja.colorDif(modelData.difMs); rightPadding: 8; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11
                                font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
                         // Pulsador virtual (GPS): solo referencia
                         Rectangle {
                             visible: caja.conGps; width: parent.u * 3; height: 40; color: Qt.rgba(41 / 255, 182 / 255, 246 / 255, 0.12)
                             readonly property bool ok: !!filaV.g && filaV.g.hay
                             Text { x: 4; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.53
-                                   text: parent.ok && !filaV.g.dudosa ? Formato.tiempo(filaV.g.realMs) : "—"; color: caja.celeste
+                                   text: parent.ok && !filaV.g.dudosa ? Formato.tiempo(filaV.g.realMs) : "—"; color: caja.celeste; rightPadding: 8; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
-                            Text { x: parent.width * 0.53; anchors.verticalCenter: parent.verticalCenter
+                            Text { x: parent.width * 0.53; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.47 - 4; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11
                                    text: !parent.ok ? "sin datos" : filaV.g.dudosa ? "dudosa" : Formato.dif(filaV.g.difMs)
                                    color: parent.ok && !filaV.g.dudosa ? caja.celeste : Tema.tintaSuave
                                    font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: parent.ok && !filaV.g.dudosa ? 22 : 15 } }
                         }
                         Text { anchors.verticalCenter: parent.verticalCenter; visible: caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
-                               text: "▸ " + caja.inicioVideo(index); color: index === caja.lap ? Tema.acento : Tema.tinta
+                               text: "▸ " + caja.inicioVideo(index); color: index === caja.lap ? Tema.acento : Tema.tinta; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11
                                font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 22 } }
                         Text { anchors.verticalCenter: parent.verticalCenter; visible: !caja.vv; width: parent.u * (caja.conGps ? 0.8 : 1.2); horizontalAlignment: Text.AlignRight
                                text: modelData.velPromKmh !== null && modelData.velPromKmh !== undefined ? String(modelData.velPromKmh).replace(".", ",") : "–"
-                               color: Tema.tintaSuave; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 18 : 20 } }
+                               color: Tema.tintaSuave; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 11; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 18 : 20 } }
                     }
                 }
             }
