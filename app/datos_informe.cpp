@@ -23,7 +23,8 @@ QVariantList Datos::marcasGps(const QString& id) const {
     QVariantList r;
     for (const MarcaGps& m : beto::marcasGps(*c))
         r << QVariantMap{{"hay", m.hay}, {"dudosa", m.dudosa}, {"realMs", static_cast<qlonglong>(m.realMs)},
-                         {"difMs", static_cast<qlonglong>(m.difMs)}, {"pulsadorMenosGpsMs", static_cast<qlonglong>(m.pulsadorMenosGpsMs)}};
+                         {"difMs", static_cast<qlonglong>(m.difMs)}, {"pulsadorMenosGpsMs", static_cast<qlonglong>(m.pulsadorMenosGpsMs)},
+                         {"cruceSinMarcaMs", static_cast<qlonglong>(m.cruceSinMarcaMs)}};
     return r;
 }
 

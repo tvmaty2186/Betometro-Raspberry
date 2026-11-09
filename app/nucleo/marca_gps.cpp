@@ -50,12 +50,13 @@ std::vector<MarcaGps> marcasGps(const Carrera& c) {
             inicio += c.vueltas[k].realMs;
             finVuelta.push_back(inicio);
         }
-        auto cruce = [&](int64_t cerca) -> std::optional<Cruce> {
-            std::optional<Cruce> mejor;
+        // Todos los cruces de la línea (yendo para adelante) entre dos momentos
+        auto cruces = [&](int64_t desde, int64_t hasta) {
+            std::vector<Cruce> r;
             for (size_t k = 1; k < P.size(); ++k) {
                 const Punto& a = P[k - 1];
                 const Punto& b = P[k];
-                if (b.t < cerca - kVentanaMs || a.t > cerca + kVentanaMs || b.t <= a.t || b.t - a.t > kHuecoMs) continue;
+                if (b.t < desde || a.t > hasta || b.t < a.t || b.t - a.t > kHuecoMs) continue;
                 const double sa = a.x * u->first + a.y * u->second, sb = b.x * u->first + b.y * u->second;
                 if (!(sa < 0 && sb >= 0)) continue;   // cruza la línea yendo para adelante
                 const double f = -sa / (sb - sa);
@@ -63,13 +64,25 @@ std::vector<MarcaGps> marcasGps(const Carrera& c) {
                 if (std::fabs(-lx * u->second + ly * u->first) > kAnchoLinea) continue;
                 const int64_t t = a.t + static_cast<int64_t>(std::llround((b.t - a.t) * f));
                 const bool dudosa = std::max(a.prec, b.prec) > kPrecDudosa || b.t - a.t > kHuecoDudosoMs;
-                if (!mejor || std::llabs(t - cerca) < std::llabs(mejor->t - cerca)) mejor = Cruce{t, dudosa};
+                if (t >= desde && t <= hasta) r.push_back(Cruce{t, dudosa});
             }
+            return r;
+        };
+        // El cruce más cerca de la marca del pulsador
+        auto cruce = [&](int64_t cerca) -> std::optional<Cruce> {
+            std::optional<Cruce> mejor;
+            for (const Cruce& x : cruces(cerca - kVentanaMs, cerca + kVentanaMs))
+                if (!mejor || std::llabs(x.t - cerca) < std::llabs(mejor->t - cerca)) mejor = x;
             return mejor;
         };
         std::optional<Cruce> anterior = Cruce{0, false};   // la largada: la misma del pulsador
         for (size_t k = i; k < fin; ++k) {
             const Vuelta& v = c.vueltas[k];
+            const int64_t empezo = k == i ? 0 : finVuelta[k - i - 1];
+            // ¿Pasó por la línea en el medio de la vuelta? (lejos de la largada y de la marca)
+            if (!v.interrumpida)
+                for (const Cruce& x : cruces(empezo + kVentanaMs, finVuelta[k - i] - kVentanaMs))
+                    if (!x.dudosa) { r[k].cruceSinMarcaMs = x.t - empezo; break; }
             const std::optional<Cruce> este = v.interrumpida ? std::nullopt : cruce(finVuelta[k - i]);
             if (anterior && este) {
                 MarcaGps& m = r[k];

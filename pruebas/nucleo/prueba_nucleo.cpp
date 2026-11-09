@@ -856,6 +856,16 @@ static void marcaGps() {
     // Con poca precisión: dudosa
     const auto md = marcasGps(armar(25));
     CHEQUEAR(md[0].hay && md[0].dudosa);
+    for (const auto& x : m) CHEQUEAR(x.cruceSinMarcaMs < 0);   // ninguna vuelta pasó la línea sin marcar
+    // Faltó una marca: la vuelta 2 y la 3 quedaron juntas en una sola → se ve el cruce del medio
+    Carrera junta = armar(3);
+    junta.vueltas[1].realMs += junta.vueltas[2].realMs;
+    for (auto f : junta.vueltas[2].traza) { f[0] += (junta.vueltas[1].realMs - junta.vueltas[2].realMs) / 1000.0; junta.vueltas[1].traza.push_back(f); }
+    junta.vueltas.erase(junta.vueltas.begin() + 2);
+    const auto mj = marcasGps(junta);
+    // el cruce real fue a un período justo de la largada; la vuelta 2 empezó 120 ms tarde (desfase de la 1)
+    CHEQUEAR(std::llabs(mj[1].cruceSinMarcaMs - (static_cast<int64_t>(std::llround(periodo)) - desfase[0])) <= 100);
+    CHEQUEAR(mj[0].cruceSinMarcaMs < 0);
     // Sin traza: no hay
     Carrera vacia; vacia.vueltas.resize(2);
     const auto mv = marcasGps(vacia);

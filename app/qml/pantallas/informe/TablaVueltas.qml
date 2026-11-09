@@ -17,6 +17,8 @@ Tarjeta { datos: true;
     property var inf: ({})                  // Datos.informe(id): largadas
     property var gps: []                    // Datos.marcasGps(id): una por vuelta
     readonly property bool conGps: gps.some(m => m && m.hay)
+    // Vueltas donde se pasó la línea a mitad de camino sin marcar (¿faltó una marca?): solo un dato
+    readonly property var sinMarca: gps.map((m, i) => m && m.cruceSinMarcaMs >= 0 ? i : -1).filter(i => i >= 0)
     readonly property color celeste: Tema.sol || Tema.datosClaros ? "#0b5394" : "#7fd0ff"
     // La vuelta modelo: la medida más cerca del ideal
     readonly property int modelo: {
@@ -179,6 +181,7 @@ Tarjeta { datos: true;
                         // Cada columna centrada en la fila: la velocidad (letra más chica) quedaba más arriba (08-15)
                         Text { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 1.2 : 1.6); textFormat: Text.StyledText
                                text: caja.nombreV(modelData) + (index === caja.modelo && caja.conGps ? "<font color='" + Tema.acento + "'> ★</font>" : "")
+                                     + (caja.sinMarca.indexOf(index) >= 0 ? "<font color='" + Tema.warn + "'> ⚠</font>" : "")
                                color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: caja.conGps ? 22 : 24 } }
                         // Etiqueta MEDIDA / LIBRE: se toca y cambia (la libre no suma error)
                         Item { anchors.verticalCenter: parent.verticalCenter; width: parent.u * (caja.conGps ? 2.0 : 3); height: 30
@@ -220,7 +223,7 @@ Tarjeta { datos: true;
                 }
             }
             Item {
-                width: colT.width; height: caja.conGps ? 92 : 64
+                width: colT.width; height: (caja.conGps ? 92 : 64) + caja.sinMarca.length * 24
                 readonly property var med: caja.vueltas.filter(v => v.medida && v.difMs !== undefined)
                 visible: med.length > 0
                 Rectangle { width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.2) }
@@ -241,6 +244,19 @@ Tarjeta { datos: true;
                           + (buenas.length ? " · marcaste en promedio <font color='" + Tema.acento + "'><b>" + caja.seg(prom, 2)
                              + (Math.abs(prom) < 5 ? "" : prom > 0 ? " tarde" : " temprano") + "</b></font>" : "")
                     color: Tema.tintaSuave; font { family: Tema.fuente600; italic: true; pixelSize: 15 }
+                }
+                // ⚠ Pasó la línea sin marcar
+                Column {
+                    x: 6; y: caja.conGps ? 90 : 64; width: parent.width - 12
+                    Repeater {
+                        model: caja.sinMarca
+                        Text {
+                            required property int modelData
+                            width: parent.width; elide: Text.ElideRight
+                            text: "⚠ " + caja.nombreV(caja.vueltas[modelData]) + ": pasaste la línea a los " + Formato.tiempo(caja.gps[modelData].cruceSinMarcaMs) + " sin marcar (¿faltó una marca?)"
+                            color: Tema.warn; font { family: Tema.fuente600; italic: true; pixelSize: 15 }
+                        }
+                    }
                 }
             }
         }

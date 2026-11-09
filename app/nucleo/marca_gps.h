@@ -16,6 +16,9 @@ struct MarcaGps {
     int64_t realMs = 0;             // tiempo de la vuelta con la marca virtual
     int64_t difMs = 0;              // realMs − ideal (positivo = tarde)
     int64_t pulsadorMenosGpsMs = 0; // positivo = el pulsador marcó después de cruzar la línea
+    // Se pasó la línea a mitad de la vuelta sin marcar (¿faltó una marca?): a cuántos ms de empezada; −1 si no.
+    // Solo un dato para el informe (Matías, 08/11/2026)
+    int64_t cruceSinMarcaMs = -1;
 };
 
 // Una por vuelta, en el mismo orden que c.vueltas

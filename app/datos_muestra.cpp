@@ -30,25 +30,44 @@ void Datos::cargarMuestra() {
         c.practica = practica;
         c.creada = s(QDateTime(f, QTime(10, 0)).toString(Qt::ISODate));
         int n = 1;
+        // El pulsador marca un poquito tarde (60 a 150 ms), como en la realidad: así el pulsador virtual (GPS) del
+        // informe da distinto que el manual. La largada es la misma para los dos.
+        auto demora = [](int k) { return k <= 0 ? 0.0 : (60 + (k * 37) % 91) / 1000.0; };
         for (int e : errores) {
             Vuelta v;
             v.n = n; v.medida = esMedida(c.patron, n); v.idealMs = T; v.realMs = T + e; v.difMs = e;
             // recorrido de ejemplo: un circuito con curvas, a 1 lectura por segundo
             const double L = static_cast<double>(D), seg = (T + e) / 1000.0;
-            double d = 0, vmax = 0;
             // BETO_MUESTRA_HZ=5: lecturas como el GPS de verdad (para medir pantallas con carreras pesadas)
             const int hz = std::max(1, qEnvironmentVariableIntValue("BETO_MUESTRA_HZ"));
-            for (int i = 0; i <= static_cast<int>(seg * hz); ++i) {
-                const double t = static_cast<double>(i) / hz;
+            // Arranca pasado de la línea lo que tardó el pulsador la vuelta anterior y la cruza `demora(n)` antes
+            // de la marca: se ajusta la velocidad para que eso pase
+            const double d0 = L / seg * demora(n - 1), hasta = seg - demora(n);
+            auto perfil = [&](double d) { const double a = 2 * M_PI * d / L; return 1 + 0.28 * std::sin(a * 3 + n) - 0.1 * std::cos(a * 5); };
+            double escala = 1;
+            for (int it = 0; it < 4; ++it) {   // cuánto anda en `hasta` segundos con esta escala
+                double dd = d0;
+                const int pasos = static_cast<int>(hasta * hz * 20);   // igual que abajo: 20 pasitos por lectura
+                for (int i = 0; i < pasos; ++i) dd += L / seg * escala * perfil(dd) / hz / 20;
+                escala *= (L - d0) / std::max(1.0, dd - d0);
+            }
+            double d = d0, vmax = 0;
+            const int ultima = static_cast<int>(seg * hz);
+            for (int i = 0; i <= ultima + 1; ++i) {
+                // la última lectura justo en la marca, como el GPS de verdad, que sigue grabando hasta el pulsador
+                const double t = i <= ultima ? static_cast<double>(i) / hz : seg;
+                if (i > ultima && t - static_cast<double>(ultima) / hz < 0.05) break;
                 const double fr = d / L, a = 2 * M_PI * fr;
-                const double kmh = L / seg * 3.6 * (1 + 0.28 * std::sin(a * 3 + n) - 0.1 * std::cos(a * 5));
+                const double kmh = L / seg * 3.6 * escala * perfil(d);
                 const double R = L / (2 * M_PI), x = R * 1.5 * std::cos(a) + R * 0.25 * std::cos(3 * a), y = R * 0.8 * std::sin(a) + R * 0.15 * std::sin(2 * a);
                 FilaTraza p{t, redondearJs(d * 10) / 10, fijarDecimalesJs(kmh, 1),
                             fijarDecimalesJs(-32.97 + y / 110540, 6), fijarDecimalesJs(-60.65 + x / (111320 * std::cos(32.97 * M_PI / 180)), 6),
                             static_cast<double>(2 + (i * 7 + n) % 4)};
                 v.traza.push_back(p);
                 vmax = std::max(vmax, kmh);
-                d += kmh / 3.6 / hz;
+                // integración fina entre lecturas (con 1 por segundo, el paso grande corría la línea)
+                const double paso = i < ultima ? 1.0 / hz : seg - static_cast<double>(ultima) / hz;
+                for (int j = 0; j < 20; ++j) d += L / seg * escala * perfil(d) * paso / 20;
             }
             v.distM = redondearJs(d);
             v.velPromKmh = fijarDecimalesJs(d / seg * 3.6, 1);
@@ -68,6 +87,8 @@ void Datos::cargarMuestra() {
     lugar(0, "Gualeguaychú, Entre Ríos", -33.009, -58.517);
     lugar(1, "Concepción del Uruguay, Entre Ríos", -32.484, -58.232);
     agregar("Santa Clara", h.addDays(-1), 6, 180000, 2500, "todas", {1500, -2100, 800, 1900, -1700, 1600});
+    // BETO_MUESTRA_FALTA=1: en Santa Clara faltó la marca del final de la vuelta 4 (la 4 y la 5 quedan juntas)
+    if (qEnvironmentVariableIntValue("BETO_MUESTRA_FALTA") == 1) base_.carreras.back().unirConSiguiente(3);
     // Para probar el reproductor del informe: si hay un videos/muestra.mkv en la carpeta, va con Santa Clara
     if (QFile::exists(carpeta_ + QStringLiteral("/videos/muestra.mkv"))) {
         Json v = Json::objeto();
