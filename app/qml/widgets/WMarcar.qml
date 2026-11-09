@@ -34,7 +34,7 @@ Item {
             NumberAnimation { target: escala; properties: "xScale,yScale"; to: 0.97; duration: 40 }
             NumberAnimation { target: brillo; property: "opacity"; to: 0.85; duration: 40 }
         }
-        PauseAnimation { duration: 80 }
+        PauseAnimation { duration: 230 }   // ~0,35 s en total: antes 0,2 s y casi no se veía (Matías, 09/11/2026)
         ParallelAnimation {
             NumberAnimation { target: escala; properties: "xScale,yScale"; to: 1; duration: 80 }
             NumberAnimation { target: brillo; property: "opacity"; to: 0; duration: 80 }

@@ -15,7 +15,9 @@ Item {
 
     function marcar(fuente, edadMs) {
         const r = Crono.marcar(fuente, edadMs || 0);
-        if ((r === "largada" || r === "marca") && tablero.item) tablero.item.efectoMarcar();
+        if (r !== "largada" && r !== "marca") return;   // marca ignorada (antirrebote): sin señal, a propósito
+        if (tablero.item) tablero.item.efectoMarcar();
+        destello.restart();
     }
     // Pulsador por cable: la marca vale cuando se apoyó el dedo (edadMs atrás)
     Connections { target: Pulsador; ignoreUnknownSignals: true; function onMarca(edadMs) { raiz.marcar("pulsador", edadMs); } }
@@ -186,5 +188,20 @@ Item {
             est: raiz.est
             onMarcar: raiz.marcar("pantalla")
         }
+    }
+
+    // Cada marca (pantalla, teclado o pulsador): marco amarillo grueso ~0,35 s alrededor de toda la pantalla,
+    // para verlo con el rabillo del ojo aunque no esté el botón MARCAR (Matías, 09/11/2026)
+    Rectangle {
+        id: marcoMarca
+        anchors.fill: parent; z: 100
+        color: "transparent"; border { width: 16; color: Tema.acento }
+        opacity: 0; visible: opacity > 0
+    }
+    SequentialAnimation {
+        id: destello
+        NumberAnimation { target: marcoMarca; property: "opacity"; to: 1; duration: 30 }
+        PauseAnimation { duration: 240 }
+        NumberAnimation { target: marcoMarca; property: "opacity"; to: 0; duration: 100 }
     }
 }
