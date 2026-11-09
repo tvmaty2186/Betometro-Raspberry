@@ -95,6 +95,12 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## 1.0.55 (publicada 09/11/2026)
+- Carrera: cada marca que cuenta prende un **marco amarillo** alrededor de la pantalla (~0,35 s) y MARCAR se ilumina
+  más tiempo. Las marcas ignoradas no muestran nada (a propósito).
+- Informe: la tabla muestra los **metros de cada vuelta** (en vez de km/h) y ya no tiene la columna VIDEO.
+- Informe con video: «En este momento» en 2×2: Velocidad · Sugerida / Distancia · Adelanto.
+
 ## 1.0.54 (publicada 09/11/2026)
 - **Salir con el pulsador** (Ajustes → Pulsador, apagado de fábrica): mantenido 5 s termina la carrera y va al informe.
 - Mapa y gráfico a pantalla completa: fila **‹ V1 V2 … ›** (y TODAS en el gráfico) para cambiar de vuelta desde adentro.
