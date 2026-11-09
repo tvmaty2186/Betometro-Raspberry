@@ -1,5 +1,7 @@
 // El resumen de cada carrera para la pantalla (tarjetas, chip de estado, LARGAR) y las listas próximas/corridas.
 #include "datos.h"
+
+#include <QJsonDocument>
 #include "datos_comun.h"
 #include "motor.h"
 
@@ -65,6 +67,8 @@ QVariantMap Datos::resumen(const Carrera& c) const {
     r["lugar"] = q(c.lugar);
     r["lugarLat"] = ex["lugarLat"].esNumero() ? QVariant(ex["lugarLat"].aNumero()) : QVariant();
     r["lugarLon"] = ex["lugarLon"].esNumero() ? QVariant(ex["lugarLon"].aNumero()) : QVariant();
+    // Clima adjuntado (Clima::adjuntar): {nombre, lat, lon, actualizado, dia, horas}
+    r["climaAdjunto"] = ex["clima"].esObjeto() ? QJsonDocument::fromJson(QByteArray::fromStdString(ex["clima"].escribir())).toVariant() : QVariant();
     r["dia"] = f.isValid() ? QString::number(f.day()).rightJustified(2, '0') : QString("--");
     r["mes"] = f.isValid() ? QString(kMeses[f.month() - 1]) : QString();
     r["fechaCorta"] = f.isValid() ? f.toString("dd/MM") : QString();

@@ -24,6 +24,7 @@
 #include <QDirIterator>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QJsonDocument>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -214,6 +215,24 @@ int main(int argc, char* argv[]) {
     }
     // Clima: pronóstico de Open-Meteo por la ubicación del GPS o por una localidad
     Clima clima(carpeta);
+    // Clima adjuntado a carreras: se guarda en la carrera y se actualiza solo cada vez que hay internet
+    clima.adjuntos = [&datos] {
+        QVariantList l;
+        for (const auto& c : datos.base().carreras)
+            if (c.extra["clima"].esObjeto())
+                l << QVariantMap{{"id", QString::fromStdString(c.id)}, {"fecha", QString::fromStdString(c.fecha)},
+                                 {"clima", QJsonDocument::fromJson(QByteArray::fromStdString(c.extra["clima"].escribir())).toVariant()}};
+        return l;
+    };
+    clima.guardarAdjunto = [&datos](const QString& id, const QVariantMap& m) {
+        if (m.isEmpty()) datos.quitarExtra(id, "clima");
+        else datos.ponerExtra(id, "clima", beto::Json::leer(QJsonDocument::fromVariant(m).toJson(QJsonDocument::Compact).toStdString()));
+    };
+    QObject::connect(&clima, &Clima::cambio, &clima, &Clima::actualizarAdjuntos, Qt::QueuedConnection);   // llegó un pronóstico
+    QTimer relojClima;   // y cada media hora, por si hay internet nuevo
+    QObject::connect(&relojClima, &QTimer::timeout, &clima, &Clima::actualizarAdjuntos);
+    relojClima.start(30 * 60 * 1000);
+    QTimer::singleShot(60 * 1000, &clima, &Clima::actualizarAdjuntos);
     QObject::connect(gps, &FuenteGps::muestra, &clima, [&clima](const beto::Muestra& m) {
         if (m.lat && m.lon && m.precisionM < 50) clima.ponerPosicion(*m.lat, *m.lon);
     });

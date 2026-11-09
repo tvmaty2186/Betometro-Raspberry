@@ -7,6 +7,8 @@
 // En la PC (sin BETO_RASPBERRY) no sale a internet: inventa un pronóstico para ver las pantallas.
 #pragma once
 
+#include <functional>
+
 #include <QHash>
 #include <QJsonObject>
 #include <QNetworkAccessManager>
@@ -45,6 +47,15 @@ public:
     // Las 24 horas de un día, para verlo hora por hora (doble toque en un día, 09/11/2026):
     // [{hora, temp, codigo, lluvia (%), mm, viento, rafagas}]
     Q_INVOKABLE QVariantList horasDelDia(double lat, double lon, const QString& fecha);
+
+    // Clima adjuntado a una carrera (Matías, 09/11/2026): se guarda en la carrera y, cada vez que hay internet, se
+    // actualiza con el último pronóstico de ese lugar para el día de la carrera. Sin internet queda el último.
+    // Pasado el día de la carrera ya no se toca. main.cpp conecta los dos ganchos con Datos.
+    std::function<QVariantList()> adjuntos;                                   // [{id, fecha, clima: {nombre, lat, lon, …}}]
+    std::function<void(const QString& id, const QVariantMap& clima)> guardarAdjunto;   // mapa vacío = quitar
+    Q_INVOKABLE void adjuntar(const QString& carreraId, const QString& nombre, double lat, double lon);
+    Q_INVOKABLE void quitarAdjunto(const QString& carreraId);
+    void actualizarAdjuntos();
 
     void ponerPosicion(double lat, double lon);   // desde el GPS
     void ponerCarrera(bool enCurso);              // en carrera no se pide el nombre del lugar (11A-1.1)

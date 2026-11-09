@@ -188,6 +188,7 @@ Item {
         onVerVuelta: (i) => { if (raiz.vueltas[i].m) raiz.lap = i; }
         onIrVideo: (i, t) => raiz.irVideo(i, t)
         onCambiarMedida: (i) => raiz.cambiarMedida(i)
+        onVerClima: climaGuardado.abrir()
         onUnir: (i) => raiz.unir(i)
         onRestablecer: raiz.restablecer()
         onCompartir: Navegacion.ir("compartir", { id: raiz.id_ })
@@ -289,6 +290,7 @@ Item {
         // con muchas vueltas (BETO_MUESTRA_LARGA), una de las últimas
         const lapP = vueltas.length > 20 ? vueltas.length - 15 : 2, tP = vueltas.length > 20 ? 5 : 134.6;
         if (Contexto.prueba === "grafico" || Contexto.prueba === "mapa" || Contexto.prueba === "comparar") tPruebaCompleto.start();
+        else if (Contexto.prueba === "informe-clima") Qt.callLater(() => climaGuardado.abrir());   // con un clima guardado
         else if (Contexto.prueba === "comp") { lap = 3; modo = "comp"; }   // el modo «Comp.» con la V4 contra la modelo
         else if (Contexto.prueba === "video-grafico" || Contexto.prueba === "video-acel") {   // el gráfico al lado del video
             verVideo = true; ladoVideo = "grafico"; if (Contexto.prueba === "video-acel") modo = "acel";
@@ -323,5 +325,18 @@ Item {
             reproductor.menuVolumen = Contexto.prueba === "video-volumen";   // captura: el panel del volumen
             if (Contexto.prueba === "video-pulsador") tPruebaPulsador.start();
         }
+    }
+    // El clima guardado en la carrera (Clima → A carrera), hora por hora
+    TClimaHoras {
+        id: climaGuardado
+        anchors.fill: parent; z: 70
+        h: raiz.h
+        function abrir() {
+            const a = raiz.c.climaAdjunto;
+            if (!a) return;
+            lugar = (a.nombre || "") + (a.actualizado ? " · actualizado " + Qt.formatDateTime(new Date(a.actualizado), "dd/MM HH:mm") : "");
+            dia = a.dia || null; horas = a.horas || []; fecha = raiz.c.fechaIso || raiz.c.fecha || "";
+        }
+        onCerrar: fecha = ""
     }
 }

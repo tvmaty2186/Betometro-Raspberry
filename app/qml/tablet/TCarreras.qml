@@ -28,7 +28,10 @@ TPantalla {
                     id: fp
                     required property var modelData
                     readonly property bool conLugar: modelData.lugarLat !== undefined && modelData.lugarLat !== null
-                    readonly property var d: conLugar && Clima.version >= 0 ? Clima.dia(modelData.lugarLat, modelData.lugarLon, modelData.fecha) : null
+                    // Con clima adjuntado (desde la pantalla Clima), ese: se actualiza solo y sirve sin internet
+                    readonly property var adj: modelData.climaAdjunto || null
+                    readonly property var d: adj && adj.dia ? adj.dia
+                                             : conLugar && Clima.version >= 0 ? Clima.dia(modelData.lugarLat, modelData.lugarLon, modelData.fecha) : null
                     width: col.width; height: raiz.h ? 130 : 250
                     radius: Math.max(14, Tema.radio * 1.5)
                     border { width: 3; color: Tema.bordeCromo }
@@ -59,13 +62,15 @@ TPantalla {
                                 IconoClima { width: 56; height: 56; anchors.verticalCenter: parent.verticalCenter; codigo: fp.d ? fp.d.codigo || 0 : 0 }
                                 Column { anchors.verticalCenter: parent.verticalCenter
                                     Text { text: fp.d ? fp.d.max + "°" : ""; color: Tema.numero; font { family: Tema.fuenteNum; weight: Font.Bold; pixelSize: 36 } }
-                                    Text { text: fp.d ? fp.d.lluvia + "%" : ""; color: Tema.lluvia; font { family: Tema.fuente600; pixelSize: 21 } } } }
+                                    Text { text: fp.d ? fp.d.lluvia + "%" : ""; color: Tema.lluvia; font { family: Tema.fuente600; pixelSize: 21 } }
+                                    Text { visible: !!fp.adj; text: "guardado"; color: Tema.acento; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 15 } } } }
                             Column { visible: !(fp.d && fp.d.disponible); anchors.centerIn: parent
                                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Clima"; color: Tema.tinta; font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 25 } }
                                 Text { anchors.horizontalCenter: parent.horizontalCenter; color: Tema.tintaSuave; font { family: Tema.fuente600; pixelSize: 21 }
-                                       text: !fp.conLugar ? "sin localidad" : fp.d && fp.d.desde ? "desde " + fp.d.desde : "cargando…" } }
+                                       text: fp.adj ? "guardado" : !fp.conLugar ? "sin localidad" : fp.d && fp.d.desde ? "desde " + fp.d.desde : "cargando…" } }
                             MouseArea { anchors.fill: parent; anchors.margins: -6
-                                onClicked: fp.conLugar ? Navegacion.ir("clima", { nombre: fp.modelData.lugar.split(",")[0], lat: fp.modelData.lugarLat, lon: fp.modelData.lugarLon, fecha: fp.modelData.fecha })
+                                onClicked: fp.adj && fp.adj.horas ? horasAdjunto.abrir(fp.modelData, fp.adj)
+                                         : fp.conLugar ? Navegacion.ir("clima", { nombre: fp.modelData.lugar.split(",")[0], lat: fp.modelData.lugarLat, lon: fp.modelData.lugarLon, fecha: fp.modelData.fecha })
                                                        : Navegacion.ir("ficha", { id: fp.modelData.id }) }
                         }
                         TBoton { width: raiz.h ? 220 : fp.width - 36 - 214; height: 96; tipo: "acento"; icono: ""; nombre: "IR A LARGAR"; tamNombre: 30
@@ -114,4 +119,15 @@ TPantalla {
     // ¿Borrar? La misma ventana que en la ficha (07-3.5)
     TBorrar { parent: raiz; carrera: raiz.borrando; onCancelar: raiz.borrando = null
               onBorrar: { Datos.borrarCarrera(raiz.borrando.id); raiz.borrando = null; } }
+    // El clima adjuntado a una carrera, hora por hora (sirve sin internet)
+    TClimaHoras {
+        id: horasAdjunto
+        parent: raiz; anchors.fill: parent
+        h: raiz.h
+        function abrir(c, a) {
+            lugar = (a.nombre || "") + (a.actualizado ? " · actualizado " + Qt.formatDateTime(new Date(a.actualizado), "dd/MM HH:mm") : "");
+            dia = a.dia; horas = a.horas || []; fecha = c.fecha;
+        }
+        onCerrar: fecha = ""
+    }
 }

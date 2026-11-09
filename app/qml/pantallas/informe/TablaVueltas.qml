@@ -43,6 +43,7 @@ Tarjeta { datos: true;
     signal unir(int indice)                 // ya confirmado: juntar esa vuelta con la siguiente
     signal restablecer()                    // ya confirmado
     signal compartir()
+    signal verClima()                       // el clima guardado en la carrera (Clima → A carrera)
     onFilaChanged: confirmarUnir = false
     Timer { id: tUnirVuelve; interval: 3000; onTriggered: caja.confirmarUnir = false }
     Timer { id: tRestVuelve; interval: 3000; onTriggered: caja.confirmarRest = false }
@@ -108,6 +109,13 @@ Tarjeta { datos: true;
                 color: mc.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
                 Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "⤴ Compartir informe"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
                 MouseArea { id: mc; anchors.fill: parent; onClicked: { caja.menuAbierto = false; caja.compartir(); } }
+            }
+            Rectangle {
+                visible: !!caja.c.climaAdjunto
+                width: parent.width; height: visible ? 52 : 0; radius: 8
+                color: mcl.pressed ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "Ver el clima guardado"; color: Tema.tinta; font { family: Tema.fuente600; pixelSize: 17 } }
+                MouseArea { id: mcl; anchors.fill: parent; onClicked: { caja.menuAbierto = false; caja.verClima(); } }
             }
         }
     }

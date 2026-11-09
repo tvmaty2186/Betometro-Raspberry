@@ -157,6 +157,9 @@ Las mismas 12 pantallas que en horizontal, apiladas en una columna. Diferencias:
   la vuelta elegida contra la modelo; doble toque abre el tiempo ganado/perdido y 4 sectores.
 - Con el video: **Mapa | Gráfico** al lado (el gráfico con los modos, raya donde va el video, toque para saltar).
 - Sin el aviso de «video cortado» (no aporta).
+- **Clima:** doble toque en un día → hora por hora. **«A carrera»** adjunta el clima del lugar a una carrera próxima
+  (`extra["clima"]`: nombre, lat, lon, actualizado, dia, horas); se actualiza solo con internet hasta el día de la
+  carrera y sin internet queda el último. Se ve en Carreras («guardado») y en el informe (⋮ → Ver el clima guardado).
 - Si el GPS ve que se pasó la línea a mitad de una vuelta **sin marcar**, el informe lo anota (⚠ y una línea al pie).
   Solo un dato: no parte la vuelta.
 - La vuelta en curso se guarda **cada 20 s** (recorrido libre, cada minuto): si se corta la luz, queda como

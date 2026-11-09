@@ -342,6 +342,37 @@ QVariantList Clima::horasDelDia(double lat, double lon, const QString& fecha) {
     return l;
 }
 
+void Clima::adjuntar(const QString& carreraId, const QString& nombre, double lat, double lon) {
+    if (!guardarAdjunto) return;
+    guardarAdjunto(carreraId, QVariantMap{{"nombre", nombre}, {"lat", lat}, {"lon", lon}});
+    pedir(lat, lon);
+    actualizarAdjuntos();
+}
+
+void Clima::quitarAdjunto(const QString& carreraId) { if (guardarAdjunto) guardarAdjunto(carreraId, {}); }
+
+void Clima::actualizarAdjuntos() {
+    if (!adjuntos || !guardarAdjunto) return;
+    const QString hoy = QDate::currentDate().toString(Qt::ISODate);
+    for (const QVariant& x : adjuntos()) {
+        const QVariantMap a = x.toMap();
+        const QString fecha = a.value("fecha").toString();
+        if (fecha < hoy) continue;   // ya pasó: queda el último pronóstico
+        QVariantMap cl = a.value("clima").toMap();
+        const double lat = cl.value("lat").toDouble(), lon = cl.value("lon").toDouble();
+        const QVariantMap d = dia(lat, lon, fecha);   // si es viejo, lo vuelve a pedir
+        if (!d.value("disponible").toBool()) continue;
+        const QVariantList h = horasDelDia(lat, lon, fecha);
+        // ¿Nada nuevo? (comparado como texto: lo guardado vuelve con números decimales)
+        auto texto = [](const QVariantMap& m) { return QJsonDocument::fromVariant(m).toJson(QJsonDocument::Compact); };
+        if (texto({{"dia", cl.value("dia")}, {"horas", cl.value("horas")}}) == texto({{"dia", d}, {"horas", h}})) continue;
+        cl["dia"] = d;
+        cl["horas"] = h;
+        cl["actualizado"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+        guardarAdjunto(a.value("id").toString(), cl);
+    }
+}
+
 QVariantList Clima::horasDe(double lat, double lon, const QString& fecha) {
     pedir(lat, lon);
     const Entrada e = cache_.value(clave(lat, lon));
