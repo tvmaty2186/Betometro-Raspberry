@@ -22,7 +22,11 @@ Item {
         Qt.callLater(() => raiz.irVideo(mk.vuelta, mk.ms / 1000));
     }
     // Video de la carrera (E7): botón Informe / Video; a medias, y doble toque → pantalla completa
-    readonly property var videos: { rev; return Datos.videos(id_); }
+    // Al terminar la carrera el video se pasa a MP4 y cambia de nombre (.mkv → .mp4): con el informe ya abierto
+    // quedaba el nombre viejo y decía «No está el archivo del video» (carreras del 09/11/2026). Se vuelve a leer.
+    property int revVideos: 0
+    Connections { target: Camara; ignoreUnknownSignals: true; function onConvirtiendoChanged() { if (!Camara.convirtiendo) raiz.revVideos++; } }
+    readonly property var videos: { rev; revVideos; return Datos.videos(id_); }
     property bool verVideo: false
     property bool completo: false
     // Un video que todavía se graba o se pasa a MP4 no se muestra: aviso «se está procesando» y se habilita solo
@@ -172,6 +176,8 @@ Item {
             anchors.fill: parent; anchors.margins: 12
             sourceComponent: MapaCompleto {
                 inf: raiz.inf; vu: raiz.vu; rec: raiz.rec; marcas: raiz.marcas; dist: raiz.dist; sug: raiz.sug; modo: raiz.modo
+                lap: raiz.lap
+                onElegirVuelta: (i) => raiz.lap = i
                 onElegirModo: (m) => raiz.modo = m
                 onCerrar: raiz.completoQue = ""
             }

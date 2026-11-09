@@ -465,7 +465,9 @@ int Camara::borrarPruebas() {
 
 QString Camara::urlVideo(const QString& archivo) const {
     if (archivo.isEmpty() || archivo.contains('/')) return {};
-    const QString ruta = carpeta_ + '/' + archivo;
+    QString ruta = carpeta_ + '/' + archivo;
+    // Recién pasado a MP4: si todavía piden el .mkv (que ya se borró), se da el .mp4
+    if (!QFileInfo::exists(ruta) && ruta.endsWith(QLatin1String(".mkv"))) ruta = ruta.left(ruta.size() - 4) + QStringLiteral(".mp4");
     return QFileInfo::exists(ruta) ? QUrl::fromLocalFile(ruta).toString() : QString();
 }
 

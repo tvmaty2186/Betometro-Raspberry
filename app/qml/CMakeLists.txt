@@ -102,6 +102,7 @@ qt_add_qml_module(betometro_qml
     pantallas/informe/GraficoVelocidad.qml
     pantallas/informe/GraficoCompleto.qml
     pantallas/informe/MapaCompleto.qml
+    pantallas/informe/ElegirVuelta.qml
     pantallas/informe/TablaVueltas.qml
     pantallas/informe/CompararVueltas.qml
     pantallas/informe/comparar.js

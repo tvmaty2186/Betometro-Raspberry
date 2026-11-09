@@ -55,11 +55,13 @@ Tarjeta { datos: true;
     readonly property real x0: 80
     readonly property real y0: 104
     readonly property real x1: width - 40
-    readonly property real y1: height - 166
+    // Con la fila de vueltas abajo (ElegirVuelta), todo sube un poco
+    readonly property real pie: elegirVuelta.visible ? 34 : 0
+    readonly property real y1: height - 166 - pie
     readonly property real bx0: 80
-    readonly property real by0: height - 112
+    readonly property real by0: height - 112 - pie
     readonly property real bx1: width - 40
-    readonly property real by1: height - 56
+    readonly property real by1: height - 56 - pie
     function ex(d) { return x0 + (x1 - x0) * (d - de) / span; }
     function dEn(x) { return de + (x - x0) / (x1 - x0) * span; }
     function valor(p) { return modo === "vel" ? p[2] : modo === "acel" ? p[3] : p[4]; }
@@ -81,9 +83,12 @@ Tarjeta { datos: true;
         sel = null;
         const t = tramos.find(x => x.i === lap);
         if (t && tramos.length > 1) { de = t.d0; a = t.d0 + t.L; } else { de = 0; a = total; }
+        vueltaElegida = t && tramos.length > 1 ? lap : -1;
         recalcular();
     }
+    property int vueltaElegida: -1   // la de la fila de abajo (-1 = TODAS); al mover o acercar a mano, ninguna (-2)
     function ver(nDe, nSpan) {   // mover/zoom con límites: nunca más chico que 200 m ni más grande que todo
+        vueltaElegida = -2;
         const s = Math.max(Math.min(200, total), Math.min(total, nSpan));
         de = Math.max(0, Math.min(total - s, nDe));
         a = de + s;
@@ -440,7 +445,16 @@ Tarjeta { datos: true;
             onPositionChanged: (m) => { if (pressed) caja.ver((x + m.x - caja.bx0) / (caja.bx1 - caja.bx0) * caja.total - dX, caja.span); }
         }
     }
-    Sub { x: 22; y: parent.height - 40; tam: 10; text: "Viendo km " + caja.kmTxt(caja.de, 1) + " a " + caja.kmTxt(caja.a, 1) + " de " + caja.kmTxt(caja.total, 1) }
-    Sub { anchors.right: parent.right; anchors.rightMargin: 22; y: parent.height - 40; tam: 10; color: Tema.apagadoTinta
+    Sub { x: 22; y: parent.height - (elegirVuelta.visible ? 42 : 40); tam: 10; text: "Viendo km " + caja.kmTxt(caja.de, 1) + " a " + caja.kmTxt(caja.a, 1) + " de " + caja.kmTxt(caja.total, 1) }
+    Sub { visible: !elegirVuelta.visible; anchors.right: parent.right; anchors.rightMargin: 22; y: parent.height - 40; tam: 10; color: Tema.apagadoTinta
           text: "Doble toque: acercar · arrastrá para recorrer · X para cerrar" }
+    // Cambiar de vuelta desde acá (Matías, 09/11/2026)
+    ElegirVuelta {
+        id: elegirVuelta
+        visible: !caja.rec && lista.length > 1
+        x: 250; width: parent.width - 500; y: parent.height - height - 12
+        vueltas: caja.vueltas; largadas: caja.inf.largadas || 1; conTodas: true
+        elegida: caja.vueltaElegida
+        onElegir: (i) => caja.abrir(i)
+    }
 }

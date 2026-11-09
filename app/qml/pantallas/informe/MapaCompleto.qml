@@ -18,6 +18,9 @@ Tarjeta { datos: true;
     property string modo: "vel"      // vel, acel, ade
     signal cerrar()
     signal elegirModo(string m)
+    property int lap: -1             // índice de la vuelta elegida (para la fila de abajo)
+    signal elegirVuelta(int indice)
+    onVuChanged: if (visible) abrir()   // otra vuelta: se ve entera
 
     oscura: true
     readonly property var pista: inf.pista || []
@@ -365,6 +368,14 @@ Tarjeta { datos: true;
                 g.beginPath(); g.roundedRect(X(vx0), Y(vy0), (vx1 - vx0) * mk, (vy1 - vy0) * mk, 3, 3); g.fill(); g.stroke();
             }
         }
+    }
+    // Cambiar de vuelta desde acá (Matías, 09/11/2026): entre la escala de colores y el mapita
+    ElegirVuelta {
+        visible: !caja.rec && lista.length > 1
+        x: 280; width: parent.width - 560; y: parent.height - 50 - height
+        vueltas: caja.inf.vueltas || []; largadas: caja.inf.largadas || 1
+        elegida: caja.lap
+        onElegir: (i) => caja.elegirVuelta(i)
     }
     Sub { x: 22; y: parent.height - 36; tam: 10; text: caja.txtViendo }
     Sub { anchors.right: parent.right; anchors.rightMargin: 22; y: parent.height - 36; tam: 10; color: Tema.apagadoTinta
