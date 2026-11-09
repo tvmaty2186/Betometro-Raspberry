@@ -22,6 +22,7 @@
 //                            animación en el inicio. La fecha la fija faketime (herramientas/comparar-capturas.sh)
 #include <QCommandLineParser>
 #include <QDirIterator>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFontDatabase>
 #include <QGuiApplication>
@@ -79,6 +80,11 @@ static void cargarFuentes() {
 
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
+    // BETO_MEDIR_ARRANQUE=1: cuánto tarda cada parte del arranque (para hacerlo más rápido)
+    static QElapsedTimer relojArranque;
+    relojArranque.start();
+    const bool medir = qEnvironmentVariableIsSet("BETO_MEDIR_ARRANQUE");
+    auto marca = [&](const char* que) { if (medir) qInfo("arranque %6lld ms · %s", static_cast<long long>(relojArranque.elapsed()), que); };
     QSocketNotifier* avisoSalir = nullptr;
     if (::socketpair(AF_UNIX, SOCK_STREAM, 0, gAvisoSalir) == 0) {
         avisoSalir = new QSocketNotifier(gAvisoSalir[1], QSocketNotifier::Read, &app);
@@ -127,6 +133,7 @@ int main(int argc, char* argv[]) {
     if (!qEnvironmentVariableIsSet("GST_REGISTRY_1_0") && !carpeta.isEmpty())
         qputenv("GST_REGISTRY_1_0", QFile::encodeName(carpeta + QStringLiteral("/gstreamer-registro.bin")));
     Datos datos(carpeta);
+    marca("datos");
     // Reporte de errores: desde acá se anota todo lo que falle (también las pantallas QML)
     Reportes reportes(carpeta);
     if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) reportes.instalar();
@@ -167,6 +174,7 @@ int main(int argc, char* argv[]) {
         else gps = new GpsSimulado(&app, fijo);
     }
     Crono crono(&datos, gps);
+    marca("gps y crono");
     // Hora del equipo desde el GPS (11B-1.2, Matías 07/11): en el autódromo casi nunca hay internet, y la Pi
     // arranca con la hora en que se apagó. Si internet (NTP) no la puso y la del GPS difiere más de 2 s, se
     // corrige el reloj. El cronómetro no se mueve: usa el reloj monotónico. Sin GPS ni internet no se bloquea nada.
@@ -210,6 +218,7 @@ int main(int argc, char* argv[]) {
         if (m.lat && m.lon && m.precisionM < 50) clima.ponerPosicion(*m.lat, *m.lon);
     });
     Camara camara(&datos, carpeta);
+    marca("cámara");
     crono.ponerCamara(&camara);
     Actualizador actualizador(carpeta);
     Tienda tienda(carpeta);   // el catálogo de herramientas (Betometro-tienda)
@@ -218,6 +227,7 @@ int main(int argc, char* argv[]) {
     if (op.value(oPrueba).contains(QStringLiteral("nueva"))) contexto.setVersionNueva(QStringLiteral("1.0.21"));   // muestra «Actualizar»
 
     Audio audio;
+    marca("audio");
     audio.ponerVolumen(datos.cfg(QStringLiteral("volumen")).toDouble());
     audio.ponerVoz(datos.cfg(QStringLiteral("voz")).toString());
     QObject::connect(&datos, &Datos::cfgChanged, &audio, [&] {
@@ -227,6 +237,7 @@ int main(int argc, char* argv[]) {
     QObject::connect(&crono, &Crono::sonido, &audio, &Audio::reproducir);
     QObject::connect(&crono, &Crono::frase, &audio, [&](const QString& f) { audio.reproducir(Audio::archivoDeFrase(f)); });
     Wifi wifi;
+    marca("wifi");
     auto ponerPropia = [&] {
         auto siONada = [&](const char* k) { const QVariant v = datos.cfg(QLatin1String(k)); return !v.isValid() || v.toBool(); };
         wifi.ponerPropia(siONada("wifiPropia"), datos.cfg(QStringLiteral("numeroAuto")).toString());
@@ -247,6 +258,7 @@ int main(int argc, char* argv[]) {
     servidor.ponerControl(&controlRemoto);
     // Google Drive: sube informes y videos solo, con wifi, sin carrera y sin la cámara grabando (docs/google-drive.md)
     Drive drive(&datos, carpeta, op.value(oPrueba));
+    marca("servidor y drive");
     servidor.ponerDrive(&drive);
     drive.ponerBorrador([&camara](const QString& archivo) { return camara.borrarVideo(archivo); });
     auto condicionesDrive = [&] { drive.ponerCondiciones(wifi.conectada(), wifi.propia(), crono.enCurso() || camara.grabando() || camara.convirtiendo()); };
@@ -354,7 +366,12 @@ int main(int argc, char* argv[]) {
     motor.rootContext()->setContextProperty(QStringLiteral("Drive"), &drive);
     QObject::connect(&motor, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(1); },
                      Qt::QueuedConnection);
+    marca("antes de la pantalla");
     motor.loadFromModule("Betometro", "Main");
+    marca("pantalla armada");
+    if (medir && !motor.rootObjects().isEmpty())
+        if (auto* v = qobject_cast<QQuickWindow*>(motor.rootObjects().first()))
+            QObject::connect(v, &QQuickWindow::frameSwapped, &app, [marca] { static bool una = false; if (!una) { una = true; marca("primera imagen en pantalla"); } });
     if (motor.rootObjects().isEmpty()) return 1;
     salud.listo();
     QTimer::singleShot(10000, &app, [] { VideoGst::precalentar(); });   // ver video_gst.cpp

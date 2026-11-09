@@ -125,7 +125,11 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
   Si `dockerd` no arranca por un pid viejo: `dockerd --pidfile /tmp/otro.pid`.
 - Variables para probar: `BETO_FIJO=1` (hora, GPS y memoria quietos), `BETO_MUESTRA_HZ=5` (recorridos de ejemplo con
   5 lecturas por segundo), `BETO_MUESTRA_LARGA=1` (carreras de 60 vueltas), `BETO_VIGILANTE_UMBRAL=1` (el vigilante
-  avisa en la PC). Video de ejemplo: `<datos>/videos/muestra.mkv` (con `gst-launch-1.0 videotestsrc … x264enc …
+  avisa en la PC), `BETO_MUESTRA_FALTA=1` (en Santa Clara falta una marca), `BETO_MEDIR_ARRANQUE=1` (cuánto tarda cada
+  parte del arranque; en la PC el programa muestra la primera imagen en menos de 0,1 s). En el ejemplo el pulsador
+  marca 60 a 150 ms tarde, para que el pulsador virtual dé distinto.
+- Ojo: con `QT_QPA_PLATFORM=offscreen` el dibujo es por software; el procesador que se mide en la PC no sirve para la
+  Pi (que dibuja con el chip gráfico). Para la Pi, el vigilante. Video de ejemplo: `<datos>/videos/muestra.mkv` (con `gst-launch-1.0 videotestsrc … x264enc …
   matroskamux`).
 - `--prueba` útiles: `comp`, `comparar`, `grafico`, `mapa`, `video-grafico`, `video-acel`, `apagar` (ventana de
   Apagar), `tablet-pantalla`. En `comparar-capturas.sh`, los nombres con espacio van entre comillas dobles adentro de

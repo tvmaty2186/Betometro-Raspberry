@@ -157,6 +157,10 @@ Las mismas 12 pantallas que en horizontal, apiladas en una columna. Diferencias:
   la vuelta elegida contra la modelo; doble toque abre el tiempo ganado/perdido y 4 sectores.
 - Con el video: **Mapa | Gráfico** al lado (el gráfico con los modos, raya donde va el video, toque para saltar).
 - Sin el aviso de «video cortado» (no aporta).
+- Si el GPS ve que se pasó la línea a mitad de una vuelta **sin marcar**, el informe lo anota (⚠ y una línea al pie).
+  Solo un dato: no parte la vuelta.
+- La vuelta en curso se guarda **cada 20 s** (recorrido libre, cada minuto): si se corta la luz, queda como
+  interrumpida con lo andado. La carrera no se retoma (decisión del 05/11).
 
 **Equipo**
 - **Apagar** abre una ventana: Apagar, Reiniciar, Cancelar.
