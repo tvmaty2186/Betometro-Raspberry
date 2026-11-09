@@ -222,6 +222,14 @@ QString Crono::marcar(const QString& fuente, double edadMs) {
 
 void Crono::terminar() { if (enCurso()) terminarCon(QStringLiteral("Carrera terminada"), true); }
 
+bool Crono::puedeSalirPulsador() const { return enCurso() && (recorrido_ || vueltasGuardadas_ > 0); }
+
+void Crono::terminarPulsador() {
+    if (!puedeSalirPulsador()) return;
+    // En un recorrido la vuelta abierta es todo el recorrido: se guarda como al terminar a mano
+    terminarCon(QStringLiteral("Carrera terminada"), recorrido_);
+}
+
 void Crono::salir() {
     if (enCurso()) return;
     if (camara_ && camara_->grabando()) camara_->detener(0);

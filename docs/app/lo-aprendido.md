@@ -923,6 +923,7 @@ Se actualiza cada **2 s**. Cada fila: ✓ (verde), ! (rojo) o – (neutro), nomb
 | Medir demora de la voz | Opcional: el audio es pregrabado. Mantener «Probar cuenta de 5 s» |
 | Pitidos y clic | Archivos de sonido cortos pregrabados (`#corto`, `#largo`, `#tic`, `#clic`) |
 | Teclas, control selfie, «Aprender botón» | Pulsador en **GPIO** con su antirrebote eléctrico. «Aprender botón» no hace falta. Se puede aceptar además un teclado USB. MARCAR en pantalla sigue siendo obligatorio si no hay pulsador (definir cómo se sabe que hay uno) |
+| Terminar la carrera (botón en pantalla) | **Además, «Salir con el pulsador»** (Ajustes → Pulsador, apagado de fábrica, `salirPulsador`; Matías, 09/11/2026): mantenido 2 s dice «Seguí apretando para salir», a los 5 s «Carrera terminada» y va al informe. La vuelta que abrió esa marca no se guarda. Necesita alguna vuelta cerrada (en un recorrido, no) |
 | Pulsador Bluetooth conectado/desconectado | No aplica (Bluetooth apagado). Opcional: avisar si el GPIO no responde en la prueba |
 | Sensor de luz (modo sol automático) | No hay sensor. Modo sol `si`/`no` (`auto` no aplica) más el ajuste nuevo de **brillo** |
 | Batería | No hay batería. La fila se cambia por las nuevas: hora del GPS, lugar libre, wifi |

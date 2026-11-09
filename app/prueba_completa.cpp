@@ -336,7 +336,7 @@ void PruebaCompleta::pasoSimulador() {
 // 3) Voz: que estén todos los audios y que se escuche uno
 void PruebaCompleta::pasoVoz() {
     QStringList esperados{QStringLiteral("ultima_m"), QStringLiteral("ultima_p"), QStringLiteral("completa"), QStringLiteral("medida"),
-                          QStringLiteral("practica"), QStringLiteral("prueba"), QStringLiteral("pulsador"), QStringLiteral("clic"),
+                          QStringLiteral("practica"), QStringLiteral("prueba"), QStringLiteral("pulsador"), QStringLiteral("seguir_salir"), QStringLiteral("terminada"), QStringLiteral("clic"),
                           QStringLiteral("corto"), QStringLiteral("largo"), QStringLiteral("tic")};
     for (int n = 0; n <= 60; ++n) esperados << QStringLiteral("n%1").arg(n, 2, 10, QLatin1Char('0'));
     for (int n = 1; n <= 60; ++n) esperados << QStringLiteral("vuelta_%1_m").arg(n, 2, 10, QLatin1Char('0')) << QStringLiteral("vuelta_%1_p").arg(n, 2, 10, QLatin1Char('0'));

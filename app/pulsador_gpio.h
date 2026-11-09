@@ -12,6 +12,9 @@
 
 #include "pulsador.h"
 
+constexpr int kAvisoLargoMs = 2000;   // «Seguí apretando para salir»
+constexpr int kLargoMs = 5000;        // sale de la carrera (Matías, 09/11/2026)
+
 class PulsadorGpio : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool activo READ activo CONSTANT)           // se pudo pedir el pin
@@ -27,6 +30,9 @@ public:
 signals:
     void marca(double edadMs);
     void cambio();
+    // Mantenido apretado (Salir con el pulsador): a los 2 s el aviso, a los 5 s salir. Soltar antes los cancela.
+    void avisoLargo();
+    void largo();
 
 private:
     void leer();
@@ -38,4 +44,6 @@ private:
     beto::FiltroPulsador filtro_;
     std::unique_ptr<QSocketNotifier> aviso_;
     QTimer reloj_;
+    QTimer tAviso_, tLargo_;
+    void sostener();   // empieza o corta la cuenta de «mantenido» según el nivel
 };

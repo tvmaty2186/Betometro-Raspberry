@@ -95,6 +95,20 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## Lo que salió de las carreras reales del 09/11/2026
+Auditoría de 2 carreras (Recorrido 12:02 y Práctica 12:05, 350 m / 50 s, 5 vueltas medidas): GPS impecable
+(precisión 1 m, sin huecos ni saltos), cámara bien (5 cuadros de 9031), datos bien aunque se cortó la corriente.
+La vuelta real medía ~380 m (no 350): por eso llegaba siempre tarde. La 6.ª fue a boxes (interrumpida).
+- **Hecho (sin publicar): Salir con el pulsador** (Ajustes → Pulsador, apagado de fábrica). Mantenido 2 s: «Seguí
+  apretando para salir»; 5 s: «Carrera terminada», sale y va al informe. La vuelta que abrió esa marca no se guarda;
+  no sale si todavía no hay vueltas cerradas (en un recorrido, sí, y se guarda). Dos frases nuevas en `voz/grabar.py`.
+- **Video «No está el archivo del video»** (12:13 y 12:14) y se tilda las primeras veces: los MP4 estaban en la
+  tarjeta. `VideoGst::abrir()` con la ruta vacía o todavía sin el archivo. Arreglar.
+- **Cuadro «Todas las vueltas» del informe amontonado**: con las dos columnas (manual y virtual) los textos se pisan
+  («s0:», «dato23,7»). Muestra antes de programar.
+- **Cambiar de vuelta desde adentro del mapa y de los gráficos** (pedido de Matías). Muestra antes.
+- **Pulsador virtual (GPS) sin dato en las vueltas 4 y 5** (misma vuelta de siempre). Revisar por qué.
+
 ## 1.0.28 «sin sorpresas» (publicada 07/11/2026)
 Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta atrás, hora del GPS, cámara, wifi,
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás

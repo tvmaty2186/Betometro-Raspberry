@@ -250,6 +250,7 @@ Json configFabrica() {
     c["anticipoMs"] = 40;             // como la app nativa, hasta medirlo en E4
     c["avisoInicio"] = true;
     c["antirreboteMs"] = 3000;
+    c["salirPulsador"] = false;       // Salir con el pulsador: apretado 5 s termina la carrera (Matías, 09/11/2026)
     c["colMedida"] = "#b3132b";
     c["colPractica"] = "#0f6e3a";
     c["velActiva"] = true;
@@ -322,6 +323,7 @@ Json armarConfig(const Json& guardado) {
     numeroEn(c, def, "anticipoMs", 0, 1500);
     boolEn(c, def, "avisoInicio");
     numeroEn(c, def, "antirreboteMs", 0, 60000);
+    boolEn(c, def, "salirPulsador");
     boolEn(c, def, "velActiva");
     numeroEn(c, def, "pitidoCadaS", 0, 600);
     numeroEn(c, def, "umbralPrecisionM", 1, 200);

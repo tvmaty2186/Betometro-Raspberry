@@ -102,6 +102,10 @@ TPantalla {
             TFila { visible: raiz.sec === "pulsador"; etiqueta: "MARCAR en pantalla"
                     detalle: raiz.a.marcarPantalla !== false ? "Se marca con el botón o con el pulsador" : "Larga y marca solo el pulsador"
                 TLlave { prendida: raiz.a.marcarPantalla !== false; onCambiada: v => raiz.poner("marcarPantalla", v) } }
+            // Salir con el pulsador (Matías, 09/11/2026): mantenido 5 s termina la carrera, sin tocar la pantalla
+            TFila { visible: raiz.sec === "pulsador"; etiqueta: "Salir con el pulsador"
+                    detalle: raiz.a.salirPulsador ? "Mantenelo apretado 5 s para terminar" : "Se termina desde la pantalla"
+                TLlave { prendida: !!raiz.a.salirPulsador; onCambiada: v => raiz.poner("salirPulsador", v) } }
             TFila { visible: raiz.sec === "pulsador"; etiqueta: "Probar el pulsador"; detalle: "En el Chequeo previo"; tocable: true
                     onTocada: Navegacion.ir("chequeo")
                 TIcono { width: 40; height: 40; nombre: "check" } }

@@ -65,6 +65,8 @@ QString Audio::archivoDeFrase(const QString& frase) {
     const bool medida = frase.endsWith(QStringLiteral("medida"));
     if (frase.startsWith(QStringLiteral("Última vuelta"))) return medida ? "ultima_m" : "ultima_p";
     if (frase == QStringLiteral("Carrera completa")) return "completa";
+    if (frase == QStringLiteral("Carrera terminada")) return "terminada";
+    if (frase == QStringLiteral("Seguí apretando para salir")) return "seguir_salir";
     static const QRegularExpression re(QStringLiteral("^Vuelta (\\d+), "));
     const auto m = re.match(frase);
     if (m.hasMatch()) {

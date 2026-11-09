@@ -51,6 +51,12 @@ PulsadorGpio::PulsadorGpio(int linea, QObject* padre) : QObject(padre) {
     connect(aviso_.get(), &QSocketNotifier::activated, this, &PulsadorGpio::leer);
     reloj_.setSingleShot(true);
     connect(&reloj_, &QTimer::timeout, this, &PulsadorGpio::revisar);
+    tAviso_.setSingleShot(true);
+    tAviso_.setInterval(kAvisoLargoMs);
+    tLargo_.setSingleShot(true);
+    tLargo_.setInterval(kLargoMs);
+    connect(&tAviso_, &QTimer::timeout, this, [this] { if (apretado_) emit avisoLargo(); });
+    connect(&tLargo_, &QTimer::timeout, this, [this] { if (apretado_) emit largo(); });
 }
 
 PulsadorGpio::~PulsadorGpio() {
@@ -66,7 +72,14 @@ void PulsadorGpio::leer() {
         filtro_.flanco(ev[i].timestamp_ns / 1e6, bajo);   // la hora la puso el kernel en la interrupción
         if (bajo != apretado_) { apretado_ = bajo; emit cambio(); }
     }
+    sostener();
     revisar();
+}
+
+// Un pico de ruido o un rebote al soltar dura milisegundos: la cuenta se corta enseguida y no llega a nada
+void PulsadorGpio::sostener() {
+    if (!apretado_) { tAviso_.stop(); tLargo_.stop(); return; }
+    if (!tLargo_.isActive()) { tAviso_.start(); tLargo_.start(); }
 }
 
 void PulsadorGpio::revisar() {

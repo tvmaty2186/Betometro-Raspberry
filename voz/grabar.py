@@ -66,6 +66,8 @@ def frases():
     f["practica"] = "libre"
     f["completa"] = "Carrera completa"
     f["pulsador"] = "Pulsador desconectado"
+    f["seguir_salir"] = "Seguí apretando para salir"   # Salir con el pulsador (09/11/2026)
+    f["terminada"] = "Carrera terminada"
     f["prueba"] = "Betómetro listo"
     return f
 
