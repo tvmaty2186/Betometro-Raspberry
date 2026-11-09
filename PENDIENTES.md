@@ -100,6 +100,13 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.50 (publicada 09/11/2026)
+- Arranque: Betómetro ya no espera a la red (~3,5 s menos); la Prueba completa dice cuánto tarda cada parte.
+- Clima: doble toque en un día → hora por hora.
+- Clima adjuntado a una carrera («A carrera»): se actualiza solo con internet (2 veces por día; el día de la carrera,
+  cada hora; sin internet no intenta y pide al conectarse). Se ve en Carreras y en el informe (⋮).
+- **Falta:** con la 1.0.50 en la Pi, correr la Prueba completa y mirar el arranque («Betómetro empezó a los …»).
+
 ## 1.0.49 (publicada 09/11/2026)
 - Tema propio: el acento siempre se lee (se aclara u oscurece si no se distingue del fondo); con letras negras, los
   gráficos, mapas y tablas van sobre gris claro.
