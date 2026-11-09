@@ -11,7 +11,12 @@ TPantalla {
     readonly property var a: Datos.ajustes
     readonly property var temas: ({ avispon: "Avispón", rally: "Rally", sport: "Deportivo", cabina: "Cabina", propio: "Propio" })
     // Apagar: una ventana con Apagar, Reiniciar y Cancelar (Matías, 08/11/2026)
-    property bool menuApagar: Contexto.prueba === "apagar"   // --prueba apagar: abierta, para las capturas
+    property bool menuApagar: Contexto.prueba.indexOf("apagar") === 0   // --prueba apagar: abierta, para las capturas
+    // Qué está trabajando que no se puede cortar ("" = nada): grabando, pasando a MP4 o subiendo a Google Drive
+    readonly property string ocupado: Contexto.prueba === "apagar-ocupado" ? "Subiendo a Google Drive"
+        : typeof Camara !== "undefined" && Camara && Camara.grabando ? "Grabando video"
+        : typeof Camara !== "undefined" && Camara && Camara.convirtiendo ? "Preparando el video"
+        : typeof Drive !== "undefined" && Drive && Drive.subiendo ? "Subiendo a Google Drive" : ""
     function seccion(s) { Navegacion.ir("ajustesSeccion", { seccion: s }); }
     readonly property var orden: ["auto", "tema", "voz", "velocidad", "pulsador", "red", "camara", "drive", "actualizar", "prueba", "apagar"]
     readonly property int enGrilla: raiz.h ? 8 : 10
@@ -112,7 +117,8 @@ TPantalla {
             Text {
                 id: pregunta
                 anchors { top: parent.top; topMargin: 26; horizontalCenter: parent.horizontalCenter }
-                text: "¿Qué querés hacer?"; color: Tema.tinta
+                text: raiz.ocupado ? raiz.ocupado + "…" : "¿Qué querés hacer?"; color: raiz.ocupado ? Tema.warn : Tema.tinta
+                width: parent.width - 52; horizontalAlignment: Text.AlignHCenter; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 20
                 font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 40 }
             }
             Grid {
@@ -121,10 +127,14 @@ TPantalla {
                 spacing: 22
                 readonly property real an: raiz.h ? (width - 2 * spacing) / 3 : width
                 readonly property real al: raiz.h ? height : (height - 2 * spacing) / 3
-                TBoton { width: parent.an; height: parent.al; icono: "apagar"; nombre: "Apagar"; dato: "Hasta la próxima"; tipo: "peligro"
-                         onTocado: Sistema.apagar() }
-                TBoton { width: parent.an; height: parent.al; icono: "actualizar"; nombre: "Reiniciar"; dato: "Apaga y vuelve a prender"
-                         onTocado: Sistema.reiniciar() }
+                // No se apaga ni reinicia con un video grabándose o pasándose a MP4, ni subiendo a Google Drive:
+                // se perdería o quedaría a medias (Matías, 09/11/2026). Se habilita solo cuando termina.
+                TBoton { width: parent.an; height: parent.al; icono: "apagar"; nombre: "Apagar"; tipo: "peligro"
+                         dato: raiz.ocupado ? "Esperá a que termine" : "Hasta la próxima"; opacity: raiz.ocupado ? 0.45 : 1
+                         onTocado: raiz.ocupado ? Navegacion.avisar(raiz.ocupado + ": esperá a que termine") : Sistema.apagar() }
+                TBoton { width: parent.an; height: parent.al; icono: "actualizar"; nombre: "Reiniciar"
+                         dato: raiz.ocupado ? "Esperá a que termine" : "Apaga y vuelve a prender"; opacity: raiz.ocupado ? 0.45 : 1
+                         onTocado: raiz.ocupado ? Navegacion.avisar(raiz.ocupado + ": esperá a que termine") : Sistema.reiniciar() }
                 TBoton { width: parent.an; height: parent.al; icono: "atras"; nombre: "Cancelar"; dato: "Seguir usando"
                          onTocado: raiz.menuApagar = false }
             }
