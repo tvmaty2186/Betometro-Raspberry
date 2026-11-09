@@ -103,6 +103,8 @@ automática y el arranque.
 ## 1.0.51 (sin publicar, en preparación)
 - Chequeo previo: la pantalla de carrera se acomoda sola según por dónde llegó la marca de prueba del pulsador
   (pantalla → con MARCAR; pulsador o tecla → sin MARCAR). Cambia el ajuste «MARCAR en pantalla».
+- Flecha de las barras (tiempo y velocidad sugerida): siempre blanco intenso con borde negro grueso, un poco más grande
+  (antes, sin dato, iba transparente y se veía verde, sobre todo en el Deportivo).
 
 ## 1.0.50 (publicada 09/11/2026)
 - Arranque: Betómetro ya no espera a la red (~3,5 s menos); la Prueba completa dice cuánto tarda cada parte.
