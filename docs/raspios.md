@@ -99,6 +99,18 @@ Un archivo por carrera (auditoría 05, sección 4, opción B; `app/nucleo/almace
 | `app/servidor.cpp` `/personalizar` | Página del celu (`recursos/web/personalizar.html`): POST con llave y cabecera `X-Betometro`; fotos `inicio-h.jpg`/`inicio-v.jpg` en los datos |
 | `raspios/arranque/` | Pantalla de arranque: foto girada (`fondo.png`, 720×1280) y barra amarilla que se llena |
 
+## Buzón de comandos: ayuda a distancia (`app/buzon.cpp`, desde la 1.0.53)
+Para revisar o arreglar la Pi sin ssh, esté en la red que esté (Matías, 09/11/2026; la Pi va a estar en otra casa).
+- Pedido: un issue en `tvmaty2186/Betometro-reportes` (privado) con la etiqueta `comando`, abierto por tvmaty2186.
+  El comando va en un bloque ``` (o es todo el texto). Uno por issue.
+- La Pi mira cada 2 min (con ETag), y 8 s después de conectarse a una wifi. Nunca en carrera, sin internet ni con
+  «Ayuda a distancia» apagada (Ajustes → Conectividad, al final).
+- Corre con `systemd-run --wait --pipe` (como root, fuera del encierro del servicio), hasta 5 min. Contesta con la
+  salida como comentario y cierra el issue. Usa la llave de los reportes (`reportes.token`: Issues lectura y escritura).
+- Para reiniciar Betómetro, que no corte la respuesta: `(sleep 3; systemctl restart betometro) >/dev/null 2>&1 &`.
+  Si igual se corta en el medio, al volver contesta «Se cortó en el medio».
+- Hechos: `/var/lib/betometro/buzon.hechos` (no se repiten).
+
 ## Cosas de la pantalla y del arranque (lo que costó)
 - La pantalla es de **5"**, no de 7". Con `dtoverlay=vc4-kms-dsi-ili9881-5inch`.
 - La Pi 3 tiene además una **salida de TV (720×480)**. En Plymouth, `Window.GetWidth()` sin número da la pantalla **más chica**: la foto salía apretada en un costado. El script busca la pantalla más grande (`Window.GetWidth(i)`) y vuelve a medir mientras arranca.

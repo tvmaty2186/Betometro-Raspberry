@@ -34,7 +34,7 @@ if(BETO_PROGRAMA)
   find_package(Qt6 6.5 QUIET COMPONENTS Quick Svg Multimedia Network)
   if(Qt6_FOUND)
     qt_standard_project_setup(REQUIRES 6.5)
-    qt_add_executable(betometro app/main.cpp app/contexto.h ${BETO_DATOS} app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/vigilante.h app/vigilante.cpp app/arranque.h app/clima.h app/clima.cpp app/sistema.h app/audio.h app/audio.cpp app/simulacion.h app/simulacion.cpp app/prueba_completa.h app/prueba_completa.cpp app/tienda.h app/tienda.cpp
+    qt_add_executable(betometro app/main.cpp app/contexto.h ${BETO_DATOS} app/crono.h app/crono.cpp app/gps.h app/gps.cpp app/qr.h app/qr.cpp app/wifi.h app/wifi.cpp app/servidor.h app/servidor.cpp app/control_remoto.h app/control_remoto.cpp app/pulsador_gpio.h app/pulsador_gpio.cpp app/reportes.h app/reportes.cpp app/salud.h app/salud.cpp app/vigilante.h app/vigilante.cpp app/arranque.h app/clima.h app/clima.cpp app/buzon.h app/buzon.cpp app/sistema.h app/audio.h app/audio.cpp app/simulacion.h app/simulacion.cpp app/prueba_completa.h app/prueba_completa.cpp app/tienda.h app/tienda.cpp
       app/camara.h app/camara.cpp app/actualizador.h app/actualizador.cpp app/hdmi.h app/hdmi.cpp app/imagen_video.h app/imagen_video.cpp app/video_gst.h app/video_gst.cpp
       app/drive.h app/drive.cpp app/drive_logica.h app/drive_logica.cpp
       app/terceros/qrcodegen/qrcodegen.cpp)
@@ -129,6 +129,12 @@ if(BETO_PRUEBAS)
     target_include_directories(prueba_drive PRIVATE app)
     target_link_libraries(prueba_drive PRIVATE Qt6::Core)
     add_test(NAME drive COMMAND prueba_drive)
+    add_executable(prueba_buzon pruebas/programa/prueba_buzon.cpp app/buzon.cpp app/buzon.h)
+    target_include_directories(prueba_buzon PRIVATE app)
+    target_link_libraries(prueba_buzon PRIVATE Qt6::Core Qt6::Network)
+    target_compile_definitions(prueba_buzon PRIVATE BETO_VERSION="${PROJECT_VERSION}")
+    set_target_properties(prueba_buzon PROPERTIES AUTOMOC ON)
+    add_test(NAME buzon COMMAND prueba_buzon)
     add_executable(prueba_clima pruebas/programa/prueba_clima.cpp app/clima.cpp app/clima.h)
     target_include_directories(prueba_clima PRIVATE app)
     target_compile_definitions(prueba_clima PRIVATE BETO_VERSION="${PROJECT_VERSION}" BETO_PRUEBA_DIR="${CMAKE_SOURCE_DIR}/pruebas/programa")

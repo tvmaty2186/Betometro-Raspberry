@@ -21,3 +21,9 @@ description: Leer los reportes automáticos que manda la Pi (issues de tvmaty218
 - Para reproducir con datos reales: la copia `Betómetro/betometro.json` está en el Google Drive de Matías
   (se pone como `<datos>/betometro.json` y se migra al arrancar).
 - Responderle corto: qué fue, si es un error del programa o algo esperable, y qué se hace.
+
+## Revisar la Pi a distancia (buzón, desde 1.0.53)
+- Crear un issue en `tvmaty2186/Betometro-reportes` con la etiqueta `comando` y el comando en un bloque ```.
+  La Pi contesta en 2 a 4 minutos con un comentario y lo cierra (si tiene internet y no está en carrera).
+- Programar un recordatorio (`send_later`, 4 min) y leer los comentarios del issue. Detalle en `docs/raspios.md`.
+- Nada que pueda borrar carreras o dejar la Pi sin arrancar sin el OK de Matías.

@@ -95,6 +95,9 @@ TPantalla {
                     Senal { nivel: modelData.senal; grosor: 8; paso: 7 }
                 }
             }
+            // Buzón de comandos por GitHub (Matías, 09/11/2026): para revisar la Pi a distancia, sin ssh
+            TFila { etiqueta: "Ayuda a distancia"; detalle: "Revisar y arreglar por internet"
+                TLlave { prendida: raiz.a.buzon !== false; onCambiada: v => Datos.ponerCfg("buzon", v) } }
         }
     }
 

@@ -51,6 +51,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "vigilante.h"
 #include "arranque.h"
 #include "clima.h"
+#include "buzon.h"
 #include "qr.h"
 #include "sistema.h"
 #include "actualizador.h"
@@ -258,6 +259,16 @@ int main(int argc, char* argv[]) {
         static bool antes = false;
         const bool ahora = !wifi.conectada().isEmpty() && !wifi.propia();
         if (ahora && !antes) QTimer::singleShot(5000, &clima, [&clima] { clima.seConecto(); });   // que termine de conectar
+        antes = ahora;
+    });
+    // Buzón de comandos por GitHub (ayuda a distancia): cada 2 min, solo con internet, sin carrera y si está prendido
+    Buzon buzon(carpeta);
+    buzon.puede = [&] { return !wifi.conectada().isEmpty() && !wifi.propia() && !crono.enCurso() && datos.config()["buzon"].aBool(true); };
+    if (qEnvironmentVariableIsSet("BETO_RASPBERRY")) buzon.empezar();
+    QObject::connect(&wifi, &Wifi::cambio, &buzon, [&wifi, &buzon] {
+        static bool antes = false;
+        const bool ahora = !wifi.conectada().isEmpty() && !wifi.propia();
+        if (ahora && !antes) QTimer::singleShot(8000, &buzon, [&buzon] { buzon.revisar(); });
         antes = ahora;
     });
     marca("wifi");

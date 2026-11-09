@@ -100,6 +100,10 @@ Arreglos por dentro: recorrido que no se pierde, instalador seguro con vuelta at
 ssh, arranque más rápido, pruebas antes de publicar. **Falta probar en la Pi:** hora del GPS sin wifi, vuelta atrás
 automática y el arranque.
 
+## 1.0.53 (sin publicar, en preparación)
+- Buzón de comandos por GitHub («Ayuda a distancia», en Conectividad): Claude revisa y arregla la Pi a distancia,
+  sin ssh. Cada 2 min, solo con internet y nunca en carrera. Ver docs/raspios.md.
+
 ## 1.0.52 (publicada 09/11/2026)
 - Carrera nueva: arranca con todas las vueltas medidas (antes, la última elección de Práctica; de fábrica impares).
   Práctica: de fábrica «Todas»; recuerda lo último que se eligió.
