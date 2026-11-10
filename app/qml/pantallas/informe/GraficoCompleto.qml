@@ -452,7 +452,7 @@ Tarjeta { datos: true;
     ElegirVuelta {
         id: elegirVuelta
         visible: !caja.rec && lista.length > 1
-        x: 250; width: parent.width - 500; y: parent.height - height - 12
+        x: 300; width: parent.width - 600; y: parent.height - height - 12   // sin pisar «Viendo km…»
         vueltas: caja.vueltas; largadas: caja.inf.largadas || 1; conTodas: true
         elegida: caja.vueltaElegida
         onElegir: (i) => caja.abrir(i)

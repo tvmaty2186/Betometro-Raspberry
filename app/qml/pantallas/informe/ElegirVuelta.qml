@@ -46,6 +46,12 @@ Item {
         MouseArea { anchors.fill: parent; anchors.margins: -4; enabled: !parent.apagado; onClicked: parent.tocado() }
     }
 
+    // Pocas vueltas: las flechas pegadas a los botones, todo centrado (10/11/2026: quedaban lejos)
+    Item {
+        id: centro
+        height: parent.height
+        width: Math.min(parent.width, fila.width + 2 * (62 + 10))
+        anchors.horizontalCenter: parent.horizontalCenter
     Boton { id: ant; anchors.left: parent.left; texto: "‹"; apagado: raiz.pos === 0; onTocado: raiz.mover(-1) }
     Boton { id: sig; anchors.right: parent.right; texto: "›"; apagado: raiz.pos >= 0 && raiz.pos === raiz.lista.length - 1; onTocado: raiz.mover(1) }
     Flickable {
@@ -78,5 +84,6 @@ Item {
             else if (b.x + b.width > contentX + width) contentX = b.x + b.width - width;
         }
         Connections { target: raiz; function onElegidaChanged() { Qt.callLater(desliza.verElegida); } }
+    }
     }
 }

@@ -41,7 +41,7 @@ TPantalla {
     // ---- Arriba: ahora o el día elegido
     Rectangle {
         id: arriba
-        width: raiz.area.width; height: raiz.h ? 250 : 470
+        width: raiz.area.width; height: raiz.h ? 250 : 540   // parada: los botones en una fila abajo, sin tapar lluvia y viento (10/11/2026)
         radius: Math.max(14, Tema.radio * 1.5)
         border { width: 3; color: Tema.bordeCromo }
         gradient: Gradient { GradientStop { position: 0; color: Qt.lighter(Tema.caja1, 1.15) } GradientStop { position: 1; color: Tema.caja2 } }
@@ -77,7 +77,7 @@ TPantalla {
         }
         Grid {
             id: botones
-            columns: raiz.h ? 1 : 2
+            columns: raiz.h ? 1 : 3
             x: raiz.h ? parent.width - width - 24 : (parent.width - width) / 2
             y: raiz.h ? (parent.height - height) / 2 : parent.height - height - 20
             spacing: 16
@@ -86,7 +86,7 @@ TPantalla {
                 property string icono
                 property bool prendida
                 signal tocada()
-                width: 220; height: raiz.h ? 62 : 72; radius: 22
+                width: raiz.h ? 220 : 200; height: raiz.h ? 62 : 72; radius: 22
                 color: prendida ? Tema.acento : Qt.rgba(0, 0, 0, 0.4)
                 border { width: 3; color: prendida ? Tema.acento : Tema.bordeCromo }
                 Row { anchors.centerIn: parent; spacing: 10

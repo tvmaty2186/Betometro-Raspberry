@@ -122,7 +122,7 @@ QtObject {
     readonly property string fuente: de("Barlow", "Barlow", "Chakra Petch Medium", "B612", "Barlow")
     readonly property string fuente600: de("Barlow SemiBold", "Barlow SemiBold", "Chakra Petch", "B612", "Barlow SemiBold")
     readonly property string fuente800: de("Barlow ExtraBold", "Barlow ExtraBold", "Chakra Petch", "B612", "Barlow ExtraBold")
-    readonly property string fuenteNum: de("Barlow Condensed", "Big Shoulders Display Thin", "Chakra Petch", "B612 Mono", "Barlow Condensed")
+    readonly property string fuenteNum: de("Barlow Condensed", "Big Shoulders Display Thin", "Chakra Petch", "B612", "Barlow Condensed")   // Cabina: B612 (no Mono): «3:00:8» sin los huecos de la Mono (10/11/2026)
     readonly property bool cursiva: avispon   // como la app: números en cursiva solo en Avispón (no en sol)
     // «Pasado» de la cuenta regresiva y «ATRASADO» (--warn) y «Pasado el ideal» de la progresiva (--mal), como la app
     // Brillo alrededor de los widgets (0 0 20px 5px var(--glow) de la app); Avispón y sol no tienen
