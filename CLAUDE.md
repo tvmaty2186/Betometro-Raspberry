@@ -75,7 +75,7 @@ El dueño es **Matías Russo** (tvmaty2186@gmail.com). Corre con un **Peugeot 40
 
 ## Versiones y publicación
 
-Última publicada: **1.0.57** (10/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
+Última publicada: **1.0.58** (10/11/2026). Para publicar: subir el número en `CMakeLists.txt` y empujar un commit con `[publicar]` en el mensaje. Detalle en [docs/raspios.md](docs/raspios.md).
 
 ## Compilar y probar
 

@@ -95,7 +95,7 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
-## Para la 1.0.58 (hecho, sin publicar)
+## 1.0.58 (publicada 10/11/2026)
 Del chequeo del 10/11/2026 (recorrido de 39,8 km en el Sentra: GPS impecable, videos ya pasados a MP4):
 - **Actualizar sin internet:** un solo aviso y no reintenta cada minuto; busca al conectarse a una wifi o cada 15 min.
 - **Tensión baja corta:** el bit «hubo tensión baja» (0x10000) se avisa una vez por arranque (antes un bajón de
