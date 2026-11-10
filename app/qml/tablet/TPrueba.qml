@@ -25,7 +25,7 @@ TPantalla {
     Item {
         id: izq
         width: raiz.h ? raiz.area.width - 420 - 20 : raiz.area.width
-        height: raiz.h ? raiz.area.height : raiz.area.height - 560
+        height: raiz.h ? raiz.area.height : raiz.area.height - 680   // parada: lugar para el QR y los 3 botones (10/11/2026: el último se salía)
         Rectangle {
             id: cabeza
             width: parent.width; height: 118; radius: Math.max(14, Tema.radio * 1.7)
@@ -137,7 +137,7 @@ TPantalla {
     }
     TBoton {
         id: empezar
-        x: caja.x; y: caja.y + caja.height + 16; width: caja.width; height: raiz.h ? 100 : 106
+        x: caja.x; y: caja.y + caja.height + 16; width: caja.width; height: raiz.h ? 100 : 96
         tipo: "acento"; icono: ""; tamNombre: 27; activo: !raiz.corre
         nombre: raiz.corre ? "Probando…" : raiz.e ? "Probar de nuevo" : "Empezar la prueba"
         dato: raiz.corre ? "Paso " + PruebaCompleta.paso + " de " + PruebaCompleta.total : "Tarda 3 a 5 minutos"
@@ -145,7 +145,7 @@ TPantalla {
     }
     TBoton {
         id: mandar
-        x: caja.x; y: empezar.y + empezar.height + 16; width: caja.width; height: raiz.h ? 100 : 106
+        x: caja.x; y: empezar.y + empezar.height + 16; width: caja.width; height: raiz.h ? 100 : 96
         icono: ""; tamNombre: 24; nombre: "Mandar el resultado al desarrollador"; activo: !!raiz.e && !raiz.corre
         onTocado: Navegacion.avisar(PruebaCompleta.mandar() ? "Mandando el resultado por internet" : "Sin llave para mandarlo: usá el QR con el celu")
     }

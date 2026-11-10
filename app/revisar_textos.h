@@ -16,6 +16,7 @@ namespace revisar {
 
 struct Texto {
     QQuickItem* item;
+    bool desliza = false;   // está en una lista que se desliza
     QRectF r;          // lo que ocupa de verdad, en coordenadas de la ventana
     QQuickItem* caja;  // el cuadro que lo contiene (tarjeta, botón, fila…)
     QString texto;
@@ -73,9 +74,11 @@ inline void juntar(QQuickItem* i, std::vector<Texto>& v, QStringList& avisos) {
             const QRectF vista = p->mapRectToScene(QRectF(0, 0, p->width(), p->height()));
             if (!vista.intersects(r)) return;
             if (caja == p) caja = nullptr;
-            break;
+            Texto t{i, true, r, caja, limpio(texto)};
+            v.push_back(t);
+            return;
         }
-    v.push_back({i, r, caja, limpio(texto)});
+    v.push_back({i, false, r, caja, limpio(texto)});
 }
 
 // Devuelve los avisos (vacío = todo bien)
@@ -87,6 +90,7 @@ inline QStringList revisar(QQuickWindow* ventana) {
     const QRectF pantalla(0, 0, ventana->width(), ventana->height());
     for (const Texto& t : v) {
         // 2) Se sale de la pantalla o de su cuadro
+        if (t.desliza) continue;   // en una lista que se desliza, lo que no se ve se ve deslizando
         if (!pantalla.adjusted(-2, -2, 2, 2).contains(t.r))
             avisos << QStringLiteral("SALE DE LA PANTALLA · «%1»").arg(t.texto);
         else if (t.caja) {
@@ -100,6 +104,8 @@ inline QStringList revisar(QQuickWindow* ventana) {
     // 3) Dos textos que se pisan (más de 3 px en los dos sentidos)
     for (size_t a = 0; a < v.size(); ++a)
         for (size_t b = a + 1; b < v.size(); ++b) {
+            // Solo dentro del mismo cuadro: un menú o una ventana encima tapa lo de abajo (no es pisarse)
+            if (v[a].caja != v[b].caja) continue;
             const QRectF x = v[a].r.intersected(v[b].r);
             if (x.width() > 3 && x.height() > 3)
                 avisos << QStringLiteral("SE PISAN  «%1» con «%2»").arg(v[a].texto, v[b].texto);
