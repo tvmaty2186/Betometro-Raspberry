@@ -58,6 +58,7 @@ static void alTerminar(int) { char c = 1; if (::write(gAvisoSalir[0], &c, 1) < 0
 #include "tienda.h"
 #include "camara.h"
 #include "pulsador_gpio.h"
+#include "revisar_textos.h"
 #include "reportes.h"
 #include "simulacion.h"
 #include "prueba_completa.h"
@@ -429,6 +430,9 @@ int main(int argc, char* argv[]) {
         const QString archivo = op.value(oCaptura), archivoTele = op.value(oCapturaTele);
         QTimer::singleShot(op.value(oEspera).toInt(), &app, [ventana, archivo, archivoTele] {
             bool ok = true;
+            // BETO_REVISAR_TEXTOS=1: lista los textos que no entran, se salen o se pisan (para repasar los temas)
+            if (qEnvironmentVariableIsSet("BETO_REVISAR_TEXTOS"))
+                for (const QString& a : revisar::revisar(ventana)) fprintf(stderr, "REVISAR %s\n", qPrintable(a));
             if (!archivo.isEmpty()) {
                 ok = ventana && ventana->grabWindow().save(archivo);
                 if (!ok) qWarning("No pude guardar la captura en %s", qPrintable(archivo));
