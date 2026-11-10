@@ -21,6 +21,10 @@ description: Leer los reportes automáticos que manda la Pi (issues de tvmaty218
 - Para reproducir con datos reales: la copia `Betómetro/betometro.json` está en el Google Drive de Matías
   (se pone como `<datos>/betometro.json` y se migra al arrancar).
 - Responderle corto: qué fue, si es un error del programa o algo esperable, y qué se hace.
+- **Siempre buscar mejoras** (pedido de Matías, 10/11/2026): en cada análisis de reportes o chequeo, además de
+  explicar lo que pasó, anotar los errores chicos y lo que se puede optimizar (avisos que se repiten, reintentos,
+  cosas lentas, mensajes inútiles) y proponerlos como arreglos para la próxima versión. Lo que él apruebe va a
+  PENDIENTES.md.
 
 ## Revisar la Pi a distancia (buzón, desde 1.0.53)
 - Crear un issue en `tvmaty2186/Betometro-reportes` con la etiqueta `comando` y el comando en un bloque ```.
