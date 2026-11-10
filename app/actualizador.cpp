@@ -102,10 +102,14 @@ void Actualizador::buscar() {
             // La API de GitHub deja buscar 60 veces por hora por casa (todas las compus juntas) y después
             // contesta «prohibido». Por eso, si falla, se pregunta a la página común de GitHub, que no tiene
             // ese límite (04/11/2026: la Pi decía «sin internet» con el wifi andando).
+            // Sin internet (no encuentra el nombre: wifi sin salida, o sin wifi): ni la página, ni aviso cada vez.
+            // Se vuelve a buscar al conectarse a una wifi (main.cpp) o en 15 minutos (10/11/2026: llenaba el reporte)
+            if (r->error() == QNetworkReply::HostNotFoundError) { sinInternet(r->errorString()); return; }
             qWarning("Actualizar: la API no contestó (%s), pruebo la página", qPrintable(r->errorString()));
             buscarPagina();
             return;
         }
+        sinRedAvisado_ = false;
         const QJsonObject o = QJsonDocument::fromJson(r->readAll()).object();
         QString v = o.value(QStringLiteral("tag_name")).toString().remove(QLatin1Char('v'));
         // Solo números de versión (va a un nombre de archivo): «1.0.36» (auditoría 12)
@@ -143,13 +147,15 @@ void Actualizador::buscarPagina() {
         r->deleteLater();
         const QString destino = r->header(QNetworkRequest::LocationHeader).toUrl().toString();
         const QString v = destino.section(QLatin1String("/tag/v"), 1, 1).section('/', 0, 0);
-        if (v.isEmpty() || !QRegularExpression(QStringLiteral("^\\d+\\.\\d+\\.\\d+$")).match(v).hasMatch()) {   // ahora sí: sin internet. De nuevo en un minuto
+        if (v.isEmpty() || !QRegularExpression(QStringLiteral("^\\d+\\.\\d+\\.\\d+$")).match(v).hasMatch()) {   // ahora sí: sin internet
+            if (r->error() == QNetworkReply::HostNotFoundError) { sinInternet(r->errorString()); return; }
             qWarning("Actualizar: no pude buscar (%s)", qPrintable(r->errorString()));
             busqueda_ = QStringLiteral("sinred");
             emit cambio();
-            reintento_.start();
+            reintento_.start();   // otro problema (GitHub lento, se cortó): de nuevo en un minuto
             return;
         }
+        sinRedAvisado_ = false;
         ultima_ = v;
         busqueda_ = QStringLiteral("aldia");
         if (masNueva(v, version())) {
@@ -288,4 +294,12 @@ void Actualizador::simular() {
     } else {
         sim_.stop();
     }
+}
+
+// Sin internet: se anota una sola vez hasta que vuelva a andar, y no se reintenta cada minuto
+void Actualizador::sinInternet(const QString& error) {
+    if (!sinRedAvisado_) qWarning("Actualizar: sin internet (%s); se busca al conectarse a una wifi", qPrintable(error));
+    sinRedAvisado_ = true;
+    busqueda_ = QStringLiteral("sinred");
+    emit cambio();
 }

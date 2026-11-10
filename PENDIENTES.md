@@ -95,6 +95,15 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## Para la 1.0.58 (hecho, sin publicar)
+Del chequeo del 10/11/2026 (recorrido de 39,8 km en el Sentra: GPS impecable, videos ya pasados a MP4):
+- **Actualizar sin internet:** un solo aviso y no reintenta cada minuto; busca al conectarse a una wifi o cada 15 min.
+- **Tensión baja corta:** el bit «hubo tensión baja» (0x10000) se avisa una vez por arranque (antes un bajón de
+  menos de 2 s no quedaba anotado; la Pi tenía throttled=0x50000 sin aviso). Con el cargador de 60 W del Sentra;
+  Matías va a poner una fuente de 5 A propia.
+- **Cámara que no arranca al primer intento** (en cada carrera; anda en el 2.º): el aviso ahora dice el motivo,
+  para arreglarlo con el dato. Puede ser la tensión baja (el USB se reinicia).
+
 ## 1.0.57 (publicada 10/11/2026)
 - **Paso a MP4 trabado** (09/11/2026): un .mkv cortado dejaba al ayudante trabado para siempre (la Pi lo confirmó:
   el .parte no crecía desde hacía 25 min). «Preparando el video» no se iba, no dejaba apagar y los otros 6 videos

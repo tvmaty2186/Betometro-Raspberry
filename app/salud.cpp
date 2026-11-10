@@ -73,12 +73,15 @@ void Salud::revisar() {
     const QByteArray t = leer(QString::fromLatin1(kTemperatura));
     const int temp = t.isEmpty() ? -1 : t.toInt() / 1000;
     const bool sabe = !e.isEmpty() || temp >= 0;
-    const bool baja0 = tensionBaja(), calor0 = calor();
+    const bool baja0 = tensionBaja(), calor0 = calor(), hubo0 = estado_ & 0x10000;
     const bool cambio_ = nuevo != estado_ || temp != temperatura_ || sabe != sabe_;
     estado_ = nuevo;
     temperatura_ = temp;
     sabe_ = sabe;
     if (tensionBaja() && !baja0) emit aviso(QStringLiteral("Tensión baja: la fuente no da 5 V suficientes (revisar el convertidor y el cable)"));
+    // Bit 16: «hubo tensión baja desde que prendió». Un bajón de menos de 2 s no se ve en el bit 0 y no quedaba
+    // anotado (chequeo del 10/11/2026: throttled=0x50000 sin ningún aviso). Se avisa una vez por arranque.
+    else if ((estado_ & 0x10000) && !hubo0) emit aviso(QStringLiteral("Hubo tensión baja un momento: la fuente no alcanzó (revisar el cargador y el cable)"));
     if (calor() && !calor0) emit aviso(QStringLiteral("Calor: el procesador se frena por temperatura (%1 °C)").arg(temp));
     if (cambio_) emit cambio();
     if (carrera_) aplicar();

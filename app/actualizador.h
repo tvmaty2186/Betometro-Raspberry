@@ -43,6 +43,8 @@ public:
     Q_INVOKABLE void buscar();             // por internet (si hay wifi)
     Q_INVOKABLE bool buscarPendrive();     // un betometro-pi-X.Y.Z.tar.gz en un pendrive
     void buscarPagina();                   // plan B sin la API de GitHub
+    void sinInternet(const QString& error);   // sin internet: un aviso y sin reintentar cada minuto
+    bool sinRedAvisado_ = false;
     Q_INVOKABLE void actualizar();         // baja (si hace falta) e instala
     Q_INVOKABLE void reiniciar();
 

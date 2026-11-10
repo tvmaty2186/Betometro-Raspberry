@@ -111,7 +111,9 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
         if (grabando() || !hay() || !datos_->config()["camara"].aBool(false)) { emit grabandoChanged(); return; }
         ++reintentos_;
         const QString nombre = nombreBase_ + '-' + QChar('a' + reintentos_);
-        qWarning("Cámara: no arrancó, se vuelve a probar (%d de 2) en %s", reintentos_, qPrintable(nombre));
+        // Con el motivo (lo que dijo el ayudante), para ver por qué falla el primer intento (10/11/2026)
+        qWarning("Cámara: no arrancó (%s), se vuelve a probar (%d de 2) en %s",
+                 qPrintable(falla_.isEmpty() ? QStringLiteral("sin detalle, código %1").arg(grab_.exitCode()) : falla_), reintentos_, qPrintable(nombre));
         if (arrancar(nombre)) {
             if (quedabanMs_ > 0) detenerTimer_.start(quedabanMs_);
             emit reintento();
