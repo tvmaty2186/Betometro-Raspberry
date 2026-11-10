@@ -13,21 +13,31 @@ TPantalla {
     function ponerTiempo(v) { tiempoIdealMs = Math.max(5000, Math.min(5999000, v)); Datos.ponerCfg("tiempoIdealMs", tiempoIdealMs); }
     // Casilleros del tiempo: qué se edita («m»/«s») y lo escrito, de izquierda a derecha
     property string casillero: ""
-    Component.onCompleted: if (Contexto.prueba === "casillero") { tocarCasillero("s"); escribir("3"); }   // solo para capturas
+    Component.onCompleted: {   // solo para capturas
+        if (Contexto.prueba === "casillero") { tocarCasillero("s"); escribir("3"); }
+        if (Contexto.prueba === "cero-minutos") { tocarCasillero("m"); escribir("0"); aceptarCasillero(); escribir("5"); escribir("0"); aceptarCasillero(); }
+    }
     property string escrito: ""
-    function tocarCasillero(que) { casillero = que; escrito = ""; }
+    function tocarCasillero(que) { if (que === "m") minPendiente = -1; casillero = que; escrito = ""; }
     function escribir(d) {
         if (escrito.length >= 2) return;
         const n = escrito + d;
         if (casillero === "s" && parseInt(n) > 59) { Navegacion.avisar("Los segundos van de 0 a 59"); return; }
         escrito = n;
     }
+    // 0 minutos con los segundos en 0 (de 4:00 a 0:50): antes se rechazaba por «menos de 5 s» y no se podía poner
+    // 0 minutos (Matías, 10/11/2026). Ahora se guardan los 0 minutos y se abren los segundos para escribirlos.
+    property int minPendiente: -1
     function aceptarCasillero() {
-        const m = Math.floor(tiempoIdealMs / 60000), s = Math.floor(tiempoIdealMs / 1000) % 60;
+        const m = minPendiente >= 0 ? minPendiente : Math.floor(tiempoIdealMs / 60000), s = Math.floor(tiempoIdealMs / 1000) % 60;
         const v = escrito === "" ? -1 : parseInt(escrito);
         const nuevo = ((casillero === "m" && v >= 0 ? v : m) * 60 + (casillero === "s" && v >= 0 ? v : s)) * 1000;   // décimas en 0
+        const eraMinutos = casillero === "m";
         casillero = ""; escrito = "";
-        if (nuevo >= 5000) ponerTiempo(nuevo); else Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos");
+        if (nuevo >= 5000) { minPendiente = -1; ponerTiempo(nuevo); return; }
+        if (eraMinutos) { minPendiente = v; casillero = "s"; Navegacion.avisar("Ahora escribí los segundos"); return; }
+        minPendiente = -1;
+        Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos");
     }
     function ponerDist(v) { distanciaM = Math.max(0, Math.min(1000000, v)); Datos.ponerCfg("distanciaM", distanciaM); }
 
@@ -46,11 +56,11 @@ TPantalla {
             Text { anchors.right: parent.right; anchors.rightMargin: 24; y: 6
                    text: raiz.casillero === "" ? Formato.tiempo(raiz.tiempoIdealMs)
                          : raiz.casillero === "m" ? (raiz.escrito || "_") + ":" + String(Math.floor(raiz.tiempoIdealMs / 1000) % 60).padStart(2, "0") + ":0"
-                         : Math.floor(raiz.tiempoIdealMs / 60000) + ":" + (raiz.escrito + "__").slice(0, 2) + ":0"
+                         : (raiz.minPendiente >= 0 ? raiz.minPendiente : Math.floor(raiz.tiempoIdealMs / 60000)) + ":" + (raiz.escrito + "__").slice(0, 2) + ":0"
                    color: Tema.numero; font { family: Tema.fuenteNum; italic: Tema.cursiva; weight: Font.Bold; pixelSize: 36 } }
             TCasilleros {
                 x: 24; anchors.bottom: parent.bottom; anchors.bottomMargin: 14
-                ms: raiz.tiempoIdealMs; editando: raiz.casillero; escrito: raiz.escrito
+                ms: raiz.minPendiente >= 0 ? (raiz.minPendiente * 60 + Math.floor(raiz.tiempoIdealMs / 1000) % 60) * 1000 : raiz.tiempoIdealMs; editando: raiz.casillero; escrito: raiz.escrito
                 onCambiar: v => raiz.ponerTiempo(v)
                 onEditar: que => raiz.tocarCasillero(que)
             }

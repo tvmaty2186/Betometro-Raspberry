@@ -27,12 +27,19 @@ TPantalla {
         if (casillero === "s" && parseInt(n) > 59) { Navegacion.avisar("Los segundos van de 0 a 59"); return; }
         escrito = n;
     }
+    // 0 minutos con los segundos en 0 (de 4:00 a 0:50): antes se rechazaba por «menos de 5 s» y no se podía poner
+    // 0 minutos (Matías, 10/11/2026). Ahora se guardan los 0 minutos y se abren los segundos para escribirlos.
+    property int minPendiente: -1
     function aceptarCasillero() {
-        const m = Math.floor(tiempoIdealMs / 60000), s = Math.floor(tiempoIdealMs / 1000) % 60;
+        const m = minPendiente >= 0 ? minPendiente : Math.floor(tiempoIdealMs / 60000), s = Math.floor(tiempoIdealMs / 1000) % 60;
         const v = escrito === "" ? -1 : parseInt(escrito);
         const nuevo = ((casillero === "m" && v >= 0 ? v : m) * 60 + (casillero === "s" && v >= 0 ? v : s)) * 1000;   // décimas en 0
+        const eraMinutos = casillero === "m";
         casillero = ""; escrito = "";
-        if (nuevo >= 5000) tiempoIdealMs = nuevo; else Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos");
+        if (nuevo >= 5000) { minPendiente = -1; tiempoIdealMs = nuevo; return; }
+        if (eraMinutos) { minPendiente = v; casillero = "s"; Navegacion.avisar("Ahora escribí los segundos"); return; }
+        minPendiente = -1;
+        Navegacion.avisar("El tiempo ideal tiene que ser de al menos 5 segundos");
     }
     property string patron: c.patron
     property string lugar: c.lugar || ""
@@ -75,9 +82,9 @@ TPantalla {
                             onTocado: { raiz.campo = "fecha"; teclado.abrir("fecha", "Fecha de la carrera", Formato.desdeIso(raiz.fecha)); } } }
             TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Tiempo ideal"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TCasilleros { chico: true; etiquetas: false
-                              ms: raiz.tiempoIdealMs; editando: raiz.casillero; escrito: raiz.escrito
+                              ms: raiz.minPendiente >= 0 ? (raiz.minPendiente * 60 + Math.floor(raiz.tiempoIdealMs / 1000) % 60) * 1000 : raiz.tiempoIdealMs; editando: raiz.casillero; escrito: raiz.escrito
                               onCambiar: v => raiz.tiempoIdealMs = Math.max(5000, v)
-                              onEditar: que => { raiz.casillero = que; raiz.escrito = ""; } } }
+                              onEditar: que => { if (que === "m") raiz.minPendiente = -1; raiz.casillero = que; raiz.escrito = ""; } } }
             TFila { visible: !c.recorrido; height: raiz.h ? 90 : 96; etiqueta: "Distancia"; opacity: raiz.fijos ? 0.5 : 1; enabled: !raiz.fijos
                 TMasMenos { texto: Formato.miles(raiz.distanciaM) + " m"; anchoTexto: 190
                             onMenos: raiz.distanciaM = Math.max(0, raiz.distanciaM - 50); onMas: raiz.distanciaM = Math.min(1000000, raiz.distanciaM + 50)
