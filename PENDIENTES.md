@@ -95,7 +95,12 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
-## Para la 1.0.57 (hecho, sin publicar)
+## 1.0.57 (publicada 10/11/2026)
+- **Paso a MP4 trabado** (09/11/2026): un .mkv cortado dejaba al ayudante trabado para siempre (la Pi lo confirmó:
+  el .parte no crecía desde hacía 25 min). «Preparando el video» no se iba, no dejaba apagar y los otros 6 videos
+  nunca se pasaban. Ahora un vigía lo corta si no avanza en 2 min (o pasa 60 min); queda anotado en
+  `videos/mp4-fallados.txt` y no se reintenta. El .mkv se sigue viendo igual.
+- «Preparando el video» **ya no bloquea** Apagar/Reiniciar (cortarlo no pierde nada): solo avisa.
 - Apagar/Reiniciar también bloqueados **actualizando** (bajando o instalando), con la **Prueba completa** en marcha y
   con un **comando del buzón** corriendo. Antes de apagar se espera a que la carrera que se está guardando quede en
   la tarjeta (`Sistema::antesDeApagar` → `Datos::guardarYa`).

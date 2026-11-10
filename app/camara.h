@@ -8,6 +8,7 @@
 #include <QProcess>
 #include <QSize>
 #include <QStringList>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QUrl>
 #include <QVariant>
@@ -112,7 +113,14 @@ private:
     QProcess grab_, vistaProc_, nivelProc_, micProc_, mp4_;
     QString mp4Entrada_;                      // el .mkv que se está pasando
     bool mp4Error_ = false, enCarrera_ = false;
-    QStringList mp4Fallados_;                 // no se reintentan hasta reiniciar
+    QStringList mp4Fallados_;                 // no se reintentan (quedan anotados en mp4-fallados.txt)
+    // Vigía del paso a MP4 (09/11/2026): un .mkv cortado (se cortó la luz grabando) dejaba al ayudante trabado
+    // para siempre: «Preparando el video» no se iba, no dejaba apagar y los demás videos no se pasaban nunca.
+    QTimer mp4Vigia_;
+    qint64 mp4Tam_ = -1;
+    QElapsedTimer mp4Quieto_, mp4Total_;
+    void vigilarMp4();
+    void anotarFallado(const QString& mkv);
     QTimer detenerTimer_;
     QTimer reintento_;                        // los 2 s antes de volver a probar
     bool arrancar(const QString& nombreBase);

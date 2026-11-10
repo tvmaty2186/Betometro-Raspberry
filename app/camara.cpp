@@ -93,6 +93,14 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
     for (QProcess* p : {&vistaProc_, &micProc_}) p->setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(5); });
     grab_.setChildProcessModifier([] { [[maybe_unused]] const int r = ::nice(10); });
     QDir().mkpath(carpeta_);
+    {   // los que ya fallaron otras veces: no se reintentan en cada arranque
+        QFile f(carpeta_ + QStringLiteral("/mp4-fallados.txt"));
+        if (f.open(QIODevice::ReadOnly))
+            for (const QByteArray& l : f.readAll().split('\n'))
+                if (!l.trimmed().isEmpty()) mp4Fallados_ << carpeta_ + '/' + QString::fromUtf8(l.trimmed());
+    }
+    mp4Vigia_.setInterval(15000);
+    connect(&mp4Vigia_, &QTimer::timeout, this, &Camara::vigilarMp4);
     connect(this, &Camara::grabandoChanged, this, &Camara::enProcesoChanged);
     connect(this, &Camara::convirtiendoChanged, this, &Camara::enProcesoChanged);
     detenerTimer_.setSingleShot(true);
@@ -187,8 +195,12 @@ Camara::Camara(Datos* datos, const QString& carpetaDatos, QObject* padre)
         } else {
             QFile::remove(parte);
             // Falló en carrera: se reintenta después. Si falló fuera de carrera, no (queda el .mkv, que igual se ve)
-            if (!enCarrera_) mp4Fallados_ << mkv;
+            // Falló de verdad (el ayudante avisó un error o el vigía lo cortó): anotado para siempre. Cortado por otra
+            // cosa (se cerró Betómetro, se apagó): no, se reintenta la próxima vez. En carrera tampoco (se reintenta).
+            if (mp4Error_) anotarFallado(mkv);
+            else if (!enCarrera_ && estado == QProcess::NormalExit) mp4Fallados_ << mkv;
         }
+        mp4Vigia_.stop();
         emit convirtiendoChanged();
         actualizarLugar();
         QTimer::singleShot(1000, this, &Camara::revisarMp4);
@@ -441,6 +453,10 @@ void Camara::revisarMp4() {
         mp4_.setArguments(QStringList{QStringLiteral("mp4"), QStringLiteral("--entrada"), mp4Entrada_, QStringLiteral("--salida"), salida,
                                       QStringLiteral("--sonido"), sonido ? QStringLiteral("si") : QStringLiteral("no")});
         mp4_.start();
+        mp4Tam_ = -1;
+        mp4Quieto_.start();
+        mp4Total_.start();
+        mp4Vigia_.start();
         emit convirtiendoChanged();
         return;
     }
@@ -481,4 +497,26 @@ void Camara::actualizarLugar() {
               {"horas", qMax(0, qRound(libreMB / (kMBporHora * (datos_->config()["camaraCalidad"].aTexto("720p") == "480p" ? 0.5 : 1.0))))},
               {"porcentaje", d.isValid() && d.bytesTotal() > 0 ? double(usado) / d.bytesTotal() : 0.0}};
     emit lugarChanged();
+}
+
+// Cada 15 s mientras se pasa a MP4: si el archivo de salida no crece en 2 minutos (fuera de carrera y sin grabar,
+// que es cuando tiene el procesador) o lleva más de 60 minutos, se corta. El .mkv queda y se sigue viendo igual.
+void Camara::vigilarMp4() {
+    if (!convirtiendo()) { mp4Vigia_.stop(); emit convirtiendoChanged(); return; }   // no arrancó: que la pantalla se entere
+    const qint64 tam = QFileInfo(mp4Entrada_.left(mp4Entrada_.size() - 4) + QStringLiteral(".mp4.parte")).size();
+    if (tam != mp4Tam_ || enCarrera_ || grabando()) { mp4Tam_ = tam; mp4Quieto_.restart(); return; }
+    const bool quieto = mp4Quieto_.elapsed() > 120000, largo = mp4Total_.elapsed() > 60 * 60000;
+    if (!quieto && !largo) return;
+    qWarning("Video: el paso a MP4 de %s %s; se corta (el video se ve igual)", qPrintable(QFileInfo(mp4Entrada_).fileName()),
+             quieto ? "no avanzó en 2 min" : "lleva más de 60 min");
+    mp4Error_ = true;
+    mp4Vigia_.stop();
+    mp4_.kill();   // finished(): borra el .parte, lo anota como fallado y sigue con el próximo
+}
+
+void Camara::anotarFallado(const QString& mkv) {
+    if (mp4Fallados_.contains(mkv)) return;
+    mp4Fallados_ << mkv;
+    QFile f(carpeta_ + QStringLiteral("/mp4-fallados.txt"));
+    if (f.open(QIODevice::Append)) f.write(QFileInfo(mkv).fileName().toUtf8() + '\n');
 }

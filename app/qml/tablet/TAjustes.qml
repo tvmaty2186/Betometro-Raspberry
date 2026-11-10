@@ -19,7 +19,6 @@ TPantalla {
         : typeof PruebaCompleta !== "undefined" && PruebaCompleta && PruebaCompleta.estado === "corriendo" ? "Prueba completa en marcha"
         : typeof Buzon !== "undefined" && Buzon && Buzon.corriendo ? "Revisión a distancia en marcha"
         : typeof Camara !== "undefined" && Camara && Camara.grabando ? "Grabando video"
-        : typeof Camara !== "undefined" && Camara && Camara.convirtiendo ? "Preparando el video"
         : typeof Drive !== "undefined" && Drive && Drive.subiendo ? "Subiendo a Google Drive" : ""
     function seccion(s) { Navegacion.ir("ajustesSeccion", { seccion: s }); }
     readonly property var orden: ["auto", "tema", "voz", "velocidad", "pulsador", "red", "camara", "drive", "actualizar", "prueba", "apagar"]
@@ -121,7 +120,10 @@ TPantalla {
             Text {
                 id: pregunta
                 anchors { top: parent.top; topMargin: 26; horizontalCenter: parent.horizontalCenter }
-                text: raiz.ocupado ? raiz.ocupado + "…" : "¿Qué querés hacer?"; color: raiz.ocupado ? Tema.warn : Tema.tinta
+                // Pasando un video a MP4 no bloquea: cortarlo no pierde nada, sigue la próxima vez (09/11/2026)
+                readonly property bool preparando: typeof Camara !== "undefined" && !!Camara && Camara.convirtiendo
+                text: raiz.ocupado ? raiz.ocupado + "…" : preparando ? "El video se termina de preparar la próxima vez" : "¿Qué querés hacer?"
+                color: raiz.ocupado || preparando ? Tema.warn : Tema.tinta
                 width: parent.width - 52; horizontalAlignment: Text.AlignHCenter; fontSizeMode: Text.HorizontalFit; minimumPixelSize: 20
                 font { family: Tema.fuente800; italic: Tema.cursiva; pixelSize: 40 }
             }
