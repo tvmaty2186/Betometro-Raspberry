@@ -95,7 +95,7 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
-## Para la 1.0.59 (hecho, sin publicar): repaso de letras y cuadros
+## 1.0.59 (publicada 10/11/2026): repaso de letras y cuadros
 Revisor automático de textos (`app/revisar_textos.h`, `BETO_REVISAR_TEXTOS=1` con `--captura`): 33 pantallas × 5
 temas × 2 orientaciones. Arreglado:
 - **Cabina:** los números en B612 (antes B612 Mono): «0: 01: 5» se salía del cuadro y pisaba ± segundos; «3. 200 m»
@@ -103,6 +103,8 @@ temas × 2 orientaciones. Arreglado:
 - **Prueba completa parada:** «Manual del navegante» quedaba encima de «Mandar el resultado» y se salía (todos los temas).
 - **Clima parado:** los botones GPS / Buscar / A carrera tapaban lluvia y viento (ahora en una fila abajo).
 - **Mapa y gráfico completos:** las flechas ‹ › pegadas a los botones de vuelta; en el gráfico no pisan «Viendo km…».
+- **Tiempo ideal con 0 minutos** (de 4:00 a 0:50): se rechazaba por «menos de 5 s»; ahora abre los segundos.
+- Cámara: con buena alimentación arranca al primer intento (lo de antes era el USB que se reiniciaba por la tensión).
 
 ## 1.0.58 (publicada 10/11/2026)
 Del chequeo del 10/11/2026 (recorrido de 39,8 km en el Sentra: GPS impecable, videos ya pasados a MP4):
