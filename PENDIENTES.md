@@ -374,5 +374,5 @@ libre muestra más datos, sumando Faltan y Tiempo ideal. Armado de esa pantalla:
 
 ## Compras
 - Auriculares con cable (3,5 mm), pulsador (10 kΩ y 100 nF).
-- Para el auto: placa de borneras a tornillo para los GPIO, convertidor 12 → 5 V (3 A o más, ajustado a 5,1 V), fusible 3 A, cable de 0,75 mm², fichas GX12, cable espiralado, disipadores.
+- Para el auto: placa de borneras a tornillo para los GPIO, convertidor 12 → 5 V (3 A o más, ajustado a 5,1 V), fusible 3 A, cable de 0,75 mm², fichas GX12, cable espiralado. (Disipadores y cooler ya puestos, 11/11/2026.)
 - Webcam USB MJPEG 1080p gran angular (para el video).

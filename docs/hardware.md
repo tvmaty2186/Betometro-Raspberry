@@ -6,6 +6,7 @@
 - microSD SanDisk Ultra de 16 GB
 - Módulo GPS GY-NEO-M8N (u-blox NEO-M8N-0-10) con SMA, micro USB, pila de respaldo y LED PPS
 - Antena GPS activa de 1 m, SMA macho
+- Disipadores y cooler (puestos el 11/11/2026)
 
 ## Falta comprar (recomendado)
 - Fuente de 5 V 2,5 A micro-USB y cable USB-A a micro-USB
