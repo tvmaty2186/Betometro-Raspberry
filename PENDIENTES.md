@@ -95,6 +95,11 @@ Botones grandes como tablet, interruptor dentro de cada tema. Plan y muestras: [
   engranaje (rueda con dientes y agujero en el medio) en el **inicio** (`TIcono.qml`, «ajustes») y en el botón del
   **video** (`video/Engranaje.qml`). Mostrarle una muestra antes.
 
+## 1.0.60 (publicada 12/11/2026): voz completa
+- Se grabaron las 2 frases que no sonaban: «Seguí apretando para salir» y «Carrera terminada» (Elena y Tomás).
+- Prueba completa: el pulsador salteado ya no cuenta como aviso.
+- Informe del arranque: «se volvió a abrir a los N min» cuando no es el arranque de la Raspberry.
+
 ## 1.0.59 (publicada 10/11/2026): repaso de letras y cuadros
 Revisor automático de textos (`app/revisar_textos.h`, `BETO_REVISAR_TEXTOS=1` con `--captura`): 33 pantallas × 5
 temas × 2 orientaciones. Arreglado:
@@ -339,7 +344,7 @@ UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorri
 libre muestra más datos, sumando Faltan y Tiempo ideal. Armado de esa pantalla: el diseñador hace 2 propuestas desde cero.
 
 ## Siguiente
-- **Para la 1.0.60 (12/11/2026, sin publicar):** se grabaron las 2 frases que faltaban («Seguí apretando para salir»
+- **1.0.60 (12/11/2026):** se grabaron las 2 frases que faltaban («Seguí apretando para salir»
   y «Carrera terminada», Elena y Tomás; desde el 09/11 no sonaban). En la Prueba completa, el pulsador salteado
   ya no es aviso (Matías no lo usa). «Betómetro empezó a los 480 s» ahora dice «se volvió a abrir a los 8 min»
   cuando no es el arranque. Hardware: cooler (47 °C máx. grabando) y fuente nueva de 5 A.
