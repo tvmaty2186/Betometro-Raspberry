@@ -228,7 +228,8 @@ void PruebaCompleta::responder(bool si) {
                                                       : QStringLiteral("faltan %1 audios: %2").arg(faltan.size()).arg(faltan.mid(0, 6).join(QStringLiteral(", "))));
         terminarPaso(!si ? kGrave : faltan.isEmpty() ? kOk : kLeve, det);
     } else {
-        terminarPaso(kLeve, QStringLiteral("sin probar: se salteó"));
+        // Salteado a mano = no se usa el pulsador: no cuenta como aviso (Matías no lo usa, 12/11/2026)
+        terminarPaso(kSaltado, QStringLiteral("sin probar: se salteó"));
     }
 }
 

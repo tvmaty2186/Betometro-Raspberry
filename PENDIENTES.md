@@ -339,6 +339,10 @@ UX: no a los carteles grandes; «Práctica libre» pasa a «Práctica»; Recorri
 libre muestra más datos, sumando Faltan y Tiempo ideal. Armado de esa pantalla: el diseñador hace 2 propuestas desde cero.
 
 ## Siguiente
+- **Para la 1.0.60 (12/11/2026, sin publicar):** se grabaron las 2 frases que faltaban («Seguí apretando para salir»
+  y «Carrera terminada», Elena y Tomás; desde el 09/11 no sonaban). En la Prueba completa, el pulsador salteado
+  ya no es aviso (Matías no lo usa). «Betómetro empezó a los 480 s» ahora dice «se volvió a abrir a los 8 min»
+  cuando no es el arranque. Hardware: cooler (47 °C máx. grabando) y fuente nueva de 5 A.
 - **Red propia (06/11/2026):** Matías la probó lejos de casa y no se armaba. Arreglado para la 1.0.23 (sin probar
   en la Pi): busca redes de nuevo antes de decidir, botón «Armar la red propia ahora», el motivo si falla
   (en Conectividad), paquetes `dnsmasq-base` e `iw`, chip amarillo en la barra con los celus conectados.

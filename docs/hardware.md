@@ -7,9 +7,9 @@
 - Módulo GPS GY-NEO-M8N (u-blox NEO-M8N-0-10) con SMA, micro USB, pila de respaldo y LED PPS
 - Antena GPS activa de 1 m, SMA macho
 - Disipadores y cooler (puestos el 11/11/2026)
+- Fuente nueva de 5 V 5 A regulada (12/11/2026)
 
 ## Falta comprar (recomendado)
-- Fuente de 5 V 2,5 A micro-USB y cable USB-A a micro-USB
 - Auriculares con cable y ficha de 3,5 mm (van en la salida de audio de la Raspberry)
 - Cables dupont y un pulsador (normal abierto)
 - Para el pulsador, contra el ruido del auto: una resistencia de 10 kΩ, un capacitor de 100 nF (cerámico) y cable trenzado o mallado de 2 hilos

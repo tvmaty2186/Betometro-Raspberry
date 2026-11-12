@@ -34,7 +34,12 @@ inline void marcar(const char* que) {
 // «Betómetro empezó a los 13,4 s · datos 0,2 s · … · primera imagen 8,1 s»
 inline QString resumen() {
     const double e = empezoA();
-    return (e >= 0 ? QStringLiteral("Betómetro empezó a los %1 s de prender · ").arg(QString::number(e, 'f', 1).replace('.', ',')) : QString())
+    // Pasado el minuto no es el arranque: el programa se volvió a abrir (actualización o reinicio). Antes decía
+    // «empezó a los 480,4 s de prender» y confundía (reporte del 12/11/2026)
+    const QString cuando = e < 0 ? QString()
+                           : e <= 60 ? QStringLiteral("Betómetro empezó a los %1 s de prender · ").arg(QString::number(e, 'f', 1).replace('.', ','))
+                                     : QStringLiteral("Betómetro se volvió a abrir a los %1 min de prender (actualización o reinicio) · ").arg(qRound(e / 60.0));
+    return cuando
            + marcas().join(QStringLiteral(" · "));
 }
 
